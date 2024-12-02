@@ -865,11 +865,43 @@ order_on_p <- function(
 # Order    
     pmat <- autonomics::pmat( object, fit = fit, coef = coefs)
     if (is.null(pmat))  return(object)
-    if (verbose)   cmessage("\t\tp-order features on: %s (%s)", 
-                            paste0(fit,   collapse = ', '), 
-                            paste0(coefs, collapse = ', '))
+    if (verbose)   cmessage("%sorderby %s %s pvalue", spaces(24),
+                            paste0(coefs, collapse = ', '),
+                            paste0(fit,   collapse = ', ')
+                            )
     if (combiner == '|')  idx <- order(matrixStats::rowMins(pmat))
     if (combiner == '&')  idx <- order(matrixStats::rowMaxs(pmat))
+# Return
+    object[idx, ]
+}
+
+
+#' @rdname order_on_p
+#' @export
+order_on_t <- function(
+      object, 
+         fit = autonomics::fits( object), 
+       coefs = autonomics::coefs(object, fit = fit), 
+    combiner = '|',
+     verbose = TRUE
+){
+# Assert
+    assert_is_valid_sumexp(object)
+    if (is.null(fit))              return(object)
+    if (!fit %in% LINMOD_ENGINES)  return(object)
+    assert_is_subset(fit,   autonomics::fits(  object))
+    assert_is_subset(coefs, autonomics::coefs( object, fit = fit))
+    assert_scalar_subset(combiner, c('|', '&'))
+    assert_is_a_bool(verbose)
+# Order    
+    tmat <- autonomics::tmat( object, fit = fit, coef = coefs)
+    if (is.null(tmat))  return(object)
+    if (verbose)   cmessage("%sorderby %s %s tvalue", spaces(24),
+                            paste0(coefs, collapse = ', '),
+                            paste0(fit,   collapse = ', ')
+                            )
+    if (combiner == '|')  idx <- order(matrixStats::rowMins(tmat), decreasing = TRUE)
+    if (combiner == '&')  idx <- order(matrixStats::rowMaxs(tmat), decreasing = TRUE)
 # Return
     object[idx, ]
 }
@@ -916,22 +948,26 @@ order_on_effect <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_positive_number(n)
-# Filter
+# Order on effect and p
     object %<>% order_on_effect(fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # dimred
     if (fit %in% LINMOD_ENGINES){
         object %<>% order_on_p(     fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # linmod
     }
+# Filter top
     n %<>% min(nrow(object))
     idx <- c(rep(TRUE, n), rep(FALSE, nrow(object)-n))
     n0 <- length(idx)
     n1 <- sum(idx, na.rm = TRUE)
+    obj <- object[idx, ]
+# Order up-> down
+    obj %<>% order_on_t( fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # linmod
     if (verbose & n1<n0){
         combiner <- paste0(' ', combiner, ' ')
         y <- paste0(coefs, collapse = combiner)
         cmessage('\t\t\tRetain %d/%d features: p(%s) or effect(%s) in best %d', n1, n0, y, y, n)
     }
 # Return
-    object[idx, ]
+    obj
 }
 
 
@@ -991,6 +1027,7 @@ extract_coef_features <- function(
         fdt(object) %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
         object %<>% .extract_p_features(  coefs = coefs,   p = p,   fit = fit, combiner = combiner, verbose = verbose)
         object %<>% .extract_fdr_features(coefs = coefs, fdr = fdr, fit = fit, combiner = combiner, verbose = verbose)
+        object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = verbose)
     }
     object %<>% .extract_effectsize_features(coefs = coefs,  effectsize = effectsize, fit = fit, combiner = combiner, verbose = verbose)
     object %<>% .extract_sign_features(      coefs = coefs,        sign = sign,       fit = fit, combiner = combiner, verbose = verbose)

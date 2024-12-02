@@ -189,12 +189,12 @@ fitcoefs <- function(object){
 }
 
 
-extract_contrast_fdt <- function(object, fitcoef){ # fitcoef is needed because not all fit have same coefs
+extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed because not all fit have same coefs
 # Order
     sep <- guess_fitsep(fdt(object))
     coef <- split_extract_fixed(fitcoef, sep, 1)
     fit  <- split_extract_fixed(fitcoef, sep, 2)
-    object %<>% order_on_p(coefs = coef, fit = fit)
+    object %<>% order_on_t(coefs = coef, fit = fit, verbose = verbose) # order_on_p
 # Extract
     allfitcols <- fvars(object) %>% extract(stri_detect_fixed(., sep))
     curfitcols <- allfitcols %>% extract(stri_detect_fixed(., fitcoef))
