@@ -95,8 +95,7 @@ fit_wilcoxon <- function(
      statvars = c('effect', 'p'),
           sep = FITSEP,
        suffix = paste0(sep, 'wilcoxon'),
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
 # assert
     assert_is_valid_sumexp(object)
@@ -134,7 +133,6 @@ fit_wilcoxon <- function(
         colnames(quantitymat) %<>% stri_replace_first_fixed(quantitydot, '')
         quantitymat }
 # Return
-    if (plot)  print(plot_volcano(object, fit = 'wilcoxon')) 
     object
 }
 

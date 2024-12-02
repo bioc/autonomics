@@ -2,9 +2,6 @@
 % Please edit documentation in R/8_fit_lmx.R
 \name{fit_lmx}
 \alias{fit_lmx}
-\alias{fit_lm}
-\alias{fit_lme}
-\alias{fit_lmer}
 \title{Fit lm, lme, or lmer}
 \usage{
 fit_lmx(
@@ -21,61 +18,6 @@ fit_lmx(
   ftest = if (is.null(coefs)) TRUE else FALSE,
   sep = FITSEP,
   suffix = paste0(sep, fit),
-  verbose = TRUE,
-  plot = FALSE
-)
-
-fit_lm(
-  object,
-  formula = as.formula("~ subgroup"),
-  drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
-  design = NULL,
-  block = NULL,
-  weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "se", "t")[1:2],
-  sep = FITSEP,
-  suffix = paste0(sep, "lm"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
-  contrasts = NULL,
-  ftest = if (is.null(coefs)) TRUE else FALSE,
-  verbose = TRUE,
-  plot = FALSE
-)
-
-fit_lme(
-  object,
-  formula = as.formula("~ subgroup"),
-  drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
-  design = NULL,
-  block = NULL,
-  weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  opt = "optim",
-  statvars = c("effect", "p", "se", "t")[1:2],
-  sep = FITSEP,
-  suffix = paste0(sep, "lme"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
-  contrasts = NULL,
-  ftest = if (is.null(coefs)) TRUE else FALSE,
-  verbose = TRUE,
-  plot = FALSE
-)
-
-fit_lmer(
-  object,
-  formula = as.formula("~ subgroup"),
-  drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
-  design = NULL,
-  block = NULL,
-  weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "se", "t")[1:2],
-  sep = FITSEP,
-  suffix = paste0(sep, "lmer"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
-  contrasts = NULL,
-  ftest = if (is.null(coefs)) TRUE else FALSE,
   verbose = TRUE,
   plot = FALSE
 )

@@ -778,16 +778,16 @@ fit_limma <- function(
     codingfun = contr.treatment.explicit,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
     contrasts = NULL,
-        coefs = if (is.null(contrasts))  model_coefs(design = design) else NULL,
+        coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
      statvars = c('effect', 'p', 't'),
         ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
+# Fit
     object %<>% reset_fit(fit = 'limma', coefs = coefs)
     limmadt <- .fit_limma(  object = object,
                            formula = formula,
@@ -806,14 +806,9 @@ fit_limma <- function(
     object %<>% merge_fdt(limmadt)
   # fdt(object)$F.limma   <- limmares$F
   # fdt(object)$F.p.limma <- limmares$F.p
-    if (plot)  print(plot_volcano(object, fit = 'limma', coefs = coefs, title = formula2str(formula)))
+# Return
     object
 }
-
-
-
-
-
 
 #' Are varlevels unique
 #' 

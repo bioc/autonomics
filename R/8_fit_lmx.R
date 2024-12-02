@@ -345,7 +345,7 @@ fit_lmx <- function(
 }
 
 
-#' @rdname fit_lmx
+#' @rdname fit
 #' @export
 fit_lm <- function(
        object,
@@ -361,8 +361,7 @@ fit_lm <- function(
         coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs)) TRUE else FALSE,
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
     
     sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
@@ -378,12 +377,11 @@ fit_lm <- function(
                    sep = sep,
                 suffix = suffix,
                  coefs = coefs,
-               verbose = verbose,
-                  plot = plot )
+               verbose = verbose )
 }
 
 
-#' @rdname fit_lmx
+#' @rdname fit
 #' @export
 fit_lme <- function(
        object, 
@@ -400,8 +398,7 @@ fit_lme <- function(
         coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs))  TRUE else FALSE,
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
 # Assert
     . <- NULL
@@ -423,12 +420,11 @@ fit_lme <- function(
                 suffix = suffix,
                    opt = opt,
                  coefs = coefs, 
-               verbose = verbose,
-                  plot = plot )
+               verbose = verbose )
 }
 
 
-#' @rdname fit_lmx
+#' @rdname fit
 #' @export
 fit_lmer <- function(
        object, 
@@ -444,8 +440,7 @@ fit_lmer <- function(
         coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs)) TRUE else FALSE,
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
 # Assert
     . <- NULL
@@ -469,6 +464,5 @@ fit_lmer <- function(
                    sep = sep,
                 suffix = suffix,
                  coefs = coefs, 
-               verbose = verbose,
-                  plot = plot )
+               verbose = verbose )
 }
