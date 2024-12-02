@@ -21,7 +21,11 @@ plot_volcano(
   fdr = 0.05,
   xndown = NULL,
   xnup = NULL,
-  title = NULL
+  title = NULL,
+  file = NULL,
+  width = 7,
+  height = 7,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -58,6 +62,14 @@ plot_volcano(
 \item{xnup}{x position of nup labels}
 
 \item{title}{string or NULL}
+
+\item{file}{filename}
+
+\item{width}{number}
+
+\item{height}{number}
+
+\item{verbose}{TRUE or FALSE}
 }
 \value{
 ggplot object

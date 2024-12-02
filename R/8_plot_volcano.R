@@ -265,6 +265,10 @@ make_volcano_dt <- function(
 #' @param xndown         x position of ndown labels
 #' @param xnup           x position of nup labels
 #' @param title          string or NULL
+#' @param file           filename
+#' @param width          number
+#' @param height         number
+#' @param verbose        TRUE or FALSE
 #' @return ggplot object
 #' @examples
 #' # Regular Usage
@@ -310,7 +314,11 @@ plot_volcano <- function(
              fdr = 0.05,
           xndown = NULL,
             xnup = NULL,
-           title = NULL
+           title = NULL,
+            file = NULL,
+           width = 7,
+          height = 7,
+         verbose = TRUE
 ){
 # Assert
     assert_is_valid_sumexp(object)
@@ -324,7 +332,9 @@ plot_volcano <- function(
     plotdt <- make_volcano_dt(object, fit = fit, coefs = coefs, 
                   label = label, shape = shape, size = size, alpha = alpha)
     g <- ggplot(plotdt) + facet_wrap(facet, nrow = nrow, scales = scales)
-    g <- g + theme_bw() + theme(panel.grid = element_blank())
+    g <- g + theme_bw() + 
+             theme(panel.grid = element_blank(), 
+                   plot.title = element_text(hjust = 0.5))
     g <- g + xlab('log2(FC)') + ylab('-log10(p)') + ggtitle(title)
     shapesym <- if (is.null(shape))  quo(NULL) else sym(shape)
     sizesym  <- if (is.null(size))   quo(NULL) else sym(size)
@@ -401,7 +411,11 @@ plot_volcano <- function(
                                         show.legend = FALSE,
                                        max.overlaps = max.overlaps )  } } }
     }
-    g
+    if (is.null(file)) { print(g); return(g) }
+    if (verbose)  cmessage('%s%s', spaces(21), file)
+    pdf(file, width = width, height = height)
+    print(g)
+    dev.off()
 }
 
 
