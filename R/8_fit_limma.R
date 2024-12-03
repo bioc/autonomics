@@ -764,8 +764,11 @@ fit <- function(
       verbose = TRUE, 
        outdir = NULL,
      writefun = 'write_xl',
-      volcano = FALSE, volcanoargs = list(),
-        exprs = FALSE, n = 12, exprargs = list()
+      volcano = FALSE, 
+  volcanoargs = list(),
+        exprs = FALSE, 
+            n = 12, 
+     exprargs = list()
 ){
 # Assert
     assert_scalar_subset(engine, c('limma', 'lme', 'lmer', 'wilcoxon', 'lm'))
@@ -777,8 +780,7 @@ fit <- function(
     assert_is_list(exprargs)
 # Fit
     fitfun <- paste0('fit_', engine)
-    object <- 
-    get(fitfun)(    object, 
+    object %<>%  get(fitfun)(
                    formula = formula,
                       drop = drop,
                  codingfun = codingfun, 

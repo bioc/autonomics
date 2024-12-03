@@ -55,7 +55,6 @@ analyze <- function(
     if (pca)  object %<>% pca(verbose = verbose, plot = FALSE)
     if (pls)  object %<>% pls(by = all.vars(formula)[1], verbose = FALSE)
     for (curfit in fit){
-        fitfun <- get(paste0('fit_', curfit))
         if (is.null(formula)) formula <- ~ subgroup
         if (is.null(coefs))   coefs <- contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun)
         object %<>% autonomics::fit(engine = fit,
@@ -66,8 +65,7 @@ analyze <- function(
                                      coefs = coefs,
                                      block = block,
                                  weightvar = weightvar,
-                                   verbose = verbose,
-                                      plot = FALSE )
+                                   verbose = verbose )
     }
     # Plot/Return
     if (plot)  plot_summary( object, 
