@@ -1354,10 +1354,10 @@ plot_exprs <- function(
                      xlab = xlab,                     ylab = ylab,
                     theme = theme
         )
-        if (npages>1)  print(p)
+        print(p)
     }
-    if (!is.null(file)){ dev.off(); file  
-    } else {             p }
+    if (is.null(file)) return(p)
+    dev.off()
 }
 
 
