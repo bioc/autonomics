@@ -1157,15 +1157,15 @@ add_facetvars <- function(
             mapping <- aes(x = !!xsym, y = value)
             position <- position_jitter(width = jitter, height = 0)
             p <- p + geom_jitter(mapping = mapping, position = position, size = pointsize, na.rm = TRUE)
-        }
-    } else {
+        }                                                                 # Was earlier outside ifloop
+        p <- add_fill_scale( p, fill,  data = dt, palette = fillpalette)  # Internalized to avoid ggplot warnings on pointplots
+    } else {                                                              # about a single value being mapped
         mapping <- aes(x = !!xsym, y = value, color = !!colorsym, shape = !!shapesym, size = !! sizesym, alpha = !! alphasym)
         p <- p + geom_point(mapping = mapping, na.rm = TRUE)
-    }
-    p <- add_color_scale(p, color, data = dt, palette = colorpalette)
-    p <- add_fill_scale( p, fill,  data = dt, palette = fillpalette)
-# Lines
-    if (!is.null(block)){   
+        p <- add_color_scale(p, color, data = dt, palette = colorpalette) # Was earlier outside ifloop
+    }                                                                     # Internalized to avoid ggplot warnings on boxplots
+# Lines                                                                   # about a single value being mapped
+    if (!is.null(block)){                                                 
         byvar <- block
         if (!is.null(facet)) byvar %<>% c(facet)
         mapping <- aes(x = !!xsym, y = value, color = !!colorsym, group = !!blocksym, linetype = !!linetypesym, alpha = !!alphasym)
