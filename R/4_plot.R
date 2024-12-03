@@ -2346,3 +2346,87 @@ plot_joint_density <- function(
         gridExtra::grid.arrange(pX, pY, pXY, layout_matrix = layout)
 }
 
+
+
+# .single_density <- function(object, svar){
+#     obj <- object
+#     obj %<>% filter_samples(!is.na(!!sym(svar)))
+#     xvalues <- obj[[svar]]
+#     xvalues %<>% sort()
+#     densityfun <- approxfun(density(xvalues, na.rm = TRUE))
+#     dvalues <- densityfun(xvalues)
+#     #plotdt <- data.table(x = xvalues, y = dvalues, d = yvalues, row = svar, col = svar)
+#     plotdt <- data.table(x = xvalues, y = xvalues, d = dvalues, row = svar, col = svar)
+#     plotdt[]
+# }
+# 
+# .double_density <- function(object, xvar, yvar){
+#     obj <- object
+#     obj %<>% filter_samples(!is.na(!!sym(xvar)))
+#     obj %<>% filter_samples(!is.na(!!sym(yvar)))
+#     xvalues <- obj[[xvar]]
+#     yvalues <- obj[[yvar]]
+#     # Kamil Slowikowski
+#     # https://slowkow.com/notes/ggplot2-color-by-density/
+#     densout <- MASS::kde2d(xvalues, yvalues)
+#     ix <- findInterval(xvalues, densout$x)
+#     iy <- findInterval(yvalues, densout$y)
+#     ii <- cbind(ix, iy)
+#     dvalues <- densout$z[ii]
+#     plotdt <- data.table(x = xvalues, y = yvalues, d = dvalues, col = xvar, row = yvar)
+#     plotdt[]
+# }
+# 
+#     
+# .double_countours <- function(object, xvar, yvar){
+#     obj <- object
+#     obj %<>% filter_samples(!is.na(!!sym(xvar)))
+#     obj %<>% filter_samples(!is.na(!!sym(yvar)))
+#     xvalues <- obj[[xvar]]
+#     yvalues <- obj[[yvar]]
+#     densout <- MASS::kde2d(xvalues, yvalues)
+#     contourdt <- contourLines(densout)
+#     contourdt %<>% lapply(as.data.table)
+#     contourdt %<>% rbindlist()
+#     contourdt[]
+# }
+# 
+# 
+# plot_pairwise_densities <- function(object, svars){
+#     nvar <- length(svars)
+#     layout <- matrix(0, nrow = nvar, ncol = nvar, dimnames = list(svars, svars))
+#     #dtsingle <- mapply(.single_density, svar = svars,               MoreArgs = list(object = object), SIMPLIFY = FALSE)
+#     dtdouble <- mapply(.double_density, xvar = rep(svars, times = length(svars)), 
+#                                         yvar = rep(svars,  each = length(svars)), MoreArgs = list(object = object), SIMPLIFY = FALSE)
+#     dtcontours
+#     #plotdt <- c(dtsingle, dtdouble)
+#     plotdt <- dtdouble
+#     plotdt %<>% rbindlist()
+#     plotdt %<>% extract(row!=col)
+# 
+#     # Lovely matrix layout presented by facet_grid
+#     # Axis can be made partially free
+#     # Y axis is free across cols within same row
+#     # X axis is free across rows within same col
+#     # Love this layout. But
+#     # It requires some scaling for the plots to look meaningful
+#     # Lets do that
+#     # plotdt[, row := factor(row, svars)]
+#     # plotdt[, col := factor(col, svars)]
+#     # plotdt[ , xmean := mean(x[col==row]) , by = col]
+#     # plotdt[ , xsd   :=   sd(x[col==row]) , by = col]
+#     # plotdt[ , ymean := mean(y[col==row]) , by = row]
+#     # plotdt[ , ysd   :=   sd(y[col==row]) , by = row]
+#     # plotdt[ , x := (x-mean(x))/sd(x)*xsd + xmean , by = c('row', 'col') ]
+#     # plotdt[ , y := (y-mean(y))/sd(y)*ysd + ymean , by = c('row', 'col') ]
+# 
+#     #     
+#     ggplot(plotdt) + theme_bw() + theme(panel.grid = element_blank()) + 
+#     facet_grid(rows = vars(row), cols = vars(col), switch = 'both', scales = 'free') + 
+#     geom_point(aes(x = x, y = y, colour = d)) + 
+#     geom_density2d()
+#     #geom_smooth(method = 'lm', se = FALSE, colour = 'gray')
+# 
+# }
+
+
