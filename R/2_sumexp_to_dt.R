@@ -211,6 +211,7 @@ extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed 
 #' @param xlfile  file
 #' @param odsfile file
 #' @param fitcoefs character vector
+#' @param verbose  TRUE or FALSE
 #' @return filepath
 #' @examples 
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
@@ -221,7 +222,7 @@ extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed 
 #' # write_ods(object, odsfile)
 #' @export
 write_xl <- function(
-    object, xlfile, fitcoefs = autonomics::fitcoefs(object)
+    object, xlfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
 ){
 # Assert
     if (!requireNamespace('writexl', quietly = TRUE)){
@@ -232,7 +233,8 @@ write_xl <- function(
     assert_all_are_dirs(dirname(xlfile))
 # Write
     fdt(object) %<>% add_adjusted_pvalues('fdr')
-    list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs, MoreArgs = list(object = object), SIMPLIFY = FALSE)
+    if (verbose)  cmessage('%s%s', spaces(21), xlfile)
+    list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
     writexl::write_xlsx(list0, path = xlfile)
 # Return
     return(xlfile)
@@ -242,7 +244,7 @@ write_xl <- function(
 #' @rdname write_xl
 #' @export
 write_ods <- function(
-    object, odsfile, fitcoefs = autonomics::fitcoefs(object)
+    object, odsfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
 ){
 # Assert
     if (!requireNamespace('readODS', quietly = TRUE)){
@@ -252,9 +254,10 @@ write_ods <- function(
     assert_is_valid_sumexp(object)
     assert_all_are_dirs(dirname(odsfile))
 # Prepare    
+    if (verbose)  cmessage('%s%s', spaces(20), odsfile)
     fdt(object) %<>% add_adjusted_pvalues('fdr')                             # add fdr
     list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs,                # extract contrastfdt
-                                         MoreArgs = list(object = object), 
+                                         MoreArgs = list(object = object, verbose = FALSE), 
                                          SIMPLIFY = FALSE)
     if (file.exists(odsfile))  unlink(odsfile)                               # rm old file
 # Write
