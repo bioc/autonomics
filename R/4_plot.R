@@ -2144,6 +2144,7 @@ assert_installed <- function(x){
 #' @param flabel           string: feature label
 #' @param group            sample groupvar
 #' @param verbose          TRUE or FALSE
+#' @param title            string
 #' @examples
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file, fit = 'limma')
@@ -2162,7 +2163,8 @@ plot_heatmap <- function(
      cluster_samples = FALSE,
               flabel = intersect(c('gene', 'feature_id'), fvars(object))[1], 
                group = 'subgroup', 
-             verbose = TRUE
+             verbose = TRUE,
+               title = NULL
 ){
 # Assert
     assert_is_all_of(object, 'SummarizedExperiment')
@@ -2181,7 +2183,7 @@ plot_heatmap <- function(
 # Filter: significant features
     object0 <- object
     if (is.null(coef)){   object %<>% extract_features_evenly(n)
-    } else {              object %<>% extract_coef_features(fit = fit, coefs = coef, effectsize = effectsize, p = p, fdr = fdr, n = n) }
+    } else {              object %<>% extract_coef_features(fit = fit, coefs = coef, effectsize = effectsize, p = p, fdr = fdr, n = n, verbose = verbose) }
 # Zscore
     assays(object)[[assay]] %<>% t() %>% scale(center = TRUE, scale = TRUE) %>% t()
     assays(object)[[assay]] %<>% na_to_zero()
@@ -2230,15 +2232,39 @@ plot_heatmap <- function(
 # Plot
     p <- ggplot(data = dt, aes(x = sample_id, y = !!sym(flabel), fill = `z-score`)) +
          geom_tile() +
-         theme_minimal() + xlab(NULL) + ylab(NULL) + 
+         theme_minimal() + xlab(NULL) + ylab(NULL) + ggtitle(title) +
          scale_x_discrete(position = 'top') + 
-         theme(axis.text.x = element_text(angle = 90, hjust = 0)) + 
+         theme(axis.text.x = element_text(angle = 90, hjust = 0), 
+               plot.title  = element_text(hjust = 0.5)) + 
          scale_fill_gradient2(low = '#ff5050', high = '#009933', na.value = 'white') + 
          geom_vline(xintercept = vlines)
     if (!is.null(coef)){
         p <- p + geom_hline(yintercept = hlines)
     }
     p
+}
+
+
+#' @rdname plot_heatmap
+#' @export
+write_heatmaps <- function(
+     object, 
+        fit = fits(object)[1], 
+      coefs = coefs(object, fit = fit)[1], 
+          ...,
+      title = NULL,
+       file,             # This function should be integrated into plot_heatmap 
+      width = 7,         # To homogenize with how things are in plot_exprs and plot_volcano
+     height = 7,
+    verbose = TRUE
+){
+    if (!is.null(file) & verbose)  cmessage('%s%s', spaces(21), file)
+    if (!is.null(file))  pdf(file = file, width = width, height = height)
+    for (coef in coefs){
+        print(plot_heatmap( object, fit = fit, coef = coef, verbose = FALSE,
+                             title = sprintf('%s: %s', title, coef), ...))
+    }
+    if (!is.null(file))  dev.off()
 }
 
 
