@@ -1354,7 +1354,7 @@ plot_exprs <- function(
                      xlab = xlab,                     ylab = ylab,
                     theme = theme
         )
-        print(p)
+        if (!is.null(file))  print(p)
     }
     if (is.null(file)) return(p)
     dev.off()
