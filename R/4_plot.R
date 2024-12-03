@@ -1317,12 +1317,13 @@ plot_exprs <- function(
     if (!is.null(ncol))       assert_is_a_number(ncol)
     if (!is.null(facet))      assert_is_subset(scales, c('fixed', 'free', 'free_x', 'free_y'))
 # Extract
+    if (!is.null(file) & verbose)  cmessage('%s%s', spaces(21), file)
     if        (dim == 'samples' ){   n %<>% min(ncol(object));  object %<>% extract_samples_evenly(n)
     } else if (dim == 'features'){   n %<>% min(nrow(object));  object %<>% extract_features_evenly(n)
     } else if (dim == 'both'){       n %<>% min(nrow(object))
         if (is.null(coefs)){         object %<>% extract_features_evenly(n) 
         } else {                     object %<>% extract_coef_features(fit = fit, coefs = coefs, combiner = combiner, 
-                                                                       p = p, fdr = fdr, n = n, verbose = verbose)
+                                                                       p = p, fdr = fdr, n = n, verbose = FALSE)
                                      object %<>% add_facetvars(fit = fit, coefs = coefs)
                                      facet %<>% c(sprintf('facet.%s', coefs))
                                      #object %<>% format_coef_vars(sep = sep, fit = fit, coefs = coefs) 
