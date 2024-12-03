@@ -685,6 +685,12 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param suffix    string: pvar suffix ("limma" in "p~t2~limma")
 #' @param verbose   whether to msg
 #' @param plot      whether to plot
+#' @param outdir    NULL or dir
+#' @param writefun  \code{\link{write_xl}} or \code{\link{write_ods}}
+#' @param volcano   TRUE or FALSE
+#' @param exprs     TRUE or FALSE
+#' @param volcanoargs list: volcano args
+#' @param exprargs    list:  expr   args
 #' @return Updated SummarizedExperiment
 #' @examples
 #' # Read
@@ -731,6 +737,14 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #'   fdt( fit_lmer(    object, block = 'Subject', sep = '.') )
 #'   fdt( fit_wilcoxon(object, block = 'Subject', sep = '.') )
 #'   fdt( fit_wilcoxon(object, sep = '.') )
+#'
+#' # Print
+#'   fit(object, block = 'Subject', coefs = 't1-t0')
+#'   fit(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE)
+#'   fit(object, block = 'Subject', coefs = 't1-t0',   exprs = TRUE)
+#'   fit(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE)
+#'   fit(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE, outdir = tempdir())
+#'   fit(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE, outdir = tempdir())
 #' @export
 fit <- function(
        object, 
@@ -743,15 +757,27 @@ fit <- function(
         coefs = if (is.null(contrasts))  contrast_coefs(design = design)     else NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
-     statvars = c('effect', 'p', 'se', 't')[1:2],
+     statvars = c('effect', 'p', 't'),
         ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, engine),
       verbose = TRUE, 
-         plot = FALSE
+       outdir = NULL,
+     writefun = 'write_xl',
+      volcano = FALSE, volcanoargs = list(),
+        exprs = FALSE, n = 12, exprargs = list()
 ){
+# Assert
     assert_scalar_subset(engine, c('limma', 'lme', 'lmer', 'wilcoxon', 'lm'))
+    if (!is.null(outdir))  assert_all_are_dirs(outdir)
+    assert_scalar_subset(writefun, c('write_xl', 'write_ods'))
+    assert_is_a_bool(volcano)
+    assert_is_a_bool(exprs)
+    assert_is_list(volcanoargs)
+    assert_is_list(exprargs)
+# Fit
     fitfun <- paste0('fit_', engine)
+    object <- 
     get(fitfun)(    object, 
                    formula = formula,
                       drop = drop,
@@ -764,8 +790,26 @@ fit <- function(
                   statvars = statvars,
                        sep = sep,
                     suffix = suffix, 
-                   verbose = verbose,
-                      plot = plot)
+                   verbose = verbose )
+# Write tables
+    if (!is.null(outdir)){
+        outdir <- sprintf('%s/%s', outdir, formula2str(formula))
+        dir.create(outdir, showWarnings = FALSE)
+    }
+    tableext <- switch(writefun, write_xl = 'xlsx', write_ods = 'ods')
+    tablefile <- if (is.null(outdir)) NULL else sprintf('%s/tables.%s',    outdir, tableext)
+    if (!is.null(outdir))  get(writefun)(object, tablefile) 
+# Print plots
+    for (coef in coefs){
+        volcanofile <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
+           exprfile <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
+        title <- sprintf('%s: %s', formula2str(formula), coef)
+        args <- list( object = object, fit = engine, coefs = coef, title = title)
+        if (volcano)  do.call( plot_volcano, c(args, volcanoargs, list(file = volcanofile)) )
+        if (exprs)    do.call( plot_exprs,   c(args, exprargs,    list(file = exprfile, block = block, n = n)))
+    }
+# Return
+    object
 }
 
 

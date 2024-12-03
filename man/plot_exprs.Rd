@@ -26,9 +26,12 @@ plot_exprs(
   p = 1,
   fdr = 1,
   facet = if (dim == "both") "feature_id" else NULL,
-  n = 4,
-  ncol = NULL,
-  nrow = NULL,
+  file = NULL,
+  width = 7,
+  height = 7,
+  n = if (is.null(file)) 4 else 12,
+  ncol = if (is.null(file)) NULL else 3,
+  nrow = if (is.null(file)) NULL else 4,
   scales = "free_y",
   labeller = "label_value",
   pointsize = if (is.null(block)) 0 else 0.5,
@@ -42,9 +45,6 @@ plot_exprs(
   xlab = NULL,
   ylab = "value",
   theme = ggplot2::theme(plot.title = element_text(hjust = 0.5)),
-  file = NULL,
-  width = 7,
-  height = 7,
   verbose = TRUE
 )
 
@@ -98,6 +98,12 @@ plot_feature_boxplots(object, ...)
 
 \item{facet}{string: fvar mapped to facet}
 
+\item{file}{NULL or filepath}
+
+\item{width}{inches}
+
+\item{height}{inches}
+
 \item{n}{number of samples (dim = 'samples') or features (dim = 'features' or 'both') to plot}
 
 \item{ncol}{number of cols in faceted plot (if dim = 'both')}
@@ -127,12 +133,6 @@ plot_feature_boxplots(object, ...)
 \item{ylab}{string}
 
 \item{theme}{ggplot2::theme(...) or NULL}
-
-\item{file}{NULL or filepath}
-
-\item{width}{inches}
-
-\item{height}{inches}
 
 \item{verbose}{TRUE or FALSE}
 

@@ -470,5 +470,28 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
         fdt(fit_lm(object))
         
         
+#----------------
+#
+#   DDGLUCOSE
+#
+#----------------
+        
+        file <- download_data('ddglucose.proteingroups.txt')
+        object <- read_maxquant_proteingroups(file)
+        biplot(pca(object), nx = 1, ny = 1)
+        object$subgroup
+        sdt(object)
+        object$cell <- split_extract_fixed(object$subgroup, '_', 1)
+        object$conc <- split_extract_fixed(object$subgroup, '_', 2)
+        object$repl <- split_extract_fixed(object$subgroup, '_', 3)
+        object %<>% fit_limma( ~ cell/conc, codingfun = code_control, 
+                               coefs = c( 'Panc1-Hek',                       # cell across conc
+                                          'Hek:5mM-0mM', 'Panc1:5mM-0mM'))   # conc within cell
+        
+        object %<>% fit_limma( ~ conc/cell, codingfun = code_control, coefs = c(''))
+        object %>% fit_limma( ~ cell*conc, coefs = )
+        
+
+        
         
         

@@ -1282,7 +1282,7 @@ plot_exprs <- function(
            width = 7,
           height = 7,
                n = if (is.null(file)) 4    else 12,
-            ncol = if (is.null(file)  NULL else  3,
+            ncol = if (is.null(file)) NULL else  3,
             nrow = if (is.null(file)) NULL else  4,
           scales = 'free_y',
         labeller = 'label_value',
