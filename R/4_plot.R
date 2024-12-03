@@ -1354,9 +1354,9 @@ plot_exprs <- function(
                      xlab = xlab,                     ylab = ylab,
                     theme = theme
         )
-        if (!is.null(file))  print(p)
+        if (!is.null(file))  print(p)  # in this case one wants to return (not print)
     }
-    if (is.null(file)) return(p)
+    if (is.null(file)) return(p)  # only the last page will be returned (unavoidable)
     dev.off()
 }
 
