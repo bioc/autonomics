@@ -185,7 +185,7 @@ fit_wilcoxon(
 
 \item{outdir}{NULL or dir}
 
-\item{writefun}{\code{\link{write_xl}} or \code{\link{write_ods}}}
+\item{writefun}{'write_xl' or 'write_ods'}
 
 \item{volcano}{TRUE or FALSE}
 

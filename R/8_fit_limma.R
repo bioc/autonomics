@@ -686,7 +686,7 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param verbose   whether to msg
 #' @param plot      whether to plot
 #' @param outdir    NULL or dir
-#' @param writefun  \code{\link{write_xl}} or \code{\link{write_ods}}
+#' @param writefun  'write_xl' or 'write_ods'
 #' @param volcano   TRUE or FALSE
 #' @param exprs     TRUE or FALSE
 #' @param volcanoargs list: volcano args
