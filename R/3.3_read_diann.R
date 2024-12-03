@@ -206,6 +206,7 @@ uniprot2isoforms <- function(x){
     dt[, uniprot := as.character(uniprot)]
 # Intuify protein
     pgdt <- unique(dt[, .(uniprot, protein)])
+    pgdt[, protein := fcoalesce(uniprot, protein)]                               #     fill empty protein fields with uniprot value
     pgdt %<>% uncollapse(protein, sep = ';')                                     #     uncollapse
     pgdt[, organism := split_extract_fixed(protein, '_', 2)]                     #     drop organism
     pgdt[, protein  := split_extract_fixed(protein, '_', 1)]                     # 

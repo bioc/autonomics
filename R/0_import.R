@@ -24,7 +24,7 @@ data.table::data.table
 #' @importFrom colorspace      sequential_hcl
 #' @importFrom data.table      as.data.table   copy
 #' @importFrom data.table      dcast  dcast.data.table
-#' @importFrom data.table      fread   fwrite  is.data.table
+#' @importFrom data.table      fcoalesce   fread   fwrite  is.data.table
 #' @importFrom data.table      melt.data.table   merge.data.table   
 #' @importFrom data.table      .N   rbindlist   setkeyv   set
 #' @importFrom data.table     setnames    setorderv   tstrsplit   :=   .SD   .I
