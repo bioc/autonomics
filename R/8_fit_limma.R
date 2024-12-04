@@ -511,6 +511,9 @@ contrast_subgroup_rows <- function(object, subgroupvar){
 #             contrast_subgroup_rows( object, subgroupvar)) }
 # }
 
+
+#' @rdname model_coefs
+#' @export
 contrast_coefs <- function(
        object, 
       formula = default_formula(object), 
@@ -522,6 +525,21 @@ contrast_coefs <- function(
     if (ncol(design)==1)  colnames(design) else setdiff(colnames(design), 'Intercept')
 }
 
+
+#' Get model coefs
+#' @param object     SummarizedExperiment
+#' @param formula    formula
+#' @param drop       TRUE or FALSE
+#' @param codingfun  coding function (e.g. contr.treatment)
+#' @param design     design matrix
+#' @return SummarizedExperiment
+#' @examples
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' object %<>% fit_limma()
+#' model_coefs(object)
+#' contrast_coefs(object)
+#' @export
 model_coefs <- function(
     object, 
     formula = default_formula(object), 

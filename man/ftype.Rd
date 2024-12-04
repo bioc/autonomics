@@ -32,7 +32,7 @@ Feature type
 \examples{
 file <- download_data('atkin.metabolon.xlsx')
 object <- read_metabolon(file)
-object \%<>\% fit_limma(block = 'Subject')
-object \%<>\% ftype()
-fdt(object)
+object \%<>\% fit_limma(block = 'Subject', coefs = model_coefs(object)) # model_coefs !
+object \%<>\% ftype()          # model_coefs not contrast_coefs !
+fdt(object)                  # because intercept is required to recreate predictions
 }
