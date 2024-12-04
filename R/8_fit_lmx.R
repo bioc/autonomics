@@ -223,56 +223,13 @@ block_vars <- function(formula){
 }
 
 
-#' Fit lm, lme, or lmer
-#' @param object       SummarizedExpriment
-#' @param fit         'lm', 'lme', or 'lmer'
-#' @param formula      formula
-#' @param drop         TRUE or FALSE
-#' @param codingfun  factor coding function
-#' \itemize{
-#'     \item contr.treatment:          intercept = y0,     coefi = yi - y0
-#'     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
-#'     \item code_control:             intercept = ymean,  coefi = yi - y0
-#'     \item contr.diff:               intercept = y0,     coefi = yi - y(i-1)
-#'     \item code_diff:                intercept = ymean,  coefi = yi - y(i-1)
-#'     \item code_diff_forward:        intercept = ymean,  coefi = yi - y(i+)
-#'     \item code_deviation:           intercept = ymean,  coefi = yi - ymean (drop last)
-#'     \item code_deviation_first:     intercept = ymean,  coefi = yi - ymean (drop first)
-#'     \item code_helmert:             intercept = ymean,  coefi = yi - mean(y0:(yi-1))
-#'     \item code_helmert_forward:     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
-#' }
-#' @param codingfun    coding function
-#' @param design       NULL 
-#' @param coefs        NULL or stringvector
-#' @param contrasts    unused. only to allow generic get(fitfun)(contrasts)
-#' @param block        NULL or svar
-#' @param opt          optimizer used in fit_lme: 'optim' (more robust) or 'nlminb'
-#' @param weightvar    NULL or svar
-#' @param statvars     character vector: subset of c('effect', 'p', 'fdr', 't')
-#' @param ftest        TRUE or FALSE
-#' @param sep          string
-#' @param suffix    string: pvar suffix ("lm" in "p~t2~lm")
-#' @param verbose      TRUE or FALSE
-#' @param plot         TRUE or FALSE
-#' @return SummarizedExperiment
-#' @examples 
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' fit_lm(     object, formula = ~subgroup)
-#' fit_limma(  object, formula = ~subgroup)
-#' fit_limma(  object, formula = ~subgroup, block = 'Subject' )
-#' fit_lme(    object, formula = ~subgroup, block = 'Subject' )
-#' fit_lmer(   object, formula = ~subgroup, block = 'Subject' )
-#' # fit_lme(  object, formula = ~subgroup, block = ~1|Subject) # needs fine-tuning
-#' # fit_lmer( object, formula = ~subgroup + (1|Subject))       # needs fine-tuning
-#' @export
 fit_lmx <- function(
        object, 
           fit, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = contr.treatment.explicit,
-        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
         block = NULL, 
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -358,7 +315,7 @@ fit_lm <- function(
      statvars = c('effect', 'p', 'se', 't')[1:2],
           sep = FITSEP,
        suffix = paste0(sep, 'lm'),
-        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
+        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs)) TRUE else FALSE,
       verbose = TRUE
@@ -395,7 +352,7 @@ fit_lme <- function(
      statvars = c('effect', 'p', 'se', 't')[1:2],
           sep = FITSEP,
        suffix = paste0(sep, 'lme'),
-        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
+        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs))  TRUE else FALSE,
       verbose = TRUE
@@ -437,7 +394,7 @@ fit_lmer <- function(
      statvars = c('effect', 'p', 'se', 't')[1:2],
           sep = FITSEP,
        suffix = paste0(sep, 'lmer'),
-        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
+        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs)) TRUE else FALSE,
       verbose = TRUE

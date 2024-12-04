@@ -34,7 +34,8 @@ fit(
   volcanoargs = list(),
   exprs = FALSE,
   n = 12,
-  exprargs = list()
+  exprargs = list(),
+  ...
 )
 
 fit_limma(
@@ -83,7 +84,7 @@ fit_lm(
   statvars = c("effect", "p", "se", "t")[1:2],
   sep = FITSEP,
   suffix = paste0(sep, "lm"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+  coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
   contrasts = NULL,
   ftest = if (is.null(coefs)) TRUE else FALSE,
   verbose = TRUE
@@ -101,7 +102,7 @@ fit_lme(
   statvars = c("effect", "p", "se", "t")[1:2],
   sep = FITSEP,
   suffix = paste0(sep, "lme"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+  coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
   contrasts = NULL,
   ftest = if (is.null(coefs)) TRUE else FALSE,
   verbose = TRUE
@@ -118,7 +119,7 @@ fit_lmer(
   statvars = c("effect", "p", "se", "t")[1:2],
   sep = FITSEP,
   suffix = paste0(sep, "lmer"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+  coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
   contrasts = NULL,
   ftest = if (is.null(coefs)) TRUE else FALSE,
   verbose = TRUE
@@ -193,9 +194,15 @@ fit_wilcoxon(
 
 \item{exprs}{TRUE or FALSE}
 
+\item{n}{number of features to plot}
+
 \item{exprargs}{list:  expr   args}
 
+\item{...}{passed to fit_(limma|lm|lme|lmer) functions}
+
 \item{plot}{whether to plot}
+
+\item{opt}{lme options}
 }
 \value{
 Updated SummarizedExperiment

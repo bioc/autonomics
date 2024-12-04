@@ -2335,7 +2335,8 @@ plot_joint_density <- function(
         if (contour) pXY <- pXY + geom_density_2d(color = 'gray80')
       # if (fill)    pXY <- pXY + geom_density_2d_filled()
         if (smooth)  pXY <- pXY + geom_smooth(se = FALSE, formula = y~x, method = 'lm', color = '#24517f')
-        if (color){  pXY <- pXY + geom_point(aes(x = !!sym(xvar), y = !!sym(yvar), color = xydensity)) + scale_color_gradient(low = '#56B1F7', high = '#132B43')
+        if (color){  pXY <- pXY + geom_point(aes(x = !!sym(xvar), y = !!sym(yvar), color = !!sym('xydensity'))) + 
+                                  scale_color_gradient(low = '#56B1F7', high = '#132B43')
         } else {     pXY <- pXY + geom_point() }
         pXY <- pXY + ylab(yvar) + xlab(xvar) + 
                    guides(fill = 'none', color = 'none') + 

@@ -687,10 +687,13 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param plot      whether to plot
 #' @param outdir    NULL or dir
 #' @param writefun  'write_xl' or 'write_ods'
-#' @param volcano   TRUE or FALSE
-#' @param exprs     TRUE or FALSE
+#' @param volcano     TRUE or FALSE
 #' @param volcanoargs list: volcano args
+#' @param exprs       TRUE or FALSE
+#' @param n           number of features to plot
 #' @param exprargs    list:  expr   args
+#' @param ...         passed to fit_(limma|lm|lme|lmer) functions
+#' @param opt         lme options
 #' @return Updated SummarizedExperiment
 #' @examples
 #' # Read
@@ -768,7 +771,8 @@ fit <- function(
   volcanoargs = list(),
         exprs = FALSE, 
             n = 12, 
-     exprargs = list()
+     exprargs = list(), 
+             ...
 ){
 # Assert
     assert_scalar_subset(engine, c('limma', 'lme', 'lmer', 'wilcoxon', 'lm'))
