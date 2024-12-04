@@ -57,7 +57,7 @@ data.table::data.table
 #' @importFrom rlang         expr_text   quo_name   as_name   quo_is_null
 #' @importFrom R.utils       gunzip
 #' @importFrom S4Vectors     DataFrame         metadata           metadata<-
-#' @importFrom stats         aggregate         approxfun          as.formula   
+#' @importFrom stats         aggregate         approxfun          as.formula      density
 #' @importFrom stats         as.dist           contrasts          contrasts<-
 #' @importFrom stats         cor               cutree
 #' @importFrom stats         contr.sum         contr.treatment    dist
