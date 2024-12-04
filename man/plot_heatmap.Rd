@@ -2,7 +2,6 @@
 % Please edit documentation in R/4_plot.R
 \name{plot_heatmap}
 \alias{plot_heatmap}
-\alias{write_heatmaps}
 \title{Plot heatmap}
 \usage{
 plot_heatmap(
@@ -20,18 +19,6 @@ plot_heatmap(
   group = "subgroup",
   verbose = TRUE,
   title = NULL
-)
-
-write_heatmaps(
-  object,
-  fit = fits(object)[1],
-  coefs = coefs(object, fit = fit)[1],
-  ...,
-  title = NULL,
-  file,
-  width = 7,
-  height = 7,
-  verbose = TRUE
 )
 }
 \arguments{

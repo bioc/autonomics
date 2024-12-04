@@ -2245,27 +2245,27 @@ plot_heatmap <- function(
 }
 
 
-#' @rdname plot_heatmap
-#' @export
-write_heatmaps <- function(
-     object, 
-        fit = fits(object)[1], 
-      coefs = coefs(object, fit = fit)[1], 
-          ...,
-      title = NULL,
-       file,             # This function should be integrated into plot_heatmap 
-      width = 7,         # To homogenize with how things are in plot_exprs and plot_volcano
-     height = 7,
-    verbose = TRUE
-){
-    if (!is.null(file) & verbose)  cmessage('%s%s', spaces(21), file)
-    if (!is.null(file))  pdf(file = file, width = width, height = height)
-    for (coef in coefs){
-        print(plot_heatmap( object, fit = fit, coef = coef, verbose = FALSE,
-                             title = sprintf('%s: %s', title, coef), ...))
-    }
-    if (!is.null(file))  dev.off()
-}
+# # @rdname plot_heatmap
+# # @export
+# write_heatmaps <- function(
+#      object, 
+#         fit = fits(object)[1], 
+#       coefs = coefs(object, fit = fit)[1], 
+#           ...,
+#       title = NULL,
+#        file,             # This function should be integrated into plot_heatmap 
+#       width = 7,         # To homogenize with how things are in plot_exprs and plot_volcano
+#      height = 7,
+#     verbose = TRUE
+# ){
+#     if (!is.null(file) & verbose)  cmessage('%s%s', spaces(21), file)
+#     if (!is.null(file))  pdf(file = file, width = width, height = height)
+#     for (coef in coefs){
+#         print(plot_heatmap( object, fit = fit, coef = coef, verbose = FALSE,
+#                              title = sprintf('%s: %s', title, coef), ...))
+#     }
+#     if (!is.null(file))  dev.off()
+# }
 
 
 get_density <- function(x, y, ...) {
