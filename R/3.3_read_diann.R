@@ -386,8 +386,8 @@ CONTAMINANTSURL <- paste0(
 #' @param overwrite TRUE or FALSE: overwrite existiung download?
 #' @return filename (string)
 #' @examples
-#' download_contaminants()                  # download first time
-#' download_contaminants(overwrite = TRUE)  # download each  time
+#' # download_contaminants()                  # download first time
+#' # download_contaminants(overwrite = TRUE)  # download each  time
 #' @export
 download_contaminants <-  function(url = CONTAMINANTSURL, overwrite = FALSE){
     destdir <- file.path(R_user_dir("autonomics", "cache"), "maxquant")
