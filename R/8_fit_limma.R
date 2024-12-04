@@ -830,7 +830,10 @@ fit <- function(
         title <- sprintf('%s: %s', formula2str(formula), coef)
         args <- list( object = object, fit = engine, coefs = coef, title = title)
         if (volcano)  do.call( plot_volcano, c(args, volcanoargs, list(file = volcanofile)) )
-        if (exprs)    do.call( plot_exprs,   c(args, exprargs,    list(file = exprfile, block = block, n = n)))
+        if (exprs){
+            p <- do.call(plot_exprs, c(args, exprargs, list(file = exprfile, block = block, n = n)))
+            if (is.null(outdir))  print(p)
+        }
     }
 # Return
     object
