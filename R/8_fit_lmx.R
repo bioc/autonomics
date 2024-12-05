@@ -229,7 +229,7 @@ fit_lmx <- function(
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = contr.treatment.explicit,
-        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
         block = NULL, 
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -315,7 +315,7 @@ fit_lm <- function(
      statvars = c('effect', 'p', 'se', 't')[1:2],
           sep = FITSEP,
        suffix = paste0(sep, 'lm'),
-        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
+        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs)) TRUE else FALSE,
       verbose = TRUE
@@ -352,7 +352,7 @@ fit_lme <- function(
      statvars = c('effect', 'p', 'se', 't')[1:2],
           sep = FITSEP,
        suffix = paste0(sep, 'lme'),
-        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
+        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs))  TRUE else FALSE,
       verbose = TRUE
@@ -394,7 +394,7 @@ fit_lmer <- function(
      statvars = c('effect', 'p', 'se', 't')[1:2],
           sep = FITSEP,
        suffix = paste0(sep, 'lmer'),
-        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
+        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
         ftest = if (is.null(coefs)) TRUE else FALSE,
       verbose = TRUE
