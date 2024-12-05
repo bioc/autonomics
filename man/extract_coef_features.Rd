@@ -59,6 +59,7 @@ extract_coef_features(
   fit = fits(object)[1],
   coefs = default_coefs(object, fit = fit),
   combiner = "|",
+  decreasing = FALSE,
   p = 1,
   fdr = 1,
   effectsize = 0,
@@ -87,6 +88,8 @@ extract_coef_features(
 \item{sign}{effect sign}
 
 \item{n}{number of top features (Inf means all)}
+
+\item{decreasing}{TRUE or FALSE}
 }
 \value{
 SummarizedExperiment

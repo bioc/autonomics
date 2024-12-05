@@ -11,6 +11,7 @@ order_on_p(
   fit = autonomics::fits(object),
   coefs = autonomics::coefs(object, fit = fit),
   combiner = "|",
+  decreasing = FALSE,
   verbose = TRUE
 )
 
@@ -19,6 +20,7 @@ order_on_t(
   fit = autonomics::fits(object),
   coefs = autonomics::coefs(object, fit = fit),
   combiner = "|",
+  decreasing = FALSE,
   verbose = TRUE
 )
 
@@ -38,6 +40,8 @@ order_on_effect(
 \item{coefs}{string vector: subset of `coefs(object)`}
 
 \item{combiner}{'|' or '&'}
+
+\item{decreasing}{TRUE or FALSE}
 
 \item{verbose}{TRUE or FALSE}
 }

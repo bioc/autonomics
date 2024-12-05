@@ -835,11 +835,12 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
 }
 
 #' Order on p 
-#' @param object   SummarizedExperiment
-#' @param fit      string vector: subset of `fits(object)`
-#' @param coefs    string vector: subset of `coefs(object)`
-#' @param combiner '|' or '&'
-#' @param verbose  TRUE or FALSE
+#' @param object      SummarizedExperiment
+#' @param fit         string vector: subset of `fits(object)`
+#' @param coefs       string vector: subset of `coefs(object)`
+#' @param combiner   '|' or '&'
+#' @param decreasing  TRUE or FALSE
+#' @param verbose     TRUE or FALSE
 #' @examples 
 #' # Read
 #'   file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
@@ -853,6 +854,7 @@ order_on_p <- function(
          fit = autonomics::fits( object), 
        coefs = autonomics::coefs(object, fit = fit), 
     combiner = '|',
+  decreasing = FALSE,
      verbose = TRUE
 ){
 # Assert
@@ -869,8 +871,8 @@ order_on_p <- function(
                             paste0(coefs, collapse = ', '),
                             paste0(fit,   collapse = ', ')
                             )
-    if (combiner == '|')  idx <- order(matrixStats::rowMins(pmat))
-    if (combiner == '&')  idx <- order(matrixStats::rowMaxs(pmat))
+    if (combiner == '|')  idx <- order(matrixStats::rowMins(pmat), decreasing = decreasing)
+    if (combiner == '&')  idx <- order(matrixStats::rowMaxs(pmat), decreasing = decreasing)
 # Return
     object[idx, ]
 }
@@ -883,6 +885,7 @@ order_on_t <- function(
          fit = autonomics::fits( object), 
        coefs = autonomics::coefs(object, fit = fit), 
     combiner = '|',
+  decreasing = FALSE,
      verbose = TRUE
 ){
 # Assert
@@ -900,8 +903,8 @@ order_on_t <- function(
                             paste0(coefs, collapse = ', '),
                             paste0(fit,   collapse = ', ')
                             )
-    if (combiner == '|')  idx <- order(matrixStats::rowMins(tmat), decreasing = TRUE)
-    if (combiner == '&')  idx <- order(matrixStats::rowMaxs(tmat), decreasing = TRUE)
+    if (combiner == '|')  idx <- order(matrixStats::rowMins(tmat), decreasing = decreasing)
+    if (combiner == '&')  idx <- order(matrixStats::rowMaxs(tmat), decreasing = decreasing)
 # Return
     object[idx, ]
 }
@@ -976,6 +979,7 @@ order_on_effect <- function(
 #' @param fit         subset of fits(object)
 #' @param coefs       subset of coefs(object)
 #' @param combiner    '|' or '&': how to combine multiple fits/coefs
+#' @param decreasing  TRUE or FALSE
 #' @param p           p threshold
 #' @param fdr         fdr threshold
 #' @param effectsize  effectsize threshold
@@ -1015,6 +1019,7 @@ extract_coef_features <- function(
            fit = fits(object)[1], 
          coefs = default_coefs(object, fit = fit),
       combiner = '|',
+    decreasing = FALSE,
              p = 1, 
            fdr = 1, 
     effectsize = 0, 
@@ -1027,7 +1032,7 @@ extract_coef_features <- function(
         fdt(object) %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
         object %<>% .extract_p_features(  coefs = coefs,   p = p,   fit = fit, combiner = combiner, verbose = verbose)
         object %<>% .extract_fdr_features(coefs = coefs, fdr = fdr, fit = fit, combiner = combiner, verbose = verbose)
-        object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = verbose)
+        object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = verbose, decreasing = decreasing)
     }
     object %<>% .extract_effectsize_features(coefs = coefs,  effectsize = effectsize, fit = fit, combiner = combiner, verbose = verbose)
     object %<>% .extract_sign_features(      coefs = coefs,        sign = sign,       fit = fit, combiner = combiner, verbose = verbose)
@@ -1322,8 +1327,10 @@ plot_exprs <- function(
     } else if (dim == 'features'){   n %<>% min(nrow(object));  object %<>% extract_features_evenly(n)
     } else if (dim == 'both'){       n %<>% min(nrow(object))
         if (is.null(coefs)){         object %<>% extract_features_evenly(n) 
-        } else {                     object %<>% extract_coef_features(fit = fit, coefs = coefs, combiner = combiner, 
-                                                                       p = p, fdr = fdr, n = n, verbose = FALSE)
+        } else {                     object %<>% extract_coef_features(
+                                                    fit = fit, coefs = coefs, combiner = combiner, 
+                                                    decreasing = FALSE, p = p, fdr = fdr, 
+                                                    n = n, verbose = FALSE)
                                      object %<>% add_facetvars(fit = fit, coefs = coefs)
                                      facet %<>% c(sprintf('facet.%s', coefs))
                                      #object %<>% format_coef_vars(sep = sep, fit = fit, coefs = coefs) 
