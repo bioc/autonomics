@@ -1343,23 +1343,22 @@ plot_exprs <- function(
     npages <- if (dim == 'samples' ) 1  else  ceiling(nrow(object) / nrow / ncol)
     if (!is.null(file))   pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
-        p <- .plot_exprs(
-                   object,
-                    assay = assay,                    geom = geom,
-                        x = x,                        fill = fill,
-                    color = color,                   shape = shape,
-                     size = size,                    alpha = alpha, 
-                    block = block,                linetype = linetype,
-                highlight = highlight,               facet = facet,     
-                   scales = scales,                   nrow = nrow,
-                     ncol = ncol,                     page = i,
-                 labeller = labeller,          pointsize   = pointsize,  
-                   jitter = jitter, 
-             colorpalette = colorpalette,      fillpalette = fillpalette, 
-                  hlevels = hlevels,                 title = title,
-                 subtitle = subtitle,
-                     xlab = xlab,                     ylab = ylab,
-                    theme = theme
+        p <- .plot_exprs(  object,
+                            assay = assay,                    geom = geom,
+                                x = x,                        fill = fill,
+                            color = color,                   shape = shape,
+                             size = size,                    alpha = alpha, 
+                            block = block,                linetype = linetype,
+                        highlight = highlight,               facet = facet,     
+                           scales = scales,                   nrow = nrow,
+                             ncol = ncol,                     page = i,
+                         labeller = labeller,          pointsize   = pointsize,  
+                           jitter = jitter, 
+                     colorpalette = colorpalette,      fillpalette = fillpalette, 
+                          hlevels = hlevels,                 title = title,
+                         subtitle = subtitle,
+                             xlab = xlab,                     ylab = ylab,
+                            theme = theme
         )
         if (!is.null(file))  print(p)  # in this case one wants to return (not print)
     }
