@@ -42,7 +42,7 @@ plot_exprs(
   title = switch(dim, both = x, features = "Feature Boxplots", samples =
     "Sample Boxplots"),
   subtitle = if (!is.null(fit)) coefs else "",
-  xlab = NULL,
+  xlab = x,
   ylab = "value",
   theme = ggplot2::theme(plot.title = element_text(hjust = 0.5)),
   verbose = TRUE
