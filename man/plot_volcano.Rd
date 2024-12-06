@@ -19,6 +19,7 @@ plot_volcano(
   nrow = length(fit),
   p = 0.05,
   fdr = 0.05,
+  n = Inf,
   xndown = NULL,
   xnup = NULL,
   title = NULL,
@@ -53,9 +54,11 @@ plot_volcano(
 
 \item{nrow}{number: no of rows in plot}
 
-\item{p}{number: p cutoff for labeling}
+\item{p}{number:   p cutoff for labeling}
 
 \item{fdr}{number: fdr cutoff for labeling}
+
+\item{n}{number:   n cutoff for labeling}
 
 \item{xndown}{x position of ndown labels}
 

@@ -235,6 +235,7 @@ make_volcano_dt <- function(
     dt %<>% tidyr::pivot_wider(id_cols = tidyselect::all_of(idvars), names_from = 'quantity', values_from = 'value')
     dt %<>% data.table()
     dt$coef %<>% factor(coefs)
+    dt[,rank := rank(p),                            by = c('fit', 'coef')]
     dt[, fdr := p.adjust(p, method = 'fdr'),        by = c('fit', 'coef')]
     dt[, bon := p.adjust(p, method = 'bonferroni'), by = c('fit', 'coef')]
     dt[, mlp := -log10(p)]
@@ -260,8 +261,9 @@ make_volcano_dt <- function(
 #' @param max.overlaps   number: passed to ggrepel
 #' @param features       feature ids (character vector): features to encircle 
 #' @param nrow           number: no of rows in plot
-#' @param p              number: p cutoff for labeling
+#' @param p              number:   p cutoff for labeling
 #' @param fdr            number: fdr cutoff for labeling
+#' @param n              number:   n cutoff for labeling
 #' @param xndown         x position of ndown labels
 #' @param xnup           x position of nup labels
 #' @param title          string or NULL
@@ -312,6 +314,7 @@ plot_volcano <- function(
             nrow = length(fit),
                p = 0.05, 
              fdr = 0.05,
+               n = Inf,
           xndown = NULL,
             xnup = NULL,
            title = NULL,
@@ -377,7 +380,7 @@ plot_volcano <- function(
     g <- g + guides(color = 'none')
 # Labels
     if (!is.null(label)){
-        idx <- plotdt$fdr < fdr & plotdt$p < p
+        idx <- plotdt$fdr<fdr & plotdt$p<p  & plotdt$rank<=n
         labeldt <- plotdt[idx]
         g <- g + geom_label_repel(     data = labeldt, 
                                     mapping = aes(x = effect, y = mlp, label = !!sym(label), color = direction), 
