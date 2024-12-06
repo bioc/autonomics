@@ -33,7 +33,6 @@ fit(
   volcano = FALSE,
   volcanoargs = list(),
   exprs = FALSE,
-  n = 12,
   exprargs = list(),
   ...
 )
@@ -194,8 +193,6 @@ fit_wilcoxon(
 
 \item{exprs}{TRUE or FALSE}
 
-\item{n}{number of features to plot}
-
 \item{exprargs}{list:  expr   args}
 
 \item{...}{passed to fit_(limma|lm|lme|lmer) functions}
@@ -203,6 +200,8 @@ fit_wilcoxon(
 \item{plot}{whether to plot}
 
 \item{opt}{lme options}
+
+\item{n}{number of features to plot}
 }
 \value{
 Updated SummarizedExperiment

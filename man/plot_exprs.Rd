@@ -10,6 +10,7 @@ plot_exprs(
   object,
   dim = "both",
   assay = assayNames(object)[1],
+  features = NULL,
   fit = fits(object)[1],
   coefs = default_coefs(object, fit = fit),
   block = NULL,
@@ -65,6 +66,8 @@ plot_feature_boxplots(object, ...)
 'both'        (subgroup distribution faceted per feature)}
 
 \item{assay}{string: value in assayNames(object)}
+
+\item{features}{features to plot no matter what (character vector)}
 
 \item{fit}{'limma', 'lm', 'lme', 'lmer', 'wilcoxon'}
 

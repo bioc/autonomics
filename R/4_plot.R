@@ -707,6 +707,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
      threshold, 
            fit = fits(object)[1], 
       combiner = '|', 
+      features = features,
        verbose = TRUE
 ){
 # Assert
@@ -728,7 +729,8 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     idx[is.na(idx)] <- FALSE
     fun <- function(y) Reduce(get(combiner), y)
     idx %<>% apply(1, fun)
-    idx %<>% unname()
+    idx %<>% unname()        # features to include no matter what
+    if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
 # Return
     n0 <- length(idx)
     n1 <- sum(idx, na.rm = TRUE)
@@ -749,6 +751,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
             p = 0.05, 
           fit = fits(object), 
      combiner = '|',
+     features = NULL,
       verbose = TRUE
 ){
       assert_is_fraction(p)
@@ -759,6 +762,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
                                  threshold = p,
                                        fit = fit,
                                   combiner = combiner,
+                                  features = features,
                                    verbose = verbose )
 }
 
@@ -770,6 +774,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
           fdr = 0.05,
           fit = fits(object),
      combiner = '|',
+     features = NULL,
       verbose = TRUE
 ){
     assert_is_fraction(fdr)
@@ -780,6 +785,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
                                 threshold = fdr,
                                       fit = fit,
                                  combiner = combiner,
+                                 features = features,
                                   verbose = verbose )
 }
 
@@ -792,6 +798,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
    effectsize = 1,
           fit = fits(object),
      combiner = '|',
+     features = NULL,
       verbose = TRUE
 ){
     assert_weakly_positive_number(effectsize)
@@ -802,6 +809,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
                                 threshold = effectsize,
                                       fit = fit,
                                  combiner = combiner,
+                                 features = features,
                                   verbose = verbose )
 }
 
@@ -813,6 +821,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
          sign, 
           fit = fits(object)[1], 
      combiner = '|',
+     features = NULL,
       verbose = TRUE
 ){
 # Assert
@@ -823,6 +832,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
 # Filter
     x <- autonomics::effectmat(object, fit = fit, coef = coefs)
     idx <- unname(apply(sign(x), 1, function(y)  Reduce(get(combiner), sign(y) %in% sign) ))
+    if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
 # Return
     n0 <- length(idx)
     n1 <- sum(idx, na.rm = TRUE)
@@ -946,6 +956,7 @@ order_on_effect <- function(
     combiner = '|', 
            n, 
          fit = fits(object)[1],
+    features = NULL,
      verbose = TRUE
 ){
 # Assert
@@ -959,6 +970,7 @@ order_on_effect <- function(
 # Filter top
     n %<>% min(nrow(object))
     idx <- c(rep(TRUE, n), rep(FALSE, nrow(object)-n))
+    if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
     n0 <- length(idx)
     n1 <- sum(idx, na.rm = TRUE)
     obj <- object[idx, ]
@@ -985,6 +997,7 @@ order_on_effect <- function(
 #' @param effectsize  effectsize threshold
 #' @param sign        effect sign
 #' @param n           number of top features (Inf means all)
+#' @param features    features to include no matter what (character vector)
 #' @param verbose     TRUE or FALSE
 #' @return SummarizedExperiment
 #' @examples
@@ -1025,18 +1038,20 @@ extract_coef_features <- function(
     effectsize = 0, 
           sign = c(-1,+1), 
              n = 4,
+      features = NULL,
        verbose = TRUE
 ){
 # Filter
+    args <- list(coefs = coefs, fit = fit, combiner = combiner, verbose = verbose)
     if (fit %in% LINMOD_ENGINES){
         fdt(object) %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
-        object %<>% .extract_p_features(  coefs = coefs,   p = p,   fit = fit, combiner = combiner, verbose = verbose)
-        object %<>% .extract_fdr_features(coefs = coefs, fdr = fdr, fit = fit, combiner = combiner, verbose = verbose)
-        object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = verbose, decreasing = decreasing)
+        object <- do.call(     .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
+        object <- do.call(   .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
+        object <- do.call(              order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
     }
-    object %<>% .extract_effectsize_features(coefs = coefs,  effectsize = effectsize, fit = fit, combiner = combiner, verbose = verbose)
-    object %<>% .extract_sign_features(      coefs = coefs,        sign = sign,       fit = fit, combiner = combiner, verbose = verbose)
-    object %<>% .extract_n_features(         coefs = coefs,           n = n,          fit = fit, combiner = combiner, verbose = verbose)
+    object <- do.call(.extract_effectsize_features, c(args, list(object = object, features = features, effectsize = effectsize )))
+    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign       )))
+    object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n          )))
 # Return
     object
 }
@@ -1203,6 +1218,7 @@ add_facetvars <- function(
 #'                     'features' (per-feature distribution across samples ) or 
 #'                     'both'        (subgroup distribution faceted per feature)
 #' @param assay         string: value in assayNames(object)
+#' @param features      features to plot no matter what (character vector)
 #' @param x                     x svar
 #' @param geom          'boxplot' or 'point'
 #' @param color         color svar: points, lines
@@ -1267,6 +1283,7 @@ plot_exprs <- function(
           object, 
              dim = 'both',
            assay = assayNames(object)[1],
+        features = NULL,
              fit = fits(object)[1],
            coefs = default_coefs(object, fit = fit),
            block = NULL,
@@ -1329,8 +1346,8 @@ plot_exprs <- function(
         if (is.null(coefs)){         object %<>% extract_features_evenly(n) 
         } else {                     object %<>% extract_coef_features(
                                                     fit = fit, coefs = coefs, combiner = combiner, 
-                                                    decreasing = FALSE, p = p, fdr = fdr, 
-                                                    n = n, verbose = FALSE)
+                                                    decreasing = FALSE, p = p, fdr = fdr, n = n, 
+                                                    features = features, verbose = FALSE)
                                      object %<>% add_facetvars(fit = fit, coefs = coefs)
                                      facet %<>% c(sprintf('facet.%s', coefs))
                                      #object %<>% format_coef_vars(sep = sep, fit = fit, coefs = coefs) 

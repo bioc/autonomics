@@ -788,7 +788,6 @@ fit <- function(
       volcano = FALSE, 
   volcanoargs = list(),
         exprs = FALSE, 
-            n = 12, 
      exprargs = list(), 
              ...
 ){
@@ -802,19 +801,18 @@ fit <- function(
     assert_is_list(exprargs)
 # Fit
     fitfun <- paste0('fit_', engine)
-    object %<>%  get(fitfun)(
-                   formula = formula,
-                      drop = drop,
-                 codingfun = codingfun, 
-                    design = design,
-                 contrasts = contrasts,
-                     coefs = coefs,
-                     block = block, 
-                 weightvar = weightvar,
-                  statvars = statvars,
-                       sep = sep,
-                    suffix = suffix, 
-                   verbose = verbose )
+    object %<>%  get(fitfun)( formula = formula,
+                                 drop = drop,
+                            codingfun = codingfun, 
+                               design = design,
+                            contrasts = contrasts,
+                                coefs = coefs,
+                                block = block, 
+                            weightvar = weightvar,
+                             statvars = statvars,
+                                  sep = sep,
+                               suffix = suffix, 
+                              verbose = verbose )
 # Write tables
     if (!is.null(outdir)){
         outdir <- sprintf('%s/%s', outdir, formula2str(formula))
@@ -827,11 +825,11 @@ fit <- function(
     for (coef in coefs){
         volcanofile <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
            exprfile <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
-        title <- sprintf('%s: %s', formula2str(formula), coef)
+        title <- sprintf('%s', formula2str(formula))
         args <- list( object = object, fit = engine, coefs = coef, title = title)
         if (volcano)  do.call( plot_volcano, c(args, volcanoargs, list(file = volcanofile)) )
         if (exprs){
-            p <- do.call(plot_exprs, c(args, exprargs, list(file = exprfile, block = block, n = n)))
+            p <- do.call(plot_exprs, c(args, exprargs, list(file = exprfile, block = block)))
             if (is.null(outdir))  print(p)
         }
     }

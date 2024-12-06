@@ -15,6 +15,7 @@
   p = 0.05,
   fit = fits(object),
   combiner = "|",
+  features = NULL,
   verbose = TRUE
 )
 
@@ -24,6 +25,7 @@
   fdr = 0.05,
   fit = fits(object),
   combiner = "|",
+  features = NULL,
   verbose = TRUE
 )
 
@@ -33,6 +35,7 @@
   effectsize = 1,
   fit = fits(object),
   combiner = "|",
+  features = NULL,
   verbose = TRUE
 )
 
@@ -42,6 +45,7 @@
   sign,
   fit = fits(object)[1],
   combiner = "|",
+  features = NULL,
   verbose = TRUE
 )
 
@@ -51,6 +55,7 @@
   combiner = "|",
   n,
   fit = fits(object)[1],
+  features = NULL,
   verbose = TRUE
 )
 
@@ -65,6 +70,7 @@ extract_coef_features(
   effectsize = 0,
   sign = c(-1, +1),
   n = 4,
+  features = NULL,
   verbose = TRUE
 )
 }
@@ -78,6 +84,8 @@ extract_coef_features(
 \item{fit}{subset of fits(object)}
 
 \item{combiner}{'|' or '&': how to combine multiple fits/coefs}
+
+\item{features}{features to include no matter what (character vector)}
 
 \item{verbose}{TRUE or FALSE}
 

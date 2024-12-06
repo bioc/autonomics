@@ -40,7 +40,7 @@ data.table::data.table
 #' @importFrom graphics       abline   axis   box   image   layout   par   polygon   text
 #' @importFrom grid           grid.layout  grid.draw   grid.newpage
 #' @importFrom gridExtra      arrangeGrob   grid.arrange
-#' @importFrom magrittr       add   and   equals
+#' @importFrom magrittr       add   and   equals    or
 #' @importFrom magrittr       divide_by   extract2   is_in
 #' @importFrom magrittr       multiply_by   subtract
 #' @importFrom magrittr       set_colnames   set_names   set_rownames
