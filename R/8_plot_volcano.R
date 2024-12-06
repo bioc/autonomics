@@ -403,9 +403,8 @@ plot_volcano <- function(
                                            size = 4,
                                           color = 'black')
                 
-                curlabeldt <- curdt[!curdt[[label]] %in% labeldt[[label]]]
-                if (length(curlabeldt)>0){
-                    g <- g + geom_label_repel( data = curlabeldt, 
+                if (length(curdt)>0){
+                    g <- g + geom_label_repel( data = curdt, 
                                             mapping = aes(x = effect, y = mlp, label = !!sym(label)), 
                                               color = 'black', 
                                          label.size = NA, 
