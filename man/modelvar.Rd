@@ -166,26 +166,11 @@ modeldt(object, ...)
   ...
 )
 
-effectdt(
-  object,
-  quantity,
-  fit = fits(object),
-  coef = default_coefs(object, fit = fit)
-)
+effectdt(object, fit = fits(object), coef = default_coefs(object, fit = fit))
 
-tdt(
-  object,
-  quantity,
-  fit = fits(object),
-  coef = default_coefs(object, fit = fit)
-)
+tdt(object, fit = fits(object), coef = default_coefs(object, fit = fit))
 
-pdt(
-  object,
-  quantity,
-  fit = fits(object),
-  coef = default_coefs(object, fit = fit)
-)
+pdt(object, fit = fits(object), coef = default_coefs(object, fit = fit))
 
 modelmat(
   object,

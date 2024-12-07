@@ -567,21 +567,21 @@ modeldt.SummarizedExperiment <- function(
 
 #' @rdname modelvar
 #' @export
-effectdt <- function( object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit) ){
+effectdt <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit) ){
     modeldt(object, quantity = 'effect', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-tdt <- function( object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit) ){
+tdt <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit) ){
     modeldt(object, quantity = 't', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-pdt <- function( object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit)){
+pdt <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit)){
     modeldt(object, quantity = 'p', fit = fit, coef = coef)
 }
 
