@@ -192,7 +192,41 @@ dichotomize_exprs <- function(dt, percentile){
     return(dt)
 }
 
-#' @rdname dot-plot_survival
+#' Fit/Plot survival 
+#' @param object      SummarizedExperiment
+#' @param assay       string
+#' @param percentile  percentage (not greater than 50)
+#' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
+#' @param samples     TRUE or FALSE : record which samples in which stratum ?
+#' @param verbose     TRUE or FALSE
+#' @param title       string
+#' @param subtitle    string
+#' @param palette     color vector
+#' @param n           number
+#' @param ncol        number
+#' @param nrow        number
+#' @param file        filepath
+#' @param width       number
+#' @param height      number
+#' @return ggsurvplot
+#' @examples 
+#' file <- download_tcga_example()
+#' if (!is.null(file) & requireNamespace('survminer')){
+#' # Read
+#'     object <- readRDS(file)
+#'     object %<>% extract(, .$sample_type == 'T')
+#'     object %<>% extract(c('UGT3A2', 'NSUN3', 'XRCC4', 'WNT10A'), )
+#' # Fit
+#'     fdt(object)
+#'     fdt(fit_survival(object))
+#'     fdt(fit_survival(object, percentile = 50))
+#'     fdt(fit_survival(object, percentile = 50, sep = '.'))
+#' # Plot
+#'     object %<>% fit_survival()
+#'     plot_survival(object)
+#'     p1 <- .plot_survival(object[1, ])
+#'     p2 <- .plot_survival(object[2, ])
+#' }
 #' @export
 fit_survival <- function(
         object, 
@@ -231,42 +265,7 @@ fit_survival <- function(
 }
 
 
-
-#' Fit/Plot survival 
-#' @param object      SummarizedExperiment
-#' @param assay       string
-#' @param percentile  percentage (not greater than 50)
-#' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
-#' @param samples     TRUE or FALSE : record which samples in which stratum ?
-#' @param verbose     TRUE or FALSE
-#' @param title       string
-#' @param subtitle    string
-#' @param palette     color vector
-#' @param n           number
-#' @param ncol        number
-#' @param nrow        number
-#' @param file        filepath
-#' @param width       number
-#' @param height      number
-#' @return ggsurvplot
-#' @examples 
-#' file <- download_tcga_example()
-#' if (!is.null(file) & requireNamespace('survminer')){
-#' # Read
-#'     object <- readRDS(file)
-#'     object %<>% extract(, .$sample_type == 'T')
-#'     object %<>% extract(c('UGT3A2', 'NSUN3', 'XRCC4', 'WNT10A'), )
-#' # Fit
-#'     fdt(object)
-#'     fdt(fit_survival(object))
-#'     fdt(fit_survival(object, percentile = 50))
-#'     fdt(fit_survival(object, percentile = 50, sep = '.'))
-#' # Plot
-#'     object %<>% fit_survival()
-#'     plot_survival(object)
-#'     p1 <- .plot_survival(object[1, ])
-#'     p2 <- .plot_survival(object[2, ])
-#' }
+#' @rdname fit_survival
 #' @export
 .plot_survival <- function(
         object,
@@ -314,7 +313,7 @@ percentiles <- function(object){
 }
 
 
-#' @rdname dot-plot_survival
+#' @rdname fit_survival
 #' @export
 plot_survival <- function(
         object, 
