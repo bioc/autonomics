@@ -507,3 +507,39 @@ fdr2p <- function(fdr){
     p
 }
 
+
+#' Plot contrast densities
+#' @param object SummarizedExperiment
+#' @param fit  'limma', 'lm', 'lme', 'lmer', or 'wilcoxon'
+#' @param coefs character vector
+#' @param sep   string
+#' @param label svar
+#' @return ggplot
+#' @examples
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' object %<>% fit(~subgroup, block = 'Subject')
+#' plot_coef_densities(object)
+#' @export
+plot_coef_densities <- function(
+    object, 
+       fit = fits(object)[1], 
+     coefs = setdiff(coefs(object, fit = fit), 'Intercept'), 
+       sep = FITSEP,
+     label = 'feature_id'
+){
+# Prepare
+    dt <- tdt(object, fit = fit, coef = coefs)
+    assert_scalar_subset(label, fvars(object))
+    dt %<>% merge(fdt(object)[ , label, with = FALSE], by = 'feature_id', sort = FALSE)
+    dt %<>% melt.data.table(id.vars = unique(c('feature_id', label)), variable.name = 'coef', value.name = 'tvalue')
+    dt[, coef := split_extract_fixed(coef, sep, 2:3)]
+    dt[, density := approxfun(density(tvalue))(tvalue) , by = 'coef']
+# Plot
+    ggplot(dt) + theme_bw() + facet_wrap(vars(coef)) + 
+                 geom_density( aes(x = tvalue )) + 
+                 geom_point(       aes(x = tvalue, y = density ) ) + 
+                 geom_text(data = dt[tvalue<0], aes(x = tvalue, y = density, label = feature_id), color = '#ff5050', hjust = 1) + 
+                 geom_text(data = dt[tvalue>0], aes(x = tvalue, y = density, label = feature_id), color = '#009933', hjust = 0)
+}
+
