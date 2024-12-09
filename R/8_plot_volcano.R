@@ -413,7 +413,7 @@ plot_volcano <- function(
                                         show.legend = FALSE,
                                        max.overlaps = max.overlaps )  } } }
     }
-    if (is.null(file)) { print(g); return(g) }
+    if (is.null(file))  return(g)
     if (verbose)  cmessage('%s%s', spaces(21), file)
     pdf(file, width = width, height = height)
     print(g)
