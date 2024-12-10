@@ -12,7 +12,9 @@ fit_survival(
   percentile = 25,
   sep = FITSEP,
   samples = if (ncol(object) < 50) TRUE else FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  outdir = NULL,
+  writefun = "write_xl"
 )
 
 .plot_survival(
@@ -51,6 +53,8 @@ plot_survival(
 \item{samples}{TRUE or FALSE : record which samples in which stratum ?}
 
 \item{verbose}{TRUE or FALSE}
+
+\item{outdir}{dir}
 
 \item{title}{string}
 

@@ -205,6 +205,7 @@ dichotomize_exprs <- function(dt, percentile){
 #' @param n           number
 #' @param ncol        number
 #' @param nrow        number
+#' @param outdir      dir
 #' @param file        filepath
 #' @param width       number
 #' @param height      number
@@ -234,7 +235,9 @@ fit_survival <- function(
     percentile = 25, 
            sep = FITSEP,
        samples = if (ncol(object) < 50) TRUE else FALSE,
-       verbose = TRUE
+       verbose = TRUE, 
+        outdir = NULL,
+      writefun = 'write_xl'
 ){
 # Assert
     assert_is_valid_sumexp(object)
@@ -255,12 +258,21 @@ fit_survival <- function(
     if (verbose)  cmessage('\t\t\tp  =  survdiff(Surv(timetoevent, event) ~ exprlevel)')
     if (verbose)  cmessage('\t\t\teffect = coxph(Surv(timetoevent, event) ~ exprvalue)')
     dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
-# Return
+# Merge
     oldnames <- names(dt) %>% extract(stri_detect_regex(., sprintf('[%s]LR$', sep)))
     newnames <- paste0(oldnames, percentile)
     setnames(dt, oldnames, newnames) 
     for (col in newnames)  object[[col]] <- NULL
     object %<>% merge_fdt(dt)
+# Write
+    if (!is.null(outdir)){
+        outdir <- sprintf('%s/surv%d', outdir, percentile)
+        dir.create(outdir, showWarnings = FALSE)
+    }
+    tableext <- switch(writefun, write_xl = 'xlsx', write_ods = 'ods')
+    tablefile <- if (is.null(outdir)) NULL else sprintf('%s/survival.%s',    outdir, tableext)
+    if (!is.null(outdir))  get(writefun)(object, tablefile)
+# Return
     object
 }
 
