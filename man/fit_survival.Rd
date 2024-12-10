@@ -14,7 +14,13 @@ fit_survival(
   samples = if (ncol(object) < 50) TRUE else FALSE,
   verbose = TRUE,
   outdir = NULL,
-  writefunname = "write_xl"
+  writefunname = "write_xl",
+  plot = FALSE,
+  n = 4,
+  ncol = 4,
+  nrow = length(percentile),
+  width = 7 * ncol,
+  height = 7 * nrow
 )
 
 .plot_survival(
@@ -58,11 +64,7 @@ plot_survival(
 
 \item{writefunname}{'write_xl' or 'write_ods'}
 
-\item{title}{string}
-
-\item{subtitle}{string}
-
-\item{palette}{color vector}
+\item{plot}{TRUE or FALSE}
 
 \item{n}{number}
 
@@ -70,11 +72,17 @@ plot_survival(
 
 \item{nrow}{number}
 
-\item{file}{filepath}
-
 \item{width}{number}
 
 \item{height}{number}
+
+\item{title}{string}
+
+\item{subtitle}{string}
+
+\item{palette}{color vector}
+
+\item{file}{filepath}
 }
 \value{
 ggsurvplot

@@ -199,17 +199,18 @@ dichotomize_exprs <- function(dt, percentile){
 #' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
 #' @param samples     TRUE or FALSE : record which samples in which stratum ?
 #' @param verbose     TRUE or FALSE
-#' @param title       string
-#' @param subtitle    string
-#' @param palette     color vector
+#' @param outdir      dir
+#' @param writefunname 'write_xl' or 'write_ods'
+#' @param plot        TRUE or FALSE
 #' @param n           number
 #' @param ncol        number
 #' @param nrow        number
-#' @param outdir      dir
-#' @param writefunname 'write_xl' or 'write_ods'
 #' @param file        filepath
 #' @param width       number
 #' @param height      number
+#' @param title       string
+#' @param subtitle    string
+#' @param palette     color vector
 #' @return ggsurvplot
 #' @examples 
 #' file <- download_tcga_example()
@@ -238,7 +239,13 @@ fit_survival <- function(
        samples = if (ncol(object) < 50) TRUE else FALSE,
        verbose = TRUE, 
         outdir = NULL,
-  writefunname = 'write_xl'
+  writefunname = 'write_xl',
+          plot = FALSE,
+             n = 4,
+          ncol = 4,
+          nrow = length(percentile),
+         width = 7*ncol,
+        height = 7*nrow
 ){
 # Assert
     assert_is_valid_sumexp(object)
