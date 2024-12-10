@@ -206,6 +206,7 @@ dichotomize_exprs <- function(dt, percentile){
 #' @param ncol        number
 #' @param nrow        number
 #' @param outdir      dir
+#' @param writefunname 'write_xl' or 'write_ods'
 #' @param file        filepath
 #' @param width       number
 #' @param height      number
@@ -237,7 +238,7 @@ fit_survival <- function(
        samples = if (ncol(object) < 50) TRUE else FALSE,
        verbose = TRUE, 
         outdir = NULL,
-      writefun = 'write_xl'
+  writefunname = 'write_xl'
 ){
 # Assert
     assert_is_valid_sumexp(object)
@@ -269,9 +270,9 @@ fit_survival <- function(
         outdir <- sprintf('%s/surv%d', outdir, percentile)
         dir.create(outdir, showWarnings = FALSE)
     }
-    tableext <- switch(writefun, write_xl = 'xlsx', write_ods = 'ods')
+    tableext <- switch(writefunname, write_xl = 'xlsx', write_ods = 'ods')
     tablefile <- if (is.null(outdir)) NULL else sprintf('%s/survival.%s',    outdir, tableext)
-    if (!is.null(outdir))  get(writefun)(object, tablefile)
+    if (!is.null(outdir))  get(writefunname)(object, tablefile)
 # Return
     object
 }

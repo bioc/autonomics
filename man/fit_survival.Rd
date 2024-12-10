@@ -14,7 +14,7 @@ fit_survival(
   samples = if (ncol(object) < 50) TRUE else FALSE,
   verbose = TRUE,
   outdir = NULL,
-  writefun = "write_xl"
+  writefunname = "write_xl"
 )
 
 .plot_survival(
@@ -55,6 +55,8 @@ plot_survival(
 \item{verbose}{TRUE or FALSE}
 
 \item{outdir}{dir}
+
+\item{writefunname}{'write_xl' or 'write_ods'}
 
 \item{title}{string}
 
