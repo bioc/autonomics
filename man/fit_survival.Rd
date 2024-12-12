@@ -15,7 +15,7 @@ fit_survival(
   verbose = TRUE,
   outdir = NULL,
   writefunname = "write_xl",
-  plot = FALSE,
+  plot = if (is.null(outdir)) FALSE else TRUE,
   n = 4,
   ncol = 4,
   nrow = length(percentile),
