@@ -264,22 +264,20 @@ fit_survival <- function(
     assert_all_are_in_left_open_range(percentile, 0, 50)
     event <- exprlevel <- timetoevent <- value <- NULL
 # Fit
-    if (verbose)  cmessage('\t\tsurvival ~ exprlevel')                                         # Filter across
+    if (verbose)  cmessage('%ssurvival ~ exprs  (cph    )', spaces(8))                         # Filter across
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
     for (pct in percentile){
         dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
-        if (verbose)  message(
-            sprintf("\t\t\texprlevel = 'Lo' (exprvalue <= %d%%)", pct),                        # Dichotomize
-            sprintf(            "  or  'Hi' (exprvalue >= %d%%)", 100 - pct))
+        if (verbose)  cmessage("%s~ expr%d (logrank)", spaces(17), pct)   # Dichotomize
         dt %<>% dichotomize_exprs(percentile = pct)                                            # Filter within 
         dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
         dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
-        if (verbose)  cmessage('\t\t\tp  =  survdiff(Surv(timetoevent, event) ~ exprlevel)')
-        if (verbose)  cmessage('\t\t\teffect = coxph(Surv(timetoevent, event) ~ exprvalue)')
+        #if (verbose)  cmessage('%ssurvdiff(Surv(timetoevent, event) ~ expr%d)', spaces(19+11), pct)
+        #if (verbose)  cmessage('%s   coxph(Surv(timetoevent, event) ~ expr)', spaces(19+11))
         dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
         oldnames <- newnames <- names(dt)
-        newnames %<>% stri_replace_all_fixed('hi-', sprintf('hi%d-', pct))
-        newnames %<>% stri_replace_all_fixed('-lo', sprintf('-lo%d', pct))
+        newnames %<>% stri_replace_all_fixed( 'hi-', sprintf('hi%d-', pct))
+        newnames %<>% stri_replace_all_fixed( '-lo', sprintf('-lo%d', pct))
         newnames %<>% stri_replace_all_regex('^hi$', sprintf('hi%d', pct))
         newnames %<>% stri_replace_all_regex('^lo$', sprintf('lo%d', pct))
         setnames(dt, oldnames, newnames) 
@@ -296,9 +294,9 @@ fit_survival <- function(
     }
 # Plot
     if (plot){
-        
-        plot_survival(object = object, assay = assay, percentile = percentile, n = n, 
-                      ncol = ncol, nrow = nrow, width = width, height = height)
+        file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
+        plot_survival(object = object, assay = assay, n = n, 
+                      ncol = ncol, nrow = nrow, width = width, height = height, file = file)
     }
 # Return
     object
@@ -366,12 +364,15 @@ plot_survival <- function(
     
 ){
 # Extract
-    object %<>% order_on_p(fit = 'logrank', coefs = coefs[1])
+    object %<>% order_on_p(fit = 'logrank', coefs = coefs[1], verbose = FALSE)
     n %<>% min(nrow(object))
     object %<>% extract(1:n, )
-    object %<>% order_on_t(fit = 'logrank', coefs = coefs[1])
+    object %<>% order_on_t(fit = 'logrank', coefs = coefs[1], verbose = FALSE)
 # Plot
-    if (!is.null(file))  pdf(file, width = width, height = height)
+    if (!is.null(file)){
+        cmessage('%s%s', spaces(21), file)
+        pdf(file, width = width, height = height)
+    }
     npages <- ceiling(nrow(object)/ncol)
     for (i in 1:npages){
         cmessage('\t\t\tPage %02d/%02d', i, npages)
