@@ -310,9 +310,9 @@ fit_survival <- function(
 .plot_survival <- function(
         object,
          assay = assayNames(object)[1],
-    percentile = 25,
-         title = paste0(assay, ' ', percentile, '%'),
-      subtitle = NULL, #paste0(assay, ': ', percentile, '% split'),
+         coefs = autonomics::coefs(object, fit = 'logrank'),
+         title = paste0(assay, ' ', coefs,3,4),
+      subtitle = NULL,
        palette = c("#009999", "#ff5050")
 ){
 # Assert
@@ -327,11 +327,10 @@ fit_survival <- function(
     feature <- unique(fdata(object)$feature_id)
     title %<>% paste(feature, ., sep = ' : ')
     assert_is_scalar(feature)
-    assert_all_are_less_than_or_equal_to(percentile, 50)
     value <- exprlevel <- NULL
 # Prepare
     subdt <- sumexp_to_longdt( object, assay = assay, svars = c('event', 'timetoevent') )
-    subdt %<>% dichotomize_exprs( percentile = percentile )
+    subdt %<>% dichotomize_exprs( percentile = as.numeric(substr(coefs,3,4)) )
 # Plot
     fit <- survival::survfit(survival::Surv(timetoevent, event) ~ exprlevel, data = subdt)
     survminer::ggsurvplot(
@@ -346,39 +345,36 @@ fit_survival <- function(
 #' @param object SummarizedExperiment
 #' @return numeric vector
 #' @export
-percentiles <- function(object){
-    pvar(object, coef = 'surv')  %>% 
-    substr(nchar(.)-1, nchar(.))  %>% 
-    as.numeric()
-}
+percentiles <- function(object)  as.numeric(substr(coefs(object, fit = 'logrank'), 3,4))
 
 
 #' @rdname fit_survival
 #' @export
 plot_survival <- function(
         object, 
-         assay = assayNames(object)[1], 
-    percentile = percentiles(object),
-         title = paste0(assay, ' ', percentile, '%'),
+         assay = assayNames(object)[1],
+         coefs = autonomics::coefs(object, fit = 'logrank'),
+         title = paste0(assay, ' ', coefs),
       subtitle = NULL,
        palette = c("#009999", "#ff5050"),
              n = 4,
           ncol = 4, 
-          nrow = length(percentile), 
+          nrow = length(coefs), 
           file = NULL, 
          width = 7*ncol, 
         height = 7*nrow
     
 ){
 # Extract
-    object %<>% order_on_p(fit = paste0('LR', percentile), coefs = 'surv')
+    object %<>% order_on_p(fit = 'logrank', coefs = coefs[1])
     n %<>% min(nrow(object))
     object %<>% extract(1:n, )
+    object %<>% order_on_t(fit = 'logrank', coefs = coefs[1])
 # Plot
     if (!is.null(file))  pdf(file, width = width, height = height)
     npages <- ceiling(nrow(object)/ncol)
     for (i in 1:npages){
-        cmessage('\t\t\tPage %02d/%d', i, npages)
+        cmessage('\t\t\tPage %02d/%02d', i, npages)
         idx1 <- (i-1)*ncol+1
         idxn <- min(i*ncol, nrow(object))
         idx <- idx1:idxn
@@ -386,8 +382,8 @@ plot_survival <- function(
         objlist %<>% split_features(by = 'feature_id')
         plots <- mapply(
             .plot_survival, 
-            object     = rep(objlist, each = length(percentile)), 
-            percentile = rep(percentile, times = length(objlist)),
+            object     = rep(objlist, each = length(coefs)), 
+            coefs = rep(coefs, times = length(objlist)),
             MoreArgs = list(assay = assay, palette = palette), SIMPLIFY = FALSE)
         survminer::arrange_ggsurvplots(plots, nrow = nrow, ncol = ncol)
     }

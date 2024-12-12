@@ -26,8 +26,8 @@ fit_survival(
 .plot_survival(
   object,
   assay = assayNames(object)[1],
-  percentile = 25,
-  title = paste0(assay, " ", percentile, "\%"),
+  coefs = autonomics::coefs(object, fit = "logrank"),
+  title = paste0(assay, " ", coefs, 3, 4),
   subtitle = NULL,
   palette = c("#009999", "#ff5050")
 )
@@ -35,13 +35,13 @@ fit_survival(
 plot_survival(
   object,
   assay = assayNames(object)[1],
-  percentile = percentiles(object),
-  title = paste0(assay, " ", percentile, "\%"),
+  coefs = autonomics::coefs(object, fit = "logrank"),
+  title = paste0(assay, " ", coefs),
   subtitle = NULL,
   palette = c("#009999", "#ff5050"),
   n = 4,
   ncol = 4,
-  nrow = length(percentile),
+  nrow = length(coefs),
   file = NULL,
   width = 7 * ncol,
   height = 7 * nrow
