@@ -260,30 +260,32 @@ fit_survival <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_scalar_subset(assay, assayNames(object))
-    assert_is_a_number(percentile)
+    assert_is_numeric(percentile)
     assert_all_are_in_left_open_range(percentile, 0, 50)
     event <- exprlevel <- timetoevent <- value <- NULL
 # Fit
     if (verbose)  cmessage('\t\tsurvival ~ exprlevel')                                         # Filter across
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
-    dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
-    if (verbose)  message(
-        sprintf("\t\t\texprlevel = 'Lo' (exprvalue <= %d%%)", percentile),                        # Dichotomize
-        sprintf(            "  or  'Hi' (exprvalue >= %d%%)", 100 - percentile))
-    dt %<>% dichotomize_exprs(percentile = percentile)                                            # Filter within 
-    dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
-    dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
-    if (verbose)  cmessage('\t\t\tp  =  survdiff(Surv(timetoevent, event) ~ exprlevel)')
-    if (verbose)  cmessage('\t\t\teffect = coxph(Surv(timetoevent, event) ~ exprvalue)')
-    dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
-    oldnames <- newnames <- names(dt)
-    newnames %<>% stri_replace_all_fixed('hi-', sprintf('hi%d-', percentile))
-    newnames %<>% stri_replace_all_fixed('-lo', sprintf('-lo%d', percentile))
-    newnames %<>% stri_replace_all_regex('^hi$', sprintf('hi%d', percentile))
-    newnames %<>% stri_replace_all_regex('^lo$', sprintf('lo%d', percentile))
-    setnames(dt, oldnames, newnames) 
-    for (col in newnames)  object[[col]] <- NULL
-    object %<>% merge_fdt(dt)
+    for (pct in percentile){
+        dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
+        if (verbose)  message(
+            sprintf("\t\t\texprlevel = 'Lo' (exprvalue <= %d%%)", pct),                        # Dichotomize
+            sprintf(            "  or  'Hi' (exprvalue >= %d%%)", 100 - pct))
+        dt %<>% dichotomize_exprs(percentile = pct)                                            # Filter within 
+        dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
+        dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
+        if (verbose)  cmessage('\t\t\tp  =  survdiff(Surv(timetoevent, event) ~ exprlevel)')
+        if (verbose)  cmessage('\t\t\teffect = coxph(Surv(timetoevent, event) ~ exprvalue)')
+        dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
+        oldnames <- newnames <- names(dt)
+        newnames %<>% stri_replace_all_fixed('hi-', sprintf('hi%d-', pct))
+        newnames %<>% stri_replace_all_fixed('-lo', sprintf('-lo%d', pct))
+        newnames %<>% stri_replace_all_regex('^hi$', sprintf('hi%d', pct))
+        newnames %<>% stri_replace_all_regex('^lo$', sprintf('lo%d', pct))
+        setnames(dt, oldnames, newnames) 
+        for (col in newnames)  object[[col]] <- NULL
+        object %<>% merge_fdt(dt)
+    }
 # Write
     if (!is.null(outdir)){
         outdir <- sprintf('%s/survival', outdir)
