@@ -174,20 +174,30 @@ dichotomize_exprs <- function(dt, percentile){
 
 .fit_survival <- function(subdt, sep, samples = FALSE){
     timetoevent <- event <- exprlevel <- NULL
-    diff <- survival::survdiff(survival::Surv(timetoevent, event) ~ exprlevel, data = subdt)
-    coef <- suppressWarnings(coef(summary( survival::coxph(
-                survival::Surv(subdt$timetoevent, subdt$event)~subdt$value)))[,'coef' ])
+    logrank <- suppressWarnings(
+                survival::survdiff(survival::Surv(timetoevent, event) ~ exprlevel, data = subdt))
+     cph <- suppressWarnings(coef(summary(
+                survival::coxph(survival::Surv(subdt$timetoevent, subdt$event)~subdt$value))))
     exprlevels <- unique(subdt$exprlevel)
     exprlevels %<>% extract(order(as.numeric(substr(., 1, nchar(.)-1))))
-    dt <- data.table( sign(coef), 1 - pchisq(diff$chisq, 1))   # effect, p
-    setnames(dt, c('V1', 'V2'), paste(c('effect', 'p'), 'surv', 'LR', sep = sep))
+    # We want right tail logrank pvalue only
+    # Left tail indicates more similarity than expected
+    # Can be interesting to detect fraud (dropping bad data)
+    # But not useful for our purpose
+    # https://stats.stackexchange.com/questions/22347/is-chi-squared-always-a-one-sided-test
+    dt <- data.table( `p~hi-lo~logrank` = 1 - pchisq(logrank$chisq, 1), # we want onesided value
+                 `effect~hi-lo~logrank` = logrank$chisq,
+                      `t~hi-lo~logrank` = logrank$chisq * sign(cph[,'coef']),
+                      `p~expr~cph` = cph[,'Pr(>|z|)'],
+                 `effect~expr~cph` = cph[,'coef'    ], 
+                      `t~expr~cph` = cph[,'z'       ] )   # effect, p
     if (samples){
-        lo <- unique(subdt[exprlevel == exprlevels[1]])$sample_id
-        hi <- unique(subdt[exprlevel == exprlevels[2]])$sample_id
-        lo %<>% as.character() %>% commonify_strings()
-        hi %<>% as.character() %>% commonify_strings()
-        dt[ , (paste('lo', 'surv', 'LR', sep = sep)) := lo ] #  lower survival samples
-        dt[ , (paste('hi', 'surv', 'LR', sep = sep)) := hi ] # higher survival samples
+         low <- unique(subdt[exprlevel == exprlevels[1]])$sample_id
+        high <- unique(subdt[exprlevel == exprlevels[2]])$sample_id
+         low %<>% as.character() %>% commonify_strings()
+        high %<>% as.character() %>% commonify_strings()
+        dt[ , lo := low  ] #  lower survival samples
+        dt[ , hi := high ] # higher survival samples
     }
     return(dt)
 }
@@ -250,36 +260,40 @@ fit_survival <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_scalar_subset(assay, assayNames(object))
-    assert_is_a_number(percentile)
+    assert_is_numeric(percentile)
     assert_all_are_in_left_open_range(percentile, 0, 50)
     event <- exprlevel <- timetoevent <- value <- NULL
 # Fit
-    if (verbose)  cmessage('\t\tsurvival ~ exprlevel')                                     # Filter across
+    if (verbose)  cmessage('\t\tsurvival ~ exprlevel')                                         # Filter across
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
-    dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
-    if (verbose)  message(
-        sprintf("\t\t\texprlevel = 'Lo' (exprvalue <= %d%%)", percentile),                 # Dichotomize
-        sprintf(            "  or  'Hi' (exprvalue >= %d%%)", 100 - percentile))
-    dt %<>% dichotomize_exprs(percentile = percentile)                                     # Filter within 
-    dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
-    dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
-    if (verbose)  cmessage('\t\t\tp  =  survdiff(Surv(timetoevent, event) ~ exprlevel)')
-    if (verbose)  cmessage('\t\t\teffect = coxph(Surv(timetoevent, event) ~ exprvalue)')
-    dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
-# Merge
-    oldnames <- names(dt) %>% extract(stri_detect_regex(., sprintf('[%s]LR$', sep)))
-    newnames <- paste0(oldnames, percentile)
-    setnames(dt, oldnames, newnames) 
-    for (col in newnames)  object[[col]] <- NULL
-    object %<>% merge_fdt(dt)
+    for (pct in percentile){
+        dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
+        if (verbose)  message(
+            sprintf("\t\t\texprlevel = 'Lo' (exprvalue <= %d%%)", pct),                        # Dichotomize
+            sprintf(            "  or  'Hi' (exprvalue >= %d%%)", 100 - pct))
+        dt %<>% dichotomize_exprs(percentile = pct)                                            # Filter within 
+        dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
+        dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
+        if (verbose)  cmessage('\t\t\tp  =  survdiff(Surv(timetoevent, event) ~ exprlevel)')
+        if (verbose)  cmessage('\t\t\teffect = coxph(Surv(timetoevent, event) ~ exprvalue)')
+        dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
+        oldnames <- newnames <- names(dt)
+        newnames %<>% stri_replace_all_fixed('hi-', sprintf('hi%d-', pct))
+        newnames %<>% stri_replace_all_fixed('-lo', sprintf('-lo%d', pct))
+        newnames %<>% stri_replace_all_regex('^hi$', sprintf('hi%d', pct))
+        newnames %<>% stri_replace_all_regex('^lo$', sprintf('lo%d', pct))
+        setnames(dt, oldnames, newnames) 
+        for (col in newnames)  object[[col]] <- NULL
+        object %<>% merge_fdt(dt)
+    }
 # Write
     if (!is.null(outdir)){
-        outdir <- sprintf('%s/surv%d', outdir, percentile)
+        outdir <- sprintf('%s/survival', outdir)
         dir.create(outdir, showWarnings = FALSE)
+        tableext <- switch(writefunname, write_xl = 'xlsx', write_ods = 'ods')
+        tablefile <- if (is.null(outdir)) NULL else sprintf('%s/survival.%s',    outdir, tableext)
+        get(writefunname)(object, tablefile)
     }
-    tableext <- switch(writefunname, write_xl = 'xlsx', write_ods = 'ods')
-    tablefile <- if (is.null(outdir)) NULL else sprintf('%s/survival.%s',    outdir, tableext)
-    if (!is.null(outdir))  get(writefunname)(object, tablefile)
 # Return
     object
 }
