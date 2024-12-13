@@ -264,11 +264,11 @@ fit_survival <- function(
     assert_all_are_in_left_open_range(percentile, 0, 50)
     event <- exprlevel <- timetoevent <- value <- NULL
 # Fit
-    if (verbose)  cmessage('%ssurvival ~ exprs  (cph    )', spaces(8))                         # Filter across
+    if (verbose)  cmessage('%ssurvival ~ exprs  cphmodel', spaces(8))                         # Filter across
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
     for (pct in percentile){
         dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
-        if (verbose)  cmessage("%s~ expr%d (logrank)", spaces(17), pct)   # Dichotomize
+        if (verbose)  cmessage("%s~ expr%d logranktest", spaces(17), pct)   # Dichotomize
         dt %<>% dichotomize_exprs(percentile = pct)                                            # Filter within 
         dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
         dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
