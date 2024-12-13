@@ -186,7 +186,7 @@ dichotomize_exprs <- function(dt, percentile){
     # But not useful for our purpose
     # https://stats.stackexchange.com/questions/22347/is-chi-squared-always-a-one-sided-test
     dt <- data.table( `p~hi-lo~logrank` = 1 - pchisq(logrank$chisq, 1), # we want onesided value
-                 `effect~hi-lo~logrank` = logrank$chisq,
+                 `effect~hi-lo~logrank` = logrank$chisq * sign(cph[,'coef']),
                       `t~hi-lo~logrank` = logrank$chisq * sign(cph[,'coef']),
                       `p~expr~cph` = cph[,'Pr(>|z|)'],
                  `effect~expr~cph` = cph[,'coef'    ], 
@@ -282,6 +282,8 @@ fit_survival <- function(
         newnames %<>% stri_replace_all_regex('^lo$', sprintf('lo%d', pct))
         setnames(dt, oldnames, newnames) 
         for (col in newnames)  object[[col]] <- NULL
+        if (verbose)  message_df('                                   %s', 
+                                 summarize_fit(dt, fit = c('logrank', 'cph')))
         object %<>% merge_fdt(dt)
     }
 # Write
