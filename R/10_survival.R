@@ -158,8 +158,8 @@ empty_survplot <- function(){
     if (length(lowervalue)==0 | lowervalue==uppervalue){
         subdt <- cbind(subdt[0], exprlevel = character(0))
     } else {
-        lowergroup <- paste0(signif(lowervalue,1), '-')
-        uppergroup <- paste0(signif(uppervalue,1), '+') 
+        lowergroup <- paste0('<', signif(lowervalue,1))
+        uppergroup <- paste0('>', signif(uppervalue,1)) 
         subdt <- rbind(cbind(subdt[value<=lowervalue], exprlevel = lowergroup),
                        cbind(subdt[value>=uppervalue], exprlevel = uppergroup))
         #subdt$exprlevel %<>% factor(c(lowergroup, uppergroup))
@@ -177,7 +177,7 @@ dichotomize_exprs <- function(dt, percentile){
     logrank <- suppressWarnings(survdiff(Surv(timetoevent, event) ~ exprlevel, data = subdt))
      cph <- suppressWarnings(coef(summary(coxph(Surv(subdt$timetoevent, subdt$event)~subdt$value))))
     exprlevels <- unique(subdt$exprlevel)
-    exprlevels %<>% extract(order(as.numeric(substr(., 1, nchar(.)-1))))
+    exprlevels %<>% extract(order(as.numeric(substr(., 2, nchar(.)))))
     # We want right tail logrank pvalue only
     # Left tail indicates more similarity than expected
     # Can be interesting to detect fraud (dropping bad data)
@@ -331,11 +331,16 @@ fit_survival <- function(
     subdt %<>% dichotomize_exprs( percentile = as.numeric(substr(coefs,3,4)) )
 # Plot
     fit <- survfit(Surv(timetoevent, event) ~ exprlevel, data = subdt)
+    # legend.labs is passed to ggtext
+    # ggtext thinks `<` is a tag to be parsed, but is able to process it and throws an error.
+    # Adding \u200B (a zero space unicode character) breaks the tag and fixes the error.
+    # Source: https://stackoverflow.com/questions/67890410
+    legend.labs <- sprintf('\u200B%s', unique(subdt$exprlevel))
     survminer::ggsurvplot(
         fit, data = subdt, conf.int = TRUE, palette = palette,
         risk.table = TRUE, risk.table.col = 'strata', risk.table.height = 0.25, 
         pval = TRUE, ggtheme = theme_bw(), title = title, subtitle = subtitle,
-        legend.labs = unique(subdt$exprlevel), legend.title = assay)
+        legend.labs = legend.labs, legend.title = assay)
 }
 
 
