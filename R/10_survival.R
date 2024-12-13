@@ -174,10 +174,8 @@ dichotomize_exprs <- function(dt, percentile){
 
 .fit_survival <- function(subdt, sep, samples = FALSE){
     timetoevent <- event <- exprlevel <- NULL
-    logrank <- suppressWarnings(
-                survival::survdiff(survival::Surv(timetoevent, event) ~ exprlevel, data = subdt))
-     cph <- suppressWarnings(coef(summary(
-                survival::coxph(survival::Surv(subdt$timetoevent, subdt$event)~subdt$value))))
+    logrank <- suppressWarnings(survdiff(Surv(timetoevent, event) ~ exprlevel, data = subdt))
+     cph <- suppressWarnings(coef(summary(coxph(Surv(subdt$timetoevent, subdt$event)~subdt$value))))
     exprlevels <- unique(subdt$exprlevel)
     exprlevels %<>% extract(order(as.numeric(substr(., 1, nchar(.)-1))))
     # We want right tail logrank pvalue only
@@ -332,7 +330,7 @@ fit_survival <- function(
     subdt <- sumexp_to_longdt( object, assay = assay, svars = c('event', 'timetoevent') )
     subdt %<>% dichotomize_exprs( percentile = as.numeric(substr(coefs,3,4)) )
 # Plot
-    fit <- survival::survfit(survival::Surv(timetoevent, event) ~ exprlevel, data = subdt)
+    fit <- survfit(Surv(timetoevent, event) ~ exprlevel, data = subdt)
     survminer::ggsurvplot(
         fit, data = subdt, conf.int = TRUE, palette = palette,
         risk.table = TRUE, risk.table.col = 'strata', risk.table.height = 0.25, 

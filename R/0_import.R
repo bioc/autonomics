@@ -52,23 +52,24 @@ data.table::data.table
 #' @importFrom MultiAssayExperiment  MultiAssayExperiment
 #' @importFrom parallel      detectCores
 #' @importFrom RColorBrewer  brewer.pal
-#' @importFrom readxl        read_excel   excel_sheets
-#' @importFrom rlang         as_string   enquo   eval_tidy   enexpr
-#' @importFrom rlang         expr_text   quo_name   as_name   quo_is_null
+#' @importFrom readxl        read_excel        excel_sheets
+#' @importFrom rlang         as_string         enquo               eval_tidy       enexpr
+#' @importFrom rlang         expr_text         quo_name            as_name         quo_is_null
 #' @importFrom R.utils       gunzip
-#' @importFrom S4Vectors     DataFrame         metadata           metadata<-
-#' @importFrom stats         aggregate         approxfun          as.formula      density
-#' @importFrom stats         as.dist           contrasts          contrasts<-
+#' @importFrom S4Vectors     DataFrame         metadata            metadata<-
+#' @importFrom stats         aggregate         approxfun           as.formula      density
+#' @importFrom stats         as.dist           contrasts           contrasts<-
 #' @importFrom stats         cor               cutree
-#' @importFrom stats         contr.sum         contr.treatment    dist
-#' @importFrom stats         hclust            IQR                lowess
-#' @importFrom stats         lm                median             model.matrix
-#' @importFrom stats         wilcox.test       na.exclude         p.adjust
-#' @importFrom stats         pchisq            qnorm              quantile
+#' @importFrom stats         contr.sum         contr.treatment     dist
+#' @importFrom stats         hclust            IQR                 lowess
+#' @importFrom stats         lm                median              model.matrix
+#' @importFrom stats         wilcox.test       na.exclude          p.adjust
+#' @importFrom stats         pchisq            qnorm               quantile
 #' @importFrom stats         rnorm             sd
 #' @import     stringi
+#' @importFrom survival      coxph             Surv                survfit         survdiff
 #' @importFrom tidyr         separate_rows
-#' @importFrom tools         file_ext   file_path_sans_ext   R_user_dir
+#' @importFrom tools         file_ext          file_path_sans_ext   R_user_dir
 #' @importFrom SummarizedExperiment  assays  assays<-  assayNames  assayNames<-
 #' @importFrom SummarizedExperiment  SummarizedExperiment
 #' @importFrom SummarizedExperiment  rowData   rowData<-   colData   colData<-
