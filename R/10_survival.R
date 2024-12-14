@@ -200,6 +200,30 @@ dichotomize_exprs <- function(dt, percentile){
     return(dt)
 }
 
+#' @rdname fit_survival
+#' @export
+survival_example <- function(){
+    n <- 5
+    object <- rbind( BOC = c(rnorm(n, mean =  2), rnorm(n, mean =  6)),
+                     PLG = c(rnorm(n, mean =  2), rnorm(n, mean =  7)),
+                     CD4 = c(rnorm(n, mean =  8), rnorm(n, mean =  3)),
+                     PLG = c(rnorm(n, mean =  9), rnorm(n, mean =  3)) )
+    colnames(object) <- c(sprintf('C%d', 1:5), sprintf('D%d', 1:5))
+    object <- SummarizedExperiment(list(exprs = object))
+    fdt(object) <- data.table(feature_id = fnames(object))
+    sdt(object) <- rbind( data.table( subgroup = 'Control',  sample_id = 'C1', timetoevent = 3, event = 1), 
+                          data.table( subgroup = 'Control',  sample_id = 'C2', timetoevent = 4, event = 1),
+                          data.table( subgroup = 'Control',  sample_id = 'C3', timetoevent = 4, event = 0),
+                          data.table( subgroup = 'Control',  sample_id = 'C4', timetoevent = 4, event = 0), 
+                          data.table( subgroup = 'Control',  sample_id = 'C5', timetoevent = 4, event = 0),
+                          data.table( subgroup = 'Diseased', sample_id = 'D1', timetoevent = 1, event = 1), 
+                          data.table( subgroup = 'Diseased', sample_id = 'D2', timetoevent = 2, event = 1),
+                          data.table( subgroup = 'Diseased', sample_id = 'D3', timetoevent = 2, event = 1),
+                          data.table( subgroup = 'Diseased', sample_id = 'D4', timetoevent = 3, event = 1), 
+                          data.table( subgroup = 'Diseased', sample_id = 'D5', timetoevent = 4, event = 1) )
+    object
+}
+
 #' Fit/Plot survival 
 #' @param object      SummarizedExperiment
 #' @param assay       string
@@ -219,25 +243,12 @@ dichotomize_exprs <- function(dt, percentile){
 #' @param title       string
 #' @param subtitle    string
 #' @param palette     color vector
+#' @param conf.int    TRUE or FALSE
 #' @return ggsurvplot
 #' @examples 
-#' file <- download_tcga_example()
-#' if (!is.null(file) & requireNamespace('survminer')){
-#' # Read
-#'     object <- readRDS(file)
-#'     object %<>% extract(, .$sample_type == 'T')
-#'     object %<>% extract(c('UGT3A2', 'NSUN3', 'XRCC4', 'WNT10A'), )
-#' # Fit
-#'     fdt(object)
-#'     fdt(fit_survival(object))
-#'     fdt(fit_survival(object, percentile = 50))
-#'     fdt(fit_survival(object, percentile = 50, sep = '.'))
-#' # Plot
-#'     object %<>% fit_survival()
-#'     plot_survival(object)
-#'     p1 <- .plot_survival(object[1, ])
-#'     p2 <- .plot_survival(object[2, ])
-#' }
+#' object <- survival_example()
+#' object %<>% fit_survival(percentile = 50)
+#' .plot_survival(object[1,])
 #' @export
 fit_survival <- function(
         object, 
@@ -309,9 +320,10 @@ fit_survival <- function(
         object,
          assay = assayNames(object)[1],
          coefs = autonomics::coefs(object, fit = 'logrank'),
-         title = paste0(assay, ' ', coefs,3,4),
+         title = paste0(assay, ' ', coefs),
       subtitle = NULL,
-       palette = c("#009999", "#ff5050")
+       palette = c("#009999", "#ff5050"),
+      conf.int = FALSE
 ){
 # Assert
     if (!requireNamespace('survminer', quietly = TRUE)){
@@ -337,7 +349,7 @@ fit_survival <- function(
     # Source: https://stackoverflow.com/questions/67890410
     legend.labs <- sprintf('\u200B%s', unique(subdt$exprlevel))
     survminer::ggsurvplot(
-        fit, data = subdt, conf.int = TRUE, palette = palette,
+        fit, data = subdt, conf.int = conf.int, palette = palette,
         risk.table = TRUE, risk.table.col = 'strata', risk.table.height = 0.25, 
         pval = TRUE, ggtheme = theme_bw(), title = title, subtitle = subtitle,
         legend.labs = legend.labs, legend.title = assay)
@@ -360,6 +372,7 @@ plot_survival <- function(
          title = paste0(assay, ' ', coefs),
       subtitle = NULL,
        palette = c("#009999", "#ff5050"),
+      conf.int = FALSE,
              n = 4,
           ncol = 4, 
           nrow = length(coefs), 
@@ -390,7 +403,7 @@ plot_survival <- function(
             .plot_survival, 
             object     = rep(objlist, each = length(coefs)), 
             coefs = rep(coefs, times = length(objlist)),
-            MoreArgs = list(assay = assay, palette = palette), SIMPLIFY = FALSE)
+            MoreArgs = list(assay = assay, palette = palette, conf.int = conf.int), SIMPLIFY = FALSE)
         survminer::arrange_ggsurvplots(plots, nrow = nrow, ncol = ncol)
     }
     if (!is.null(file))  dev.off()
