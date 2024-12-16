@@ -9,9 +9,11 @@ read_compounddiscoverer(
   files = list.files(path = dir, pattern = "(RP|HILIC).*\\\\.csv$", full.names = TRUE),
   colname_regex = "^(.*)\\\\d{8,8}_+(.*)_+((HILIC|RP)(NEG|POS))\\\\.raw.*$",
   colname_format = function(x) stringi::stri_replace_first_regex(x, colname_regex,
-    "$1$2"),
-  mod_extract = function(x) stringi::stri_subset_regex(x, colname_regex) \%>\%
-    stringi::stri_replace_first_regex(colname_regex, "$3"),
+    "$1$2", opts_regex = stringi::stri_opts_regex(case_insensitive = TRUE)),
+  mod_extract = function(x) stringi::stri_subset_regex(x, colname_regex, opts_regex =
+    stringi::stri_opts_regex(case_insensitive = TRUE)) \%>\%
+    stringi::stri_replace_first_regex(colname_regex, "$3", opts_regex =
+    stringi::stri_opts_regex(case_insensitive = TRUE)),
   quantity = NULL,
   nonames = FALSE,
   exclude_sname_pattern = "(blank|QC|RS)",

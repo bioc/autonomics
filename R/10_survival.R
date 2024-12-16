@@ -203,24 +203,39 @@ dichotomize_exprs <- function(dt, percentile){
 #' @rdname fit_survival
 #' @export
 survival_example <- function(){
-    n <- 5
-    object <- rbind( BOC = c(rnorm(n, mean =  2), rnorm(n, mean =  6)),
-                     PLG = c(rnorm(n, mean =  2), rnorm(n, mean =  7)),
-                     CD4 = c(rnorm(n, mean =  8), rnorm(n, mean =  3)),
-                     PLG = c(rnorm(n, mean =  9), rnorm(n, mean =  3)) )
-    colnames(object) <- c(sprintf('C%d', 1:5), sprintf('D%d', 1:5))
+    sampledt <- rbind(  data.table( subgroup = 'Control',  sample_id = 'C01', timetoevent = 3, event = 1), 
+                        data.table( subgroup = 'Control',  sample_id = 'C02', timetoevent = 3, event = 1), 
+                        data.table( subgroup = 'Control',  sample_id = 'C03', timetoevent = 4, event = 1),
+                        data.table( subgroup = 'Control',  sample_id = 'C04', timetoevent = 4, event = 1),
+                        data.table( subgroup = 'Control',  sample_id = 'C05', timetoevent = 4, event = 0),
+                        data.table( subgroup = 'Control',  sample_id = 'C06', timetoevent = 4, event = 0),
+                        data.table( subgroup = 'Control',  sample_id = 'C07', timetoevent = 4, event = 0), 
+                        data.table( subgroup = 'Control',  sample_id = 'C08', timetoevent = 4, event = 0), 
+                        data.table( subgroup = 'Control',  sample_id = 'C09', timetoevent = 4, event = 0),
+                        data.table( subgroup = 'Control',  sample_id = 'C10', timetoevent = 4, event = 0),
+                        data.table( subgroup = 'Diseased', sample_id = 'D01', timetoevent = 1, event = 1), 
+                        data.table( subgroup = 'Diseased', sample_id = 'D02', timetoevent = 1, event = 1), 
+                        data.table( subgroup = 'Diseased', sample_id = 'D03', timetoevent = 2, event = 1),
+                        data.table( subgroup = 'Diseased', sample_id = 'D04', timetoevent = 2, event = 1),
+                        data.table( subgroup = 'Diseased', sample_id = 'D05', timetoevent = 2, event = 1),
+                        data.table( subgroup = 'Diseased', sample_id = 'D06', timetoevent = 2, event = 1),
+                        data.table( subgroup = 'Diseased', sample_id = 'D07', timetoevent = 3, event = 1), 
+                        data.table( subgroup = 'Diseased', sample_id = 'D08', timetoevent = 3, event = 1), 
+                        data.table( subgroup = 'Diseased', sample_id = 'D09', timetoevent = 4, event = 1), 
+                        data.table( subgroup = 'Diseased', sample_id = 'D10', timetoevent = 4, event = 1) )
+    n <- nrow(sampledt)/2
+    object <- rbind( ASGR1 = c(rnorm(n, mean =  2), rnorm(n, mean =  5)),
+                       BOC = c(rnorm(n, mean =  2), rnorm(n, mean =  6)),
+                       CD4 = c(rnorm(n, mean =  2), rnorm(n, mean =  7)),
+                      LY86 = c(rnorm(n, mean =  2), rnorm(n, mean =  8)),
+                       CFI = c(rnorm(n, mean =  6), rnorm(n, mean =  3)),
+                       PLG = c(rnorm(n, mean =  7), rnorm(n, mean =  3)),
+                      PROC = c(rnorm(n, mean =  8), rnorm(n, mean =  3)),
+                      XCL1 = c(rnorm(n, mean =  9), rnorm(n, mean =  3)) )
+    colnames(object) <- sampledt$sample_id
     object <- SummarizedExperiment(list(exprs = object))
     fdt(object) <- data.table(feature_id = fnames(object))
-    sdt(object) <- rbind( data.table( subgroup = 'Control',  sample_id = 'C1', timetoevent = 3, event = 1), 
-                          data.table( subgroup = 'Control',  sample_id = 'C2', timetoevent = 4, event = 1),
-                          data.table( subgroup = 'Control',  sample_id = 'C3', timetoevent = 4, event = 0),
-                          data.table( subgroup = 'Control',  sample_id = 'C4', timetoevent = 4, event = 0), 
-                          data.table( subgroup = 'Control',  sample_id = 'C5', timetoevent = 4, event = 0),
-                          data.table( subgroup = 'Diseased', sample_id = 'D1', timetoevent = 1, event = 1), 
-                          data.table( subgroup = 'Diseased', sample_id = 'D2', timetoevent = 2, event = 1),
-                          data.table( subgroup = 'Diseased', sample_id = 'D3', timetoevent = 2, event = 1),
-                          data.table( subgroup = 'Diseased', sample_id = 'D4', timetoevent = 3, event = 1), 
-                          data.table( subgroup = 'Diseased', sample_id = 'D5', timetoevent = 4, event = 1) )
+    sdt(object) <- sampledt
     object
 }
 
@@ -247,8 +262,7 @@ survival_example <- function(){
 #' @return ggsurvplot
 #' @examples 
 #' object <- survival_example()
-#' object %<>% fit_survival(percentile = 50)
-#' .plot_survival(object[1,])
+#' fit_survival(object)
 #' @export
 fit_survival <- function(
         object, 
@@ -279,10 +293,8 @@ fit_survival <- function(
         dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
         if (verbose)  cmessage("%s~ expr%d logranktest", spaces(17), pct)   # Dichotomize
         dt %<>% dichotomize_exprs(percentile = pct)                                            # Filter within 
-        dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
+       #dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
         dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
-        #if (verbose)  cmessage('%ssurvdiff(Surv(timetoevent, event) ~ expr%d)', spaces(19+11), pct)
-        #if (verbose)  cmessage('%s   coxph(Surv(timetoevent, event) ~ expr)', spaces(19+11))
         dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
         oldnames <- newnames <- names(dt)
         newnames %<>% stri_replace_all_fixed( 'hi-', sprintf('hi%d-', pct))

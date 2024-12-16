@@ -99,6 +99,5 @@ Fit/Plot survival
 }
 \examples{
 object <- survival_example()
-object \%<>\% fit_survival(percentile = 50)
-.plot_survival(object[1,])
+fit_survival(object)
 }
