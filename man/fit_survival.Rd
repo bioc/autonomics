@@ -3,8 +3,6 @@
 \name{survival_example}
 \alias{survival_example}
 \alias{fit_survival}
-\alias{.plot_survival}
-\alias{plot_survival}
 \title{Fit/Plot survival}
 \usage{
 survival_example()
@@ -22,32 +20,6 @@ fit_survival(
   n = 4,
   ncol = 4,
   nrow = length(percentile),
-  width = 7 * ncol,
-  height = 7 * nrow
-)
-
-.plot_survival(
-  object,
-  assay = assayNames(object)[1],
-  coefs = autonomics::coefs(object, fit = "logrank"),
-  title = paste0(assay, " ", coefs),
-  subtitle = NULL,
-  palette = c("#009999", "#ff5050"),
-  conf.int = FALSE
-)
-
-plot_survival(
-  object,
-  assay = assayNames(object)[1],
-  coefs = autonomics::coefs(object, fit = "logrank"),
-  title = paste0(assay, " ", coefs),
-  subtitle = NULL,
-  palette = c("#009999", "#ff5050"),
-  conf.int = FALSE,
-  n = 4,
-  ncol = 4,
-  nrow = length(coefs),
-  file = NULL,
   width = 7 * ncol,
   height = 7 * nrow
 )
@@ -81,6 +53,8 @@ plot_survival(
 
 \item{height}{number}
 
+\item{file}{filepath}
+
 \item{title}{string}
 
 \item{subtitle}{string}
@@ -88,8 +62,6 @@ plot_survival(
 \item{palette}{color vector}
 
 \item{conf.int}{TRUE or FALSE}
-
-\item{file}{filepath}
 }
 \value{
 ggsurvplot

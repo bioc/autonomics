@@ -158,8 +158,8 @@ empty_survplot <- function(){
     if (length(lowervalue)==0 | lowervalue==uppervalue){
         subdt <- cbind(subdt[0], exprlevel = character(0))
     } else {
-        lowergroup <- paste0('<', signif(lowervalue,1))
-        uppergroup <- paste0('>', signif(uppervalue,1)) 
+        lowergroup <- paste0('Lo', percentile) #paste0('<', signif(lowervalue,1))
+        uppergroup <- paste0('Hi', percentile) #paste0('>', signif(uppervalue,1)) 
         subdt <- rbind(cbind(subdt[value<=lowervalue], exprlevel = lowergroup),
                        cbind(subdt[value>=uppervalue], exprlevel = uppergroup))
         #subdt$exprlevel %<>% factor(c(lowergroup, uppergroup))
@@ -169,15 +169,15 @@ empty_survplot <- function(){
 
 dichotomize_exprs <- function(dt, percentile){
     dt %<>% extract(, .dichotomize_exprs(.SD, percentile = percentile), by = 'feature_id')
-    
+    dt[, exprlevel := factor(exprlevel, sprintf('%s%d', c('Lo', 'Hi'), percentile))]
+    dt[]
 }
 
 .fit_survival <- function(subdt, sep, samples = FALSE){
     timetoevent <- event <- exprlevel <- NULL
     logrank <- suppressWarnings(survdiff(Surv(timetoevent, event) ~ exprlevel, data = subdt))
      cph <- suppressWarnings(coef(summary(coxph(Surv(subdt$timetoevent, subdt$event)~subdt$value))))
-    exprlevels <- unique(subdt$exprlevel)
-    exprlevels %<>% extract(order(as.numeric(substr(., 2, nchar(.)))))
+    exprlevels <- levels(subdt$exprlevel)
     # We want right tail logrank pvalue only
     # Left tail indicates more similarity than expected
     # Can be interesting to detect fraud (dropping bad data)
@@ -318,7 +318,7 @@ fit_survival <- function(
 # Plot
     if (plot){
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
-        plot_survival(object = object, assay = assay, n = n, 
+        plot_survminer(object = object, assay = assay, n = n, 
                       ncol = ncol, nrow = nrow, width = width, height = height, file = file)
     }
 # Return
@@ -326,9 +326,71 @@ fit_survival <- function(
 }
 
 
-#' @rdname fit_survival
+#' Plot survival
+#' @param object   SummarizedExperiment
+#' @param assay    value in assayNames(object)
+#' @param coefs    autonomics::coefs(object) subset
+#' @param splitvar split svar
+#' @param title    string
+#' @examples
+#' object <- survival_example()
+#' object %<>% fit_survival(percentile = 25)
+#' plot_survival(object)
 #' @export
-.plot_survival <- function(
+plot_survival <- function(
+      object, 
+       assay = assayNames(object)[1],
+  percentile = 25,
+    splitvar = 'exprlevel',
+       title = sprintf('survival ~ expr'),
+    ordervar = tvar(object, fit = 'cph', coef = 'expr'),
+        pvar = c('p~expr~cph', sprintf('p~hi%d-lo%d~logrank', percentile, percentile))
+                 
+){
+# Prepare
+    logrankvar <- sprintf('p~hi%d-lo%d~logrank', percentile, percentile)
+    cphvar <- 'p~expr~cph'
+    plotdt <- sumexp_to_longdt(object, assay = assay, svars = c('timetoevent', 'event'))
+    if (!is.null(percentile))  plotdt %<>% dichotomize_exprs(percentile = percentile)
+    plotdt %<>% extract(order(feature_id, get(splitvar), timetoevent))
+    plotdt[ , ntotal := .N , by = c('feature_id', splitvar)]
+    plotdt <- plotdt[ , .(ntotal = unique(ntotal),                    ndead = sum(event)) ,   by = c('feature_id', splitvar, 'timetoevent')]
+    plotdt <- plotdt[ , .(ntotal = ntotal, timetoevent = timetoevent, ndead = cumsum(ndead)), by = c('feature_id', splitvar)]
+    plotdt[, survival := 100*(ntotal-ndead)/ntotal]
+    plotdt %<>% extract(order(feature_id, get(splitvar), timetoevent))
+    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', splitvar)][, timetoevent := 0 ][, ndead := 0 ][, survival := 100 ]
+    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', splitvar)][, timetoevent := max(timetoevent)+1]
+    plotdt <- rbind(plotdt0, plotdt, plotdtn)
+# Statistics
+    plotdt %<>% merge(fdt(object)[, .SD, .SDcols = patterns('feature_id|logrank|cph')], by = 'feature_id', sort = FALSE)
+    plotdt[, facet := feature_id]
+    plotdt[, facet := sprintf('%s\ncph                lr%d', facet, percentile)]
+    plotdt[, facet := sprintf('%s\n%s         %s', facet, formatC(get(cphvar),     format = 'e', digits = 1),
+                                                          formatC(get(logrankvar), format = 'e', digits = 1)) , by = 'feature_id']
+    plotdt %<>% extract(order(get(ordervar)))
+    plotdt[, facet := factor(facet, unique(facet))]
+# Plot
+    # pdt <- plotdt[, .(label = sprintf('cph %s\nlr%d %s', formatC(get(cphvar    )[1], format = 'e', digits = 1), 
+    #                                          percentile, formatC(get(logrankvar)[1], format = 'e', digits = 1)),
+    #                       x = median(timetoevent),
+    #                       y = median(survival)), by = 'facet']
+     ndt <- plotdt[, .(x = min(timetoevent), 
+                       y = max(survival)*(1+0.1-0.2*as.numeric(get(splitvar))), 
+                   label = sprintf('%d', ntotal[1])), by = c('facet', splitvar)]
+    ggplot(plotdt) + 
+         theme_bw() + 
+         facet_wrap(vars(facet)) + 
+         ggtitle(title) + 
+         theme(plot.title = element_text(hjust = 0.5),
+            plot.subtitle = element_text(hjust = 0.5),
+              panel.grid  = element_blank()) + 
+         geom_step(aes(x = timetoevent, y = survival, group = !!sym(splitvar), color = !!sym(splitvar))) + 
+         geom_text(data = ndt, aes(x = x, y = y, label = label, color = !!sym(splitvar)), hjust = -0.1, vjust = 1, show.legend = FALSE)
+#         geom_text(data = pdt, aes(x = -Inf, y = -Inf, label = label), hjust = -0.1, vjust = -0.2)
+}
+
+
+.plot_survminer <- function(
         object,
          assay = assayNames(object)[1],
          coefs = autonomics::coefs(object, fit = 'logrank'),
@@ -375,9 +437,7 @@ fit_survival <- function(
 percentiles <- function(object)  as.numeric(substr(coefs(object, fit = 'logrank'), 3,4))
 
 
-#' @rdname fit_survival
-#' @export
-plot_survival <- function(
+plot_survminer <- function(
         object, 
          assay = assayNames(object)[1],
          coefs = autonomics::coefs(object, fit = 'logrank'),
@@ -412,7 +472,7 @@ plot_survival <- function(
         objlist <- object[idx, ]
         objlist %<>% split_features(by = 'feature_id')
         plots <- mapply(
-            .plot_survival, 
+            .plot_survminer, 
             object     = rep(objlist, each = length(coefs)), 
             coefs = rep(coefs, times = length(objlist)),
             MoreArgs = list(assay = assay, palette = palette, conf.int = conf.int), SIMPLIFY = FALSE)
