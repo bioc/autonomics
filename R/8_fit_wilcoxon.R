@@ -81,13 +81,13 @@ all_vars <- function(x){
 }
     
 #' @export
-#' @rdname fit
+#' @rdname fit_linmod
 fit_wilcoxon <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = NULL,
     codingfun = contr.treatment.explicit, # wilcox is the only one where `contr.treatment` doesnt work
-       design = NULL, # only so that fit(.) works
+       design = NULL, # only so that fit_linmod(.) works
     contrasts = NULL,
         coefs = NULL, 
         block = NULL, 

@@ -302,14 +302,14 @@ fit_lmx <- function(
 }
 
 
-#' @rdname fit
+#' @rdname fit_linmod
 #' @export
 fit_lm <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = contr.treatment.explicit,
-       design = NULL,  # only to make fit(.) work!
+       design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
      statvars = c('effect', 'p', 'se', 't')[1:2],
@@ -338,14 +338,14 @@ fit_lm <- function(
 }
 
 
-#' @rdname fit
+#' @rdname fit_linmod
 #' @export
 fit_lme <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = contr.treatment.explicit,
-       design = NULL,  # only to make fit(.) work!
+       design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           opt = 'optim',
@@ -381,14 +381,14 @@ fit_lme <- function(
 }
 
 
-#' @rdname fit
+#' @rdname fit_linmod
 #' @export
 fit_lmer <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = contr.treatment.explicit,
-       design = NULL,  # only to make fit(.) work!
+       design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
      statvars = c('effect', 'p', 'se', 't')[1:2],
