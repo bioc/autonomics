@@ -118,7 +118,7 @@ guess_compounddiscoverer_quantity <- function(x){
 # Determine MS modus
     cddt %<>%
       dplyr::mutate(
-        `MS Modus` = mod_extract(names(.)) %>%
+        Modus = mod_extract(names(.)) %>%
           unique() %>%
           assert_are_same_length(1))
 # Determine ID qualifier
@@ -138,7 +138,7 @@ guess_compounddiscoverer_quantity <- function(x){
 # Extract require columns
     pattern <- COMPOUNDDISCOVERER_PATTERNS[[quantity]]
     anncols <- c(
-      'Name', 'Compounds ID', 'MS Modus', 'Formula', 'Annot. DeltaMass [ppm]',
+      'Name', 'Compounds ID', 'Modus', 'Formula', 'Annot. DeltaMass [ppm]',
       'Calc. MW', 'm/z', 'RT [min]', 'ID Quality', 'mzCloud Best Match',
       'mzVault Best Match')
     anncols %<>% intersect(names(cddt))
