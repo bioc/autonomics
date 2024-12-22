@@ -182,12 +182,12 @@ fit_survival <- function(
 # Plot
     if (plot){
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
-        plot_survminer(object = object, assay = assay, n = n, 
-                      ncol = ncol, nrow = nrow, width = width, height = height, file = file)
+        plot_survival(object = object, assay = assay, file = file)
     }
 # Return
     object
 }
+
 
 
 #' Plot survival
@@ -196,64 +196,82 @@ fit_survival <- function(
 #' @param coefs    autonomics::coefs(object) subset
 #' @param splitvar split svar
 #' @param title    string
+#' @param subtitle string
+#' @param file     filepath
+#' @param width    number
+#' @param height   number
+#' @return ggplot
 #' @examples
-#' object <- survival_example()
-#' object %<>% fit_survival(percentile = 25)
-#' plot_survival(object)
+#' # Defaults
+#'     object <- survival_example()
+#'     object %<>% fit_survival()
+#'     plot_survival(object)
+#' # Engines
+#'     object <- survival_example()
+#'     object %<>% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
+#'     plot_survival(object)
+#' # Pdf
+#'     plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
 #' @export
 plot_survival <- function(
       object, 
        assay = assayNames(object)[1],
-  percentile = 25,
-    splitvar = 'exprlevel',
-       title = sprintf('survival ~ expr'),
-    ordervar = tvar(object, fit = 'cph', coef = 'expr'),
-        pvar = c('p~expr~cph', sprintf('p~hi%d-lo%d~logrank', percentile, percentile))
-                 
+      engine = intersect(fits(object), c('coxph', 'survdiff', 'logrank')),
+   nquantile = 2,
+       title = sprintf('surv ~ expr'), 
+    subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
+        file = NULL,
+       width = 7,
+      height = 7,
+           n = min(nrow(object),9),
+        ncol = 3,
+        nrow = 3
 ){
 # Prepare
-    logrankvar <- sprintf('p~hi%d-lo%d~logrank', percentile, percentile)
-    cphvar <- 'p~expr~cph'
-    plotdt <- sumexp_to_longdt(object, assay = assay, svars = c('timetoevent', 'event'))
-    if (!is.null(percentile))  plotdt %<>% dichotomize_exprs(percentile = percentile)
-    plotdt %<>% extract(order(feature_id, get(splitvar), timetoevent))
-    plotdt[ , ntotal := .N , by = c('feature_id', splitvar)]
-    plotdt <- plotdt[ , .(ntotal = unique(ntotal),                    ndead = sum(event)) ,   by = c('feature_id', splitvar, 'timetoevent')]
-    plotdt <- plotdt[ , .(ntotal = ntotal, timetoevent = timetoevent, ndead = cumsum(ndead)), by = c('feature_id', splitvar)]
+    obj <- extract_coef_features(object, fit = engine[1], n = n)
+    plotdt <- sumexp_to_longdt(obj, assay = assay, svars = c('timetoevent', 'event'))
+    plotdt[, quantile := NA_character_]
+    plotdt[, quantile := dplyr::ntile(value, nquantile), by = 'feature_id']
+    plotdt <- plotdt[quantile %in% c(1, nquantile)]
+    plotdt %<>% extract(order(feature_id, quantile, timetoevent))
+    plotdt[ , ntotal := .N , by = c('feature_id', 'quantile')]
+    plotdt <- plotdt[ , .(ntotal = unique(ntotal),                    ndead = sum(event)) ,   by = c('feature_id', 'quantile', 'timetoevent')]
+    plotdt <- plotdt[ , .(ntotal = ntotal, timetoevent = timetoevent, ndead = cumsum(ndead)), by = c('feature_id', 'quantile')]
     plotdt[, survival := 100*(ntotal-ndead)/ntotal]
-    plotdt %<>% extract(order(feature_id, get(splitvar), timetoevent))
-    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', splitvar)][, timetoevent := 0 ][, ndead := 0 ][, survival := 100 ]
-    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', splitvar)][, timetoevent := max(timetoevent)+1]
+    plotdt %<>% extract(order(feature_id, quantile, timetoevent))
+    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'quantile')][, timetoevent := 0 ][, ndead := 0 ][, survival := 100 ]
+    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'quantile')][, timetoevent := max(timetoevent)+1]
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
-    plotdt %<>% merge(fdt(object)[, .SD, .SDcols = patterns('feature_id|logrank|cph')], by = 'feature_id', sort = FALSE)
-    plotdt[, facet := feature_id]
-    plotdt[, facet := sprintf('%s\ncph                lr%d', facet, percentile)]
-    plotdt[, facet := sprintf('%s\n%s         %s', facet, formatC(get(cphvar),     format = 'e', digits = 1),
-                                                          formatC(get(logrankvar), format = 'e', digits = 1)) , by = 'feature_id']
-    plotdt %<>% extract(order(get(ordervar)))
+    pcols <- pvar(object, fit = engine)
+    tcol  <- tvar(object, fit = engine[1])
+    statdt <- fdt(object)[, c('feature_id', pcols, tcol), with = FALSE]
+    statdt[, (pcols) := lapply(.SD, formatC, format = 'g', digits = 2), .SDcols = pcols]
+    statdt[, facet := paste0(.SD, collapse = '      '), .SDcols = pcols, by = 'feature_id']
+    statdt[, (pcols) := NULL]
+    #statdt[, facet := sprintf('%s\n%s', paste0(engine, collapse = spaces(8)), facet)]
+    statdt[, facet := sprintf('%s\n%s', feature_id, facet)]
+    plotdt %<>% merge(statdt, by = 'feature_id')
+    plotdt %<>% extract(order(get(tcol)))
     plotdt[, facet := factor(facet, unique(facet))]
+    plotdt[, quantile := paste0('Q', quantile)]
 # Plot
-    # pdt <- plotdt[, .(label = sprintf('cph %s\nlr%d %s', formatC(get(cphvar    )[1], format = 'e', digits = 1), 
-    #                                          percentile, formatC(get(logrankvar)[1], format = 'e', digits = 1)),
-    #                       x = median(timetoevent),
-    #                       y = median(survival)), by = 'facet']
      ndt <- plotdt[, .(x = min(timetoevent), 
-                       y = max(survival)*(1+0.1-0.2*as.numeric(get(splitvar))), 
-                   label = sprintf('%d', ntotal[1])), by = c('facet', splitvar)]
-    ggplot(plotdt) + 
-         theme_bw() + 
-         facet_wrap(vars(facet)) + 
-         ggtitle(title) + 
-         theme(plot.title = element_text(hjust = 0.5),
-            plot.subtitle = element_text(hjust = 0.5),
-              panel.grid  = element_blank()) + 
-         geom_step(aes(x = timetoevent, y = survival, group = !!sym(splitvar), color = !!sym(splitvar))) + 
-         geom_text(data = ndt, aes(x = x, y = y, label = label, color = !!sym(splitvar)), hjust = -0.1, vjust = 1, show.legend = FALSE)
-#         geom_text(data = pdt, aes(x = -Inf, y = -Inf, label = label), hjust = -0.1, vjust = -0.2)
-}
-
-
+                       y = max(survival)*(1+0.1-0.1*as.numeric(substr(quantile, 2, 2))), 
+                   label = sprintf('%d', ntotal[1])), by = c('facet', 'quantile')]
+    npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nrow(object) / nrow / ncol)
+    if (!is.null(file))  pdf(file, width = width, height = height)
+    for (i in seq_len(npages)){
+        p <- ggplot(plotdt) + 
+             theme_bw() + 
+             facet_wrap_paginate(vars(facet), nrow = nrow, ncol = ncol, page = i) + 
+             ggtitle(title, subtitle = subtitle) + 
+             theme(plot.title = element_text(hjust = 0.5),
+                plot.subtitle = element_text(hjust = 0.5),
+                  panel.grid  = element_blank()) + 
+             geom_step(aes(x = timetoevent, y = survival, group = quantile, color = quantile)) + 
+             geom_text(data = ndt, aes(x = x, y = y, label = label, color = quantile), hjust = -0.1, vjust = 1, show.legend = FALSE)
+        if (!is.null(file))  print(p)
     }
     if (is.null(file))  return(p) else dev.off()
 }

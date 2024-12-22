@@ -7,11 +7,16 @@
 plot_survival(
   object,
   assay = assayNames(object)[1],
-  percentile = 25,
-  splitvar = "exprlevel",
-  title = sprintf("survival ~ expr"),
-  ordervar = tvar(object, fit = "cph", coef = "expr"),
-  pvar = c("p~expr~cph", sprintf("p~hi\%d-lo\%d~logrank", percentile, percentile))
+  engine = intersect(fits(object), c("coxph", "survdiff", "logrank")),
+  nquantile = 2,
+  title = sprintf("surv ~ expr"),
+  subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
+  file = NULL,
+  width = 7,
+  height = 7,
+  n = min(nrow(object), 9),
+  ncol = 3,
+  nrow = 3
 )
 }
 \arguments{
@@ -19,17 +24,35 @@ plot_survival(
 
 \item{assay}{value in assayNames(object)}
 
-\item{splitvar}{split svar}
-
 \item{title}{string}
 
+\item{subtitle}{string}
+
+\item{file}{filepath}
+
+\item{width}{number}
+
+\item{height}{number}
+
 \item{coefs}{autonomics::coefs(object) subset}
+
+\item{splitvar}{split svar}
+}
+\value{
+ggplot
 }
 \description{
 Plot survival
 }
 \examples{
-object <- survival_example()
-object \%<>\% fit_survival(percentile = 25)
-plot_survival(object)
+# Defaults
+    object <- survival_example()
+    object \%<>\% fit_survival()
+    plot_survival(object)
+# Engines
+    object <- survival_example()
+    object \%<>\% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
+    plot_survival(object)
+# Pdf
+    plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
 }

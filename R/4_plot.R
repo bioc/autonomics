@@ -1043,12 +1043,10 @@ extract_coef_features <- function(
 ){
 # Filter
     args <- list(coefs = coefs, fit = fit, combiner = combiner, verbose = verbose)
-    if (fit %in% LINMOD_ENGINES){
-        fdt(object) %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
-        object <- do.call(     .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
-        object <- do.call(   .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
-        object <- do.call(              order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
-    }
+    fdt(object) %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
+    object <- do.call(     .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
+    object <- do.call(   .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
+    object <- do.call(              order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
     object <- do.call(.extract_effectsize_features, c(args, list(object = object, features = features, effectsize = effectsize )))
     object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign       )))
     object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n          )))
@@ -1377,10 +1375,9 @@ plot_exprs <- function(
                              xlab = xlab,                     ylab = ylab,
                             theme = theme
         )
-        if (!is.null(file))  print(p)  # in this case one wants to return (not print)
+        if (!is.null(file))  print(p)
     }
-    if (is.null(file)) return(p)  # only the last page will be returned (unavoidable)
-    dev.off()
+    if (is.null(file)) return(p) else dev.off()  # only the last page will be returned (unavoidable)
 }
 
 
