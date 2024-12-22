@@ -105,74 +105,139 @@ survival_example <- function(){
     object
 }
 
+
+#' Fit onefeature survival 
+#' @param timetoevent numeric (time to event)
+#' @param event       numeric (1=event, 0=not)
+#' @param expr        numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)
+#' @examples
+#' # Prepare
+#'          object <- survival_example()
+#'     timetoevent <- object$timetoevent
+#'           event <- object$event
+#'           value <- values(object)[1,]
+#'        quantile <- factor(dplyr::ntile(expr, 2))
+#' # Survival
+#'        .coxph(timetoevent, event, value)
+#'     .survdiff(timetoevent, event, quantile)
+#'      .logrank(timetoevent, event, quantile)
+#' # Sumexp
+#'          fit_survival(object)
+#' @rdname dot-coxph
+#' @export
+.coxph <- function(timetoevent, event, expr){
+    survout <- suppressWarnings(coef(summary(coxph(Surv(timetoevent, event)~expr))))
+    data.table( `p~expr~coxph` =    survout[, 'Pr(>|z|)'], 
+           `effect~expr~coxph` = -1*survout[, 'coef'    ], 
+                `t~expr~coxph` = -1*survout[, 'z'       ])
+}
+
+#' @rdname dot-coxph
+#' @export
+.survdiff <- function(timetoevent, event, expr){
+    nexpr <- length(levels(expr))
+    survout <- suppressWarnings(survdiff(   Surv(timetoevent, event) ~ expr   ))
+    meandiff <- mean(timetoevent[expr==rev(levels(expr))[1]]) - 
+                mean(timetoevent[expr==   (levels(expr))[1]])
+    dtout <- data.table(  `p~expr~survdiff` =  1 - pchisq(survout$chisq, 1), 
+                     `effect~expr~survdiff` = meandiff,
+                          `t~expr~survdiff` = survout$chisq * sign(meandiff) )
+    oldnames <- newnames <- names(dtout)
+    newnames %<>% stri_replace_first_fixed('~expr~', sprintf('~expr%s~', rev(levels(expr))[1]))
+    setnames(dtout, oldnames, newnames)
+    dtout[]
+}
+
+
+#' @rdname dot-coxph
+#' @export
+.logrank <- function(timetoevent, event, expr){
+    nexpr <- length(levels(expr))
+    survout <- suppressWarnings(coin::logrank_test(   Surv(timetoevent, event) ~ expr   ))
+    meandiff <- mean(timetoevent[expr==rev(levels(expr))[1]]) - 
+                mean(timetoevent[expr==   (levels(expr))[1]])
+    dtout <- data.table(  `p~expr~logrank` = coin::pvalue(survout), 
+                     `effect~expr~logrank` = meandiff,
+                          `t~expr~logrank` = coin::statistic(survout) * sign(meandiff) )
+    oldnames <- newnames <- names(dtout)
+    newnames %<>% stri_replace_first_fixed('~expr~', sprintf('~expr%s~', rev(levels(expr))[1]))
+    setnames(dtout, oldnames, newnames)
+    dtout[]
+}
+
+
 #' Fit/Plot survival 
 #' @param object      SummarizedExperiment
+#' @param engine     'coxph' {survival}, 'survdiff' {survival}, 'logrank' {coin}
+#' @param ntile       number
 #' @param assay       string
-#' @param percentile  percentage (not greater than 50)
 #' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
-#' @param samples     TRUE or FALSE : record which samples in which stratum ?
 #' @param verbose     TRUE or FALSE
+#' @param plot        TRUE or FALSE
 #' @param outdir      dir
 #' @param writefunname 'write_xl' or 'write_ods'
-#' @param plot        TRUE or FALSE
-#' @param n           number
-#' @param ncol        number
-#' @param nrow        number
-#' @param file        filepath
-#' @param width       number
-#' @param height      number
-#' @param title       string
-#' @param subtitle    string
-#' @param palette     color vector
-#' @param conf.int    TRUE or FALSE
 #' @return ggsurvplot
-#' @examples 
-#' object <- survival_example()
-#' fit_survival(object)
+#' @examples
+#' # Defaults
+#'     object <- survival_example()
+#'     fit_survival(object)
+#' # Engines
+#'     fit_survival(object, engine = c('coxph', 'survdiff'))
+#'     fit_survival(object, engine = c('coxph', 'survdiff', 'logrank'))
+#' # Quantiles
+#'     fit_survival(object, engine = 'logrank')
+#'     fit_survival(object, engine = 'logrank', ntile = 4)
+#' # Plot
+#'     fit_survival(object)
+#'     fit_survival(object, plot = TRUE)
+#'     fit_survival(object, engine = c('coxph', 'survdiff'), plot = TRUE)
 #' @export
 fit_survival <- function(
         object, 
+         ntile = 2,
+        engine = c('coxph', 'survdiff', 'logrank')[1],
          assay = assayNames(object)[1],
-    percentile = 25, 
            sep = FITSEP,
-       samples = if (ncol(object) < 50) TRUE else FALSE,
-       verbose = TRUE, 
-        outdir = NULL,
-  writefunname = 'write_xl',
+       verbose = TRUE,
           plot = if (is.null(outdir)) FALSE else TRUE,
-             n = 4,
-          ncol = 4,
-          nrow = length(percentile),
-         width = 7*ncol,
-        height = 7*nrow
+        outdir = NULL,
+  writefunname = 'write_xl'
 ){
 # Assert
     assert_is_valid_sumexp(object)
+    assert_is_subset(engine, c('coxph', 'survdiff', 'logrank'))
     assert_scalar_subset(assay, assayNames(object))
-    assert_is_numeric(percentile)
-    assert_all_are_in_left_open_range(percentile, 0, 50)
     event <- exprlevel <- timetoevent <- value <- NULL
-# Fit
-    if (verbose)  cmessage('%ssurvival ~ exprs  cphmodel', spaces(8))                         # Filter across
-    object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
-    for (pct in percentile){
-        dt <- sumexp_to_longdt(object, assay = assay, svars = c('event', 'timetoevent'))       # Melt
-        if (verbose)  cmessage("%s~ expr%d logranktest", spaces(17), pct)   # Dichotomize
-        dt %<>% dichotomize_exprs(percentile = pct)                                            # Filter within 
-       #dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'exprlevel')]   #    3 events     per feature/exprlevel
-        dt <- dt[, .SD[    length(unique(exprlevel))==2], by = c('feature_id')             ]   #    2 exprlevels per feature
-        dt %<>% extract(, .fit_survival(.SD, sep = sep, samples = samples), by = 'feature_id') # Fit survival
-        oldnames <- newnames <- names(dt)
-        newnames %<>% stri_replace_all_fixed( 'hi-', sprintf('hi%d-', pct))
-        newnames %<>% stri_replace_all_fixed( '-lo', sprintf('-lo%d', pct))
-        newnames %<>% stri_replace_all_regex('^hi$', sprintf('hi%d', pct))
-        newnames %<>% stri_replace_all_regex('^lo$', sprintf('lo%d', pct))
-        setnames(dt, oldnames, newnames) 
-        for (col in newnames)  object[[col]] <- NULL
-        if (verbose)  message_df('                                   %s', 
-                                 summarize_fit(dt, fit = c('logrank', 'cph')))
-        object %<>% merge_fdt(dt)
+    if ('logrank' %in% engine){
+        if (!requireNamespace('coin'))  message("BiocManager::install('coin'). Then rerun")}
+# Prepare
+    if (verbose)  cmessage('%sSurvival', spaces(8))
+    object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))       # Filter
+    dt <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
+# Coxph
+    if ('coxph' %in% engine){
+        if (verbose)  cmessage('%scoxph: surv ~ exprs', spaces(8+8+4))
+        outdt <- dt[ , .coxph(timetoevent, event, value), by = 'feature_id' ]
+        object %<>% merge_fdt(outdt)
     }
+# Survdiff/Logrank
+    dt[, quantile := dplyr::ntile(value, ntile), by = 'feature_id']   # Quantile
+    dt <- dt[quantile %in% c(1, ntile)]
+   #dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'quantile')]  #    3 events     per feature/exprlevel
+    dt <- dt[, .SD[    length(unique(na.exclude(quantile)))==2], by = c('feature_id')]   #    2 exprlevels per feature
+    dt[, quantile := factor(quantile)]
+    txt <- '                                   %s'
+    if ('survdiff' %in% engine){
+        if (verbose)  cmessage('%ssurvdiff%d: surv ~ ntile(exprs,%d)', spaces(8+8), ntile, ntile)
+        outdt <- dt[ , .survdiff(timetoevent, event, quantile), by = 'feature_id' ]
+        object %<>% merge_fdt(outdt)
+    }
+    if ('logrank'  %in% engine){
+        if (verbose)  cmessage('%slogrank%d: surv ~ ntile(exprs,%d)', spaces(8+8+1), ntile, ntile)
+        outdt <- dt[ ,  .logrank(timetoevent, event, quantile), by = 'feature_id' ]
+        object %<>% merge_fdt(outdt)
+    }
+    if (verbose)  message_df(txt, summarize_fit(object, fit = engine))
 # Write
     if (!is.null(outdir)){
         outdir <- sprintf('%s/survival', outdir)

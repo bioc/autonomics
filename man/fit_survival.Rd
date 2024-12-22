@@ -9,59 +9,34 @@ survival_example()
 
 fit_survival(
   object,
+  ntile = 2,
+  engine = c("coxph", "survdiff", "logrank")[1],
   assay = assayNames(object)[1],
-  percentile = 25,
   sep = FITSEP,
-  samples = if (ncol(object) < 50) TRUE else FALSE,
   verbose = TRUE,
-  outdir = NULL,
-  writefunname = "write_xl",
   plot = if (is.null(outdir)) FALSE else TRUE,
-  n = 4,
-  ncol = 4,
-  nrow = length(percentile),
-  width = 7 * ncol,
-  height = 7 * nrow
+  outdir = NULL,
+  writefunname = "write_xl"
 )
 }
 \arguments{
 \item{object}{SummarizedExperiment}
 
-\item{assay}{string}
+\item{ntile}{number}
 
-\item{percentile}{percentage (not greater than 50)}
+\item{engine}{'coxph' {survival}, 'survdiff' {survival}, 'logrank' {coin}}
+
+\item{assay}{string}
 
 \item{sep}{fvar string separator : e.g. '~' gives p~surv~LR50}
 
-\item{samples}{TRUE or FALSE : record which samples in which stratum ?}
-
 \item{verbose}{TRUE or FALSE}
+
+\item{plot}{TRUE or FALSE}
 
 \item{outdir}{dir}
 
 \item{writefunname}{'write_xl' or 'write_ods'}
-
-\item{plot}{TRUE or FALSE}
-
-\item{n}{number}
-
-\item{ncol}{number}
-
-\item{nrow}{number}
-
-\item{width}{number}
-
-\item{height}{number}
-
-\item{file}{filepath}
-
-\item{title}{string}
-
-\item{subtitle}{string}
-
-\item{palette}{color vector}
-
-\item{conf.int}{TRUE or FALSE}
 }
 \value{
 ggsurvplot
@@ -70,6 +45,17 @@ ggsurvplot
 Fit/Plot survival
 }
 \examples{
-object <- survival_example()
-fit_survival(object)
+# Defaults
+    object <- survival_example()
+    fit_survival(object)
+# Engines
+    fit_survival(object, engine = c('coxph', 'survdiff'))
+    fit_survival(object, engine = c('coxph', 'survdiff', 'logrank'))
+# Quantiles
+    fit_survival(object, engine = 'logrank')
+    fit_survival(object, engine = 'logrank', ntile = 4)
+# Plot
+    fit_survival(object)
+    fit_survival(object, plot = TRUE)
+    fit_survival(object, engine = c('coxph', 'survdiff'), plot = TRUE)
 }
