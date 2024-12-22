@@ -123,7 +123,7 @@ survival_example <- function(){
 #' # Plot
 #'     fit_survival(object)
 #'     fit_survival(object, plot = TRUE)
-#'     fit_survival(object, engine = c('coxph', 'survdiff'), plot = TRUE)
+#'     fit_survival(object, engine = c('coxph', 'survdiff', 'logrank'), plot = TRUE)
 #' @export
 fit_survival <- function(
         object, 
@@ -182,7 +182,7 @@ fit_survival <- function(
 # Plot
     if (plot){
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
-        plot_survival(object = object, assay = assay, file = file)
+        print(plot_survival(object = object, assay = assay, file = file))
     }
 # Return
     object
