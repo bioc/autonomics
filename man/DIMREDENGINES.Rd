@@ -4,7 +4,7 @@
 \name{DIMREDUN}
 \alias{DIMREDUN}
 \alias{DIMREDSUPER}
-\alias{DIMRED}
+\alias{DIMREDENGINES}
 \title{Dimension Reduction Methods}
 \format{
 An object of class \code{character} of length 2.
@@ -18,16 +18,16 @@ DIMREDUN
 
 DIMREDSUPER
 
-DIMRED
+DIMREDENGINES
 }
 \description{
 Dimension Reduction Methods
 }
 \details{
 \itemize{
-    \item \code{DIMREDUN:    c('pca', 'sma')}
-    \item \code{DIMREDSUPER: c('lda', 'pls', 'opls', 'spls')}
-    \item \code{DIMRED:      c('pca', 'sma', 'lda', 'pls', 'opls', 'spls')}
+    \item \code{DIMREDUN:      c('pca', 'sma')}
+    \item \code{DIMREDSUPER:   c('lda', 'pls', 'opls', 'spls')}
+    \item \code{DIMREDENGINES: c('pca', 'sma', 'lda', 'pls', 'opls', 'spls')}
 }
 }
 \keyword{datasets}
