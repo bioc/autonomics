@@ -166,9 +166,9 @@ guess_fitsep <- function(object, ...)  UseMethod('guess_fitsep')
 #' @rdname guess_fitsep
 #' @export
 guess_fitsep.data.table <- function(object, ...){
-    idx <- names(object) %>% stri_detect_regex('^effect')
+    idx <- names(object) %>% stri_detect_regex('^t[^a-zA-Z0-9]')
     if (all(!idx))  return(NULL)
-    sep <- names(object)[idx][1] %>% substr(7,7)
+    sep <- names(object)[idx][1] %>% substr(2,2)
     return(sep)
 }
 
