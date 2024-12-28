@@ -962,8 +962,8 @@ order_on_effect <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_positive_number(n)
-# Order on effect and p
-    object %<>% order_on_effect(fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # dimred
+# Order on t and p
+    object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # dimred
     if (fit %in% LINMODENGINES){
         object %<>% order_on_p(     fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # linmod
     }
