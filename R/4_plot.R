@@ -755,6 +755,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
       verbose = TRUE
 ){
       assert_is_fraction(p)
+      if (is.null(pvar(object, fit = fit, coef = coefs)))  return(object)  # pca lacks pvalues
       ..extract_statistic_features( object = object,        
                                      coefs = coefs,
                                  statistic = 'p',
@@ -778,6 +779,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
       verbose = TRUE
 ){
     assert_is_fraction(fdr)
+    if (is.null(fdrvar(object, fit = fit, coef = coefs)))  return(object)  # pca lacks fdrvalues
     ..extract_statistic_features(  object = object,
                                     coefs = coefs,
                                 statistic = 'fdr',
@@ -802,6 +804,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
       verbose = TRUE
 ){
     assert_weakly_positive_number(effectsize)
+    if (is.null(effectvar(object, fit = fit, coef = coefs)))  return(object)  # pca lacks effectvalues
     ..extract_statistic_features(  object = object,
                                     coefs = coefs,
                                 statistic = 'effectsize',
