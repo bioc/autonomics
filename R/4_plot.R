@@ -830,7 +830,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     if (is.null(fit))    return(object)
     if (is.null(coefs))  return(object)
 # Filter
-    x <- autonomics::effectmat(object, fit = fit, coef = coefs)
+    x <- tmat(object, fit = fit, coef = coefs)
     idx <- unname(apply(sign(x), 1, function(y)  Reduce(get(combiner), sign(y) %in% sign) ))
     if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
 # Return
