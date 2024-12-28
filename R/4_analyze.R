@@ -57,15 +57,15 @@ analyze <- function(
     for (curfit in fit){
         if (is.null(formula)) formula <- ~ subgroup
         if (is.null(coefs))   coefs <- contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun)
-        object %<>% autonomics::fit(engine = fit,
-                                   formula = formula,
-                                      drop = drop,
-                                 codingfun = codingfun,
-                                 contrasts = contrasts,
-                                     coefs = coefs,
-                                     block = block,
-                                 weightvar = weightvar,
-                                   verbose = verbose )
+        object %<>% fit_linmod(engine = fit,
+                              formula = formula,
+                                 drop = drop,
+                            codingfun = codingfun,
+                            contrasts = contrasts,
+                                coefs = coefs,
+                                block = block,
+                            weightvar = weightvar,
+                              verbose = verbose )
     }
     # Plot/Return
     if (plot)  plot_summary( object, 
