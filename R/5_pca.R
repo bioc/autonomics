@@ -690,7 +690,7 @@ biplot_dims <- function(
     object, method = 'pca', by = biplot_by(object, method)
 ){
     sep <- guess_fitsep(fdt(object))
-    x <- paste0('effect', sep, by, sep, method)
+    x <- paste0('t', sep, by, sep, method)
     y <- grep(x, svars(object), value = TRUE, fixed = TRUE)
     y <- gsub(x, '', y)
     y %<>% as.numeric()
