@@ -74,10 +74,10 @@ evenify_upwards <- function(x)   if (is_odd(x)) x+1 else x
     object
 }
 
-   scorenames <- function( method = 'pca', by, dims = 1:2, sep = FITSEP )  paste0('effect', sep, by, sep, method, dims)
- loadingnames <- function( method = 'pca', by, dims = 1:2, sep = FITSEP )  paste0('effect', sep, by, sep, method, dims)
-   methodname <- function( method = 'pca', by,             sep = FITSEP )  paste0(               by, sep, method      )
-variancenames <- function(                     dims = 1:2               )  paste0('effect',                       dims)
+   scorenames <- function( method = 'pca', by, dims = 1:2, sep = FITSEP )  paste0('t', sep, by, sep, method, dims)
+ loadingnames <- function( method = 'pca', by, dims = 1:2, sep = FITSEP )  paste0('t', sep, by, sep, method, dims)
+   methodname <- function( method = 'pca', by,             sep = FITSEP )  paste0(          by, sep, method      )
+variancenames <- function(                     dims = 1:2               )  paste0('t',                       dims)
 
 variances <- function(
     object, method = 'pca', by = biplot_by(object, method), dims = 1:2, sep = FITSEP
