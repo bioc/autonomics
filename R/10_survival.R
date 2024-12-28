@@ -99,6 +99,13 @@ survival_example <- function(){
 }
 
 
+#' Survival engines
+#' @export
+#' @examples
+#' SURVIVALENGINES
+SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
+
+
 #' Fit/Plot survival 
 #' @param object      SummarizedExperiment
 #' @param engine     'coxph' {survival}, 'survdiff' {survival}, 'logrank' {coin}

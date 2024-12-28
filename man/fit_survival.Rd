@@ -57,5 +57,5 @@ Fit/Plot survival
 # Plot
     fit_survival(object)
     fit_survival(object, plot = TRUE)
-    fit_survival(object, engine = c('coxph', 'survdiff'), plot = TRUE)
+    fit_survival(object, engine = c('coxph', 'survdiff', 'logrank'), plot = TRUE)
 }
