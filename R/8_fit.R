@@ -731,10 +731,10 @@ downfeatures <- function(
 
 
 # dont rm - its the lower-level function used by fits() and coefs() !
-.effectvars <- function(featuredt){
+.tvars <- function(featuredt){
     . <- NULL
     sep <- guess_fitsep(featuredt)
-    names(featuredt) %>% extract(stri_startswith_fixed(., paste0('effect', sep)))
+    names(featuredt) %>% extract(stri_startswith_fixed(., paste0('t', sep)))
 }
 
 
@@ -756,7 +756,7 @@ fits <- function(object, ...)  UseMethod('fits')
 fits.data.table <- function(object, ...){
     sep <- guess_fitsep(object)
     if (is.null(sep))  return(NULL)
-    x <- .effectvars(object)
+    x <- .tvars(object)
     x %<>% split_extract_fixed(sep, 3)
     x %<>% unique()
     x
@@ -802,8 +802,8 @@ coefs.data.table <- function(
     if (is.null(sep))  return(NULL)
     if (is.null(fit))  return(NULL)
     . <- NULL
-    coefs0 <- split_extract_fixed(.effectvars(object), sep, 2)
-    fits0  <- split_extract_fixed(.effectvars(object), sep, 3)
+    coefs0 <- split_extract_fixed(.tvars(object), sep, 2)
+    fits0  <- split_extract_fixed(.tvars(object), sep, 3)
     coefs0 %<>% extract(fits0 %in% fit)
     coefs0 %<>% unique()
     #if (!is.null(svars))  coefs0 %<>% extract(Reduce('|', lapply(svars, grepl, .)))
