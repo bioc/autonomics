@@ -1105,7 +1105,7 @@ add_facetvars <- function(
                tvalues <-   tvec( object, fit = fit, coef = coefs[i] )
            facetvar <- paste0('facet.', coefs[[i]])
         assert_are_disjoint_sets(facetvar, fvars(object))
-        if (!is.null(pvalues))      values %<>% formatC(format = 'e', digits = 0) %>% as.character() 
+        if (!is.null(pvalues))     pvalues %<>% formatC(format = 'e', digits = 0) %>% as.character() 
         if (!is.null(fdrvalues)) fdrvalues %<>% formatC(format = 'e', digits = 0) %>% as.character()
         if (!is.null(tvalues))     tvalues %<>% round(3)  %>% as.character()
         fdt(object)[[facetvar]] <- 
