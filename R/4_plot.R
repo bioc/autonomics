@@ -1097,16 +1097,16 @@ add_facetvars <- function(
     assert_is_subset(coefs, autonomics::coefs(object, fit = fit))
 # Add
     for (i in seq_along(coefs)){
-               pvalues <-      pvec( object, fit = fit, coef = coefs[i] )
-             fdrvalues <-    fdrvec( object, fit = fit, coef = coefs[i] )
-          effectvalues <- effectvec( object, fit = fit, coef = coefs[i] )
+               pvalues <-   pvec( object, fit = fit, coef = coefs[i] )
+             fdrvalues <- fdrvec( object, fit = fit, coef = coefs[i] )
+               tvalues <-   tvec( object, fit = fit, coef = coefs[i] )
            facetvar <- paste0('facet.', coefs[[i]])
         assert_are_disjoint_sets(facetvar, fvars(object))
-        if (!is.null(pvalues))            pvalues %<>% formatC(format = 'e', digits = 0) %>% as.character() 
-        if (!is.null(fdrvalues))        fdrvalues %<>% formatC(format = 'e', digits = 0) %>% as.character()
-        if (!is.null(effectvalues))  effectvalues %<>% round(3)  %>% as.character()
+        if (!is.null(pvalues))      values %<>% formatC(format = 'e', digits = 0) %>% as.character() 
+        if (!is.null(fdrvalues)) fdrvalues %<>% formatC(format = 'e', digits = 0) %>% as.character()
+        if (!is.null(tvalues))     tvalues %<>% round(3)  %>% as.character()
         fdt(object)[[facetvar]] <- 
-            if (is.null(pvalues)){         sprintf('%s : %s',          coefs[[i]], effectvalues)
+            if (is.null(pvalues)){         sprintf('%s : %s',          coefs[[i]], tvalues)
             } else if (is_scalar(coefs)){  sprintf(     'p = %s (%s)',             pvalues, fdrvalues) 
             } else {                       sprintf('%s : p = %s (%s)', coefs[[i]], pvalues, fdrvalues) 
             }
