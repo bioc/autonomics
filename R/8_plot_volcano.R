@@ -153,6 +153,7 @@ add_adjusted_pvalues.data.table <- function(
 # Assert
     assert_is_data.table(object)
     assert_is_subset(method, stats::p.adjust.methods)
+    if (is.null(pvar(object, fit = fit, coef = coefs)))  return(object)   # pca: no pvalues
 # Reset
     fdrvars <- paste(method, coefs, fit, sep = FITSEP)
     fdrvars %<>% intersect(names(object))
