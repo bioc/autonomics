@@ -901,7 +901,7 @@ order_on_t <- function(
 # Assert
     assert_is_valid_sumexp(object)
     if (is.null(fit))              return(object)
-   #if (!fit %in% LINMOD_ENGINES)  return(object) # now also works for survival
+   #if (!fit %in% LINMODENGINES)  return(object) # now also works for survival
     assert_is_subset(fit,   autonomics::fits(  object))
     assert_is_subset(coefs, autonomics::coefs( object, fit = fit))
     assert_scalar_subset(combiner, c('|', '&'))
@@ -964,7 +964,7 @@ order_on_effect <- function(
     assert_positive_number(n)
 # Order on effect and p
     object %<>% order_on_effect(fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # dimred
-    if (fit %in% LINMOD_ENGINES){
+    if (fit %in% LINMODENGINES){
         object %<>% order_on_p(     fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # linmod
     }
 # Filter top

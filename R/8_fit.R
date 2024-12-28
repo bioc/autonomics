@@ -881,7 +881,7 @@ is_sig <- function(
 
 #' Linear Modeling Engines
 #' @examples
-#' LINMOD_ENGINES
+#' LINMODENGINES
 #' @export
-LINMOD_ENGINES <- c('limma', 'lm', 'lme', 'lmer', 'wilcoxon')
+LINMODENGINES <- c('limma', 'lm', 'lme', 'lmer', 'wilcoxon')
 
