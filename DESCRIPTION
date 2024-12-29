@@ -1,7 +1,7 @@
 Package: autonomics
 Type: Package
 Title: Unified Statistical Modeling of Omics Data
-Version: 1.15.87
+Version: 1.15.88
 Authors@R: c(person("Aditya",   "Bhagwat",    email = "aditya.bhagwat@uni-marburg.de",    role = c("aut", "cre")), 
              person("Richard",  "Cotton",     email = "richierocks@gmail.com",            role = "ctb"),
              person("Shahina",  "Hayat",      email = "shahina.hayat@hotmail.com",        role = "ctb"),
@@ -68,6 +68,7 @@ Imports:
   stats, 
   stringi,
   SummarizedExperiment,
+  survival,
   tidyr,
   tidyselect,
   tools,
@@ -116,7 +117,6 @@ Suggests:
   readODS,
   rtracklayer, 
   statmod,
-  survival,
   testthat,
   UniProt.ws,
   writexl,
