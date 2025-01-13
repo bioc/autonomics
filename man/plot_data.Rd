@@ -46,11 +46,11 @@ file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 object \%<>\% pca()
 data <- sdt(object)
-plot_data(data, x = `effect~sample_id~pca1`, y = `effect~sample_id~pca2`)
-plot_data(data, x = `effect~sample_id~pca1`, y = `effect~sample_id~pca2`, color = subgroup)
-plot_data(data, x = `effect~sample_id~pca1`, y = `effect~sample_id~pca2`, color = NULL)
+plot_data(data, x = `t~sample_id~pca1`, y = `t~sample_id~pca2`)
+plot_data(data, x = `t~sample_id~pca1`, y = `t~sample_id~pca2`, color = subgroup)
+plot_data(data, x = `t~sample_id~pca1`, y = `t~sample_id~pca2`, color = NULL)
 fixed <- list(shape = 15, size = 3)
-plot_data(data, x = `effect~sample_id~pca1`, y = `effect~sample_id~pca2`, fixed = fixed)
+plot_data(data, x = `t~sample_id~pca1`, y = `t~sample_id~pca2`, fixed = fixed)
 }
 \author{
 Aditya Bhagwat, Johannes Graumann
