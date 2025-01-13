@@ -200,8 +200,6 @@ fit_wilcoxon(
 \item{plot}{whether to plot}
 
 \item{opt}{lme options}
-
-\item{n}{number of features to plot}
 }
 \value{
 Updated SummarizedExperiment

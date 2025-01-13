@@ -24,7 +24,7 @@ fit_survival(
 
 \item{ntile}{number}
 
-\item{engine}{'coxph' {survival}, 'survdiff' {survival}, 'logrank' {coin}}
+\item{engine}{'coxph' (survival), 'survdiff' (survival), 'logrank' (coin)}
 
 \item{assay}{string}
 

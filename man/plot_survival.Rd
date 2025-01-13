@@ -24,6 +24,10 @@ plot_survival(
 
 \item{assay}{value in assayNames(object)}
 
+\item{engine}{'coxph', 'survdiff' or 'logrank'}
+
+\item{nquantile}{number of quantiles}
+
 \item{title}{string}
 
 \item{subtitle}{string}
@@ -34,9 +38,11 @@ plot_survival(
 
 \item{height}{number}
 
-\item{coefs}{autonomics::coefs(object) subset}
+\item{n}{number of features to plot}
 
-\item{splitvar}{split svar}
+\item{ncol}{number of columns}
+
+\item{nrow}{number of rows}
 }
 \value{
 ggplot

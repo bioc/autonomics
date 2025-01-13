@@ -534,6 +534,7 @@ plot_coef_densities <- function(
     assert_scalar_subset(label, fvars(object))
     dt %<>% merge(fdt(object)[ , label, with = FALSE], by = 'feature_id', sort = FALSE)
     dt %<>% melt.data.table(id.vars = unique(c('feature_id', label)), variable.name = 'coef', value.name = 'tvalue')
+    tvalue <- NULL  # R CMD check
     dt[, ('coef'   ) := split_extract_fixed(coef, sep, 2:3)]
     dt[, ('density') := approxfun(stats::density(tvalue))(tvalue) , by = 'coef']
 # Plot

@@ -48,10 +48,10 @@ survival_example <- function(){
 #'          object <- survival_example()
 #'     timetoevent <- object$timetoevent
 #'           event <- object$event
-#'           value <- values(object)[1,]
+#'            expr <- values(object)[1,]
 #'        quantile <- factor(dplyr::ntile(expr, 2))
 #' # Survival
-#'        .coxph(timetoevent, event, value)
+#'        .coxph(timetoevent, event, expr)
 #'     .survdiff(timetoevent, event, quantile)
 #'      .logrank(timetoevent, event, quantile)
 #' # Sumexp
@@ -108,7 +108,7 @@ SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 
 #' Fit/Plot survival 
 #' @param object      SummarizedExperiment
-#' @param engine     'coxph' {survival}, 'survdiff' {survival}, 'logrank' {coin}
+#' @param engine     'coxph' (survival), 'survdiff' (survival), 'logrank' (coin)
 #' @param ntile       number
 #' @param assay       string
 #' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
@@ -198,15 +198,18 @@ fit_survival <- function(
 
 
 #' Plot survival
-#' @param object   SummarizedExperiment
-#' @param assay    value in assayNames(object)
-#' @param coefs    autonomics::coefs(object) subset
-#' @param splitvar split svar
-#' @param title    string
-#' @param subtitle string
-#' @param file     filepath
-#' @param width    number
-#' @param height   number
+#' @param object     SummarizedExperiment
+#' @param assay      value in assayNames(object)
+#' @param engine    'coxph', 'survdiff' or 'logrank'
+#' @param nquantile  number of quantiles
+#' @param title      string
+#' @param subtitle   string
+#' @param file       filepath
+#' @param width      number
+#' @param height     number
+#' @param n          number of features to plot
+#' @param ncol       number of columns
+#' @param nrow       number of rows
 #' @return ggplot
 #' @examples
 #' # Defaults
@@ -234,6 +237,10 @@ plot_survival <- function(
         ncol = 3,
         nrow = 3
 ){
+# Prevent check notes
+    event <- timetoevent <- NULL                                  # svar
+    value <- NULL                                                 # sumexp_to_longdt
+    facet <- label <- ndead <- ntotal <- survival <- y <- NULL    # plotdt 
 # Prepare
     obj <- extract_coef_features(object, fit = engine[1], n = n)
     plotdt <- sumexp_to_longdt(obj, assay = assay, svars = c('timetoevent', 'event'))

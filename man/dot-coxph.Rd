@@ -27,10 +27,10 @@ Fit onefeature survival
          object <- survival_example()
     timetoevent <- object$timetoevent
           event <- object$event
-          value <- values(object)[1,]
+           expr <- values(object)[1,]
        quantile <- factor(dplyr::ntile(expr, 2))
 # Survival
-       .coxph(timetoevent, event, value)
+       .coxph(timetoevent, event, expr)
     .survdiff(timetoevent, event, quantile)
      .logrank(timetoevent, event, quantile)
 # Sumexp

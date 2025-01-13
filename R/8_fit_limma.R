@@ -708,7 +708,6 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param volcano     TRUE or FALSE
 #' @param volcanoargs list: volcano args
 #' @param exprs       TRUE or FALSE
-#' @param n           number of features to plot
 #' @param exprargs    list:  expr   args
 #' @param ...         passed to fit_(limma|lm|lme|lmer) functions
 #' @param opt         lme options
