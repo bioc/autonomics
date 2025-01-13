@@ -23,7 +23,6 @@ fit_linmod(
   coefs = if (is.null(contrasts)) model_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "t"),
   ftest = if (is.null(coefs)) TRUE else FALSE,
   sep = FITSEP,
   suffix = paste0(sep, engine),
@@ -47,7 +46,6 @@ fit_limma(
   coefs = if (is.null(contrasts)) model_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "t"),
   ftest = if (is.null(coefs)) TRUE else FALSE,
   sep = FITSEP,
   suffix = paste0(sep, "limma"),
@@ -64,7 +62,6 @@ fit_limma(
   coefs = if (is.null(contrasts)) model_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "se", "t")[1:2],
   ftest = if (is.null(coefs)) TRUE else FALSE,
   sep = FITSEP,
   suffix = paste0(sep, "limma"),
@@ -80,7 +77,6 @@ fit_lm(
   design = NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "se", "t")[1:2],
   sep = FITSEP,
   suffix = paste0(sep, "lm"),
   coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
@@ -98,7 +94,6 @@ fit_lme(
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   opt = "optim",
-  statvars = c("effect", "p", "se", "t")[1:2],
   sep = FITSEP,
   suffix = paste0(sep, "lme"),
   coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
@@ -115,7 +110,6 @@ fit_lmer(
   design = NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  statvars = c("effect", "p", "se", "t")[1:2],
   sep = FITSEP,
   suffix = paste0(sep, "lmer"),
   coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
@@ -134,7 +128,6 @@ fit_wilcoxon(
   coefs = NULL,
   block = NULL,
   weightvar = NULL,
-  statvars = c("effect", "p"),
   sep = FITSEP,
   suffix = paste0(sep, "wilcoxon"),
   verbose = TRUE
@@ -172,8 +165,6 @@ fit_wilcoxon(
 \item{block}{block svar (or NULL)}
 
 \item{weightvar}{NULL or name of weight matrix in assays(object)}
-
-\item{statvars}{character vector: subset of c('effect', 'p', 'fdr', 't', 'se')}
 
 \item{ftest}{TRUE or FALSE}
 

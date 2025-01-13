@@ -92,7 +92,6 @@ fit_wilcoxon <- function(
         coefs = NULL, 
         block = NULL, 
     weightvar = NULL, 
-     statvars = c('effect', 'p'),
           sep = FITSEP,
        suffix = paste0(sep, 'wilcoxon'),
       verbose = TRUE
@@ -118,8 +117,8 @@ fit_wilcoxon <- function(
     fitres <- lapply(vectorize_contrasts(contrasts), .wilcoxon, 
                      dt, subgroupvar = subgroupvar, block = block, sep = sep, verbose = verbose)
     fitres %<>% Reduce(function(x, y)  merge(x, y, by = 'feature_id', all = TRUE), .)
-    pattern <- sprintf('^(feature_id|%s)',  paste0(statvars, collapse = '|'))   # select statvars
-    fitres <- fitres[, .SD, .SDcols = patterns(pattern) ]
+    #pattern <- sprintf('^(feature_id|%s)',  paste0(statvars, collapse = '|'))   # select statvars
+    #fitres <- fitres[, .SD, .SDcols = patterns(pattern) ]
     names(fitres)[-1] %<>% paste0(suffix)
     if (verbose)  message_df('\t\t\t%s', summarize_fit(fitres, fit = 'wilcoxon'))
     object %<>% merge_fit(fitres)

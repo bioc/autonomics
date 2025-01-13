@@ -697,7 +697,6 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param coefs     NULL or character vector: model coefs to test
 #' @param block     block svar (or NULL)
 #' @param weightvar NULL or name of weight matrix in assays(object)
-#' @param statvars  character vector: subset of c('effect', 'p', 'fdr', 't', 'se')
 #' @param ftest     TRUE or FALSE
 #' @param sep       string: pvar separator  ("~" in "p~t2~limma")
 #' @param suffix    string: pvar suffix ("limma" in "p~t2~limma")
@@ -768,7 +767,6 @@ fit_linmod <- function(
         coefs = if (is.null(contrasts))  model_coefs(design = design)     else NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
-     statvars = c('effect', 'p', 't'),
         ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, engine),
@@ -799,7 +797,6 @@ fit_linmod <- function(
                                 coefs = coefs,
                                 block = block, 
                             weightvar = weightvar,
-                             statvars = statvars,
                                   sep = sep,
                                suffix = suffix, 
                               verbose = verbose )
@@ -840,7 +837,6 @@ fit_limma <- function(
         coefs = if (is.null(contrasts))  model_coefs(design = design) else NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
-     statvars = c('effect', 'p', 't'),
         ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
@@ -857,7 +853,6 @@ fit_limma <- function(
                              coefs = coefs,
                              block = block,
                          weightvar = weightvar,
-                          statvars = statvars,
                              ftest = ftest,
                                sep = sep,
                             suffix = suffix,
@@ -920,7 +915,6 @@ varlevels_dont_clash.SummarizedExperiment <- function(
         coefs = if (is.null(contrasts))  model_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-     statvars = c('effect', 'p', 'se', 't')[1:2],
         ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
@@ -935,7 +929,6 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     assert_is_subset(coefs, colnames(design))
     if (!is.null(block))      assert_is_subset(block, svars(object))
     if (!is.null(weightvar))  assert_scalar_subset(weightvar, assayNames(object))
-    assert_is_subset(statvars, c('effect', 'p', 't', 'se'))
 # Design/contrasts/block/weights
     . <- NULL
     blockvar <- NULL
@@ -967,11 +960,11 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     
 # p/t/fdr
     limmadt <- data.table(feature_id = rownames(limmafit))
-    if (        'effect' %in% statvars){ dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect', sep, ., suffix); limmadt %<>% cbind(dt0) }
-    if (estimable & 'se' %in% statvars){ dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0) }
-    if (estimable & 't'  %in% statvars){ dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',      sep, ., suffix); limmadt %<>% cbind(dt0) } 
-    if (estimable & 'p'  %in% statvars){ dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',      sep, ., suffix); limmadt %<>% cbind(dt0) } 
-    if (estimable & ftest)  limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit$F.p.value ]
+    dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect', sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',      sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',      sep, ., suffix); limmadt %<>% cbind(dt0)
+   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
+    if (ftest)  limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit$F.p.value ]
 # Return
     sumdt <- summarize_fit(limmadt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
