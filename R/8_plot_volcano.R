@@ -525,7 +525,7 @@ fdr2p <- function(fdr){
 plot_coef_densities <- function(
     object, 
        fit = fits(object)[1], 
-     coefs = setdiff(coefs(object, fit = fit), 'Intercept'), 
+     coefs = setdiff(autonomics::coefs(object, fit = fit), 'Intercept'), 
        sep = FITSEP,
      label = 'feature_id'
 ){
@@ -534,8 +534,8 @@ plot_coef_densities <- function(
     assert_scalar_subset(label, fvars(object))
     dt %<>% merge(fdt(object)[ , label, with = FALSE], by = 'feature_id', sort = FALSE)
     dt %<>% melt.data.table(id.vars = unique(c('feature_id', label)), variable.name = 'coef', value.name = 'tvalue')
-    dt[, coef := split_extract_fixed(coef, sep, 2:3)]
-    dt[, density := approxfun(density(tvalue))(tvalue) , by = 'coef']
+    dt[, ('coef'   ) := split_extract_fixed(coef, sep, 2:3)]
+    dt[, ('density') := approxfun(stats::density(tvalue))(tvalue) , by = 'coef']
 # Plot
     ggplot(dt) + theme_bw() + facet_wrap(vars(coef)) + 
                  geom_density( aes(x = tvalue )) + 

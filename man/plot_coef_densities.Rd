@@ -7,7 +7,7 @@
 plot_coef_densities(
   object,
   fit = fits(object)[1],
-  coefs = setdiff(coefs(object, fit = fit), "Intercept"),
+  coefs = setdiff(autonomics::coefs(object, fit = fit), "Intercept"),
   sep = FITSEP,
   label = "feature_id"
 )
