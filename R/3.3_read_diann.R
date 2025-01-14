@@ -378,7 +378,6 @@ CONTAMINANTSURL <- paste0(
 #'
 #' Rm contaminants from DIA-NN SumExp
 #' @param object         SummarizedExperiment
-#' @param contaminants   uniprots (character vector)
 #' @param verbose        TRUE or FALSE
 #' @return SummarizedExperiment
 #' @examples
