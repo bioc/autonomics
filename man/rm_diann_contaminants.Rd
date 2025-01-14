@@ -4,18 +4,14 @@
 \alias{rm_diann_contaminants}
 \title{Rm contaminants}
 \usage{
-rm_diann_contaminants(
-  object,
-  contaminants = read_contaminants(),
-  verbose = TRUE
-)
+rm_diann_contaminants(object, verbose = TRUE)
 }
 \arguments{
 \item{object}{SummarizedExperiment}
 
-\item{contaminants}{uniprots (character vector)}
-
 \item{verbose}{TRUE or FALSE}
+
+\item{contaminants}{uniprots (character vector)}
 }
 \value{
 SummarizedExperiment

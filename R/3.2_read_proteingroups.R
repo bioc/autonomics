@@ -371,8 +371,8 @@ is_file <- function(file){
 #'                     'reporterintensity', 'maxlfq', 'labeledintensity', 
 #'                     'intensity' or NULL
 #' @param subgroups     NULL or string vector : subgroups to retain
-#' @param contaminants  TRUE or FALSE : retain contaminants ?
-#' @param reverse       TRUE or FALSE : include reverse hits ?
+#' @param rm_contaminants           TRUE or FALSE : rm contaminants ?
+#' @param rm_reverse                TRUE or FALSE : rm reverse proteins ?
 #' @param rm_missing_in_all_samples TRUE or FALSE
 #' @param invert        string vector : subgroups which require inversion
 #' @param impute        TRUE or FALSE: impute group-specific NA values?
@@ -409,8 +409,8 @@ read_maxquant_proteingroups <- function(
                      quantity = NULL,
                     subgroups = NULL,
                        invert = character(0),
-                 contaminants = FALSE,
-                      reverse = FALSE,
+              rm_contaminants = TRUE,
+                   rm_reverse = TRUE,
     rm_missing_in_all_samples = TRUE, 
                        impute = FALSE,
                          plot = FALSE,
@@ -462,8 +462,8 @@ read_maxquant_proteingroups <- function(
     assays(object)$pepcounts <- pepmat
     object %<>% process_maxquant( subgroups = subgroups,      
                                      invert = invert,
-                                    reverse = reverse,  
-                               contaminants = contaminants,   
+                                 rm_reverse = rm_reverse,  
+                            rm_contaminants = rm_contaminants,   
                   rm_missing_in_all_samples = rm_missing_in_all_samples, 
                                      impute = impute,
                                     verbose = verbose )
@@ -498,9 +498,9 @@ read_proteingroups <- function(...){
 #'                     'reporterintensity', 'maxlfq', 'labeledintensity', 
 #'                     'intensity' or NULL
 #' @param subgroups     NULL or string vector : subgroups to retain
-#' @param contaminants  TRUE or FALSE: retain contaminants ?
-#' @param reverse       TRUE or FALSE: include reverse hits 
-#' @param rm_missing_in_all_samples TRUE or FALSE
+#' @param rm_contaminants            TRUE or FALSE: rm contaminants ?
+#' @param rm_reverse                 TRUE or FALSE: rm reverse proteins ? 
+#' @param rm_missing_in_all_samples  TRUE or FALSE
 #' @param localization  number: min localization probability (for phosphosites)
 #' @param invert        string vector: subgroups which require inversion
 #' @param impute        TRUE or FALSE: impute group-specific NA values?
@@ -535,8 +535,8 @@ read_maxquant_phosphosites <- function(
                  quantity = NULL,   
                 subgroups = NULL,
                    invert = character(0),
-             contaminants = FALSE,
-                  reverse = FALSE,
+          rm_contaminants = TRUE,
+               rm_reverse = TRUE,
 rm_missing_in_all_samples = TRUE,
              localization = 0.75,
                    impute = FALSE,
@@ -597,8 +597,8 @@ rm_missing_in_all_samples = TRUE,
 # Process / Analyze
     object %<>% process_maxquant( subgroups = subgroups,     
                                      invert = invert,      
-                                    reverse = reverse, 
-                               contaminants = contaminants,  
+                                 rm_reverse = reverse, 
+                            rm_contaminants = contaminants,  
                   rm_missing_in_all_samples = rm_missing_in_all_samples,
                                localization = localization, 
                                      impute = impute,
@@ -790,7 +790,7 @@ demultiplex <- function(x, verbose = FALSE){
 #----------------------------------------------------------------------------
 
 process_maxquant <- function(
-    object, subgroups, invert, contaminants, reverse, rm_missing_in_all_samples = TRUE, 
+    object, subgroups, invert, rm_contaminants, rm_reverse, rm_missing_in_all_samples = TRUE, 
     localization = 0.75, impute, verbose
 ){
 # Demultiplex. Infer Subgroup
@@ -810,13 +810,12 @@ process_maxquant <- function(
     object %<>% invert_subgroups(invert)
 # Features
     analysis(object)$nfeatures <- c(nrow(object))
-    if (!reverse)             object %<>% filter_features(   reverse == '', verbose = verbose)
-    if (!contaminants)        object %<>% filter_features(contaminant== '', verbose = verbose)
+    if (rm_reverse)                   object %<>% filter_features(   reverse == '', verbose = verbose)
+    if (rm_contaminants)              object %<>% filter_features(contaminant== '', verbose = verbose)
     if ({rm_missing_in_all_samples})  object %<>% rm_missing_in_all_samples(verbose = verbose)
     #object %<>% filter_exprs_replicated_in_some_subgroup(verbose = verbose) # doesnt work for single-instance subgroups
     if ('Localization prob' %in% fvars(object)){                             # subgroup could be increasing concentrations or so
-        object %<>% filter_features(
-            `Localization prob` >= localization, verbose = verbose)  }
+        object %<>% filter_features(`Localization prob` >= localization, verbose = verbose)  }
 # Impute
     if ({{impute}})  object %<>% impute(plot = FALSE)
     object

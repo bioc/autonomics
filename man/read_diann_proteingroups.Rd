@@ -15,7 +15,7 @@ read_diann_proteingroups(
   file,
   Lib.PG.Q = 0.01,
   simplify_snames = TRUE,
-  contaminants = character(0),
+  rm_contaminants = TRUE,
   impute = FALSE,
   plot = FALSE,
   pca = plot,
@@ -40,9 +40,9 @@ read_diann(...)
 
 \item{simplify_snames}{TRUE or FALSE: simplify (drop common parts in) samplenames ?}
 
-\item{contaminants}{character vector: contaminant uniprots}
+\item{rm_contaminants}{TRUE or FALSE: rm contaminants ?}
 
-\item{impute}{TRUE or FALSE: impute group-specific NA values?}
+\item{impute}{TRUE or FALSE: impute group-specific NA values ?}
 
 \item{plot}{TRUE or FALSE}
 

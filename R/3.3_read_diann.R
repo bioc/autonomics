@@ -254,8 +254,8 @@ uniprot2isoforms <- function(x){
 #' @param file               'report.tsv' file
 #' @param Lib.PG.Q            Lib.PG.Q cutoff
 #' @param simplify_snames     TRUE or FALSE: simplify (drop common parts in) samplenames ?
-#' @param contaminants        character vector: contaminant uniprots
-#' @param impute              TRUE or FALSE: impute group-specific NA values?
+#' @param rm_contaminants     TRUE or FALSE: rm contaminants ?
+#' @param impute              TRUE or FALSE: impute group-specific NA values ?
 #' @param plot                TRUE or FALSE
 #' @param pca                 TRUE or FALSE: run pca ?
 #' @param pls                 TRUE or FALSE: run pls ?
@@ -290,7 +290,7 @@ read_diann_proteingroups <- function(
                file, 
            Lib.PG.Q = 0.01,
     simplify_snames = TRUE,
-       contaminants = character(0), 
+    rm_contaminants = TRUE, 
              impute = FALSE, 
                plot = FALSE, 
                 pca = plot, 
@@ -303,8 +303,6 @@ read_diann_proteingroups <- function(
             palette = NULL,
             verbose = TRUE
 ){
-# Assert
-    if (!is.null(contaminants))  assert_is_character(contaminants)
 # SumExp
     dt <- .read_diann_proteingroups(file, Lib.PG.Q = Lib.PG.Q)
     object <- SummarizedExperiment(list(
@@ -332,19 +330,16 @@ read_diann_proteingroups <- function(
     if (simplify_snames)  snames(object) %<>% simplify_snames()
     object %<>% add_subgroup()
 # Filter. Impute. Analyze
-    if (length(contaminants)>0){
-        object %<>% rm_diann_contaminants(contaminants, verbose = verbose)
-    }
+    if (rm_contaminants)  object %<>% rm_diann_contaminants(verbose = verbose)
     object %<>% rm_missing_in_all_samples(verbose = verbose)
     object %<>% extract(order(rowVars(values(.), na.rm = TRUE)), )
   # object %<>% filter_exprs_replicated_in_some_subgroup(verbose = verbose)
     if ({{impute}})   object %<>% impute()  # above breaks when all subgroups are singletons
-    object %<>% analyze(
-        pca         = pca,           pls         = pls,
-        fit         = fit,           formula     = formula,
-        block       = block,         coefs       = coefs,
-        contrasts   = contrasts,     verbose     = verbose,
-        plot        = plot,          palette     = palette)
+    object %<>% analyze( pca         = pca,           pls         = pls,
+                         fit         = fit,           formula     = formula,
+                         block       = block,         coefs       = coefs,
+                         contrasts   = contrasts,     verbose     = verbose,
+                         plot        = plot,          palette     = palette )
     object
 }
 
@@ -371,66 +366,13 @@ dcast_diann <- function(dt, quantity, fill, log2 = FALSE){
     mat
 }
 
-#' Contaminants URL
-#' @examples 
-#' CONTAMINANTSURL
-#' @export
+# No longer publicly accessibly (14.01.2025 )
 CONTAMINANTSURL <- paste0(
-    'http://lotus1.gwdg.de/mpg/mmbc/maxquant_input.nsf', 
+    'https://lotus1.gwdg.de/mpg/mmbc/maxquant_input.nsf', 
     '/7994124a4298328fc125748d0048fee2/$FILE/',
     'contaminants.fasta')
 
 
-#' Downloads contaminants
-#' @param url contaminants file url (string)
-#' @param overwrite TRUE or FALSE: overwrite existiung download?
-#' @return filename (string)
-#' @examples
-#' # download_contaminants()                  # download first time
-#' # download_contaminants(overwrite = TRUE)  # download each  time
-#' @export
-download_contaminants <-  function(url = CONTAMINANTSURL, overwrite = FALSE){
-    destdir <- file.path(R_user_dir("autonomics", "cache"), "maxquant")
-    dir.create(destdir, showWarnings = FALSE, recursive = TRUE)
-    destfile <- paste0(destdir, '/contaminants.fasta')
-    if (overwrite | !file.exists(destfile)){
-        tryCatch(
-            download.file(url, destfile, mode = 'wb'),
-            error = function(e){
-                 message('Automatic download failed: ', url, 
-                         '\nDownload manually into\n', 
-                         destfile)
-                 destfile <<- NULL
-            }
-        )
-    }
-    return(destfile)
-}
-
-#' Read contaminants
-#' @param file contaminant file
-#' @return data.table
-#' @examples
-#' file <- download_contaminants()
-#' dt <- read_contaminants(file)
-#' @export
-read_contaminants <-  function(file = download_contaminants()){
-# Assert
-    if (!requireNamespace('Biostrings', quietly = TRUE)){
-        stop("BiocManager::install('Biostrings'). Then re-run.") }
-    if (is.null(file)){
-        cmessage('\t`file` doesnt exist - return NULL')
-        return(NULL) # download_contaminants returns NULL when offline
-    }
-    assert_all_are_existing_files(file)
-    assert_is_identical_to_true(substr(file, nchar(file)-4, nchar(file)) == 'fasta')
-# Read
-    y <- Biostrings::readAAStringSet(file)
-    y %<>% names()
-    y %<>% split_extract_fixed(' ', 1)
-# Return
-    y
-}
 
 #' Rm contaminants
 #'
@@ -444,16 +386,14 @@ read_contaminants <-  function(file = download_contaminants()){
 #' object <- read_diann_proteingroups(file)
 #' object %<>% rm_diann_contaminants()
 #' @export
-rm_diann_contaminants <- function(
-    object, contaminants = read_contaminants(), verbose = TRUE
-){
+rm_diann_contaminants <- function(object, verbose = TRUE){
 # Assert
     assert_is_valid_sumexp(object)
-    if (is.null(contaminants)){
-        message('\tcontminants is NULL - return object unchanged')
-        return(object)  
-    }
     contaminant <- uniprot <- NULL
+# contaminants
+    contaminantdt <- read_contaminantdt()
+    contaminantdt %<>% extract(uniprot != '')
+    contaminants <- contaminantdt$uniprot
 # Rm
     fdt0 <- fdt(object)
     fdt0 %<>% separate_rows(uniprot, sep = ';') %>% data.table()

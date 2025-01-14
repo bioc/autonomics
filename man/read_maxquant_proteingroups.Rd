@@ -13,8 +13,8 @@ read_maxquant_proteingroups(
   quantity = NULL,
   subgroups = NULL,
   invert = character(0),
-  contaminants = FALSE,
-  reverse = FALSE,
+  rm_contaminants = TRUE,
+  rm_reverse = TRUE,
   rm_missing_in_all_samples = TRUE,
   impute = FALSE,
   plot = FALSE,
@@ -49,9 +49,9 @@ read_proteingroups(...)
 
 \item{invert}{string vector : subgroups which require inversion}
 
-\item{contaminants}{TRUE or FALSE : retain contaminants ?}
+\item{rm_contaminants}{TRUE or FALSE : rm contaminants ?}
 
-\item{reverse}{TRUE or FALSE : include reverse hits ?}
+\item{rm_reverse}{TRUE or FALSE : rm reverse proteins ?}
 
 \item{rm_missing_in_all_samples}{TRUE or FALSE}
 
