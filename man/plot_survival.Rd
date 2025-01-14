@@ -60,5 +60,5 @@ Plot survival
     object \%<>\% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
     plot_survival(object)
 # Pdf
-    plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
+    # plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
 }

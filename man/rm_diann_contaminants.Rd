@@ -10,8 +10,6 @@ rm_diann_contaminants(object, verbose = TRUE)
 \item{object}{SummarizedExperiment}
 
 \item{verbose}{TRUE or FALSE}
-
-\item{contaminants}{uniprots (character vector)}
 }
 \value{
 SummarizedExperiment

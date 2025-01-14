@@ -221,7 +221,7 @@ fit_survival <- function(
 #'     object %<>% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
 #'     plot_survival(object)
 #' # Pdf
-#'     plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
+#'     # plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
 #' @export
 plot_survival <- function(
       object, 
