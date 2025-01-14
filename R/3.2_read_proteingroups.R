@@ -794,7 +794,7 @@ process_maxquant <- function(
     localization = 0.75, impute, verbose
 ){
 # Demultiplex. Infer Subgroup
-    contaminant <- `Localization prob` <- NULL
+    contaminant <- `Localization prob` <- reverse <- NULL
     colnames(object) %<>% demultiplex(verbose = verbose)
     object$sample_id <- colnames(object)
     object %<>% add_subgroup(verbose = verbose)
