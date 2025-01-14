@@ -241,8 +241,8 @@ test_that( " read_proteingroups: fukuda20, pca = TRUE ", {
             file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
             object <- read_maxquant_proteingroups(file, pca = TRUE)
             expect_s4_class(object, 'SummarizedExperiment')
-            expect_true(all(c('effect~sample_id~pca1', 'effect~sample_id~pca2') %in% svars(object)))
-            expect_true(all(c('effect~sample_id~pca1', 'effect~sample_id~pca2') %in% fvars(object)))
+            expect_true(all(c('t~sample_id~pca1', 't~sample_id~pca2') %in% svars(object)))
+            expect_true(all(c('t~sample_id~pca1', 't~sample_id~pca2') %in% fvars(object)))
             expect_true('sample_id~pca' %in% names(metadata(object)))
 })
 

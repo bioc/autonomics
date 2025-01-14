@@ -26,8 +26,8 @@ test_that(  " read_somascan: pca = TRUE", {
     file <- system.file('extdata/atkin.somascan.adat', package = 'autonomics')
     object <- read_somascan(file, pca = TRUE)
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(all(c('effect~sample_id~pca1', 'effect~sample_id~pca2') %in% svars(object)))
-    expect_true(all(c('effect~sample_id~pca1', 'effect~sample_id~pca2') %in% fvars(object)))
+    expect_true(all(c('t~sample_id~pca1', 't~sample_id~pca2') %in% svars(object)))
+    expect_true(all(c('t~sample_id~pca1', 't~sample_id~pca2') %in% fvars(object)))
     expect_true('sample_id~pca' %in% names(metadata(object)))
 })
 
