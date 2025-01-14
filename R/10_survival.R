@@ -59,7 +59,7 @@ survival_example <- function(){
 #' @rdname dot-coxph
 #' @export
 .coxph <- function(timetoevent, event, expr){
-    survout <- suppressWarnings(coef(summary(coxph(Surv(timetoevent, event)~expr))))
+    survout <- suppressWarnings(stats::coef(summary(coxph(Surv(timetoevent, event)~expr))))
     data.table( `p~expr~coxph` =    survout[, 'Pr(>|z|)'], 
            `effect~expr~coxph` = -1*survout[, 'coef'    ], 
                 `t~expr~coxph` = -1*survout[, 'z'       ])
