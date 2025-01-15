@@ -189,7 +189,11 @@ fit_survival <- function(
 # Plot
     if (plot){
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
-        print(plot_survival(object = object, assay = assay, file = file))
+        print( plot_survival( object = object, 
+                               assay = assay, 
+                                file = file, 
+                              engine = engine, 
+                               ntile = ntile ) )
     }
 # Return
     object
@@ -201,7 +205,7 @@ fit_survival <- function(
 #' @param object     SummarizedExperiment
 #' @param assay      value in assayNames(object)
 #' @param engine    'coxph', 'survdiff' or 'logrank'
-#' @param nquantile  number of quantiles
+#' @param ntile  number of quantiles
 #' @param title      string
 #' @param subtitle   string
 #' @param file       filepath
@@ -227,7 +231,7 @@ plot_survival <- function(
       object, 
        assay = assayNames(object)[1],
       engine = intersect(fits(object), c('coxph', 'survdiff', 'logrank')),
-   nquantile = 2,
+       ntile = 2,
        title = sprintf('surv ~ expr'), 
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
         file = NULL,
@@ -245,8 +249,8 @@ plot_survival <- function(
     obj <- extract_coef_features(object, fit = engine[1], n = n)
     plotdt <- sumexp_to_longdt(obj, assay = assay, svars = c('timetoevent', 'event'))
     plotdt[, quantile := NA_character_]
-    plotdt[, quantile := dplyr::ntile(value, nquantile), by = 'feature_id']
-    plotdt <- plotdt[quantile %in% c(1, nquantile)]
+    plotdt[, quantile := dplyr::ntile(value, ntile), by = 'feature_id']
+    plotdt <- plotdt[quantile %in% c(1, ntile)]
     plotdt %<>% extract(order(feature_id, quantile, timetoevent))
     plotdt[ , ntotal := .N , by = c('feature_id', 'quantile')]
     plotdt <- plotdt[ , .(ntotal = unique(ntotal),                    ndead = sum(event)) ,   by = c('feature_id', 'quantile', 'timetoevent')]
@@ -273,7 +277,8 @@ plot_survival <- function(
      ndt <- plotdt[, .(x = min(timetoevent), 
                        y = max(survival)*(1+0.1-0.1*as.numeric(substr(quantile, 2, 2))), 
                    label = sprintf('%d', ntotal[1])), by = c('facet', 'quantile')]
-    npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nrow(object) / nrow / ncol)
+    nfacets <- length(unique(ndt$facet))
+    npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nfacets / nrow / ncol)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
         p <- ggplot(plotdt) + 

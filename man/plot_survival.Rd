@@ -8,7 +8,7 @@ plot_survival(
   object,
   assay = assayNames(object)[1],
   engine = intersect(fits(object), c("coxph", "survdiff", "logrank")),
-  nquantile = 2,
+  ntile = 2,
   title = sprintf("surv ~ expr"),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
   file = NULL,
@@ -26,7 +26,7 @@ plot_survival(
 
 \item{engine}{'coxph', 'survdiff' or 'logrank'}
 
-\item{nquantile}{number of quantiles}
+\item{ntile}{number of quantiles}
 
 \item{title}{string}
 
