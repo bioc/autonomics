@@ -279,7 +279,7 @@ plot_survival <- function(
     maxtotal <- max(plotdt$ntotal)
     maxdigits <- ceiling(log10(maxtotal))
 
-    pattern <- paste0('%', maxdigits, 'd - %', maxdigits, 'd')    
+    pattern <- paste0('%', maxdigits, 'd → %', maxdigits, 'd')    
     ndt <- plotdt[, .(label = sprintf(pattern, ntotal[1], ntotal[1]-max(ndead))), by = c('facet', 'quantile')]
     quantiles <- unique(ndt$quantile)
     colordt <- data.table(quantile = quantiles, color = make_colors(quantiles))
