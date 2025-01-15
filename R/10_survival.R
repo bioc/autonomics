@@ -274,10 +274,19 @@ plot_survival <- function(
     plotdt[, facet := factor(facet, unique(facet))]
     plotdt[, quantile := paste0('Q', quantile)]
 # Plot
-     ndt <- plotdt[, .(x = min(timetoevent), 
-                       y = max(survival)*(1+0.1-0.1*as.numeric(substr(quantile, 2, 2))), 
-                   label = sprintf('%d', ntotal[1])), by = c('facet', 'quantile')]
-    nfacets <- length(unique(ndt$facet))
+    maxtime <- max(plotdt$timetoevent)
+    maxsurvival <- max(plotdt$survival)
+    maxtotal <- max(plotdt$ntotal)
+    maxdigits <- ceiling(log10(maxtotal))
+
+    pattern <- paste0('%', maxdigits, 'd - %', maxdigits, 'd')    
+    ndt <- plotdt[, .(label = sprintf(pattern, ntotal[1], ntotal[1]-max(ndead))), by = c('facet', 'quantile')]
+    quantiles <- unique(ndt$quantile)
+    colordt <- data.table(quantile = quantiles, color = make_colors(quantiles))
+    ndt %<>% merge(colordt, by = 'quantile')
+    ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
+    ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
+    nfacets <- nrow(ndt)
     npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nfacets / nrow / ncol)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
@@ -289,7 +298,8 @@ plot_survival <- function(
                 plot.subtitle = element_text(hjust = 0.5),
                   panel.grid  = element_blank()) + 
              geom_step(aes(x = timetoevent, y = survival, group = quantile, color = quantile)) + 
-             geom_text(data = ndt, aes(x = x, y = y, label = label, color = quantile), hjust = -0.1, vjust = 1, show.legend = FALSE)
+             ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
+                                   hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA')
         if (!is.null(file))  print(p)
     }
     if (is.null(file))  return(p) else dev.off()
