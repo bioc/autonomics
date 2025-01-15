@@ -135,7 +135,7 @@ SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 fit_survival <- function(
         object, 
          ntile = 2,
-        engine = c('coxph', 'survdiff', 'logrank')[1],
+        engine = c('survdiff', 'coxph', 'logrank')[1:2],
          assay = assayNames(object)[1],
            sep = FITSEP,
        verbose = TRUE,
@@ -154,13 +154,7 @@ fit_survival <- function(
     if (verbose)  cmessage('%sSurvival', spaces(8))
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))       # Filter
     dt <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
-# Coxph
-    if ('coxph' %in% engine){
-        if (verbose)  cmessage('%scoxph: surv ~ exprs', spaces(8+8+4))
-        outdt <- dt[ , .coxph(timetoevent, event, value), by = 'feature_id' ]
-        object %<>% merge_fdt(outdt)
-    }
-# Survdiff/Logrank
+# Analyze
     dt[, quantile := dplyr::ntile(value, ntile), by = 'feature_id']   # Quantile
     dt <- dt[quantile %in% c(1, ntile)]
    #dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'quantile')]  #    3 events     per feature/exprlevel
@@ -175,6 +169,11 @@ fit_survival <- function(
     if ('logrank'  %in% engine){
         if (verbose)  cmessage('%slogrank%d: surv ~ ntile(exprs,%d)', spaces(8+8+1), ntile, ntile)
         outdt <- dt[ ,  .logrank(timetoevent, event, quantile), by = 'feature_id' ]
+        object %<>% merge_fdt(outdt)
+    }
+    if ('coxph' %in% engine){
+        if (verbose)  cmessage('%scoxph: surv ~ exprs', spaces(8+8+4))
+        outdt <- dt[ , .coxph(timetoevent, event, value), by = 'feature_id' ]
         object %<>% merge_fdt(outdt)
     }
     if (verbose)  message_df(txt, summarize_fit(object, fit = engine))

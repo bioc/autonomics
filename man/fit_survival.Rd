@@ -10,7 +10,7 @@ survival_example()
 fit_survival(
   object,
   ntile = 2,
-  engine = c("coxph", "survdiff", "logrank")[1],
+  engine = c("survdiff", "coxph", "logrank")[1:2],
   assay = assayNames(object)[1],
   sep = FITSEP,
   verbose = TRUE,
