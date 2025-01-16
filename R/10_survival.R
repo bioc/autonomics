@@ -16,8 +16,8 @@ survival_example <- function(){
                         data.table( subgroup = 'Diseased', sample_id = 'D02', timetoevent = 1, event = 1), 
                         data.table( subgroup = 'Diseased', sample_id = 'D03', timetoevent = 2, event = 1),
                         data.table( subgroup = 'Diseased', sample_id = 'D04', timetoevent = 2, event = 1),
-                        data.table( subgroup = 'Diseased', sample_id = 'D05', timetoevent = 2, event = 1),
-                        data.table( subgroup = 'Diseased', sample_id = 'D06', timetoevent = 2, event = 1),
+                        data.table( subgroup = 'Diseased', sample_id = 'D05', timetoevent = 2, event = 0), # lets include right censoring examples too !
+                        data.table( subgroup = 'Diseased', sample_id = 'D06', timetoevent = 2, event = 0),
                         data.table( subgroup = 'Diseased', sample_id = 'D07', timetoevent = 3, event = 1), 
                         data.table( subgroup = 'Diseased', sample_id = 'D08', timetoevent = 3, event = 1), 
                         data.table( subgroup = 'Diseased', sample_id = 'D09', timetoevent = 4, event = 1), 
@@ -251,9 +251,10 @@ plot_survival <- function(
     plotdt[, quantile := dplyr::ntile(value, ntile), by = 'feature_id']
     plotdt <- plotdt[quantile %in% c(1, ntile)]
     plotdt %<>% extract(order(feature_id, quantile, timetoevent))
-    plotdt[ , ntotal := .N , by = c('feature_id', 'quantile')]
-    plotdt <- plotdt[ , .(ntotal = unique(ntotal),                    ndead = sum(event)) ,   by = c('feature_id', 'quantile', 'timetoevent')]
-    plotdt <- plotdt[ , .(ntotal = ntotal, timetoevent = timetoevent, ndead = cumsum(ndead)), by = c('feature_id', 'quantile')]
+    plotdt <- plotdt[order(feature_id, quantile, timetoevent, -event)]
+    plotdt[ ,  ntotal := .N - cumsum(1-event),                        by = c('feature_id', 'quantile')   ]
+    plotdt[ , ndead := cumsum(event),                                 by = c('feature_id', 'quantile')   ]
+    plotdt <- plotdt[ , .(ntotal  = max(ntotal), ndead = max(ndead)), by = c('feature_id', 'quantile', 'timetoevent')]
     plotdt[, survival := 100*(ntotal-ndead)/ntotal]
     plotdt %<>% extract(order(feature_id, quantile, timetoevent))
     plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'quantile')][, timetoevent := 0 ][, ndead := 0 ][, survival := 100 ]
