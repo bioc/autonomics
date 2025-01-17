@@ -3,7 +3,7 @@
 \name{survival_example}
 \alias{survival_example}
 \alias{fit_survival}
-\title{Fit/Plot survival}
+\title{Fit survival}
 \usage{
 survival_example()
 
@@ -45,10 +45,26 @@ fit_survival(
 \item{writefunname}{'write_xl' or 'write_ods'}
 }
 \value{
-ggsurvplot
+SummarizedExperiment
 }
 \description{
-Fit/Plot survival
+Investigates association between expression and survival
+}
+\details{
+Investigates association between expression and survival.                        \cr
+\verb{    } Continuous for \code{coxph}.                                         \cr
+\verb{    } Categorical for \code{survdiff} or \code{logrank}                    \cr
+\verb{        } Samples are split into \code{ntile} expression groups.           \cr
+\verb{        } Survival is compared between highest and lowest expressors.      \cr 
+
+Three statistics recorded per engine                                             \cr
+\verb{        } \code{p}                                                         \cr
+\verb{   } \code{effect: } coef (\code{coxph})                                   \cr
+\verb{           } mean survival difference (\code{survdiff, logrank})           \cr
+\verb{        } \code{t: } \eqn{z}  (\code{coxph})                               \cr
+\verb{           }         \eqn{ \chi^2} (\code{survdiff}, \code{logrank})       \cr
+\verb{                } sign reflects whether expression                         \cr
+\verb{                } increases (positive) or decreases (negative) survival
 }
 \examples{
 # Defaults

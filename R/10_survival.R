@@ -106,7 +106,24 @@ survival_example <- function(){
 SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 
 
-#' Fit/Plot survival 
+#' Fit survival 
+#' 
+#' Investigates association between expression and survival
+#' 
+#' Investigates association between expression and survival.                        \cr
+#' \verb{    } Continuous for \code{coxph}.                                         \cr
+#' \verb{    } Categorical for \code{survdiff} or \code{logrank}                    \cr
+#' \verb{        } Samples are split into \code{ntile} expression groups.           \cr
+#' \verb{        } Survival is compared between highest and lowest expressors.      \cr 
+#' 
+#' Three statistics recorded per engine                                             \cr
+#' \verb{        } \code{p}                                                         \cr
+#' \verb{   } \code{effect: } coef (\code{coxph})                                   \cr
+#' \verb{           } mean survival difference (\code{survdiff, logrank})           \cr
+#' \verb{        } \code{t: } \eqn{z}  (\code{coxph})                               \cr
+#' \verb{           }         \eqn{ \chi^2} (\code{survdiff}, \code{logrank})       \cr
+#' \verb{                } sign reflects whether expression                         \cr
+#' \verb{                } increases (positive) or decreases (negative) survival
 #' @param object      SummarizedExperiment
 #' @param engine     'coxph' (survival), 'survdiff' (survival), 'logrank' (coin)
 #' @param ntile       number
@@ -118,7 +135,7 @@ SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 #' @param height      number
 #' @param outdir      dir
 #' @param writefunname 'write_xl' or 'write_ods'
-#' @return ggsurvplot
+#' @return SummarizedExperiment
 #' @examples
 #' # Defaults
 #'     object <- survival_example()
