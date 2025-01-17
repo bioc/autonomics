@@ -201,6 +201,7 @@ fit_survival <- function(
 
 
 #' Plot survival
+#' 
 #' @param object     SummarizedExperiment
 #' @param assay      value in assayNames(object)
 #' @param engine    'coxph', 'survdiff' or 'logrank'
@@ -243,7 +244,7 @@ plot_survival <- function(
 # Prevent check notes
     event <- timetoevent <- NULL                                  # svar
     value <- NULL                                                 # sumexp_to_longdt
-    facet <- label <- ndead <- ntotal <- survival <- y <- NULL    # plotdt 
+    facet <- label <- totDead <- totObs <- survival <- y <- NULL    # plotdt 
 # Prepare
     obj <- extract_coef_features(object, fit = engine[1], n = n)
     plotdt <- sumexp_to_longdt(obj, assay = assay, svars = c('timetoevent', 'event'))
@@ -252,13 +253,15 @@ plot_survival <- function(
     plotdt <- plotdt[quantile %in% c(1, ntile)]
     plotdt %<>% extract(order(feature_id, quantile, timetoevent))
     plotdt <- plotdt[order(feature_id, quantile, timetoevent, -event)]
-    plotdt[ ,  ntotal := .N - cumsum(1-event),                        by = c('feature_id', 'quantile')   ]
-    plotdt[ , ndead := cumsum(event),                                 by = c('feature_id', 'quantile')   ]
-    plotdt <- plotdt[ , .(ntotal  = max(ntotal), ndead = max(ndead)), by = c('feature_id', 'quantile', 'timetoevent')]
-    plotdt[, survival := 100*(ntotal-ndead)/ntotal]
+    plotdt[ , totObs   := .N - cumsum(1-event),                                               by = c('feature_id', 'quantile')   ]
+    plotdt[ , totDead := cumsum(event),                                                       by = c('feature_id', 'quantile')   ]
+    plotdt <- plotdt[ , .(totObs  = max(totObs), 
+                          totDead = max(totDead), 
+                          curOut  = sum(event==0)), by = c('feature_id', 'quantile', 'timetoevent')]
+    plotdt[, survival := 100*(totObs-totDead)/totObs]
     plotdt %<>% extract(order(feature_id, quantile, timetoevent))
-    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'quantile')][, timetoevent := 0 ][, ndead := 0 ][, survival := 100 ]
-    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'quantile')][, timetoevent := max(timetoevent)+1]
+    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'quantile')][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
+    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'quantile')][, timetoevent := max(timetoevent)+1][, curOut := 0]
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
     pcols <- pvar(object, fit = engine)
@@ -276,11 +279,14 @@ plot_survival <- function(
 # Plot
     maxtime <- max(plotdt$timetoevent)
     maxsurvival <- max(plotdt$survival)
-    maxtotal <- max(plotdt$ntotal)
+    maxtotal <- max(plotdt$totObs)
     maxdigits <- ceiling(log10(maxtotal))
 
-    pattern <- paste0('%', maxdigits, 'd → %', maxdigits, 'd')    
-    ndt <- plotdt[, .(label = sprintf(pattern, ntotal[1], ntotal[1]-max(ndead))), by = c('facet', 'quantile')]
+    ndt <- plotdt[, .(totObs  = totObs[1], 
+                      totDead = totDead[.N], 
+                      nout   = totObs[1] - totObs[.N]), by = c('facet', 'quantile')]
+    ndt[ , nalive := totObs-totDead-nout ]
+    ndt[, label := sprintf('%d<sup>°</sup> %d<sup>†</sup> %d<sup>•</sup>', nalive, totDead, nout)]
     quantiles <- unique(ndt$quantile)
     colordt <- data.table(quantile = quantiles, color = make_colors(quantiles))
     ndt %<>% merge(colordt, by = 'quantile')
@@ -297,9 +303,17 @@ plot_survival <- function(
              theme(plot.title = element_text(hjust = 0.5),
                 plot.subtitle = element_text(hjust = 0.5),
                   panel.grid  = element_blank()) + 
-             geom_step(aes(x = timetoevent, y = survival, group = quantile, color = quantile)) + 
              ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
-                                   hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA')
+                                   hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
+                # Place text before lines to give the latter more prominence
+             geom_step(aes(x = timetoevent, y = survival, group = quantile, color = quantile)) + 
+             geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = quantile), size = 1, show.legend = FALSE) + 
+                # Note that here the dropout is placed after the stepdown.
+                # This is because each dropout changes the denominator.
+                # So changes the survival percentage.
+                # But this approach seems to deviate from convention.
+                # survminer flags the dropout before the stepdown.
+                # It is possible that a future implementation will switch to that behaviour.
         if (!is.null(file))  print(p)
     }
     if (is.null(file))  return(p) else dev.off()
