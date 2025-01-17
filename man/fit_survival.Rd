@@ -14,8 +14,10 @@ fit_survival(
   assay = assayNames(object)[1],
   sep = FITSEP,
   verbose = TRUE,
-  plot = if (is.null(outdir)) FALSE else TRUE,
   outdir = NULL,
+  plot = if (is.null(outdir)) FALSE else TRUE,
+  width = 7,
+  height = 7,
   writefunname = "write_xl"
 )
 }
@@ -32,9 +34,13 @@ fit_survival(
 
 \item{verbose}{TRUE or FALSE}
 
+\item{outdir}{dir}
+
 \item{plot}{TRUE or FALSE}
 
-\item{outdir}{dir}
+\item{width}{number}
+
+\item{height}{number}
 
 \item{writefunname}{'write_xl' or 'write_ods'}
 }

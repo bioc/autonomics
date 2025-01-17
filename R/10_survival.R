@@ -114,6 +114,8 @@ SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 #' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
 #' @param verbose     TRUE or FALSE
 #' @param plot        TRUE or FALSE
+#' @param width       number
+#' @param height      number
 #' @param outdir      dir
 #' @param writefunname 'write_xl' or 'write_ods'
 #' @return ggsurvplot
@@ -139,8 +141,10 @@ fit_survival <- function(
          assay = assayNames(object)[1],
            sep = FITSEP,
        verbose = TRUE,
-          plot = if (is.null(outdir)) FALSE else TRUE,
         outdir = NULL,
+          plot = if (is.null(outdir)) FALSE else TRUE,
+         width = 7,
+        height = 7,
   writefunname = 'write_xl'
 ){
 # Assert
@@ -191,6 +195,8 @@ fit_survival <- function(
         print( plot_survival( object = object, 
                                assay = assay, 
                                 file = file, 
+                               width = width, 
+                              height = height,
                               engine = engine, 
                                ntile = ntile ) )
     }
