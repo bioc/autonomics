@@ -307,7 +307,7 @@ plot_survival <- function(
                                    hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
              geom_step(aes(x = timetoevent, y = survival, group = quantile, color = quantile)) + 
-             geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = quantile), size = 1, show.legend = FALSE) + 
+             geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = quantile), size = 1, show.legend = FALSE)
                 # Note that here the dropout is placed after the stepdown.
                 # This is because each dropout changes the denominator.
                 # So changes the survival percentage.
