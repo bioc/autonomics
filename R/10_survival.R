@@ -133,6 +133,9 @@ SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 #' @param plot        TRUE or FALSE
 #' @param width       number
 #' @param height      number
+#' @param n           number of features to plot
+#' @param nrow        number of rows
+#' @param ncol        number of cols
 #' @param outdir      dir
 #' @param writefunname 'write_xl' or 'write_ods'
 #' @return SummarizedExperiment
@@ -162,6 +165,9 @@ fit_survival <- function(
           plot = if (is.null(outdir)) FALSE else TRUE,
          width = 7,
         height = 7,
+             n = min(nrow(object), 9),
+          ncol = 3,
+          nrow = 3,
   writefunname = 'write_xl'
 ){
 # Assert
@@ -209,13 +215,18 @@ fit_survival <- function(
 # Plot
     if (plot){
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
-        print( plot_survival( object = object, 
-                               assay = assay, 
-                                file = file, 
-                               width = width, 
-                              height = height,
-                              engine = engine, 
-                               ntile = ntile ) )
+        print( plot_survival(
+                    object = object, 
+                     assay = assay, 
+                    engine = engine, 
+                     ntile = ntile,
+                      file = file, 
+                     width = width, 
+                    height = height,
+                         n = n, 
+                      nrow = nrow, 
+                      ncol = ncol
+        ) )
     }
 # Return
     object

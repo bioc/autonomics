@@ -30,9 +30,9 @@ fit_linmod(
   outdir = NULL,
   writefun = "write_xl",
   volcano = FALSE,
-  volcanoargs = list(),
+  volcanoargs = list(coefs = coefs),
   exprs = FALSE,
-  exprargs = list(),
+  exprargs = list(coefs = coefs),
   ...
 )
 

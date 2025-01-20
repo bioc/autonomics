@@ -774,9 +774,9 @@ fit_linmod <- function(
        outdir = NULL,
      writefun = 'write_xl',
       volcano = FALSE, 
-  volcanoargs = list(),
+  volcanoargs = list(coefs = coefs),
         exprs = FALSE, 
-     exprargs = list(), 
+     exprargs = list(coefs = coefs),
              ...
 ){
 # Assert
@@ -808,18 +808,26 @@ fit_linmod <- function(
     tableext <- switch(writefun, write_xl = 'xlsx', write_ods = 'ods')
     tablefile <- if (is.null(outdir)) NULL else sprintf('%s/tables.%s',    outdir, tableext)
     if (!is.null(outdir))  get(writefun)(object, tablefile) 
-# Print plots
-    for (coef in coefs){
-        volcanofile <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
-           exprfile <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
+# Volcanoes
+    if (volcano){
+    for (coef in volcanoargs$coefs){
+        file <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
         title <- sprintf('%s', formula2str(formula))
-        args <- list( object = object, fit = engine, coefs = coef, title = title)
-        if (volcano)  do.call( plot_volcano, c(args, volcanoargs, list(file = volcanofile)) )
-        if (exprs){
-            p <- do.call(plot_exprs, c(args, exprargs, list(file = exprfile, block = block)))
-            if (is.null(outdir))  print(p)
-        }
-    }
+        args <- list( object = object, fit = engine, title = title, file = file )
+        args %<>% c( volcanoargs )
+        p <- do.call(plot_volcano, args)
+        if (is.null(outdir))  print(p)
+    }}
+# Exprs
+    if (exprs){
+    for (coef in exprargs$coefs){
+        file <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
+        title <- sprintf('%s', formula2str(formula))
+        args <- list( object = object,  fit = engine,  title = title,  file = file, block = block)
+        args %<>% c( exprargs )
+        p <- do.call(plot_exprs, args)
+        if (is.null(outdir))  print(p)
+    }}
 # Return
     object
 }

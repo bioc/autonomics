@@ -18,6 +18,9 @@ fit_survival(
   plot = if (is.null(outdir)) FALSE else TRUE,
   width = 7,
   height = 7,
+  n = min(nrow(object), 9),
+  ncol = 3,
+  nrow = 3,
   writefunname = "write_xl"
 )
 }
@@ -41,6 +44,12 @@ fit_survival(
 \item{width}{number}
 
 \item{height}{number}
+
+\item{n}{number of features to plot}
+
+\item{ncol}{number of cols}
+
+\item{nrow}{number of rows}
 
 \item{writefunname}{'write_xl' or 'write_ods'}
 }
