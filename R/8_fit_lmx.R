@@ -95,9 +95,9 @@
                                                        check.conv.singular = lme4::.makeCC(action = "ignore", tol=1e-4 ),
                                                            check.conv.hess = lme4::.makeCC(action = 'ignore', tol=1e-6 )))
     fitres %<>% lmerTest::as_lmerModLmerTest()
-    Fp <- suppressWarnings(stats::anova(fitres))
-    Fp <- Fp[, 'Pr(>F)'] %>% set_names(rownames(Fp))
-    names(Fp) %<>% paste0('p~', .)
+    Fres <- suppressWarnings(stats::anova(fitres))
+    pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('p~F', rownames(Fres)))
+    tF <- Fres[, 'F value'] %>% set_names(paste0('t~F', rownames(Fres)))
     fitres %<>% summary() %>% stats::coefficients()
     colnames(fitres) %<>% stri_replace_first_fixed('Estimate', 'effect')
     colnames(fitres) %<>% stri_replace_first_fixed('Std. Error', 'se')
@@ -107,7 +107,7 @@
     fitmat <- matrix(fitres, nrow=1)
     colnames(fitmat) <- paste(rep(colnames(fitres), each = nrow(fitres)), 
                         rep(rownames(fitres), times = ncol(fitres)), sep = sep )
-    data.table(cbind(fitmat, t(Fp)))
+    data.table(cbind(fitmat, t(tF), t(pF)))
 }
 
 .extractstat <- function(fitres, quantity){
