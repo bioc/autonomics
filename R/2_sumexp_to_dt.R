@@ -147,28 +147,6 @@ sumexp_to_tsv <- function(object, assay = assayNames(object)[1], file){
     fwrite(widedt, file, sep = '\t')
 }
 
-#' Get fit vars/dt
-#' @param object SummarizedExperimenmt
-#' @return string vector
-#' @examples
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' fitvars(object)
-#'   fitdt(object)
-#' fitvars(fit_limma(object))
-#'   fitdt(fit_limma(object))
-#' @export
-fitvars <- function(object){
-    sep <- guess_fitsep(fdt(object))
-    fvars(object) %>% extract(stri_detect_fixed(., sep))
-}
-
-#' @rdname fitvars
-#' @export
-fitdt <- function(object){
-    cols <- c('feature_id', fitvars(object))
-    fdt(object)[, cols, with = FALSE]
-}
 
 #' fitcoefs
 #' @param object SummarizedExperiment
@@ -182,10 +160,7 @@ fitdt <- function(object){
 fitcoefs <- function(object){
     sep <- guess_fitsep(fdt(object))
     if (is.null(sep))  return(NULL)
-    
-    fitvars(object)  %>%  
-    split_extract_fixed(sep, 2:3) %>%
-    unique()
+    split_extract_fixed(tvar(object), sep, 2:3)
 }
 
 
