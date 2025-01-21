@@ -45,7 +45,7 @@
         Fp <- suppressWarnings(stats::anova(fitres))  # ANOVA F-tests on an essentially perfect fit are unreliable
         Fp <- Fp %>% extract(-nrow(.), , drop = FALSE)
         Fp <- Fp[, 'Pr(>F)'] %>% set_names(rownames(Fp))
-        names(Fp) %<>% paste0('p~', .)
+        names(Fp) %<>% paste0('pF~', .)
         fitres %<>% summary()                      # weights: stackoverflow.com/questions/51142338
         fitres %<>% stats::coefficients()
         rows <- setdiff(rownames(fitres0), rownames(fitres))
@@ -229,15 +229,12 @@ fit_lmx <- function(
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = contr.treatment.explicit,
-        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
         block = NULL, 
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-        ftest = if (is.null(coefs))  TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, fit),
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
 # Assert
     assert_is_valid_sumexp(object)
@@ -281,20 +278,13 @@ fit_lmx <- function(
                     pat <- sprintf('%s(.+)', var)   # f.p: p~subgroup
                     names(fitres) %<>% stri_replace_first_regex(pat, '$1') }
 # Extract
-                             pattern <- 'feature_id'
-    if (!is.null( coefs))    pattern %<>% paste0('|', paste0(coefs, collapse = '|'))
-    if (ftest)               pattern %<>% paste0('|', paste0( vars, collapse = '|'))
-                             pattern %<>% paste0('(', ., ')$')
-    fitres <- fitres[, .SD, .SDcols = patterns(pattern) ]
     names(fitres)[-1] %<>% paste0(suffix)
-    if (verbose)  message_df('                      %s', summarize_fit(fitres, fit = fit, coefs = coefs))
+    if (verbose)  message_df('                      %s', summarize_fit(fitres, fit = fit))
 # Merge back
     object %<>% merge_fit(fitres)
     formula %<>% droplhs() %<>% formula2str()
     
     if (!is.null(weights))  formula %<>% paste0(', weights = assays(object)$', weightvar)
-    if (length(coefs) > 1)  coefs %<>% setdiff('Intercept')
-    if (plot)  print(plot_volcano(object, fit = fit, coefs = coefs))
     object 
 }
 
