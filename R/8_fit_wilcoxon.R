@@ -89,7 +89,6 @@ fit_wilcoxon <- function(
     codingfun = contr.treatment.explicit, # wilcox is the only one where `contr.treatment` doesnt work
        design = NULL, # only so that fit_linmod(.) works
     contrasts = NULL,
-        coefs = NULL, 
         block = NULL, 
     weightvar = NULL, 
           sep = FITSEP,
