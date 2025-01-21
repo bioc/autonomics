@@ -950,8 +950,8 @@ varlevels_dont_clash.SummarizedExperiment <- function(
                     if(is.null(blockvar))  '' else paste0(' | ',blockvar),
                     if(is.null(weightvar)) '' else paste0(', weights = assays(object)$', weightvar))
     limmafit <- suppressWarnings(lmFit( object = exprmat, design = design, 
-                    block = block, correlation = metadata(object)$dupcor, weights = weightmat))
-    if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = model_coefs(design = design)) 
+                    block = block, correlation = metadata(object)$dupcor, weights = weightmat))           # contrast_coefs (not model_coefs!)
+    if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = contrast_coefs(design = design)) # to make F-test meaningful !
     } else {                  limmafit %<>% contrasts.fit(contrasts = makeContrasts(contrasts = contrasts, levels = design)) }
     estimable <- !all(limmafit$df.residual==0)
     if (estimable)   limmafit %<>% eBayes()
