@@ -70,9 +70,9 @@
                           data = sd,
                      na.action = stats::na.omit, 
                        control = ctrl )
-    Fp <- suppressWarnings(stats::anova(fitres)[-1, , drop = FALSE])
-    Fp <- Fp[, 'p-value'] %>% set_names(rownames(Fp))
-    names(Fp) %<>% paste0('p~', .)
+    Fres <- suppressWarnings(stats::anova(fitres)[-1, , drop = FALSE])
+    pF <- Fres[, 'p-value'] %>% set_names(paste0('p~F', rownames(Fres)))
+    tF <- Fres[, 'F-value'] %>% set_names(paste0('t~F', rownames(Fres)))
     suppressWarnings(fitres %<>% summary())  # only 2 replicates in a group -> df = 0 -> p = NaN -> warning
     fitres %<>% stats::coefficients()
     colnames(fitres) %<>% stri_replace_first_fixed('Value', 'effect')
@@ -83,7 +83,7 @@
     fitmat <- matrix(fitres, nrow = 1)
     colnames(fitmat) <- paste(rep(colnames(fitres), each = nrow(fitres)), 
                         rep(rownames(fitres), times = ncol(fitres)), sep = sep )
-    data.table(cbind(fitmat, t(Fp)))
+    data.table(cbind(fitmat, t(tF), t(pF)))
 }
 
 .lmer <- function(sd, formula, block = NULL, weights, sep, optim = NULL){
