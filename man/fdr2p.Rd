@@ -21,7 +21,7 @@ fdr to p
    object \%<>\% extract(order(fdt(.)[[pcol]]), )
    object \%<>\% extract(1:10, )
    fdt(object) \%<>\% extract(, 1)
-   object \%<>\% fit_limma(coefs = 't3-t0')
+   object \%<>\% fit_limma()
 # fdr2p
    fdt(object)[[pcol]]
    fdt(object)[[pcol]] \%>\% p.adjust(method = 'fdr')

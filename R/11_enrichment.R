@@ -323,10 +323,9 @@ factor2logical <- function(x){
 #'     object <- read_somascan(file, fit = 'limma', coefs = 't1-t0')
 #'     fvars(object) %<>% gsub('EntrezGeneSymbol', 'gene', .)
 #'     object %<>% abstract_fit()
-#'     var <- abstractvar(object)
 #'     varlevels <- c('flat', 'down', 'up')
-#'     enrichdt1 <- enrichment(object, pathwaydt, var = var)                      # 2:n factor 
-#'     enrichdt2 <- enrichment(object, pathwaydt, var = var, levels = varlevels)  # 1:n factor
+#'     enrichdt1 <- enrichment(object, pathwaydt, var = 't1-t0~limma')                      # 2:n factor 
+#'     enrichdt2 <- enrichment(object, pathwaydt, var = 't1-t0~limma', levels = varlevels)  # 1:n factor
 #'     enrichdt3 <-  altenrich(object, pathwaydt)                 # alternative implementation
 #'     cols <- intersect(names(enrichdt1), names(enrichdt3))
 #'     all(enrichdt1[, cols, with = FALSE]  ==  enrichdt3[, cols, with = FALSE])   # identical

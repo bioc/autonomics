@@ -92,7 +92,7 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
     fdt(object)
     
 # LinMod
-    object %<>% fit_limma(coefs = 'Adult')
+    object %<>% fit_limma()
     object %<>% extract( order(fdt(.)$`p~Adult~limma`) , )
     fdt(object)
     
@@ -179,9 +179,9 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
         rna  %>% impute() # no NA
         pro %<>% impute()
         fos %<>% impute()
-        rna %<>% fit_limma(coefs = 'M00') # differentiation E00 -> M00
-        pro %<>% fit_limma(coefs = 'M00')
-        fos %<>% fit_limma(coefs = 'M00')
+        rna %<>% fit_limma() # differentiation E00 -> M00
+        pro %<>% fit_limma()
+        fos %<>% fit_limma()
         rna %<>% extract(order(fdt(.)$`p~M00~limma`), )
         pro %<>% extract(order(fdt(.)$`p~M00~limma`), )
         fos %<>% extract(order(fdt(.)$`p~M00~limma`), )

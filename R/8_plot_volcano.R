@@ -129,7 +129,7 @@ add_assay_means <- function(
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
 #' fdt(object) %<>% extract(, 1:2)
-#' object %<>% fit_limma(coef = 'Adult-X30dpt')
+#' object %<>% fit_limma()
 #' object %<>% extract(order(fdt(.)$`p~Adult-X30dpt~limma`), )
 #'  fdt(object)
 #' (fdt(object) %<>% add_adjusted_pvalues('fdr'))
@@ -495,7 +495,7 @@ map_fvalues <- function(
 #'    object %<>% extract(order(fdt(.)[[pcol]]), )
 #'    object %<>% extract(1:10, )
 #'    fdt(object) %<>% extract(, 1)
-#'    object %<>% fit_limma(coefs = 't3-t0')
+#'    object %<>% fit_limma()
 #' # fdr2p
 #'    fdt(object)[[pcol]]
 #'    fdt(object)[[pcol]] %>% p.adjust(method = 'fdr')
