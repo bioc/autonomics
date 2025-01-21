@@ -962,7 +962,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',      sep, ., suffix); limmadt %<>% cbind(dt0)
     dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',      sep, ., suffix); limmadt %<>% cbind(dt0)
    #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
-    limmadt[, (sprintf('pF%sglobal%s', sep, suffix)) := limmafit$F.p.value ]
+    limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit$F.p.value ]
 # Return
     sumdt <- summarize_fit(limmadt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
