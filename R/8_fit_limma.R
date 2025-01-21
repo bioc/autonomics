@@ -1024,10 +1024,10 @@ summarize_fit.data.table <- function(
     
     sumdt <- dcast.data.table(longdt, feature_id + coefficient + fit ~ statistic, value.var = 'value')
     sumdt <- sumdt[, .(
-        downfdr = sum(effect < 0  & fdr < 0.05, na.rm = TRUE), 
-        upfdr   = sum(effect > 0  & fdr < 0.05, na.rm = TRUE),
-        downp   = sum(effect < 0  &   p < 0.05, na.rm = TRUE), 
-        upp     = sum(effect > 0  &   p < 0.05, na.rm = TRUE)), by = c('coefficient', 'fit') ]
+        downfdr = sum(t < 0  & fdr < 0.05, na.rm = TRUE), 
+        upfdr   = sum(t > 0  & fdr < 0.05, na.rm = TRUE),
+        downp   = sum(t < 0  &   p < 0.05, na.rm = TRUE), 
+        upp     = sum(t > 0  &   p < 0.05, na.rm = TRUE)), by = c('coefficient', 'fit') ]
     if (!is.null(fit)){
         idx <- sumdt$fit %in% fit
         sumdt %<>% extract(idx)
