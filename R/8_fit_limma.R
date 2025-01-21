@@ -738,7 +738,7 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #'     
 #' # Posthoc contrasts: limma-only, flexible, but sometimes approximate
 #'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% fit_limma( ~ subgroup, block = 'Subject', codingfun = code_control, coefs ='t1-t0')
+#'   object %<>% fit_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
 #'   object %<>% fit_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
 #'       # flexible, but only approximate
 #'       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
@@ -794,7 +794,6 @@ fit_linmod <- function(
                             codingfun = codingfun, 
                                design = design,
                             contrasts = contrasts,
-                                coefs = coefs,
                                 block = block, 
                             weightvar = weightvar,
                                   sep = sep,
@@ -842,26 +841,22 @@ fit_limma <- function(
     codingfun = contr.treatment.explicit,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
     contrasts = NULL,
-        coefs = if (is.null(contrasts))  model_coefs(design = design) else NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
-        ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
       verbose = TRUE
 ){
 # Fit
-    object %<>% reset_fit(fit = 'limma', coefs = coefs)
+    object %<>% reset_fit(fit = 'limma')
     limmadt <- .fit_limma(  object = object,
                            formula = formula,
                               drop = drop,
                          codingfun = codingfun,
                             design = design,        
                          contrasts = contrasts, 
-                             coefs = coefs,
                              block = block,
                          weightvar = weightvar,
-                             ftest = ftest,
                                sep = sep,
                             suffix = suffix,
                            verbose = verbose )
@@ -920,21 +915,17 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     codingfun = contr.treatment.explicit,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
     contrasts = NULL,
-        coefs = if (is.null(contrasts))  model_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-        ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
-      verbose = TRUE, 
-         plot = FALSE
+      verbose = TRUE
 ){
 # Assert
     assert_is_valid_sumexp(object)
     assert_valid_formula(formula, object)
     assert_is_a_bool(drop)
     assert_is_matrix(design)
-    assert_is_subset(coefs, colnames(design))
     if (!is.null(block))      assert_is_subset(block, svars(object))
     if (!is.null(weightvar))  assert_scalar_subset(weightvar, assayNames(object))
 # Design/contrasts/block/weights
@@ -961,7 +952,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
                     if(is.null(weightvar)) '' else paste0(', weights = assays(object)$', weightvar))
     limmafit <- suppressWarnings(lmFit( object = exprmat, design = design, 
                     block = block, correlation = metadata(object)$dupcor, weights = weightmat))
-    if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = coefs) 
+    if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = model_coefs(design = design)) 
     } else {                  limmafit %<>% contrasts.fit(contrasts = makeContrasts(contrasts = contrasts, levels = design)) }
     estimable <- !all(limmafit$df.residual==0)
     if (estimable)   limmafit %<>% eBayes()
@@ -972,7 +963,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',      sep, ., suffix); limmadt %<>% cbind(dt0)
     dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',      sep, ., suffix); limmadt %<>% cbind(dt0)
    #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
-    if (ftest)  limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit$F.p.value ]
+    limmadt[, (sprintf('pF%sglobal%s', sep, suffix)) := limmafit$F.p.value ]
 # Return
     sumdt <- summarize_fit(limmadt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
