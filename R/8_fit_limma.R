@@ -767,16 +767,15 @@ fit_linmod <- function(
         coefs = if (is.null(contrasts))  model_coefs(design = design)     else NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
-        ftest = if (is.null(coefs)) TRUE else FALSE,
           sep = FITSEP,
        suffix = paste0(sep, engine),
       verbose = TRUE, 
        outdir = NULL,
      writefun = 'write_xl',
       volcano = FALSE, 
-  volcanoargs = list(coefs = coefs),
+  volcanoargs = list(),
         exprs = FALSE, 
-     exprargs = list(coefs = coefs),
+     exprargs = list(),
              ...
 ){
 # Assert
@@ -809,7 +808,7 @@ fit_linmod <- function(
     if (!is.null(outdir))  get(writefun)(object, tablefile) 
 # Volcanoes
     if (volcano){
-    for (coef in volcanoargs$coefs){
+    for (coef in coefs){
         file <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
         title <- sprintf('%s', formula2str(formula))
         args <- list( object = object, fit = engine, title = title, file = file )
@@ -819,7 +818,7 @@ fit_linmod <- function(
     }}
 # Exprs
     if (exprs){
-    for (coef in exprargs$coefs){
+    for (coef in coefs){
         file <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
         title <- sprintf('%s', formula2str(formula))
         args <- list( object = object,  fit = engine,  title = title,  file = file, block = block)

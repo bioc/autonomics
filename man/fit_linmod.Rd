@@ -23,7 +23,6 @@ fit_linmod(
   coefs = if (is.null(contrasts)) model_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  ftest = if (is.null(coefs)) TRUE else FALSE,
   sep = FITSEP,
   suffix = paste0(sep, engine),
   verbose = TRUE,
@@ -154,8 +153,6 @@ fit_wilcoxon(
 
 \item{weightvar}{NULL or name of weight matrix in assays(object)}
 
-\item{ftest}{TRUE or FALSE}
-
 \item{sep}{string: pvar separator  ("~" in "p~t2~limma")}
 
 \item{suffix}{string: pvar suffix ("limma" in "p~t2~limma")}
@@ -176,9 +173,11 @@ fit_wilcoxon(
 
 \item{...}{passed to fit_(limma|lm|lme|lmer) functions}
 
-\item{plot}{whether to plot}
-
 \item{opt}{lme options}
+
+\item{ftest}{TRUE or FALSE}
+
+\item{plot}{whether to plot}
 }
 \value{
 Updated SummarizedExperiment
@@ -213,7 +212,7 @@ Fit General Linear Model
     
 # Posthoc contrasts: limma-only, flexible, but sometimes approximate
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% fit_limma( ~ subgroup, block = 'Subject', codingfun = code_control, coefs ='t1-t0')
+  object \%<>\% fit_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
   object \%<>\% fit_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
       # flexible, but only approximate
       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
