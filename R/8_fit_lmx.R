@@ -332,9 +332,7 @@ fit_lme <- function(
           opt = 'optim',
           sep = FITSEP,
        suffix = paste0(sep, 'lme'),
-        coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun), 
     contrasts = NULL,
-        ftest = if (is.null(coefs))  TRUE else FALSE,
       verbose = TRUE
 ){
 # Assert
@@ -351,11 +349,9 @@ fit_lme <- function(
              codingfun = codingfun,
                  block = block, 
              weightvar = weightvar,
-                 ftest = ftest,
                    sep = sep,
                 suffix = suffix,
                    opt = opt,
-                 coefs = coefs, 
                verbose = verbose )
 }
 
