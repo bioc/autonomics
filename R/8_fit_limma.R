@@ -950,8 +950,8 @@ varlevels_dont_clash.SummarizedExperiment <- function(
                     if(is.null(blockvar))  '' else paste0(' | ',blockvar),
                     if(is.null(weightvar)) '' else paste0(', weights = assays(object)$', weightvar))
     limmafit <- suppressWarnings(lmFit( object = exprmat, design = design, 
-                    block = block, correlation = metadata(object)$dupcor, weights = weightmat))           # contrast_coefs (not model_coefs!)
-    if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = contrast_coefs(design = design)) # to make F-test meaningful !
+                    block = block, correlation = metadata(object)$dupcor, weights = weightmat))
+    if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = model_coefs(design = design))
     } else {                  limmafit %<>% contrasts.fit(contrasts = makeContrasts(contrasts = contrasts, levels = design)) }
     estimable <- !all(limmafit$df.residual==0)
     if (estimable)   limmafit %<>% eBayes()
@@ -962,8 +962,10 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',      sep, ., suffix); limmadt %<>% cbind(dt0)
     dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',      sep, ., suffix); limmadt %<>% cbind(dt0)
    #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
-    limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit$F.p.value ]
-    limmadt[, (sprintf('t%sF%s', sep, suffix)) := limmafit$F         ]
+# F statistics                                        # Suprising shorthand for intercept-free fstats !
+    cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
+    limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
+    limmadt[, (sprintf('t%sF%s', sep, suffix)) := limmafit[, cols]$F         ]
 # Return
     sumdt <- summarize_fit(limmadt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
