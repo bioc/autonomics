@@ -103,9 +103,7 @@ fit_lmer(
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   sep = FITSEP,
   suffix = paste0(sep, "lmer"),
-  coefs = model_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
   contrasts = NULL,
-  ftest = if (is.null(coefs)) TRUE else FALSE,
   verbose = TRUE
 )
 
@@ -116,7 +114,6 @@ fit_wilcoxon(
   codingfun = contr.treatment.explicit,
   design = NULL,
   contrasts = NULL,
-  coefs = NULL,
   block = NULL,
   weightvar = NULL,
   sep = FITSEP,
