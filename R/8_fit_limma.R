@@ -811,7 +811,7 @@ fit_linmod <- function(
     for (coef in coefs){
         file <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
         title <- sprintf('%s', formula2str(formula))
-        args <- list( object = object, fit = engine, title = title, file = file )
+        args <- list( object = object, fit = engine, coefs = coef, title = title, file = file )
         args %<>% c( volcanoargs )
         p <- do.call(plot_volcano, args)
         if (is.null(outdir))  print(p)
@@ -821,7 +821,7 @@ fit_linmod <- function(
     for (coef in coefs){
         file <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
         title <- sprintf('%s', formula2str(formula))
-        args <- list( object = object,  fit = engine,  title = title,  file = file, block = block)
+        args <- list( object = object,  fit = engine, coefs = coef, title = title,  file = file, block = block )
         args %<>% c( exprargs )
         p <- do.call(plot_exprs, args)
         if (is.null(outdir))  print(p)
