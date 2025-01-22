@@ -9,7 +9,7 @@
 order_on_p(
   object,
   fit = autonomics::fits(object),
-  coefs = autonomics::coefs(object, fit = fit),
+  coefs = setdiff(autonomics::coefs(object, fit = fit), "Intercept"),
   combiner = "|",
   decreasing = FALSE,
   verbose = TRUE
@@ -52,9 +52,14 @@ SummarizedExperiment
 Order on p
 }
 \examples{
-# Read
-  file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-  object <- read_metabolon(file)
-  order_on_p(object)
-  order_on_p(fit_limma(object), coefs = c('t1-t0', 't2-t0', 't3-t0'))
+# Linmod
+    file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+    object <- read_metabolon(file)
+    order_on_p(object)
+    object \%<>\% fit_limma()
+    order_on_p(object)
+# Survival
+    object <- survival_example()
+    object \%<>\% fit_survival()
+    order_on_p(object)
 }
