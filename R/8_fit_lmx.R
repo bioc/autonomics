@@ -44,8 +44,8 @@
         fitres <- lm( formula = formula, data = sd,  weights = weights, na.action = stats::na.omit )
         Fres <- suppressWarnings(stats::anova(fitres))  # ANOVA F-tests on an essentially perfect fit are unreliable
         Fres <- Fres %>% extract(-nrow(.), , drop = FALSE)
-        pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('p~F', rownames(Fres)))
-        tF <- Fres[, 'F value'] %>% set_names(paste0('t~F', rownames(Fres)))
+        pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('PF~', rownames(Fres)))
+        tF <- Fres[, 'F value'] %>% set_names(paste0('F~', rownames(Fres)))
         fitres %<>% summary()                      # weights: stackoverflow.com/questions/51142338
         fitres %<>% stats::coefficients()
         rows <- setdiff(rownames(fitres0), rownames(fitres))
@@ -71,8 +71,8 @@
                      na.action = stats::na.omit, 
                        control = ctrl )
     Fres <- suppressWarnings(stats::anova(fitres)[-1, , drop = FALSE])
-    pF <- Fres[, 'p-value'] %>% set_names(paste0('p~F', rownames(Fres)))
-    tF <- Fres[, 'F-value'] %>% set_names(paste0('t~F', rownames(Fres)))
+    pF <- Fres[, 'p-value'] %>% set_names(paste0('PF~', rownames(Fres)))
+    tF <- Fres[, 'F-value'] %>% set_names(paste0('F~',  rownames(Fres)))
     suppressWarnings(fitres %<>% summary())  # only 2 replicates in a group -> df = 0 -> p = NaN -> warning
     fitres %<>% stats::coefficients()
     colnames(fitres) %<>% stri_replace_first_fixed('Value', 'effect')
@@ -96,8 +96,8 @@
                                                            check.conv.hess = lme4::.makeCC(action = 'ignore', tol=1e-6 )))
     fitres %<>% lmerTest::as_lmerModLmerTest()
     Fres <- suppressWarnings(stats::anova(fitres))
-    pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('p~F', rownames(Fres)))
-    tF <- Fres[, 'F value'] %>% set_names(paste0('t~F', rownames(Fres)))
+    pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('pF~', rownames(Fres)))
+    tF <- Fres[, 'F value'] %>% set_names(paste0('F~',  rownames(Fres)))
     fitres %<>% summary() %>% stats::coefficients()
     colnames(fitres) %<>% stri_replace_first_fixed('Estimate', 'effect')
     colnames(fitres) %<>% stri_replace_first_fixed('Std. Error', 'se')

@@ -189,7 +189,7 @@ beta <- function( object, fit = fits(object)[1] ){
     sep <- guess_fitsep(object)
     colnames(betas) %<>% split_extract_fixed(sep, 2)
     if ('Intercept' %in% colnames(betas))  betas[ , 'Intercept' ] <- 0
-    betas[ pmat(object) > 0.05 ] <- 0
+    betas[ pmat(object, fit = fit) > 0.05 ] <- 0
     betas[ is.na(betas) ] <- 0
     betas %<>% t()
     betas
@@ -964,8 +964,8 @@ varlevels_dont_clash.SummarizedExperiment <- function(
    #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
 # F statistics                                        # Suprising shorthand for intercept-free fstats !
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
-    limmadt[, (sprintf('p%sF%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
-    limmadt[, (sprintf('t%sF%s', sep, suffix)) := limmafit[, cols]$F         ]
+    limmadt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
+    limmadt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
 # Return
     sumdt <- summarize_fit(limmadt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
