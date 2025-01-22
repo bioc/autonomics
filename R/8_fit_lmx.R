@@ -44,8 +44,8 @@
         fitres <- lm( formula = formula, data = sd,  weights = weights, na.action = stats::na.omit )
         Fres <- suppressWarnings(stats::anova(fitres))  # ANOVA F-tests on an essentially perfect fit are unreliable
         Fres <- Fres %>% extract(-nrow(.), , drop = FALSE)
-        pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('p~F', rownames(Fp)))
-        tF <- Fres[, 'F value'] %>% set_names(paste0('t~F', rownames(Fp)))
+        pF <- Fres[, 'Pr(>F)' ] %>% set_names(paste0('p~F', rownames(Fres)))
+        tF <- Fres[, 'F value'] %>% set_names(paste0('t~F', rownames(Fres)))
         fitres %<>% summary()                      # weights: stackoverflow.com/questions/51142338
         fitres %<>% stats::coefficients()
         rows <- setdiff(rownames(fitres0), rownames(fitres))
