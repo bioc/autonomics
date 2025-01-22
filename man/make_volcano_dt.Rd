@@ -7,7 +7,7 @@
 make_volcano_dt(
   object,
   fit = fits(object)[1],
-  coefs = default_coefs(object, fit = fit)[1],
+  coefs = coefs(object, fit = fit)[1],
   shape = "imputed",
   size = NULL,
   alpha = NULL,

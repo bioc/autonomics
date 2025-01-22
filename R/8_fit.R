@@ -349,7 +349,7 @@ modelvar <- function(object, ...) UseMethod('modelvar')
 #' @rdname modelvar
 #' @export
 modelvar.data.table <- function(
-    object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit), ...
+    object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){
 # Assert
     assert_is_subset(quantity, c('fdr', 'p', 't', 'effect', 'se', 'abstract'))
@@ -370,7 +370,7 @@ modelvar.data.table <- function(
 #' @rdname modelvar
 #' @export
 modelvar.SummarizedExperiment <- function(
-    object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit), ...
+    object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){  
     modelvar.data.table(fdt(object), quantity = quantity, fit = fit, coef = coef )
 }
@@ -379,7 +379,7 @@ modelvar.SummarizedExperiment <- function(
 #' @rdname modelvar
 #' @export
 effectvar <- function( 
-    object, fit = fits(object), coef = default_coefs(object, fit = fit)
+    object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)
 ){
     modelvar(object, quantity = 'effect', fit = fit, coef = coef)
 }
@@ -388,7 +388,7 @@ effectvar <- function(
 #' @rdname modelvar
 #' @export
 tvar <- function(
-    object, fit = fits(object), coef = default_coefs(object, fit = fit)
+    object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)
 ){
     modelvar(object, quantity = 't', fit = fit, coef = coef)
 }
@@ -396,14 +396,14 @@ tvar <- function(
 
 #' @rdname modelvar
 #' @export
-pvar <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit) ){
+pvar <- function( object, fit = fits(object), coef = autonomics::coefs(object, fit = fit) ){
     modelvar(object, quantity = 'p', fit = fit, coef = coef )
 }
 
 
 #' @rdname modelvar
 #' @export
-fdrvar <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit) ){
+fdrvar <- function( object, fit = fits(object), coef = autonomics::coefs(object, fit = fit) ){
     modelvar(object, quantity = 'fdr', fit = fit, coef = coef) 
 }
 
@@ -416,7 +416,7 @@ abstractvar <- function(object, ...)  UseMethod('abstractvar')
 #' @rdname modelvar
 #' @export
 abstractvar.data.table <- function(
-    object, fit = fits(object), coef = default_coefs(object, fit = fit), ...
+    object, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){
     sep <- guess_fitsep(object)             # cant use modelvar because its
     y <- paste(  rep(coef, length(fit)),         # t1~limma
@@ -428,7 +428,7 @@ abstractvar.data.table <- function(
 #' @rdname modelvar
 #' @export 
 abstractvar.SummarizedExperiment <- function(
-    object, fit = fits(object), coef = default_coefs(object, fit = fit), ...
+    object, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){
     abstractvar.data.table(fdt(object), fit = fit, coef = coef)
 }
@@ -448,7 +448,7 @@ modelvec <- function(object, ...)  UseMethod('modelvec')
 #' @rdname modelvar
 #' @export
 modelvec.data.table <- function(
-    object, quantity, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1], 
+    object, quantity, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1], 
     fvar = 'feature_id', ...
 ){
     valuevar <- modelvar(object, quantity = quantity, fit = fit, coef = coef)
@@ -462,7 +462,7 @@ modelvec.data.table <- function(
 #' @rdname modelvar
 #' @export
 modelvec.SummarizedExperiment <- function(
-    object, quantity, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1], 
+    object, quantity, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1], 
     fvar = 'feature_id', ...
 ){
     modelvec.data.table(fdt(object), quantity = quantity, fit = fit, coef = coef, fvar = fvar)
@@ -472,7 +472,7 @@ modelvec.SummarizedExperiment <- function(
 #' @rdname modelvar
 #' @export
 effectvec <- function(
-    object, fit = fits(object)[1], coef = default_coefs(object)[1], fvar = 'feature_id'
+    object, fit = fits(object)[1], coef = autonomics::coefs(object)[1], fvar = 'feature_id'
 ){
     modelvec(object, quantity = 'effect', fit = fit, coef = coef, fvar = fvar)
 }
@@ -480,7 +480,7 @@ effectvec <- function(
 #' @rdname modelvar
 #' @export
 tvec <- function(
-    object, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1], fvar = 'feature_id'
+    object, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1], fvar = 'feature_id'
 ){
     modelvec(object, quantity = 't', fit = fit, coef = coef, fvar = fvar)
 }
@@ -489,7 +489,7 @@ tvec <- function(
 #' @rdname modelvar
 #' @export
 pvec <- function(
-    object, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1], fvar = 'feature_id'
+    object, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1], fvar = 'feature_id'
 ){
     modelvec(object, quantity = 'p', fit = fit, coef = coef, fvar = fvar)
 }
@@ -498,7 +498,7 @@ pvec <- function(
 #' @rdname modelvar
 #' @export
 fdrvec <- function(
-     object, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1],  fvar = 'feature_id'
+     object, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1],  fvar = 'feature_id'
 ){
     modelvec(object, quantity = 'fdr', fit = fit, coef = coef, fvar = fvar)
 }
@@ -512,7 +512,7 @@ abstractvec <- function(object, ...)  UseMethod('abstractvec')
 #' @rdname modelvar
 #' @export
 abstractvec.data.table <- function(
-    object, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1], fvar = 'feature_id', ...
+    object, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1], fvar = 'feature_id', ...
 ){
     var <- abstractvar(object, fit = fit, coef = coef)
     if (is.null(var))  return(NULL)
@@ -523,7 +523,7 @@ abstractvec.data.table <- function(
 #' @rdname modelvar
 #' @export
 abstractvec.SummarizedExperiment <- function(
-    object, fit = fits(object)[1], coef = default_coefs(object, fit = fit)[1], fvar = 'feature_id', ...
+    object, fit = fits(object)[1], coef = autonomics::coefs(object, fit = fit)[1], fvar = 'feature_id', ...
 ){
     y <- abstractvec.data.table(fdt(object), fit = fit, coef = coef, fvar = fvar)
     names(y) <- fdt(object)[[fvar]]
@@ -547,7 +547,7 @@ modeldt <- function(object, ...)  UseMethod('modeldt')
 #' @rdname modelvar
 #' @export
 modeldt.data.table <- function(
-    object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit), ...
+    object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){
     var <- modelvar(object, quantity, coef = coef, fit = fit)
     if (is.null(var))  return(NULL)
@@ -559,7 +559,7 @@ modeldt.data.table <- function(
 #' @rdname modelvar
 #' @export
 modeldt.SummarizedExperiment <- function(
-    object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit), ...
+    object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){
     modeldt.data.table(fdt(object), quantity = quantity, fit = fit, coef = coef)
 }
@@ -567,21 +567,21 @@ modeldt.SummarizedExperiment <- function(
 
 #' @rdname modelvar
 #' @export
-effectdt <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit) ){
+effectdt <- function( object, fit = fits(object), coef = autonomics::coefs(object, fit = fit) ){
     modeldt(object, quantity = 'effect', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-tdt <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit) ){
+tdt <- function( object, fit = fits(object), coef = autonomics::coefs(object, fit = fit) ){
     modeldt(object, quantity = 't', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-pdt <- function( object, fit = fits(object), coef = default_coefs(object, fit = fit)){
+pdt <- function( object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)){
     modeldt(object, quantity = 'p', fit = fit, coef = coef)
 }
 
@@ -600,7 +600,7 @@ modelmat <- function(object, ...)  UseMethod('modelmat')
 #' @rdname modelvar
 #' @export
 modelmat <- function(
-    object, quantity, fit = fits(object), coef = default_coefs(object, fit = fit)
+    object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit)
 ){
     dt2mat(modeldt(object, quantity = quantity, fit = fit, coef = coef))
 }
@@ -608,14 +608,14 @@ modelmat <- function(
 
 #' @rdname modelvar
 #' @export
-effectmat <- function(object, fit = fits(object), coef = default_coefs(object, fit = fit)){
+effectmat <- function(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)){
     modelmat(object, quantity = 'effect', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-effectsizemat <- function(object, fit = fits(object), coef = default_coefs(object, fit = fit)){
+effectsizemat <- function(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)){
   # dont rm: used in ..extract_statistic_features : 
   # getFromNamespace(sprintf('%smat', statistic), 'autonomics')
     abs(modelmat(object, quantity = 'effect', fit = fit, coef = coef))
@@ -624,21 +624,21 @@ effectsizemat <- function(object, fit = fits(object), coef = default_coefs(objec
 
 #' @rdname modelvar
 #' @export
-tmat <- function(object, fit = fits(object), coef = default_coefs(object, fit = fit)){
+tmat <- function(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)){
     modelmat(object, quantity = 't', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-pmat <- function(object, fit = fits(object), coef = default_coefs(object, fit = fit)){
+pmat <- function(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)){
     modelmat(object, quantity = 'p', fit = fit, coef = coef)
 }
 
 
 #' @rdname modelvar
 #' @export
-fdrmat <- function(object, fit = fits(object), coef = default_coefs(object, fit = fit)){
+fdrmat <- function(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit)){
     modelmat(object, quantity = 'fdr', fit = fit, coef = coef)
 }
 
@@ -659,7 +659,7 @@ modelfeatures <- function(object, ...) UseMethod('modelfeatures')
 modelfeatures.data.table <- function(
              object,
                 fit = fits(object)[1],
-               coef = default_coefs(object, fit = fit)[1], 
+               coef = autonomics::coefs(object, fit = fit)[1], 
                fvar = 'feature_id', 
     significancevar = 'p',
        significance = 0.05,
@@ -689,7 +689,7 @@ modelfeatures.SummarizedExperiment <- function(object, ...)   modelfeatures.data
 upfeatures <- function(
              object, 
                 fit = fits(object)[1], 
-               coef = default_coefs(object, fit = fit)[1], 
+               coef = autonomics::coefs(object, fit = fit)[1], 
                fvar = 'feature_id',
     significancevar = 'p',
        significance = 0.05,
@@ -710,7 +710,7 @@ upfeatures <- function(
 downfeatures <- function(
              object,
                 fit = fits(object)[1], 
-               coef = default_coefs(object, fit = fit)[1], 
+               coef = autonomics::coefs(object, fit = fit)[1], 
                fvar = 'feature_id',
     significancevar = 'p',
        significance = 0.05,

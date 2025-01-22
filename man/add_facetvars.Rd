@@ -7,7 +7,7 @@
 add_facetvars(
   object,
   fit = fits(object)[1],
-  coefs = default_coefs(object, fit = fit)
+  coefs = autonomics::coefs(object, fit = fit)
 )
 }
 \arguments{

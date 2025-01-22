@@ -46,7 +46,7 @@ modelvar(object, ...)
   object,
   quantity,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit),
+  coef = autonomics::coefs(object, fit = fit),
   ...
 )
 
@@ -54,31 +54,35 @@ modelvar(object, ...)
   object,
   quantity,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit),
+  coef = autonomics::coefs(object, fit = fit),
   ...
 )
 
-effectvar(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+effectvar(
+  object,
+  fit = fits(object),
+  coef = autonomics::coefs(object, fit = fit)
+)
 
-tvar(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+tvar(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
-pvar(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+pvar(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
-fdrvar(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+fdrvar(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
 abstractvar(object, ...)
 
 \method{abstractvar}{data.table}(
   object,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit),
+  coef = autonomics::coefs(object, fit = fit),
   ...
 )
 
 \method{abstractvar}{SummarizedExperiment}(
   object,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit),
+  coef = autonomics::coefs(object, fit = fit),
   ...
 )
 
@@ -88,7 +92,7 @@ modelvec(object, ...)
   object,
   quantity,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   ...
 )
@@ -97,7 +101,7 @@ modelvec(object, ...)
   object,
   quantity,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   ...
 )
@@ -105,28 +109,28 @@ modelvec(object, ...)
 effectvec(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object)[1],
+  coef = autonomics::coefs(object)[1],
   fvar = "feature_id"
 )
 
 tvec(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id"
 )
 
 pvec(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id"
 )
 
 fdrvec(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id"
 )
 
@@ -135,7 +139,7 @@ abstractvec(object, ...)
 \method{abstractvec}{data.table}(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   ...
 )
@@ -143,7 +147,7 @@ abstractvec(object, ...)
 \method{abstractvec}{SummarizedExperiment}(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   ...
 )
@@ -154,7 +158,7 @@ modeldt(object, ...)
   object,
   quantity,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit),
+  coef = autonomics::coefs(object, fit = fit),
   ...
 )
 
@@ -162,50 +166,58 @@ modeldt(object, ...)
   object,
   quantity,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit),
+  coef = autonomics::coefs(object, fit = fit),
   ...
 )
 
-effectdt(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+effectdt(
+  object,
+  fit = fits(object),
+  coef = autonomics::coefs(object, fit = fit)
+)
 
-tdt(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+tdt(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
-pdt(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+pdt(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
 modelmat(
   object,
   quantity,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit)
+  coef = autonomics::coefs(object, fit = fit)
 )
 
 modelmat(
   object,
   quantity,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit)
+  coef = autonomics::coefs(object, fit = fit)
 )
 
-effectmat(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+effectmat(
+  object,
+  fit = fits(object),
+  coef = autonomics::coefs(object, fit = fit)
+)
 
 effectsizemat(
   object,
   fit = fits(object),
-  coef = default_coefs(object, fit = fit)
+  coef = autonomics::coefs(object, fit = fit)
 )
 
-tmat(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+tmat(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
-pmat(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+pmat(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
-fdrmat(object, fit = fits(object), coef = default_coefs(object, fit = fit))
+fdrmat(object, fit = fits(object), coef = autonomics::coefs(object, fit = fit))
 
 modelfeatures(object, ...)
 
 \method{modelfeatures}{data.table}(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   significancevar = "p",
   significance = 0.05,
@@ -219,7 +231,7 @@ modelfeatures(object, ...)
 upfeatures(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   significancevar = "p",
   significance = 0.05,
@@ -229,7 +241,7 @@ upfeatures(
 downfeatures(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   fvar = "feature_id",
   significancevar = "p",
   significance = 0.05,

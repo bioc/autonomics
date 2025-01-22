@@ -12,7 +12,7 @@ add_adjusted_pvalues(object, ...)
   object,
   method = "fdr",
   fit = fits(object),
-  coefs = default_coefs(object, fit = fit),
+  coefs = autonomics::coefs(object, fit = fit),
   verbose = TRUE,
   ...
 )
@@ -21,7 +21,7 @@ add_adjusted_pvalues(object, ...)
   object,
   method = "fdr",
   fit = fits(object),
-  coefs = default_coefs(object, fit = fit),
+  coefs = autonomics::coefs(object, fit = fit),
   verbose = TRUE,
   ...
 )

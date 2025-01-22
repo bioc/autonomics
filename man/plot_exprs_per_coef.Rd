@@ -7,7 +7,7 @@
 plot_exprs_per_coef(
   object,
   fit = fits(object)[1],
-  coefs = default_coefs(object, fit = fit),
+  coefs = autonomics::coefs(object, fit = fit),
   x = default_x(object),
   block = NULL,
   geom = default_geom(object, x, block = block),

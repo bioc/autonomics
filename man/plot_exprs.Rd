@@ -12,7 +12,7 @@ plot_exprs(
   assay = assayNames(object)[1],
   features = NULL,
   fit = fits(object)[1],
-  coefs = default_coefs(object, fit = fit),
+  coefs = autonomics::coefs(object, fit = fit),
   block = NULL,
   x = default_x(object, dim),
   geom = default_geom(object, x = x, block = block),

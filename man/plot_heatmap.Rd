@@ -7,7 +7,7 @@
 plot_heatmap(
   object,
   fit = fits(object)[1],
-  coef = default_coefs(object, fit = fit)[1],
+  coef = autonomics::coefs(object, fit = fit)[1],
   effectsize = 0,
   p = 1,
   fdr = 0.05,

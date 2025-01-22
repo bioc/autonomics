@@ -5,30 +5,7 @@
 #
 #==============================================================================
 
-#' Get default coefs
-#' @param object data.table or SummarizedExperiment
-#' @param fit 'limma', 'lm', 'lme', 'lmer', 'wilcoxon'
-#' @param ... S3 dispatch
-#' @return character
-#' @examples
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' object %<>% fit_limma()
-#' default_coefs(object)
-#' @export
-default_coefs <- function(object, ...)  UseMethod('default_coefs')
 
-#' @rdname default_coefs
-#' @export
-default_coefs.data.table <- function(object, fit = fits(object), ...){
-    if (length(fit)==0)  return(NULL)  else  autonomics::coefs(object, fit = fit)
-}
-
-#' @rdname default_coefs
-#' @export
-default_coefs.SummarizedExperiment <- function(object, fit = fits(object), ...){
-    default_coefs.data.table(fdt(object), fit = fit)
-}
 
 #' Bin continuous variable
 #' @param object numeric or SummarizedExperiment
@@ -146,7 +123,7 @@ add_adjusted_pvalues.data.table <- function(
     object, 
        method = 'fdr',
           fit = fits(object),
-        coefs = default_coefs(object, fit = fit),
+        coefs = autonomics::coefs(object, fit = fit),
       verbose = TRUE, 
              ...
 ){
@@ -173,7 +150,7 @@ add_adjusted_pvalues.SummarizedExperiment <- function(
     object, 
     method = 'fdr',
        fit = fits(object),
-     coefs = default_coefs(object, fit = fit),
+     coefs = autonomics::coefs(object, fit = fit),
    verbose = TRUE, 
           ...
 ){
@@ -200,7 +177,7 @@ add_adjusted_pvalues.SummarizedExperiment <- function(
 make_volcano_dt <- function(
     object,
        fit = fits(object)[1], 
-     coefs = default_coefs(object, fit = fit)[1],
+     coefs = coefs(object, fit = fit)[1],
      shape = 'imputed', 
      size  = NULL, 
      alpha = NULL,
