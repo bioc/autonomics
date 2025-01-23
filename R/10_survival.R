@@ -276,7 +276,10 @@ plot_survival <- function(
         nrow = 3
 ){
 # Prevent check notes
-    if (!requireNamespace('ggtext', quietly = TRUE))   message("BiocManager::install('ggtext'). Then rerun")
+    if (!requireNamespace('ggtext', quietly = TRUE)){   
+        message("BiocManager::install('ggtext'). Then rerun")
+        return(NULL)
+    }
     event <- timetoevent <- NULL      # svar
     value <- NULL                     # sumexp_to_longdt                                     # plotdt
     color <- curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
