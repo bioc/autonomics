@@ -311,16 +311,16 @@ plot_survival <- function(
     plotdt[, facet := factor(facet, unique(facet))]
     plotdt[, quantile := paste0('Q', quantile)]
 # Plot
-    maxtime <- max(plotdt$timetoevent)
-    maxsurvival <- max(plotdt$survival)
-    maxtotal <- max(plotdt$totObs)
+    maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
+    maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("†")   # \u2020
+    maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("•")   # \u2022
     maxdigits <- ceiling(log10(maxtotal))
 
     ndt <- plotdt[, .(totObs  = totObs[1], 
                       totDead = totDead[.N], 
                       nout   = totObs[1] - totObs[.N]), by = c('facet', 'quantile')]
     ndt[ , nalive := totObs-totDead-nout ]
-    ndt[, label := sprintf('%d<sup>°</sup> %d<sup>†</sup> %d<sup>•</sup>', nalive, totDead, nout)]
+    ndt[, label := sprintf('%d<sup>\u00b0</sup> %d<sup>\u2020</sup> %d<sup>\u2022</sup>', nalive, totDead, nout)]
     quantiles <- unique(ndt$quantile)
     colordt <- data.table(quantile = quantiles, color = make_colors(quantiles))
     ndt %<>% merge(colordt, by = 'quantile')
