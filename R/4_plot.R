@@ -718,7 +718,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     assert_scalar_subset(comparer,  c('<', '>', '=='))
     assert_is_a_number(threshold)
     assert_is_subset(fit,                fits(object))
-    assert_is_subset(coefs, autonomics::coefs(object, fit = fit))
+    assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
     assert_scalar_subset(combiner, c('|', '&'))
     assert_is_a_bool(verbose)
 # Filter
@@ -870,7 +870,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
 order_on_p <- function(
       object, 
          fit = autonomics::fits( object), 
-       coefs = setdiff(autonomics::coefs(object, fit = fit), 'Intercept'), 
+       coefs = autonomics::coefs(object, fit = fit), 
     combiner = '|',
   decreasing = FALSE,
      verbose = TRUE
@@ -879,7 +879,7 @@ order_on_p <- function(
     assert_is_valid_sumexp(object)
     if (is.null(fit))  return(object)
     assert_is_subset(fit,   autonomics::fits(  object))
-    assert_is_subset(coefs, autonomics::coefs( object, fit = fit))
+    assert_is_subset(coefs, autonomics::coefs( object, fit = fit, intercept = TRUE))
     assert_scalar_subset(combiner, c('|', '&'))
     assert_is_a_bool(verbose)
 # Order    
@@ -941,7 +941,7 @@ order_on_effect <- function(
     assert_is_valid_sumexp(object)
     if (is.null(fit))  return(object)
     assert_is_subset(fit,   autonomics::fits(  object))
-    assert_is_subset(coefs, autonomics::coefs( object, fit = fit))
+    assert_is_subset(coefs, autonomics::coefs( object, fit = fit, intercept = TRUE))
     assert_scalar_subset(combiner, c('|', '&'))
     assert_is_a_bool((verbose))
 # Order
@@ -1102,7 +1102,7 @@ add_facetvars <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_scalar_subset(fit, fits(object))
-    assert_is_subset(coefs, autonomics::coefs(object, fit = fit))
+    assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
 # Add
     for (i in seq_along(coefs)){
                pvalues <-   pvec( object, fit = fit, coef = coefs[i] )
@@ -2199,7 +2199,7 @@ plot_heatmap <- function(
     assert_is_subset(assay,         assayNames(object))
     if (!is.null(fit )){ assert_is_a_string(fit);  assert_is_subset(  fit, fits(object))  }
     if (!is.null(coef))  assert_is_a_string(coef)
-    if (!is.null(coef))  assert_is_subset(  coef, coefs(object, fit = fit))
+    if (!is.null(coef))  assert_is_subset(  coef, coefs(object, fit = fit, intercept = TRUE))
     assert_is_a_number(effectsize)
     assert_is_a_number(p)
     assert_is_a_number(fdr)

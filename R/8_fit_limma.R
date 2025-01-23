@@ -185,7 +185,7 @@ X <- function(
 #' @rdname X
 #' @export
 beta <- function( object, fit = fits(object)[1] ){
-    betas <- effectmat(object, fit = fit)
+    betas <- effectmat(object, fit = fit, coef = coefs(object, intercept = TRUE))
     sep <- guess_fitsep(object)
     colnames(betas) %<>% split_extract_fixed(sep, 2)
     if ('Intercept' %in% colnames(betas))  betas[ , 'Intercept' ] <- 0

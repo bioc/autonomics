@@ -9,20 +9,20 @@
 \usage{
 coefs(object, ...)
 
-\method{coefs}{factor}(object, ...)
+\method{coefs}{factor}(object, intercept = FALSE, ...)
 
-\method{coefs}{data.table}(object, fit = fits(object), svars = NULL, ...)
+\method{coefs}{data.table}(object, fit = fits(object), intercept = FALSE, ...)
 
-\method{coefs}{SummarizedExperiment}(object, fit = fits(object), ...)
+\method{coefs}{SummarizedExperiment}(object, fit = fits(object), intercept = FALSE, ...)
 }
 \arguments{
 \item{object}{factor, data.table, SummarizedExperiment}
 
 \item{...}{required for s3 dispatch}
 
-\item{fit}{'limma', 'lm', 'lme', 'lmer', 'wilcoxon'}
+\item{intercept}{TRUE or FALSE : whether to include the intercept}
 
-\item{svars}{NULL or charactervector (svar for which to return coefs)}
+\item{fit}{'limma', 'lm', 'lme', 'lmer', 'wilcoxon'}
 }
 \value{
 character vector
@@ -41,4 +41,5 @@ Get coefs
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file, fit = 'limma')
     coefs(object)
+    coefs(object, intercept = TRUE)
 }

@@ -188,7 +188,7 @@ make_volcano_dt <- function(
     sep <- guess_fitsep(fdt(object))
     assert_any_are_matching_regex(fvars(object), paste0('^p', sep))
     assert_is_subset(fit, fits(object))
-    assert_is_subset(coefs, autonomics::coefs(object, fit = fit))
+    assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
     if (!is.null(shape)){ assert_is_subset(shape, fvars(object)); object %<>% bin(shape) }
     if (!is.null(size) ){ assert_is_subset(size,  fvars(object)); object %<>% bin(size)  }
     if (!is.null(alpha)){ assert_is_subset(alpha, fvars(object)); object %<>% bin(alpha) }
@@ -280,7 +280,7 @@ make_volcano_dt <- function(
 plot_volcano <- function(
           object,
              fit = fits(object)[1], 
-           coefs = setdiff( autonomics::coefs(object, fit = fit), 'Intercept' )[1],
+           coefs = autonomics::coefs(object, fit = fit)[1],
            facet = if (is_scalar(fit)) 'coef' else c('fit', 'coef'),
           scales = 'fixed',
            shape = if ('imputed' %in% fvars(object)) 'imputed' else NULL, 
@@ -502,7 +502,7 @@ fdr2p <- function(fdr){
 plot_coef_densities <- function(
     object, 
        fit = fits(object)[1], 
-     coefs = setdiff(autonomics::coefs(object, fit = fit), 'Intercept'), 
+     coefs = autonomics::coefs(object, fit = fit), 
        sep = FITSEP,
      label = 'feature_id'
 ){

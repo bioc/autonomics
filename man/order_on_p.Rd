@@ -9,7 +9,7 @@
 order_on_p(
   object,
   fit = autonomics::fits(object),
-  coefs = setdiff(autonomics::coefs(object, fit = fit), "Intercept"),
+  coefs = autonomics::coefs(object, fit = fit),
   combiner = "|",
   decreasing = FALSE,
   verbose = TRUE

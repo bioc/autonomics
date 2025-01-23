@@ -205,7 +205,7 @@ abstract_fit <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_is_subset(fit,   fits(object))
-    assert_is_subset(coef, coefs(object))
+    assert_is_subset(coef, coefs(object, intercept = TRUE))
 # Abstract
     for ( curfit in fit){
     for (curcoef in coef){
@@ -369,7 +369,7 @@ enrichment <- function(
     if (is.null(pathwaydt))  return(NULL)
     assert_is_data.table(pathwaydt)
     if (!is.null(fit ))  assert_scalar_subset(fit,  fits(object))
-    if (!is.null(coef))  assert_scalar_subset(coef, coefs(object))
+    if (!is.null(coef))  assert_scalar_subset(coef, coefs(object, intercept = TRUE))
     assert_scalar_subset(var, fvars(object), .xname = get_name_in_parent(var))
     assert_is_factor(fdt(object)[[var]])
     assert_is_subset(levels, levels(fdt(object)[[var]]))
@@ -485,7 +485,7 @@ altenrich <- function(
     assert_all_are_non_missing_nor_empty_character(fdt(object)[[genevar]])
     assert_all_are_non_missing_nor_empty_character(  pathwaydt[[genevar]])
     if (!is.null(genesep))  assert_is_a_string(genesep)
-    assert_scalar_subset(coef, coefs(object))
+    assert_scalar_subset(coef, coefs(object, intercept = TRUE))
     assert_scalar_subset(fit, fits(object))
     genes0 <- fdt(object)[[genevar]]
     fdt(object)[[genevar]] %<>% split_extract_regex(genesep, 1)

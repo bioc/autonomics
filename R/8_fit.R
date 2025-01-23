@@ -354,7 +354,7 @@ modelvar.data.table <- function(
 # Assert
     assert_is_subset(quantity, c('fdr', 'p', 't', 'effect', 'se', 'abstract'))
     assert_is_subset(fit,   fits(object))
-    assert_is_subset(coef, coefs(object, fit = fit))
+    assert_is_subset(coef, coefs(object, fit = fit, intercept = TRUE))
     assert_has_no_duplicates(fit)   # Avoid duplicate columns
     assert_has_no_duplicates(coef)  # Downstream functionality melts and dcasts
 # Return                            # Which requires the cast to be unique
@@ -770,10 +770,10 @@ fits.SummarizedExperiment <- function(object, ...){
 
 #' Get coefs
 #' 
-#' @param object  factor, data.table, SummarizedExperiment
-#' @param fit     'limma', 'lm', 'lme', 'lmer', 'wilcoxon'
-#' @param svars   NULL or charactervector (svar for which to return coefs)
-#' @param ...     required for s3 dispatch
+#' @param object     factor, data.table, SummarizedExperiment
+#' @param fit       'limma', 'lm', 'lme', 'lmer', 'wilcoxon'
+#' @param intercept  TRUE or FALSE : whether to include the intercept
+#' @param ...        required for s3 dispatch
 #' @return  character vector
 #' @examples
 #' # Factor
@@ -786,18 +786,21 @@ fits.SummarizedExperiment <- function(object, ...){
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file, fit = 'limma')
 #'     coefs(object)
+#'     coefs(object, intercept = TRUE)
 #' @export
 coefs <- function(object, ...)  UseMethod('coefs')
 
 #' @rdname coefs
 #' @export
-coefs.factor <- function(object, ...)   colnames(contrasts(object))
+coefs.factor <- function(object, intercept = FALSE, ...) {
+    coefs0 <- colnames(contrasts(object))
+    if (!intercept)  coefs0 %<>% setdiff('Intercept')
+    coefs0
+}
 
 #' @rdname coefs
 #' @export
-coefs.data.table <- function(
-    object, fit = fits(object), svars = NULL, ...
-){
+coefs.data.table <- function(object, fit = fits(object), intercept = FALSE, ...){
     sep <- guess_fitsep(object)
     if (is.null(sep))  return(NULL)
     if (is.null(fit))  return(NULL)
@@ -807,13 +810,14 @@ coefs.data.table <- function(
     coefs0 %<>% extract(fits0 %in% fit)
     coefs0 %<>% unique()
     #if (!is.null(svars))  coefs0 %<>% extract(Reduce('|', lapply(svars, grepl, .)))
-    coefs0 
+    if (!intercept)  coefs0 %<>% setdiff('Intercept')
+    coefs0
 }
 
 #' @rdname coefs
 #' @export
-coefs.SummarizedExperiment <- function(object, fit = fits(object), ...){
-    coefs.data.table(fdt(object), fit = fit)
+coefs.SummarizedExperiment <- function(object, fit = fits(object), intercept = FALSE, ...){
+    coefs.data.table(fdt(object), fit = fit, intercept = intercept)
 }
 
 #============================================================================
@@ -863,7 +867,7 @@ is_sig <- function(
     assert_is_all_of(object, 'SummarizedExperiment')
     assert_is_character(fit)
     assert_is_subset(fit, fits(object))
-    if (is.character(contrast))  for (fi in fit)  assert_is_subset(contrast, coefs(object, fit = fi))
+    if (is.character(contrast))  for (fi in fit)  assert_is_subset(contrast, coefs(object, fit = fi, intercept = TRUE))
 # Run across models
     if (quantity == 'fdr')  fdt(object) %<>% add_adjusted_pvalues('fdr')
     res <-  mapply(.is_sig, fit, 
