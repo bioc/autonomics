@@ -277,9 +277,9 @@ plot_survival <- function(
 ){
 # Prevent check notes
     if (!requireNamespace('ggtext', quietly = TRUE))   message("BiocManager::install('ggtext'). Then rerun")
-    event <- timetoevent <- NULL                                  # svar
-    value <- NULL                                                 # sumexp_to_longdt
-    facet <- label <- totDead <- totObs <- survival <- y <- NULL    # plotdt 
+    event <- timetoevent <- NULL      # svar
+    value <- NULL                     # sumexp_to_longdt                                     # plotdt
+    color <- curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
 # Prepare
     obj <- extract_coef_features(object, fit = engine[1], n = n)
     plotdt <- sumexp_to_longdt(obj, assay = assay, svars = c('timetoevent', 'event'))
@@ -288,8 +288,8 @@ plot_survival <- function(
     plotdt <- plotdt[quantile %in% c(1, ntile)]
     plotdt %<>% extract(order(feature_id, quantile, timetoevent))
     plotdt <- plotdt[order(feature_id, quantile, timetoevent, -event)]
-    plotdt[ , totObs   := .N - cumsum(1-event),                                               by = c('feature_id', 'quantile')   ]
-    plotdt[ , totDead := cumsum(event),                                                       by = c('feature_id', 'quantile')   ]
+    plotdt[ , totObs   := .N - cumsum(1-event),     by = c('feature_id', 'quantile')   ]
+    plotdt[ , totDead := cumsum(event),             by = c('feature_id', 'quantile')   ]
     plotdt <- plotdt[ , .(totObs  = max(totObs), 
                           totDead = max(totDead), 
                           curOut  = sum(event==0)), by = c('feature_id', 'quantile', 'timetoevent')]
