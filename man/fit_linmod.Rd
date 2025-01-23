@@ -174,10 +174,6 @@ fit_wilcoxon(
 \item{...}{passed to fit_(limma|lm|lme|lmer) functions}
 
 \item{opt}{lme options}
-
-\item{ftest}{TRUE or FALSE}
-
-\item{plot}{whether to plot}
 }
 \value{
 Updated SummarizedExperiment

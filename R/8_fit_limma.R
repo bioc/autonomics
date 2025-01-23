@@ -697,11 +697,9 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param coefs     NULL or character vector: model coefs to test
 #' @param block     block svar (or NULL)
 #' @param weightvar NULL or name of weight matrix in assays(object)
-#' @param ftest     TRUE or FALSE
 #' @param sep       string: pvar separator  ("~" in "p~t2~limma")
 #' @param suffix    string: pvar suffix ("limma" in "p~t2~limma")
 #' @param verbose   whether to msg
-#' @param plot      whether to plot
 #' @param outdir    NULL or dir
 #' @param writefun  'write_xl' or 'write_ods'
 #' @param volcano     TRUE or FALSE
