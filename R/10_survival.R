@@ -176,7 +176,7 @@ fit_survival <- function(
     assert_scalar_subset(assay, assayNames(object))
     event <- exprlevel <- timetoevent <- value <- NULL
     if ('logrank' %in% engine){
-        if (!requireNamespace('coin'))  message("BiocManager::install('coin'). Then rerun")}
+        if (!requireNamespace('coin', quietly = TRUE))  message("BiocManager::install('coin'). Then rerun")}
 # Prepare
     if (verbose)  cmessage('%sSurvival', spaces(8))
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))       # Filter
@@ -276,6 +276,7 @@ plot_survival <- function(
         nrow = 3
 ){
 # Prevent check notes
+    if (!requireNamespace('ggtext', quietly = TRUE))   message("BiocManager::install('ggtext'). Then rerun")
     event <- timetoevent <- NULL                                  # svar
     value <- NULL                                                 # sumexp_to_longdt
     facet <- label <- totDead <- totObs <- survival <- y <- NULL    # plotdt 
