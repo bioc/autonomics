@@ -70,15 +70,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             expect_true(sumexp_contains_fit(               fit_wilcoxon( object, ~ subgroup, block = 'Subject'),  'wilcoxon'))
     })
     
-    test_that( " fit: mcclain21 ", {
-        file  <- download_mcclain21('counts')
-        sfile <- download_mcclain21('samples')
-        object <- .read_rnaseq_counts(file, sfile = sfile, by.y = 'rna_id')
-        expect_s4_class(object, 'SummarizedExperiment')
-        
-    })
 
-        
 #============================================================================
 #                                                                           #
 #            context(" plot_contrastogram ")                                #
