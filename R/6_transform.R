@@ -66,8 +66,18 @@ which.medoid <- function(mat){
     if (any(idx))  cmessage('\t\t\t\tUse %d/%d non-NA rows to compute spatial median', 
                            sum(idx), length(idx))
     mat %<>% extract(!idx, )
-    spatmed <- ICSNP::spatial.median(t(mat))
-    which.min(sqrt(colSums((sweep(mat, 1, spatmed))^2)))
+
+    tryCatch(
+        {   spatmed <- ICSNP::spatial.median(t(mat))
+            which.min(sqrt(colSums((sweep(mat, 1, spatmed))^2)))
+        }, 
+        error = function(cond){
+            message('    spatial median failed - using simple centroid instead')
+            centroid <- colMeans(mat)
+            centroid %<>% matrix(nrow = nrow(mat), ncol = ncol(mat), byrow = TRUE)
+            which.min(colSums((mat - centroid)^2))
+        }
+    )
 }
 
 .filter_medoid <- function(object, verbose = FALSE){
