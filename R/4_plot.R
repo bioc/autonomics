@@ -2337,11 +2337,11 @@ plot_joint_density <- function(
         xvalues <- obj[[xvar]]
         densityfun <- approxfun(density(xvalues, na.rm = TRUE))
         pX <- ggplot() + theme_bw() + 
-                         annotate('point', x = sort(xvalues), y = -densityfun(sort(xvalues))) + 
-                         annotate('path',  x = sort(xvalues), y = -densityfun(sort(xvalues))) + 
-                         scale_x_continuous(position = 'top') + 
-                         xlab(NULL) + 
-                         ylab('') + 
+                         annotate('point', x = sort(xvalues), y = densityfun(sort(xvalues))) + 
+                         annotate('path',  x = sort(xvalues), y = densityfun(sort(xvalues))) + 
+                         scale_x_continuous(position = 'bottom') + 
+                         xlab(xvar) + 
+                         ylab(NULL) + 
                          theme(axis.text.y = element_blank(), # 5.5 each is default
                                 panel.grid = element_blank(), # t=0 & b=10.5 preserves asp ratio
                                plot.margin = unit(c(t = 0, r = 5.5, b = 10.5, l = 5.5), 'points'))
@@ -2352,9 +2352,11 @@ plot_joint_density <- function(
                          annotate('point', y = sort(yvalues), x = -densityfun(sort(yvalues))) + 
                          annotate('path',  y = sort(yvalues), x = -densityfun(sort(yvalues))) + 
                          scale_y_continuous(position = 'right') + 
-                         xlab('') + 
-                         ylab(NULL) + 
+                         xlab(NULL) + 
+                         ylab(yvar) + 
                          theme(axis.text.x = element_blank(), 
+                               axis.text.y = element_text(),
+                               axis.title.y.right = element_text(angle = 90),
                                 panel.grid = element_blank(), 
                                plot.margin = unit(c(t = 5.5, r = 0, b = 5.5, l = 10.5), 'points'))
     # XY
@@ -2366,12 +2368,12 @@ plot_joint_density <- function(
         if (color){  pXY <- pXY + geom_point(aes(x = !!sym(xvar), y = !!sym(yvar), color = !!sym('xydensity'))) + 
                                   scale_color_gradient(low = '#56B1F7', high = '#132B43')
         } else {     pXY <- pXY + geom_point() }
-        pXY <- pXY + ylab(yvar) + xlab(xvar) + 
+        pXY <- pXY + ylab(NULL) + xlab(NULL) + 
                    guides(fill = 'none', color = 'none') + 
                    theme(axis.text.x = element_blank(), 
                          axis.text.y = element_blank(), 
                           panel.grid = element_blank() )
-        layout <- matrix(c(2,3,4,1), byrow = TRUE, nrow = 2)
+        layout <- matrix(c(4,1,2,3), byrow = TRUE, nrow = 2)
         gridExtra::grid.arrange(pX, pY, pXY, layout_matrix = layout)
 }
 
