@@ -16,7 +16,8 @@ sumexp_to_longdt(
   object,
   fvars = intersect("feature_name", autonomics::fvars(object)),
   svars = intersect("subgroup", autonomics::svars(object)),
-  assay = assayNames(object) \%>\% intersect(c(.[1], "is_imputed"))
+  assay = assayNames(object) \%>\% intersect(c(.[1], "is_imputed")),
+  value.name = "value"
 )
 
 sumexp_to_subrep_dt(object, subgroup = subgroup)
@@ -29,6 +30,8 @@ sumexp_to_subrep_dt(object, subgroup = subgroup)
 \item{assay}{matrix in assays(object) to be used}
 
 \item{svars}{additional svars to include in table}
+
+\item{value.name}{string: passed to melt.data.table}
 
 \item{subgroup}{subgroup (sym)}
 }

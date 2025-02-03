@@ -39,6 +39,7 @@ sumexp_to_widedt <- function(
 #' @param fvars  additional fvars to include in table
 #' @param svars  additional svars to include in table
 #' @param assay  matrix in assays(object) to be used
+#' @param value.name string: passed to melt.data.table
 #' @return data.table
 #' @examples
 #' # Atkin Hypoglycemia
@@ -63,7 +64,8 @@ sumexp_to_longdt <- function(
     object,
     fvars = intersect('feature_name', autonomics::fvars(object)),
     svars = intersect('subgroup',     autonomics::svars(object)),
-    assay = assayNames(object) %>% intersect(c(.[1], 'is_imputed'))
+    assay = assayNames(object) %>% intersect(c(.[1], 'is_imputed')), 
+    value.name = 'value'
 ){
 # Assert
     . <- sample_id <- NULL
@@ -81,7 +83,7 @@ sumexp_to_longdt <- function(
 # Melt
     melt <- data.table::melt.data.table
     dt <- sumexp_to_widedt(object, fvars = fvars, assay = assay[1])
-    dt %<>% melt(id.vars = unique(c('feature_id', fvars)), variable.name = 'sample_id', value.name = 'value')
+    dt %<>% melt(id.vars = unique(c('feature_id', fvars)), variable.name = 'sample_id', value.name = value.name)
 # Merge
     if (length(assay)>1){
         for (ass in assay[-1]){
@@ -92,7 +94,7 @@ sumexp_to_longdt <- function(
     }
     sdt1 <- sdt(object)[, c('sample_id', svars), with = FALSE]
     dt %<>% merge(sdt1, by = 'sample_id')
-    cols <- c('feature_id', fvars, 'sample_id', svars, 'value', assay[-1])
+    cols <- c('feature_id', fvars, 'sample_id', svars, value.name, assay[-1])
     cols %<>% unique() # avoid duplication of same fields in fid and fvars
     cols %<>% intersect(names(dt))
     dt %<>% extract(, cols, with = FALSE)
