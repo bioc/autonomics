@@ -6,18 +6,20 @@
 \alias{.logrank}
 \title{Fit onefeature survival}
 \usage{
-.coxph(timetoevent, event, expr)
+.coxph(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues))
 
-.survdiff(timetoevent, event, expr)
+.survdiff(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues))
 
-.logrank(timetoevent, event, expr)
+.logrank(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues))
 }
 \arguments{
 \item{timetoevent}{numeric (time to event)}
 
 \item{event}{numeric (1=event, 0=not)}
 
-\item{expr}{numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)}
+\item{xvalues}{numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)}
+
+\item{xname}{string}
 }
 \description{
 Fit onefeature survival

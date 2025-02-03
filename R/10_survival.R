@@ -40,9 +40,10 @@ survival_example <- function(){
 
 
 #' Fit onefeature survival 
-#' @param timetoevent numeric (time to event)
-#' @param event       numeric (1=event, 0=not)
-#' @param expr        numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)
+#' @param timetoevent  numeric (time to event)
+#' @param event        numeric (1=event, 0=not)
+#' @param xvalues      numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)
+#' @param xname        string
 #' @examples
 #' # Prepare
 #'          object <- survival_example()
@@ -58,44 +59,45 @@ survival_example <- function(){
 #'          fit_survival(object)
 #' @rdname dot-coxph
 #' @export
-.coxph <- function(timetoevent, event, expr){
-    survout <- suppressWarnings(stats::coef(summary(coxph(Surv(timetoevent, event)~expr))))
-    data.table( `p~expr~coxph` =    survout[, 'Pr(>|z|)'], 
-           `effect~expr~coxph` = -1*survout[, 'coef'    ], 
-                `t~expr~coxph` = -1*survout[, 'z'       ])
+.coxph <- function(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues)){
+    survout <- suppressWarnings(stats::coef(summary(coxph(Surv(timetoevent, event) ~ xvalues))))
+    outdt <- data.table( p =    survout[, 'Pr(>|z|)'], 
+                    effect = -1*survout[, 'coef'    ], 
+                         t = -1*survout[, 'z'       ])
+    setnames(outdt, names(outdt), 
+             paste0(names(outdt),'~', xname, '~survcoxph'))
+    outdt[]
 }
 
 #' @rdname dot-coxph
 #' @export
-.survdiff <- function(timetoevent, event, expr){
-    nexpr <- length(levels(expr))
-    survout <- suppressWarnings(survdiff(   Surv(timetoevent, event) ~ expr   ))
-    meandiff <- mean(timetoevent[expr==rev(levels(expr))[1]]) - 
-                mean(timetoevent[expr==   (levels(expr))[1]])
-    dtout <- data.table(  `p~expr~survdiff` =  1 - pchisq(survout$chisq, 1), 
-                     `effect~expr~survdiff` = meandiff,
-                          `t~expr~survdiff` = survout$chisq * sign(meandiff) )
-    oldnames <- newnames <- names(dtout)
-    newnames %<>% stri_replace_first_fixed('~expr~', sprintf('~expr%s~', rev(levels(expr))[1]))
-    setnames(dtout, oldnames, newnames)
-    dtout[]
+.survdiff <- function(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues)){
+    xlevels <- levels(xvalues)
+    survout <- suppressWarnings(survdiff(   Surv(timetoevent, event) ~ xvalues   ))
+    meandiff <- mean(timetoevent[xvalues==rev(xlevels)[1]]) - 
+                mean(timetoevent[xvalues==   (xlevels)[1]])
+    outdt <- data.table(  p =  1 - pchisq(survout$chisq, 1), 
+                     effect = meandiff,
+                          t = survout$chisq * sign(meandiff) )
+    setnames(outdt, names(outdt), 
+             sprintf('%s~%s%s-%s~survdiff', names(outdt), xname, rev(xlevels)[1], xlevels[1]))
+    outdt[]
 }
 
 
 #' @rdname dot-coxph
 #' @export
-.logrank <- function(timetoevent, event, expr){
-    nexpr <- length(levels(expr))
-    survout <- suppressWarnings(coin::logrank_test(   Surv(timetoevent, event) ~ expr   ))
-    meandiff <- mean(timetoevent[expr==rev(levels(expr))[1]]) - 
-                mean(timetoevent[expr==   (levels(expr))[1]])
-    dtout <- data.table(  `p~expr~logrank` = coin::pvalue(survout), 
-                     `effect~expr~logrank` = meandiff,
-                          `t~expr~logrank` = coin::statistic(survout) * sign(meandiff) )
-    oldnames <- newnames <- names(dtout)
-    newnames %<>% stri_replace_first_fixed('~expr~', sprintf('~expr%s~', rev(levels(expr))[1]))
-    setnames(dtout, oldnames, newnames)
-    dtout[]
+.logrank <- function(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues)){
+    xlevels <- levels(xvalues)
+    survout <- suppressWarnings(coin::logrank_test(   Surv(timetoevent, event) ~ xvalues   ))
+    meandiff <- mean(timetoevent[xvalues==rev(xlevels)[1]]) - 
+                mean(timetoevent[xvalues==   (xlevels)[1]])
+    outdt <- data.table(  p = coin::pvalue(survout), 
+                     effect = meandiff,
+                          t = coin::statistic(survout) * sign(meandiff) )
+    setnames(outdt, names(outdt), 
+             sprintf('%s~%s%s-%s~survlogrank', names(outdt), xname, rev(xlevels)[1], xlevels[1]))
+    outdt[]
 }
 
 
