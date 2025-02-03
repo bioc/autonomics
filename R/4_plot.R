@@ -911,7 +911,7 @@ order_on_t <- function(
     if (is.null(fit))              return(object)
    #if (!fit %in% LINMODENGINES)  return(object) # now also works for survival
     assert_is_subset(fit,   autonomics::fits(  object))
-    assert_is_subset(coefs, autonomics::coefs( object, fit = fit))
+    assert_is_subset(coefs, autonomics::coefs( object, fit = fit, intercept = TRUE))
     assert_scalar_subset(combiner, c('|', '&'))
     assert_is_a_bool(verbose)
 # Order    
