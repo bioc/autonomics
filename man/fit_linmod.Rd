@@ -20,7 +20,7 @@ fit_linmod(
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
     verbose = FALSE),
   contrasts = NULL,
-  coefs = if (is.null(contrasts)) model_coefs(design = design) else NULL,
+  coefs = if (is.null(contrasts)) autonomics::coefs(object) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   sep = FITSEP,
