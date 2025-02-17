@@ -86,8 +86,8 @@ character2factor <- function(x)  if (is.character(x)) factor(x) else x
 #' object <- read_metabolon(file)
 #' unique(create_design(object))
 #' unique(create_design(object, ~ Time))
-#' unique(create_design(object, ~ Time, codingfun = contr.treatment.explicit))
-#' unique(create_design(object, ~ Time, codingfun = contr.diff))
+#' unique(create_design(object, ~ Time, codingfun = code_control))
+#' unique(create_design(object, ~ Time, codingfun = code_diff))
 #' unique(create_design(object, ~ Time + Diabetes))
 #' unique(create_design(object, ~ Time / Diabetes))
 #' unique(create_design(object, ~ Time * Diabetes))
@@ -101,7 +101,7 @@ create_design.SummarizedExperiment <- function(
     object, 
     formula   = default_formula(object),
     drop      = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
     verbose   = TRUE, 
     ...
 ){
@@ -118,7 +118,7 @@ create_design.data.table <- function(
     object, 
     formula   = default_formula(object),
     drop      = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
     verbose   = TRUE, 
     ...
 ){
@@ -169,7 +169,7 @@ X <- function(
     object, 
     formula   = default_formula(object),
     drop      = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = contr.treatment.explicit
+    codingfun = code_control
 ){
     design <- create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE)
     X <- unique(design)
@@ -518,7 +518,7 @@ contrast_coefs <- function(
        object, 
       formula = default_formula(object), 
          drop = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = contr.treatment.explicit, 
+    codingfun = code_control, 
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE)
 ){
     
@@ -544,7 +544,7 @@ model_coefs <- function(
     object, 
     formula = default_formula(object), 
        drop = varlevels_dont_clash(object, all.vars(formula)), 
-  codingfun = contr.treatment.explicit, 
+  codingfun = code_control, 
      design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE)
 ){
     colnames(design)
@@ -759,7 +759,7 @@ fit_linmod <- function(
       formula = as.formula('~ subgroup'),
        engine = 'limma', 
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit, # if (engine == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment , 
+    codingfun = code_control, # if (engine == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment , 
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE),
     contrasts = NULL,
         coefs = if (is.null(contrasts))  autonomics::coefs(object)  else NULL,
@@ -835,7 +835,7 @@ fit_limma <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
     contrasts = NULL,
         block = NULL,
@@ -909,7 +909,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
     contrasts = NULL,
         block = NULL, 

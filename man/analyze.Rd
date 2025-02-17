@@ -11,7 +11,7 @@ analyze(
   fit = "limma",
   formula = ~subgroup,
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
+  codingfun = code_control,
   contrasts = NULL,
   coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
   block = NULL,

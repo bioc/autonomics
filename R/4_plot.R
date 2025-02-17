@@ -1658,7 +1658,7 @@ plot_venn <- function(x){
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' object %<>% fit_wilcoxon(~ subgroup, block = 'Subject')
-#' object %<>% fit_limma(   ~ subgroup, block = 'Subject', codingfun = contr.treatment.explicit)
+#' object %<>% fit_limma(   ~ subgroup, block = 'Subject')
 #' isfdr <- is_sig(object, contrast = 't3-t0', quantity = 'p', fit = fits(object))
 #' plot_contrast_venn(isfdr)
 #' @export
@@ -1720,7 +1720,7 @@ plot_matrix <- function(mat){
 #' object$subgroup %<>% substr(1,3)
 #' plot_design(object)
 #' @export
-plot_design <- function(object, codingfun = contr.treatment.explicit){
+plot_design <- function(object, codingfun = code_control){
     coef <- y <- yend <- NULL
     designmat <- create_design(object, subgroupvar = 'subgroup', drop = TRUE, codingfun = codingfun)
     rownames(designmat) <- object$subgroup

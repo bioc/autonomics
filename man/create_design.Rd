@@ -12,7 +12,7 @@ create_design(object, ...)
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
+  codingfun = code_control,
   verbose = TRUE,
   ...
 )
@@ -21,7 +21,7 @@ create_design(object, ...)
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
+  codingfun = code_control,
   verbose = TRUE,
   ...
 )
@@ -62,8 +62,8 @@ file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 unique(create_design(object))
 unique(create_design(object, ~ Time))
-unique(create_design(object, ~ Time, codingfun = contr.treatment.explicit))
-unique(create_design(object, ~ Time, codingfun = contr.diff))
+unique(create_design(object, ~ Time, codingfun = code_control))
+unique(create_design(object, ~ Time, codingfun = code_diff))
 unique(create_design(object, ~ Time + Diabetes))
 unique(create_design(object, ~ Time / Diabetes))
 unique(create_design(object, ~ Time * Diabetes))

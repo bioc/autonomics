@@ -34,8 +34,8 @@ Get coefs
 # Factor
     x <- factor(c('A', 'B', 'C'))
     coefs(x)
-    coefs(code(x, contr.treatment.explicit))
     coefs(code(x, code_control))
+    coefs(code(x, contr.treatment.explicit))
     
 # SummarizedExperiment
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')

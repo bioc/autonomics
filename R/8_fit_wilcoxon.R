@@ -86,7 +86,7 @@ fit_wilcoxon <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = NULL,
-    codingfun = contr.treatment.explicit, # wilcox is the only one where `contr.treatment` doesnt work
+    codingfun = code_control, # wilcox is the only one where `contr.treatment` doesnt work
        design = NULL, # only so that fit_linmod(.) works
     contrasts = NULL,
         block = NULL, 

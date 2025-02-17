@@ -9,7 +9,7 @@ X(
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit
+  codingfun = code_control
 )
 
 beta(object, fit = fits(object)[1])

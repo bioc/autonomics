@@ -228,7 +228,7 @@ fit_lmx <- function(
           fit, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
         block = NULL, 
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -295,7 +295,7 @@ fit_lm <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
        design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -325,7 +325,7 @@ fit_lme <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
        design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -362,7 +362,7 @@ fit_lmer <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = contr.treatment.explicit,
+    codingfun = code_control,
        design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 

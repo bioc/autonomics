@@ -9,7 +9,7 @@ ftype(
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
   fit = fits(object)[1],
-  codingfun = contr.treatment.explicit
+  codingfun = code_control
 )
 }
 \arguments{

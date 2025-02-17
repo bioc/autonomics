@@ -9,7 +9,7 @@ contrast_coefs(
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
+  codingfun = code_control,
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
     verbose = FALSE)
 )
@@ -18,7 +18,7 @@ model_coefs(
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = contr.treatment.explicit,
+  codingfun = code_control,
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
     verbose = FALSE)
 )

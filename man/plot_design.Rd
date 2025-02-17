@@ -4,7 +4,7 @@
 \alias{plot_design}
 \title{Plot model}
 \usage{
-plot_design(object, codingfun = contr.treatment.explicit)
+plot_design(object, codingfun = code_control)
 }
 \arguments{
 \item{object}{´SummarizedExperiment}
