@@ -1,4 +1,55 @@
 
+
+#' Is character matrix
+#' @examples
+#' object <- survival_example()
+#' object %<>% bin_assay()
+#' object %<>% factorize_assay()
+#' is_character_matrix(assays(object)$exprs)
+#' is_character_matrix(assays(object)$expr3bins)
+#' is_character_matrix(assays(object)$exprs3levels)
+#' @return TRUE or false
+#' @export
+is_character_matrix <- function(x, .xname = get_name_in_parent(x)){
+    modex <- mode(x)
+    txt <- "`%s` is not a character matrix, but has mode '%s'"
+    if (modex != 'character')  return(false(txt, .xname, modex))
+    TRUE
+}
+
+
+#' @rdname is_character_matrix
+#' @export
+assert_character_matrix <- function(x, .xname = get_name_in_parent(x)){
+    assert_engine(is_character_matrix, x, .xname = .xname)
+}
+
+
+# This assertion was written to ensure that .survdiff is fed only 
+# binned data. But then it was realized that the required of survdiff 
+# is stricter. Binned data needs to be factorized to ensure proper factor
+# ordering, which in turns ensure intuitive coefficient interpretation.
+# So rather than this assertion, character columns are now explicitly factorized
+# before sending them to .survdiff, .logrank, or .coxph.
+# Is binned assay
+# @examples
+# object <- survival_example()
+# is_binned_assay(assays(object)[[1]])
+# @return TRUE or false
+# @export
+#is_binned_assay <- function(x, .xname = get_name_in_parent(x)){
+#    if (length(unique(c(x))) >= ncol(x))  return(false("%s is not a binned assay", .xname))
+#    return(TRUE)
+#}
+
+# @rdname is_binned_assay
+# @export
+#assert_binned_assay <- function(x, .xname = get_name_in_parent(x)){
+#    assert_engine(is_binned_assay, x, .xname = get_name_in_parent(x))    
+#}
+
+
+
 #==============================================================================
 # has/contains
 
