@@ -77,18 +77,24 @@ survival_example <- function(){
     #data.table(cbind(fitmat, t(tF), t(pF)))
 }
 
+
 #' @rdname dot-coxph
 #' @export
-.survdiff <- function(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues)){
-    xlevels <- levels(xvalues)
-    survout <- suppressWarnings(survdiff(   Surv(timetoevent, event) ~ xvalues   ))
-    meandiff <- mean(timetoevent[xvalues==rev(xlevels)[1]]) - 
-                mean(timetoevent[xvalues==   (xlevels)[1]])
-    outdt <- data.table(  p =  1 - pchisq(survout$chisq, 1), 
-                     effect = meandiff,
-                          t = survout$chisq * sign(meandiff) )
-    setnames(outdt, names(outdt), 
-             sprintf('%s~%s%s-%s~survdiff', names(outdt), xname, rev(xlevels)[1], xlevels[1]))
+.survdiff <- function(sd, formula){
+    xvar <- labels(terms(formula))
+    xvalues <- sd[[xvar]]
+    xlevel1 <-     levels(xvalues)[1]
+    xleveln <- rev(levels(xvalues))[1]
+    
+    sd %<>% extract(get(xvar) %in% c(xlevel1, xleveln))
+    survout <- suppressWarnings(survival::survdiff(formula = formula, data = sd))
+   meandiff <- sd[ , mean(timetoevent[get(xvar)==xleveln]) -
+                     mean(timetoevent[get(xvar)==xlevel1]) ]
+    outdt <- data.table(  effect = -meandiff,
+                               t = -sign(meandiff) * survout$chisq,
+                               p =  1 - pchisq(survout$chisq, 1)  )
+    newnames <- sprintf('%s~%s%s-%s~survdiff', names(outdt), xvar, xleveln, xlevel1)
+    setnames(outdt, names(outdt), newnames)
     outdt[]
 }
 
