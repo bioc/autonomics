@@ -108,6 +108,56 @@ survival_example <- function(){
 SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 
 
+#' Bin/Factorize assay
+#' @param object  SummarizedExperiment
+#' @param assay   string
+#' @param k       number of bins/levels
+#' @param verbose TRUE or FALSE
+#' @return SummarizedExperiment
+#' @examples
+#' object <- survival_example()
+#'       bin_assay(object)
+#' factorize_assay(object)
+#' @export
+bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
+# Assert
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(assay, assayNames(object))
+    assert_is_a_number(k)
+    assert_is_a_bool(verbose)
+# Bin
+    mat <- assays(object)[[assay]]
+    mat %<>% apply(1, dplyr::ntile, n = k) %>% t()
+    colnames(mat) <- colnames(object)
+# Add
+    newassayname <- paste0(assay, '3bins')
+    if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
+    assays(object)[[newassayname]] <- mat
+    object
+}
+
+
+#' @rdname bin_assay
+#' @export
+factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
+# Bin (assertions done during binning)
+    object %<>% bin_assay(assay = assay, k = k, verbose = verbose)
+# Factorize
+    binnedassay <- sprintf('%s%dbins', assay, k)
+    mat <- assays(object)[[binnedassay]]
+    mode(mat) <- 'character'
+    mat %<>% paste0('xpr', .)
+    dim(mat) <- dim(object)
+    dimnames(mat) <- dimnames(object)
+# Add
+    newassayname <- paste0(assay, '3levels')
+    if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
+    assays(object)[[newassayname]] <- mat
+    object
+}
+
+
+
 #' Fit survival 
 #' 
 #' Investigates association between expression and survival
