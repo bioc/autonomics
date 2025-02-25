@@ -177,12 +177,102 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 }
 
 
+#' Fit survival
+#' 
+#' Compute survival effect of svars, exprs, and their interactions
+#' 
+#' @param object    SummarizedExperiment
+#' @param formula   Formula
+#' @param bins      Number of value bins. Zero means unbinned.
+#' @param bintype  'factor' or 'numeric'
+#' @param engine   'coxph', 'survdiff', or 'logrank'
+#' @param drop      Whether to drop factor varname in coefnames
+#' @param codingfun (factor) coding function
+#' @param verbose   TRUE or FALSE
+#' @examples
+#' # Load/Transform
+#'    object <- survival_example()
+#'    object %<>% bin_assay()
+#'    object %<>% factorize_assay()
+#' # coxph{survival}
+#'   .fit_survival(object)
+#'   .fit_survival(object, ~ exprs)                             #      expr effect
+#'   .fit_survival(object, ~ exprs3bins)                        #   exprbin effect
+#'   .fit_survival(object, ~ exprs3levels)                      # exprlevel effect
+#'   .fit_survival(object, formula = ~ subgroup)                #  subgroup effect
+#'   .fit_survival(object, formula = ~ subgroup + expr3levels)  #  subgroup effect ACROSS exprlevels,  exprlevel effect ACROSS subgroups.
+#'   .fit_survival(object, formula = ~ subgroup / expr3levels)  # exprlevel effect WITHIN subgroup,     subgroup effect ACROSS exprlevels.
+#'   .fit_survival(object, formula = ~ expr3levels / subgroup)  #  subgroup effect WITHIN exprlevel,   exprlevel effect ACROSS subgroups.
+#'   .fit_survival(object, formula = ~ expr3levels * subgroup)  #  subgroup effect differences BETWEEN exprlevels
+#' # survdiff{survival}
+#'   .fit_survival(object, formula = ~ exprs3levels, engine = 'survdiff')
+#'   .fit_survival(object, formula = ~ exprs3levels, engine = 'logrank')
+.fit_survival <- function( 
+       object,
+       formula = as.formula(sprintf('~%s', assayNames(object)[1])),
+        engine = c('coxph', 'survdiff', 'logrank')[1],
+          drop = TRUE,
+     codingfun = code_control,
+       verbose = TRUE
+){
+# Assert
+    assert_is_valid_sumexp(object)
+    assert_is_subset(c('timetoevent', 'event'), svars(object))
+    assert_is_formula(formula)
+    assert_is_subset(all.vars(formula), c(assayNames(object), svars(object)))
+    assert_scalar_subset(engine, c('coxph', 'survdiff', 'logrank'))
+    assert_is_a_bool(drop)
+    assert_is_function(codingfun)
+    assert_is_a_bool(verbose)
+    if (engine == 'logrank'){
+        if (!requireNamespace('coin', quietly = TRUE))  message("BiocManager::install('coin'). Then rerun")
+    }
+    object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
+# Code
+    survivalvars <- c('timetoevent', 'event')
+      samplevars <- intersect(all.vars(formula),      svars(object))
+        assayvar <- intersect(all.vars(formula), assayNames(object))
+    if (is_empty(assayvar)){   
+        dt <- sdt(object)[, c('sample_id', samplevars, survivalvars), with = FALSE]
+        dt[, feature_id := 'dummy'] 
+    } else {
+        assert_is_scalar(assayvar)   # currently written for scalar assayvar
+        if (engine == 'survdiff')   assert_character_matrix(assays(object)[[assayvar]], .xname = sprintf('assays(object)$%s', assayvar))
+        dt <- sumexp_to_longdt(object, svars = c(samplevars, survivalvars), assay = assayvar, value.name = assayvar) 
+        charactercols <- vapply(dt, is.character, logical(1))           # lower-level functions expect factors
+        charactercols %<>% extract(. == TRUE)
+        charactercols %<>% names()
+        for (col in charactercols)   dt[ , (col) := factor(get(col)) ]  # this ensures level order
+    }
+    dt %<>% code(codingfun = codingfun, vars = c(assayvar, samplevars), verbose = verbose)
+# Fit
+    twosideformula <- formula
+    twosideformula %<>% formula2str()
+    twosideformula %<>% paste0('Surv(timetoevent, event)', .)
+    if (verbose)  cmessage('%s%s(%s)', spaces(8), engine, twosideformula)
+    twosideformula %<>% as.formula()
+    if (engine == 'coxph')     fitres <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'survdiff')  fitres <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'logrank')   fitres <- dt[,  .logrank(.SD, twosideformula), by = 'feature_id']
+    
+    if (drop)   for (var in c(assayvar, samplevars)){  
+                    pat <- sprintf('%s(.+)', var)
+                    names(fitres) %<>% stri_replace_first_regex(pat, '$1')  }
+    names(fitres)[-1] %<>% paste0('~coxph')
+# Merge    
+    if (verbose)  message_df('                      %s', summarize_fit(fitres))
+    if ('expr' %in% all.vars(formula)){  object %<>% merge_fit(fitres)
+    } else {                              metadata(object)$survival <- fitres[, -1] }
+    object
+}
+
+
 
 #' Fit survival 
 #' 
-#' Investigates association between expression and survival
+#' Compute association between survival and expression (or svar)
 #' 
-#' Investigates association between expression and survival.                        \cr
+#' Compute association between survival and expression (or svar)
 #' \verb{    } Continuous for \code{coxph}.                                         \cr
 #' \verb{    } Categorical for \code{survdiff} or \code{logrank}                    \cr
 #' \verb{        } Samples are split into \code{ntile} expression groups.           \cr
@@ -197,9 +287,11 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' \verb{                } sign reflects whether expression                         \cr
 #' \verb{                } increases (positive) or decreases (negative) survival
 #' @param object      SummarizedExperiment
-#' @param engine     'coxph' (survival), 'survdiff' (survival), 'logrank' (coin)
+#' @param splitvar    svar or assayName
+#' @param engine     'coxph' 'survdiff' or 'logrank'
+#' @param drop        TRUE or FALSE
 #' @param ntile       number
-#' @param assay       string
+#' @param splitvar       string
 #' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
 #' @param verbose     TRUE or FALSE
 #' @param plot        TRUE or FALSE
@@ -211,26 +303,27 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' @param outdir      dir
 #' @param writefunname 'write_xl' or 'write_ods'
 #' @return SummarizedExperiment
-#' @examples
-#' # Defaults
-#'     object <- survival_example()
-#'     fit_survival(object)
-#' # Engines
-#'     fit_survival(object, engine = c('coxph', 'survdiff'))
-#'     fit_survival(object, engine = c('coxph', 'survdiff', 'logrank'))
-#' # Quantiles
-#'     fit_survival(object, engine = 'logrank')
-#'     fit_survival(object, engine = 'logrank', ntile = 4)
-#' # Plot
-#'     fit_survival(object)
-#'     fit_survival(object, plot = TRUE)
-#'     fit_survival(object, engine = c('coxph', 'survdiff', 'logrank'), plot = TRUE)
+#' @examples                                                 # Innerfun
+#'  object <- survival_example()                             #     returns data.table
+#'                                                           #     accepts scalar args
+#' .fit_survival(object)                                     #         effect of exprquantile (2-1) on survival
+#' .fit_survival(object, ntile = 3)                          #         effect of exprquantile (3-1) on survival
+#' .fit_survival(object, splitvar = 'subgroup')              #         effect of subgroup (Disease-Control) on survival
+#' .fit_survival(object, engine = 'coxph')                   #         effect of exprvalue (continous) on survival
+#'                                                           # Outerfun 
+#'  fit_survival(object)                                     #     returns SummarizedExperiment
+#'                                                           #     accepts vector args
+#'  fit_survival(object, ntile = c(2,3))                     #             ntile: multiple contrasts: exprquantiles contrasts: (2-1) and (3-1)
+#'  fit_survival(object, splitvar = c('subgroup', 'exprs'))  #          splitvar: multiple exprquantile  (2-1) and subgroups
+#'  fit_survival(object, engine = c('survdiff', 'coxph'))    #            engine: survdiff (categorical) and coxph (continous)
+#'                                                           #     Writes
+#'                                                           #     Plots
 #' @export
 fit_survival <- function(
         object, 
          ntile = 2,
-        engine = c('survdiff', 'coxph', 'logrank')[1:2],
-         assay = assayNames(object)[1],
+        engine = c('survdiff', 'coxph', 'logrank')[1],
+      splitvar = assayNames(object)[1],
            sep = FITSEP,
        verbose = TRUE,
         outdir = NULL,
@@ -242,40 +335,23 @@ fit_survival <- function(
           nrow = 3,
   writefunname = 'write_xl'
 ){
-# Assert
-    assert_is_valid_sumexp(object)
-    assert_is_subset(engine, c('coxph', 'survdiff', 'logrank'))
-    assert_scalar_subset(assay, assayNames(object))
-    event <- exprlevel <- timetoevent <- value <- NULL
-    if ('logrank' %in% engine){
-        if (!requireNamespace('coin', quietly = TRUE))  message("BiocManager::install('coin'). Then rerun")}
-# Prepare
     if (verbose)  cmessage('%sSurvival', spaces(8))
-    object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))       # Filter
-    dt <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
-# Analyze
-    dt[, quantile := dplyr::ntile(value, ntile), by = 'feature_id']   # Quantile
-    dt <- dt[quantile %in% c(1, ntile)]
-   #dt <- dt[, .SD[sum(event==1 & !is.na(value))>=3], by = c('feature_id', 'quantile')]  #    3 events     per feature/exprlevel
-    dt <- dt[, .SD[    length(unique(na.exclude(quantile)))==2], by = c('feature_id')]   #    2 exprlevels per feature
-    dt[, quantile := factor(quantile)]
-    txt <- '                                   %s'
-    if ('survdiff' %in% engine){
-        if (verbose)  cmessage('%ssurvdiff%d: surv ~ ntile(exprs,%d)', spaces(8+8), ntile, ntile)
-        outdt <- dt[ , .survdiff(timetoevent, event, quantile), by = 'feature_id' ]
-        object %<>% merge_fdt(outdt)
-    }
-    if ('logrank'  %in% engine){
-        if (verbose)  cmessage('%slogrank%d: surv ~ ntile(exprs,%d)', spaces(8+8+1), ntile, ntile)
-        outdt <- dt[ ,  .logrank(timetoevent, event, quantile), by = 'feature_id' ]
-        object %<>% merge_fdt(outdt)
-    }
-    if ('coxph' %in% engine){
-        if (verbose)  cmessage('%scoxph: surv ~ exprs', spaces(8+8+4))
-        outdt <- dt[ , .coxph(timetoevent, event, value), by = 'feature_id' ]
-        object %<>% merge_fdt(outdt)
-    }
-    if (verbose)  message_df(txt, summarize_fit(object, fit = engine))
+# Compute
+    for (sva in splitvar){
+    for (eng in engine){
+    for (nti in ntile){
+        outdt <- .fit_survival(  object = object, 
+                               splitvar = sva, 
+                                  ntile = nti, 
+                                 engine = eng, 
+                                verbose = FALSE  )
+                 object %<>% merge_fdt(outdt[feature_id != 'dummy'])
+        metadata(object)$survival <-  outdt[feature_id == 'dummy']
+    }}}
+# Message
+    if (verbose)  message_df('                                   %s', 
+                             summarize_fit(  rbind(fdt(object), metadata(object)$survival),
+                                             fit = engine ))
 # Write
     if (!is.null(outdir)){
         outdir <- sprintf('%s/survival', outdir)
@@ -289,7 +365,7 @@ fit_survival <- function(
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
         print( plot_survival(
                     object = object, 
-                     assay = assay, 
+                     assay = splitvar, 
                     engine = engine, 
                      ntile = ntile,
                       file = file, 
