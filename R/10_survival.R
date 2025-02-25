@@ -1,5 +1,5 @@
 
-#' @rdname fit_survival
+#' @rdname dot-fit_survival
 #' @export
 survival_example <- function(){
     sampledt <- rbind(  data.table( subgroup = 'Control',  sample_id = 'C01', timetoevent = 3, event = 1), 
@@ -43,30 +43,38 @@ survival_example <- function(){
 #' @param timetoevent  numeric (time to event)
 #' @param event        numeric (1=event, 0=not)
 #' @param xvalues      numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)
-#' @param xname        string
+#' @param xname        string: used in fvar
+#' @param drop         TRUE or FALSE : drop xname in output fvar ?
 #' @examples
 #' # Prepare
-#'          object <- survival_example()
-#'     timetoevent <- object$timetoevent
-#'           event <- object$event
-#'            expr <- values(object)[1,]
-#'        quantile <- factor(dplyr::ntile(expr, 2))
+#'      object <- survival_example()
+#'      sd <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
+#'      sd %<>% extract(feature_id %in% feature_id[1])
+#'      sd[ , quantile := factor(dplyr::ntile(value, 2)) ]
 #' # Survival
-#'        .coxph(timetoevent, event, expr)
-#'     .survdiff(timetoevent, event, quantile)
-#'      .logrank(timetoevent, event, quantile)
-#' # Sumexp
-#'          fit_survival(object)
+#'        .coxph(sd, Surv(timetoevent, event) ~ quantile)
+#'     .survdiff(sd, Surv(timetoevent, event) ~ quantile)
+#'      .logrank(sd, Surv(timetoevent, event) ~ quantile)
 #' @rdname dot-coxph
 #' @export
-.coxph <- function(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues)){
-    survout <- suppressWarnings(stats::coef(summary(coxph(Surv(timetoevent, event) ~ xvalues))))
-    outdt <- data.table( p =    survout[, 'Pr(>|z|)'], 
-                    effect = -1*survout[, 'coef'    ], 
-                         t = -1*survout[, 'z'       ])
-    setnames(outdt, names(outdt), 
-             paste0(names(outdt),'~', xname, '~survcoxph'))
-    outdt[]
+.coxph <- function(sd, formula){
+    fitres <- survival::coxph(formula = formula, data = sd)
+    #Fres <- suppressWarnings(stats::anova(fitres))
+    #Fres <- Fres %>% extract(-1, , drop = FALSE)
+    #pF <- Fres[, 'Pr(>|Chi|)' ] %>% set_names(paste0('PF~', rownames(Fres)))
+    #tF <- Fres[, 'Chisq'      ] %>% set_names(paste0('F~', rownames(Fres)))
+    fitres %<>% summary()
+    fitres %<>% stats::coefficients()
+    colnames(fitres) %<>% stri_replace_first_fixed('se(coef)', 'se') # dont reverse order of these two lines
+    colnames(fitres) %<>% stri_replace_first_fixed('coef', 'effect')
+    colnames(fitres) %<>% stri_replace_first_fixed('Pr(>|z|)', 'p')  # dont reverse order of these two lines
+    colnames(fitres) %<>% stri_replace_first_fixed('z', 't')
+    fitres %<>% extract(, c('effect', 't', 'p'), drop = FALSE)
+    fitmat <- matrix(fitres, nrow = 1)
+    colnames(fitmat) <- paste(rep(colnames(fitres),  each = nrow(fitres)), 
+                              rep(rownames(fitres), times = ncol(fitres)), sep = '~')
+    data.table(fitmat)
+    #data.table(cbind(fitmat, t(tF), t(pF)))
 }
 
 #' @rdname dot-coxph
