@@ -101,16 +101,22 @@ survival_example <- function(){
 
 #' @rdname dot-coxph
 #' @export
-.logrank <- function(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues)){
-    xlevels <- levels(xvalues)
-    survout <- suppressWarnings(coin::logrank_test(   Surv(timetoevent, event) ~ xvalues   ))
-    meandiff <- mean(timetoevent[xvalues==rev(xlevels)[1]]) - 
-                mean(timetoevent[xvalues==   (xlevels)[1]])
-    outdt <- data.table(  p = coin::pvalue(survout), 
-                     effect = meandiff,
-                          t = coin::statistic(survout) * sign(meandiff) )
-    setnames(outdt, names(outdt), 
-             sprintf('%s~%s%s-%s~survlogrank', names(outdt), xname, rev(xlevels)[1], xlevels[1]))
+.logrank <- function(sd, formula){
+    xvar <- labels(terms(formula))
+    xvalues <- sd[[xvar]]                                #   NOTE  The coin statistic is signed for twogroup comparisons 
+    xlevel1 <-     levels(xvalues )[1]                        #   But unsigned for multigroup comparisons (which are anova like)
+    xleveln <- rev(levels(xvalues))[1]                        #   But unsigned for multigroup comparisons (which are anova like)
+            
+
+    sd %<>% extract(get(xvar) %in% c(xlevel1, xleveln))         
+    survout <- suppressWarnings(coin::logrank_test(formula = formula, data = sd))
+  meandiff <- sd[ , mean(timetoevent[get(xvar)==xleveln]) -
+                    mean(timetoevent[get(xvar)==xlevel1]) ]
+    outdt <- data.table( effect = -meandiff,
+                              t = -sign(meandiff) * abs(coin::statistic(survout)),
+                              p = coin::pvalue(survout) )
+    newnames <- sprintf('%s~%s%s-%s~logrank', names(outdt), xvar, xleveln, xlevel1)
+    setnames(outdt, names(outdt), newnames )
     outdt[]
 }
 
