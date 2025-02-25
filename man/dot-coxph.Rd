@@ -6,11 +6,11 @@
 \alias{.logrank}
 \title{Fit onefeature survival}
 \usage{
-.coxph(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues))
+.coxph(sd, formula)
 
-.survdiff(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues))
+.survdiff(sd, formula)
 
-.logrank(timetoevent, event, xvalues, xname = get_name_in_parent(xvalues))
+.logrank(sd, formula)
 }
 \arguments{
 \item{timetoevent}{numeric (time to event)}
@@ -19,22 +19,21 @@
 
 \item{xvalues}{numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)}
 
-\item{xname}{string}
+\item{xname}{string: used in fvar}
+
+\item{drop}{TRUE or FALSE : drop xname in output fvar ?}
 }
 \description{
 Fit onefeature survival
 }
 \examples{
 # Prepare
-         object <- survival_example()
-    timetoevent <- object$timetoevent
-          event <- object$event
-           expr <- values(object)[1,]
-       quantile <- factor(dplyr::ntile(expr, 2))
+     object <- survival_example()
+     sd <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
+     sd \%<>\% extract(feature_id \%in\% feature_id[1])
+     sd[ , quantile := factor(dplyr::ntile(value, 2)) ]
 # Survival
-       .coxph(timetoevent, event, expr)
-    .survdiff(timetoevent, event, quantile)
-     .logrank(timetoevent, event, quantile)
-# Sumexp
-         fit_survival(object)
+       .coxph(sd, Surv(timetoevent, event) ~ quantile)
+    .survdiff(sd, Surv(timetoevent, event) ~ quantile)
+     .logrank(sd, Surv(timetoevent, event) ~ quantile)
 }

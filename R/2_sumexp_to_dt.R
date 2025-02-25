@@ -174,9 +174,10 @@ extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed 
     object %<>% order_on_t(coefs = coef, fit = fit, verbose = verbose) # order_on_p
 # Extract
     allfitcols <- fvars(object) %>% extract(stri_detect_fixed(., sep))
-    curfitcols <- allfitcols %>% extract(stri_detect_fixed(., fitcoef))
+    curfitcols <- allfitcols 
+    curfitcols %<>% extract(split_extract_fixed(., sep, 2:3) == fitcoef)
     annocols <- fvars(object) %>% setdiff('feature_id') %>% setdiff(allfitcols)
-    cols <- c('feature_id', curfitcols, annocols)
+    cols <- c('feature_id', annocols, curfitcols)
     fdt0 <- fdt(object)[, cols, with = FALSE]
     names(fdt0) %<>% stri_replace_first_fixed(paste0(sep, coef, sep, fit), '')
     fdt0
@@ -184,9 +185,9 @@ extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed 
 
 
 #' Write xl/ods
-#' @param object  SummarizedExperiment
-#' @param xlfile  file
-#' @param odsfile file
+#' @param object   SummarizedExperiment
+#' @param xlfile   file
+#' @param odsfile  file
 #' @param fitcoefs character vector
 #' @param verbose  TRUE or FALSE
 #' @return filepath
@@ -195,7 +196,7 @@ extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed 
 #' object <- read_metabolon(file, fit = 'limma')
 #' xlfile  <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.xlsx')
 #' odsfile <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.ods')
-#' # write_xl(object,  xlfile)
+#' # write_xl( object,  xlfile)
 #' # write_ods(object, odsfile)
 #' @export
 write_xl <- function(

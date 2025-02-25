@@ -41,6 +41,6 @@ file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file, fit = 'limma')
 xlfile  <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.xlsx')
 odsfile <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.ods')
-# write_xl(object,  xlfile)
+# write_xl( object,  xlfile)
 # write_ods(object, odsfile)
 }
