@@ -261,9 +261,10 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     names(fitres)[-1] %<>% paste0('~coxph')
 # Merge    
     if (verbose)  message_df('                      %s', summarize_fit(fitres))
-    if ('expr' %in% all.vars(formula)){  object %<>% merge_fit(fitres)
-    } else {                              metadata(object)$survival <- fitres[, -1] }
-    object
+    #if ('expr' %in% all.vars(formula)){  object %<>% merge_fit(fitres)
+    #} else {                              metadata(object)$survival <- fitres[, -1] }
+    #object
+    fitres
 }
 
 
