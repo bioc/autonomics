@@ -6,10 +6,11 @@
 \usage{
 plot_survival(
   object,
-  assay = assayNames(object)[1],
-  engine = intersect(fits(object), c("coxph", "survdiff", "logrank")),
-  ntile = 2,
-  title = sprintf("surv ~ expr"),
+  formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
+  engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
+    extract(1),
+  coef = coefs(object, fit = engine)[1],
+  title = formula2str(formula),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
   file = NULL,
   width = 7,
@@ -22,11 +23,7 @@ plot_survival(
 \arguments{
 \item{object}{SummarizedExperiment}
 
-\item{assay}{value in assayNames(object)}
-
 \item{engine}{'coxph', 'survdiff' or 'logrank'}
-
-\item{ntile}{number of quantiles}
 
 \item{title}{string}
 
@@ -43,6 +40,10 @@ plot_survival(
 \item{ncol}{number of columns}
 
 \item{nrow}{number of rows}
+
+\item{assay}{value in assayNames(object)}
+
+\item{ntile}{number of quantiles}
 }
 \value{
 ggplot
@@ -53,8 +54,9 @@ Plot survival
 \examples{
 # Defaults
     object <- survival_example()
-    object \%<>\% fit_survival()
-    plot_survival(object)
+    object \%<>\% factorize_assay(k = 2)
+    object \%<>\% fit_survival(~exprs2levels)
+    plot_survival(object, formula = ~ exprs2levels)
 # Engines
     object <- survival_example()
     object \%<>\% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))

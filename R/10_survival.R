@@ -396,8 +396,9 @@ fit_survival <- function(
 #' @examples
 #' # Defaults
 #'     object <- survival_example()
-#'     object %<>% fit_survival()
-#'     plot_survival(object)
+#'     object %<>% factorize_assay(k = 2)
+#'     object %<>% fit_survival(~exprs2levels)
+#'     plot_survival(object, formula = ~ exprs2levels)
 #' # Engines
 #'     object <- survival_example()
 #'     object %<>% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
@@ -407,10 +408,10 @@ fit_survival <- function(
 #' @export
 plot_survival <- function(
       object, 
-       assay = assayNames(object)[1],
-      engine = intersect(fits(object), c('coxph', 'survdiff', 'logrank')),
-       ntile = 2,
-       title = sprintf('surv ~ expr'), 
+      formula = as.formula(sprintf('~%s', assayNames(object)[1])),
+      engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
+        coef = coefs(object, fit = engine)[1],
+       title = formula2str(formula),
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
         file = NULL,
        width = 7,
@@ -419,31 +420,35 @@ plot_survival <- function(
         ncol = 3,
         nrow = 3
 ){
-# Prevent check notes
+# Assert
     if (!requireNamespace('ggtext', quietly = TRUE)){   
         message("BiocManager::install('ggtext'). Then rerun")
         return(NULL)
     }
+    assert_is_valid_sumexp(object)
+    assert_is_subset(all.vars(formula), c(svars(object), assayNames(object)))
+    assert_scalar_subset(engine, fits(object))
+    assert_scalar_subset(coef, coefs(object, fit = engine))
     event <- timetoevent <- NULL      # svar
     value <- NULL                     # sumexp_to_longdt                                     # plotdt
     color <- curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
 # Prepare
-    obj <- extract_coef_features(object, fit = engine[1], n = n)
+    obj <- extract_coef_features(object, fit = engine, coefs = coef, n = n)
+    assay <- all.vars(formula) %>% intersect(assayNames(object))
+    assert_is_a_string(assay)
+    assert_character_matrix(assays(object)[[assay]], .xname = sprintf('assays(object)$%s', assay))
     plotdt <- sumexp_to_longdt(obj, assay = assay, svars = c('timetoevent', 'event'))
-    plotdt[, quantile := NA_character_]
-    plotdt[, quantile := dplyr::ntile(value, ntile), by = 'feature_id']
-    plotdt <- plotdt[quantile %in% c(1, ntile)]
-    plotdt %<>% extract(order(feature_id, quantile, timetoevent))
-    plotdt <- plotdt[order(feature_id, quantile, timetoevent, -event)]
-    plotdt[ , totObs   := .N - cumsum(1-event),     by = c('feature_id', 'quantile')   ]
-    plotdt[ , totDead := cumsum(event),             by = c('feature_id', 'quantile')   ]
+    #plotdt <- plotdt[quantile %in% c(1, ntile)]
+    plotdt <- plotdt[order(feature_id, value, timetoevent, -event)]
+    plotdt[ , totObs   := .N - cumsum(1-event),     by = c('feature_id', 'value')   ]
+    plotdt[ , totDead := cumsum(event),             by = c('feature_id', 'value')   ]
     plotdt <- plotdt[ , .(totObs  = max(totObs), 
                           totDead = max(totDead), 
-                          curOut  = sum(event==0)), by = c('feature_id', 'quantile', 'timetoevent')]
+                          curOut  = sum(event==0)), by = c('feature_id', 'value', 'timetoevent')]
     plotdt[, survival := 100*(totObs-totDead)/totObs]
-    plotdt %<>% extract(order(feature_id, quantile, timetoevent))
-    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'quantile')][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
-    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'quantile')][, timetoevent := max(timetoevent)+1][, curOut := 0]
+    plotdt %<>% extract(order(feature_id, value, timetoevent))
+    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'value')][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
+    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'value')][, timetoevent := max(timetoevent)+1][, curOut := 0]
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
     pcols <- pvar(object, fit = engine)
@@ -457,21 +462,19 @@ plot_survival <- function(
     plotdt %<>% merge(statdt, by = 'feature_id')
     plotdt %<>% extract(order(get(tcol)))
     plotdt[, facet := factor(facet, unique(facet))]
-    plotdt[, quantile := paste0('Q', quantile)]
 # Plot
     maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
     maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("†")   # \u2020
     maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("•")   # \u2022
     maxdigits <- ceiling(log10(maxtotal))
-
     ndt <- plotdt[, .(totObs  = totObs[1], 
                       totDead = totDead[.N], 
-                      nout   = totObs[1] - totObs[.N]), by = c('facet', 'quantile')]
+                       nout   = totObs[1] - totObs[.N]), by = c('facet', 'value')]
     ndt[ , nalive := totObs-totDead-nout ]
     ndt[, label := sprintf('%d<sup>\u00b0</sup> %d<sup>\u2020</sup> %d<sup>\u2022</sup>', nalive, totDead, nout)]
-    quantiles <- unique(ndt$quantile)
-    colordt <- data.table(quantile = quantiles, color = make_colors(quantiles))
-    ndt %<>% merge(colordt, by = 'quantile')
+    levels <- unique(ndt$value)
+    colordt <- data.table(value = levels, color = make_onefactor_colors(levels))
+    ndt %<>% merge(colordt, by = 'value')
     ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
     ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
     nfacets <- nrow(ndt)
@@ -488,8 +491,8 @@ plot_survival <- function(
              ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
                                    hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
-             geom_step(aes(x = timetoevent, y = survival, group = quantile, color = quantile)) + 
-             geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = quantile), size = 1, show.legend = FALSE)
+             geom_step(aes(x = timetoevent, y = survival, group = value, color = value)) + 
+             geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = value), size = 1, show.legend = FALSE)
                 # Note that here the dropout is placed after the stepdown.
                 # This is because each dropout changes the denominator.
                 # So changes the survival percentage.

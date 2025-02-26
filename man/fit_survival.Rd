@@ -6,10 +6,10 @@
 \usage{
 fit_survival(
   object,
-  ntile = 2,
-  engine = c("survdiff", "coxph", "logrank")[1],
-  splitvar = assayNames(object)[1],
-  sep = FITSEP,
+  formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
+  engine = c("coxph", "survdiff", "logrank")[1],
+  drop = TRUE,
+  codingfun = code_control,
   verbose = TRUE,
   outdir = NULL,
   plot = if (is.null(outdir)) FALSE else TRUE,
@@ -24,13 +24,9 @@ fit_survival(
 \arguments{
 \item{object}{SummarizedExperiment}
 
-\item{ntile}{number}
-
 \item{engine}{'coxph' 'survdiff' or 'logrank'}
 
-\item{splitvar}{string}
-
-\item{sep}{fvar string separator : e.g. '~' gives p~surv~LR50}
+\item{drop}{TRUE or FALSE}
 
 \item{verbose}{TRUE or FALSE}
 
@@ -50,7 +46,11 @@ fit_survival(
 
 \item{writefunname}{'write_xl' or 'write_ods'}
 
-\item{drop}{TRUE or FALSE}
+\item{ntile}{number}
+
+\item{splitvar}{string}
+
+\item{sep}{fvar string separator : e.g. '~' gives p~surv~LR50}
 }
 \value{
 SummarizedExperiment
