@@ -150,7 +150,7 @@ bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TR
     mat %<>% apply(1, dplyr::ntile, n = k) %>% t()
     colnames(mat) <- colnames(object)
 # Add
-    newassayname <- paste0(assay, '3bins')
+    newassayname <- sprintf('%s%dbins', assay, k)
     if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
     assays(object)[[newassayname]] <- mat
     object
@@ -170,7 +170,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     dim(mat) <- dim(object)
     dimnames(mat) <- dimnames(object)
 # Add
-    newassayname <- paste0(assay, '3levels')
+    newassayname <- sprintf('%s%dlevels', assay, k)
     if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
     assays(object)[[newassayname]] <- mat
     object
