@@ -322,10 +322,10 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' @export
 fit_survival <- function(
         object, 
-         ntile = 2,
-        engine = c('survdiff', 'coxph', 'logrank')[1],
-      splitvar = assayNames(object)[1],
-           sep = FITSEP,
+       formula = as.formula(sprintf('~%s', assayNames(object)[1])),
+        engine = c('coxph', 'survdiff', 'logrank')[1],
+          drop = TRUE,
+     codingfun = code_control,
        verbose = TRUE,
         outdir = NULL,
           plot = if (is.null(outdir)) FALSE else TRUE,
@@ -338,21 +338,16 @@ fit_survival <- function(
 ){
     if (verbose)  cmessage('%sSurvival', spaces(8))
 # Compute
-    for (sva in splitvar){
     for (eng in engine){
-    for (nti in ntile){
         outdt <- .fit_survival(  object = object, 
-                               splitvar = sva, 
-                                  ntile = nti, 
-                                 engine = eng, 
-                                verbose = FALSE  )
+                                formula = formula,
+                                 engine = engine,
+                                   drop = drop,
+                              codingfun = codingfun,
+                                verbose = verbose )
                  object %<>% merge_fdt(outdt[feature_id != 'dummy'])
         metadata(object)$survival <-  outdt[feature_id == 'dummy']
-    }}}
-# Message
-    if (verbose)  message_df('                                   %s', 
-                             summarize_fit(  rbind(fdt(object), metadata(object)$survival),
-                                             fit = engine ))
+    }
 # Write
     if (!is.null(outdir)){
         outdir <- sprintf('%s/survival', outdir)
