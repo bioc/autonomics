@@ -94,10 +94,8 @@ survival_example <- function(){
 #' @param drop         TRUE or FALSE : drop xname in output fvar ?
 #' @examples
 #' # Prepare
-#'      object <- survival_example()
-#'      sd <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
-#'      sd %<>% extract(feature_id %in% feature_id[1])
-#'      sd[ , quantile := factor(dplyr::ntile(value, 2)) ]
+#'      sd <- survdt()
+#'      sd[ , quantile := factor(dplyr::ntile(BOC, 2)) ]
 #' # Survival
 #'        .coxph(sd, Surv(timetoevent, event) ~ quantile)
 #'     .survdiff(sd, Surv(timetoevent, event) ~ quantile)
@@ -472,7 +470,6 @@ plot_survival <- function(
       formula = as.formula(sprintf('~%s', assayNames(object)[1])),
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
         coef = coefs(object, fit = engine)[1],
-       color = all.vars(formula)[1],
        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
         file = NULL,
@@ -496,25 +493,28 @@ plot_survival <- function(
 # Prepare
     obj <- extract_coef_features(object, fit = engine, coefs = coef, n = n)
     assayvar <- all.vars(formula) %>% intersect(assayNames(object))
+  samplevars <- all.vars(formula) %>% intersect(svars(object))
     if (length(assayvar)==0){
-        plotdt <- sdt(obj)[, c('sample_id', all.vars(formula), 'timetoevent', 'event'), with = FALSE]
+        plotdt <- sdt(obj)[, c('sample_id', samplevars, 'timetoevent', 'event'), with = FALSE]
         plotdt[, feature_id := formula2str(formula)]
     } else {
         assert_is_a_string(assayvar)
         assert_character_matrix(assays(object)[[assayvar]], .xname = sprintf('assays(object)$%s', assayvar))
-        plotdt <- sumexp_to_longdt(obj, assay = assayvar, svars = c('timetoevent', 'event'), value.name = assayvar)
+        plotdt <- sumexp_to_longdt(obj, assay = assayvar, svars = c(samplevars, 'timetoevent', 'event'), value.name = assayvar)
     }
     plotdt[, alive := 1-event]
     setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent', 'alive'))
-    plotdt[ , totObs   := .N - cumsum(1-event),     by = c('feature_id', all.vars(formula))   ]
-    plotdt[ , totDead := cumsum(event),             by = c('feature_id', all.vars(formula))   ]
+    
+    plotdt[, survivalgroup := do.call(paste, c(.SD, sep = '.')), .SDcols = all.vars(formula) ]
+    plotdt[ , totObs   := .N - cumsum(1-event),     by = c('feature_id', 'survivalgroup')   ]
+    plotdt[ , totDead := cumsum(event),             by = c('feature_id', 'survivalgroup')   ]
     plotdt <- plotdt[ , .(totObs  = max(totObs), 
                           totDead = max(totDead), 
-                          curOut  = sum(event==0)), by = c('feature_id', all.vars(formula), 'timetoevent')]
+                          curOut  = sum(event==0)), by = c('feature_id', 'survivalgroup', 'timetoevent')]
     plotdt[, survival := 100*(totObs-totDead)/totObs]
-    setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent'))
-    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', all.vars(formula))][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
-    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', all.vars(formula))][, timetoevent := max(timetoevent)+1][, curOut := 0]
+    setorderv(plotdt, c('feature_id', 'survivalgroup', 'timetoevent'))
+    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'survivalgroup')][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
+    plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'survivalgroup')][, timetoevent := max(timetoevent)+1][, curOut := 0]
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
     pcols <- pvar(object, fit = engine, coef = coef)
@@ -536,12 +536,12 @@ plot_survival <- function(
     maxdigits <- ceiling(log10(maxtotal))
     ndt <- plotdt[, .(totObs  = totObs[1], 
                       totDead = totDead[.N], 
-                       nout   = totObs[1] - totObs[.N]), by = c('facet', all.vars(formula))]
+                       nout   = totObs[1] - totObs[.N]), by = c('facet', 'survivalgroup')]
     ndt[ , nalive := totObs-totDead-nout ]
     ndt[, label := sprintf('%d<sup>\u00b0</sup> %d<sup>\u2020</sup> %d<sup>\u2022</sup>', nalive, totDead, nout)]
-    colordt <- data.table(value = unique(ndt[[color]]), color = make_onefactor_colors(unique(ndt[[color]])))
-    setnames(colordt, 'value', color)
-    ndt %<>% merge(colordt, by = color)
+    survivalgroups <- unique(ndt$survivalgroup)
+    colordt <- data.table(survivalgroup = survivalgroups, color = make_colors(survivalgroups))
+    ndt %<>% merge(colordt, by = 'survivalgroup')
     ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
     ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
     nfacets <- nrow(ndt)
@@ -555,11 +555,12 @@ plot_survival <- function(
              theme(plot.title = element_text(hjust = 0.5),
                 plot.subtitle = element_text(hjust = 0.5),
                   panel.grid  = element_blank()) + 
-             ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
-                                   hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
+             #ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
+             #                      hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
-             geom_step(aes(x = timetoevent, y = survival, group = !!sym(color), color = !!sym(color))) + 
-             geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = !!sym(color)), size = 1, show.legend = FALSE)
+             geom_step(aes(x = timetoevent, y = survival, group = survivalgroup, color = survivalgroup)) + 
+             scale_color_manual(values = colordt$color %>% set_names(colordt$survivalgroup)) #+ 
+             #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
                 # Note that here the dropout is placed after the stepdown.
                 # This is because each dropout changes the denominator.
                 # So changes the survival percentage.
