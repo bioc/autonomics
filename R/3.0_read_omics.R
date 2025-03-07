@@ -461,6 +461,7 @@ merge_fdt <- function(
 merge_data <- function(objectdt, dt, by.x, by.y, fill = NULL, verbose){
 # Assert
     if (is.null(dt))  return(objectdt)
+    if (nrow(dt)==0)  return(objectdt)
     assert_is_data.table(objectdt)
     assert_is_data.table(dt)
     assert_is_subset(by.x, names(objectdt))
