@@ -765,8 +765,13 @@ fits.data.table <- function(object, ...){
 #' @rdname fits
 #' @export
 fits.SummarizedExperiment <- function(object, ...){
-    fits.data.table(fdt(object))
-}
+    c(fits.data.table(fdt(object)),
+      fits(metadata(object)$survival))  # fits.data.table if stats available
+}                                       # fits.NULL if stats unavailable
+
+#' @rdname fits
+#' @export
+fits.NULL <- function(object, ...)  NULL
 
 #' Get coefs
 #' 
