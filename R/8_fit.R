@@ -567,8 +567,14 @@ modeldt.data.table <- function(
 modeldt.SummarizedExperiment <- function(
     object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){
-    modeldt.data.table(fdt(object), quantity = quantity, fit = fit, coef = coef)
-}
+    rbind(modeldt.data.table(fdt(object),    quantity = quantity, fit = fit, coef = coef),
+          modeldt(metadata(object)$survival, quantity = quantity, fit = fit, coef = coef))
+}       # modeldt.NULL if metadata absent
+        # modeldt.data.table if metadata present
+
+#' @rdname modelvar
+#' @export
+modeldt.NULL <- function(object, ...) NULL
 
 
 #' @rdname modelvar
