@@ -154,9 +154,14 @@ add_adjusted_pvalues.SummarizedExperiment <- function(
    verbose = TRUE, 
           ...
 ){
-    fdt(object) %<>% add_adjusted_pvalues.data.table(method = method, fit = fit, coefs = coefs, verbose = verbose)
+         fdt(object)          %<>% add_adjusted_pvalues(method = method, fit = fit, coefs = coefs, verbose = verbose)  # data.table
+    metadata(object)$survival %<>% add_adjusted_pvalues(method = method, fit = fit, coefs = coefs, verbose = verbose)  # data.table or NULL
     object
 }
+
+#' @rdname add_adjusted_pvalues
+#' @export
+add_adjusted_pvalues.NULL <- function(object, ...)  object
 
 
     
