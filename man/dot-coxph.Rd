@@ -28,10 +28,8 @@ Fit onefeature survival
 }
 \examples{
 # Prepare
-     object <- survival_example()
-     sd <- sumexp_to_longdt(object, svars = c('timetoevent', 'event'))
-     sd \%<>\% extract(feature_id \%in\% feature_id[1])
-     sd[ , quantile := factor(dplyr::ntile(value, 2)) ]
+     sd <- survdt()
+     sd[ , quantile := factor(dplyr::ntile(BOC, 2)) ]
 # Survival
        .coxph(sd, Surv(timetoevent, event) ~ quantile)
     .survdiff(sd, Surv(timetoevent, event) ~ quantile)

@@ -4,6 +4,7 @@
 \alias{fits}
 \alias{fits.data.table}
 \alias{fits.SummarizedExperiment}
+\alias{fits.NULL}
 \title{Get fit models}
 \usage{
 fits(object, ...)
@@ -11,6 +12,8 @@ fits(object, ...)
 \method{fits}{data.table}(object, ...)
 
 \method{fits}{SummarizedExperiment}(object, ...)
+
+\method{fits}{`NULL`}(object, ...)
 }
 \arguments{
 \item{object}{SummarizedExperiment or data.table}

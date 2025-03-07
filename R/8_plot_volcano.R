@@ -128,7 +128,6 @@ add_adjusted_pvalues.data.table <- function(
              ...
 ){
 # Assert
-    assert_is_data.table(object)
     assert_is_subset(method, stats::p.adjust.methods)
     if (is.null(pvar(object, fit = fit, coef = coefs)))  return(object)   # pca: no pvalues
 # Reset
@@ -154,7 +153,7 @@ add_adjusted_pvalues.SummarizedExperiment <- function(
    verbose = TRUE, 
           ...
 ){
-         fdt(object)          %<>% add_adjusted_pvalues(method = method, fit = fit, coefs = coefs, verbose = verbose)  # data.table
+       fdt(object) %<>% add_adjusted_pvalues.data.table(method = method, fit = fit, coefs = coefs, verbose = verbose)  # data.table
     metadata(object)$survival %<>% add_adjusted_pvalues(method = method, fit = fit, coefs = coefs, verbose = verbose)  # data.table or NULL
     object
 }

@@ -4,6 +4,7 @@
 \alias{add_adjusted_pvalues}
 \alias{add_adjusted_pvalues.data.table}
 \alias{add_adjusted_pvalues.SummarizedExperiment}
+\alias{add_adjusted_pvalues.NULL}
 \title{Add adjusted pvalues}
 \usage{
 add_adjusted_pvalues(object, ...)
@@ -25,6 +26,8 @@ add_adjusted_pvalues(object, ...)
   verbose = TRUE,
   ...
 )
+
+\method{add_adjusted_pvalues}{`NULL`}(object, ...)
 }
 \arguments{
 \item{object}{SummarizedExperiment or (feature) data.table}

@@ -10,7 +10,6 @@ plot_survival(
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   coef = coefs(object, fit = engine)[1],
-  color = all.vars(formula)[1],
   title = if (svar_formula(formula, object)) NULL else formula2str(formula),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
   file = NULL,
@@ -54,22 +53,28 @@ ggplot
 Plot survival
 }
 \examples{
+# ~ survgroup
+    object <- survex()
+    object \%<>\% fit_survival(~ survgroup)
+    plot_survival(object, formula = ~ survgroup)
+    plot_survival(object, formula = ~ survgroup)
+
 # ~ exprs2levels
-    object <- survival_example()
+    object <- survex()
     object \%<>\% factorize_assay(k = 2)
     object \%<>\% fit_survival(~ exprs2levels)
     plot_survival(object, formula = ~ exprs2levels)
 
-# ~ subgroup
-    object <- survival_example()
-    object \%<>\% fit_survival(~ subgroup)
-    plot_survival(object, formula = ~ subgroup)
+# ~ sex
+    object <- survex()
+    object \%<>\% fit_survival(~ sex)
+    plot_survival(object, formula = ~ sex)
 
 #' ~ expr2levels + subgroup
-     object <- survival_example() 
+     object <- survex()
      object \%<>\% factorize_assay(k = 2)
-     object \%<>\% fit_survival(~ exprs2levels + subgroup)
-     plot_survival(object, formula = ~ exprs2levels + subgroup)
+     object \%<>\% fit_survival(~ sex + exprs2levels)
+     plot_survival(object, formula = ~ sex + exprs2levels, nrow = 2, ncol = 2) + scale_x_continuous(breaks = 0:8)
 
 # Engines
     object <- survival_example()

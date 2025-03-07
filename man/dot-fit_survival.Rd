@@ -38,20 +38,20 @@ Compute survival effect of svars, exprs, and their interactions
 }
 \examples{
 # Load/Transform
-   object <- survival_example()
-   object \%<>\% bin_assay()
-   object \%<>\% factorize_assay()
+   object <- survex()
+   object \%<>\% bin_assay(k = 2)
+   object \%<>\% factorize_assay(k = 2)
 # coxph{survival}
   .fit_survival(object)
-  .fit_survival(object, ~ exprs)                             #      expr effect
-  .fit_survival(object, ~ exprs3bins)                        #   exprbin effect
-  .fit_survival(object, ~ exprs3levels)                      # exprlevel effect
-  .fit_survival(object, formula = ~ subgroup)                #  subgroup effect
-  .fit_survival(object, formula = ~ subgroup + expr3levels)  #  subgroup effect ACROSS exprlevels,  exprlevel effect ACROSS subgroups.
-  .fit_survival(object, formula = ~ subgroup / expr3levels)  # exprlevel effect WITHIN subgroup,     subgroup effect ACROSS exprlevels.
-  .fit_survival(object, formula = ~ expr3levels / subgroup)  #  subgroup effect WITHIN exprlevel,   exprlevel effect ACROSS subgroups.
-  .fit_survival(object, formula = ~ expr3levels * subgroup)  #  subgroup effect differences BETWEEN exprlevels
+  .fit_survival(object, ~ exprs)                         #      expr effect
+  .fit_survival(object, ~ exprs2bins)                    #   exprbin effect
+  .fit_survival(object, ~ exprs2levels)                  # exprlevel effect
+  .fit_survival(object, formula = ~ sex)                 #       sex effect
+  .fit_survival(object, formula = ~ sex + exprs2levels)  #       sex effect ACROSS exprlevels,  exprlevel effect ACROSS sexes.
+  .fit_survival(object, formula = ~ sex / exprs2levels)  # exprlevel effect WITHIN sex,               sex effect ACROSS exprlevels.
+  .fit_survival(object, formula = ~ exprs2levels / sex)  #       sex effect WITHIN exprlevel,   exprlevel effect ACROSS sexes
+  .fit_survival(object, formula = ~ exprs2levels * sex)  #       sex effect differences BETWEEN exprlevels
 # survdiff{survival}
-  .fit_survival(object, formula = ~ exprs3levels, engine = 'survdiff')
-  .fit_survival(object, formula = ~ exprs3levels, engine = 'logrank')
+  .fit_survival(object, formula = ~ exprs2levels, engine = 'survdiff')
+  .fit_survival(object, formula = ~ exprs2levels, engine = 'logrank')
 }

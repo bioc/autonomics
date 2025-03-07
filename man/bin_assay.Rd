@@ -25,7 +25,7 @@ SummarizedExperiment
 Bin/Factorize assay
 }
 \examples{
-object <- survival_example()
-      bin_assay(object)
-factorize_assay(object)
+object <- survex()
+      bin_assay(object, k = 4)
+factorize_assay(object, k = 4)
 }

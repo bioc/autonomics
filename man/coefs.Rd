@@ -5,6 +5,7 @@
 \alias{coefs.factor}
 \alias{coefs.data.table}
 \alias{coefs.SummarizedExperiment}
+\alias{coefs.NULL}
 \title{Get coefs}
 \usage{
 coefs(object, ...)
@@ -14,6 +15,8 @@ coefs(object, ...)
 \method{coefs}{data.table}(object, fit = fits(object), intercept = FALSE, ...)
 
 \method{coefs}{SummarizedExperiment}(object, fit = fits(object), intercept = FALSE, ...)
+
+\method{coefs}{`NULL`}(object, ...)
 }
 \arguments{
 \item{object}{factor, data.table, SummarizedExperiment}

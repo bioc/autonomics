@@ -4,6 +4,7 @@
 \alias{modelvar}
 \alias{modelvar.data.table}
 \alias{modelvar.SummarizedExperiment}
+\alias{modelvar.NULL}
 \alias{effectvar}
 \alias{tvar}
 \alias{pvar}
@@ -24,6 +25,7 @@
 \alias{modeldt}
 \alias{modeldt.data.table}
 \alias{modeldt.SummarizedExperiment}
+\alias{modeldt.NULL}
 \alias{effectdt}
 \alias{tdt}
 \alias{pdt}
@@ -57,6 +59,8 @@ modelvar(object, ...)
   coef = autonomics::coefs(object, fit = fit),
   ...
 )
+
+\method{modelvar}{`NULL`}(object, ...)
 
 effectvar(
   object,
@@ -169,6 +173,8 @@ modeldt(object, ...)
   coef = autonomics::coefs(object, fit = fit),
   ...
 )
+
+\method{modeldt}{`NULL`}(object, ...)
 
 effectdt(
   object,

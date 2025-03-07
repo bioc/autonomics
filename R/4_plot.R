@@ -1022,8 +1022,7 @@ order_on_effect <- function(
 #'     object %<>% .extract_sign_features(      coefs = 't1-t0', sign = -1)
 #'     object %<>% .extract_n_features(         coefs = 't1-t0', n = 1)
 #'     object <- object0
-#'     object %<>%  extract_coef_features(
-#'                    coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
+#'     object %<>%  extract_coef_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
 #' # Multiple coefs
 #'     object <- object0
 #'     object %<>% .extract_p_features(         coefs = c('t1-t0', 't2-t0'), p = 0.05)
@@ -1032,8 +1031,7 @@ order_on_effect <- function(
 #'     object %<>% .extract_sign_features(      coefs = c('t1-t0', 't2-t0'), sign = -1)
 #'     object %<>% .extract_n_features(         coefs = c('t1-t0', 't2-t0'), n = 1)
 #'     object <- object0
-#'     object %<>%  extract_coef_features(
-#'                    coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
+#'     object %<>%  extract_coef_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
 #' @export
 extract_coef_features <- function(  
         object,
@@ -1051,7 +1049,7 @@ extract_coef_features <- function(
 ){
 # Filter
     args <- list(coefs = coefs, fit = fit, combiner = combiner, verbose = verbose)
-    fdt(object) %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
+    object %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
     object <- do.call(     .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
     object <- do.call(   .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
     object <- do.call(              order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
