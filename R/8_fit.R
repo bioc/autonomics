@@ -372,8 +372,14 @@ modelvar.data.table <- function(
 modelvar.SummarizedExperiment <- function(
     object, quantity, fit = fits(object), coef = autonomics::coefs(object, fit = fit), ...
 ){  
-    modelvar.data.table(fdt(object), quantity = quantity, fit = fit, coef = coef )
-}
+    c(modelvar.data.table(fdt(object),    quantity = quantity, fit = fit, coef = coef),
+      modelvar(metadata(object)$survival, quantity = quantity, fit = fit, coef = coef))  # modelvar.NULL or
+}                                                                                        # modelvar.data.table
+
+
+#' @rdname modelvar
+#' @export
+modelvar.NULL <- function(object, ...)  NULL
 
 
 #' @rdname modelvar
