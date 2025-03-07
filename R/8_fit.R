@@ -822,8 +822,13 @@ coefs.data.table <- function(object, fit = fits(object), intercept = FALSE, ...)
 #' @rdname coefs
 #' @export
 coefs.SummarizedExperiment <- function(object, fit = fits(object), intercept = FALSE, ...){
-    coefs.data.table(fdt(object), fit = fit, intercept = intercept)
-}
+    c(coefs.data.table(fdt(object), fit = fit, intercept = intercept),
+      coefs(metadata(object)$survival, fit = fit)) # coefs.data.table if metadata contains stats
+}                                                  # coefs.NULL if metadata has no stats
+
+#' @rdname coefs
+#' @export
+coefs.NULL <- function(object, ...)  NULL
 
 #============================================================================
 #
