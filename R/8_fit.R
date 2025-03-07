@@ -353,8 +353,9 @@ modelvar.data.table <- function(
 ){
 # Assert
     assert_is_subset(quantity, c('fdr', 'p', 't', 'effect', 'se', 'abstract'))
-    assert_is_subset(fit,   fits(object))
-    assert_is_subset(coef, coefs(object, fit = fit, intercept = TRUE))
+    fit  %<>% intersect( fits(object))
+    coef %<>% intersect(coefs(object, fit = fit))
+    if (is.null(fit))  return(NULL) # stats can be in `fdt` or `metadata`
     assert_has_no_duplicates(fit)   # Avoid duplicate columns
     assert_has_no_duplicates(coef)  # Downstream functionality melts and dcasts
 # Return                            # Which requires the cast to be unique
