@@ -1,4 +1,51 @@
 
+
+#' Survival analysis example
+#' @return SummarizedExperiment
+#' @examples
+#' #  Background    BOC   CD4   PLG   XCL1
+#' #                ===   ===   ===   ====
+#' #                Flo   Fhi   Flo   Fhi    _______________
+#' #                Fhi   Flo   Fhi   Flo    ____________  |
+#' #                Mlo   Mhi   Mhi   Mlo    _____      |  |_____
+#' #                Mhi   Mlo   Mlo   Mhi    __   |__   |__     |__
+#' #                                           |     |     |
+#' #                                           |__   |__   |_______
+#' #                                              |     |
+#' #                                              |__    |__
+#' #                                                 |      |
+#' survex()
+#' @export 
+survex <- function(){
+    
+    set.seed(1)
+    expr1.m <- rnorm(10,3)
+    expr1.f <- rnorm(10,3)
+    expr2.m <- rnorm(10,5)
+    expr2.f <- rnorm(10,5)# m.surv1  m.surv2  f.surv3  f.surv4
+    mat <- rbind( geneA = c(expr1.m, expr2.m, expr1.f, expr2.f), 
+                  geneB = c(expr2.m, expr1.m, expr2.f, expr1.f),
+                  geneC = c(expr1.m, expr2.m, expr2.f, expr1.f), 
+                  geneD = c(expr2.m, expr1.m, expr1.f, expr2.f))
+    object <- SummarizedExperiment::SummarizedExperiment(list(exprs = mat))
+    fdt(object)$feature_id <- fnames(object)
+    object$sample_id <- snames(object)  <- c(sprintf('surv1.m.%d', 0:9),  sprintf('surv2.m.%d', 0:9), sprintf('surv3.f.%d', 0:9), sprintf('surv4.f.%d', 0:9))
+    object$survgroup <- object$sample_id %>% split_extract_fixed('.', 1)
+    object$sex       <- object$sample_id %>% split_extract_fixed('.', 2)
+    object$replicate <- object$sample_id %>% split_extract_fixed('.', 3)
+
+    surv1.m.time <- c( rep(1,4), rep(2,4), rep(3,2) ); surv1.m.event <- rep(1,10)
+    surv2.m.time <- c( rep(2,2), rep(3,4), rep(4,4) ); surv2.m.event <- rep(1,10)
+    surv3.f.time <- c( rep(4,4), rep(5,4), rep(7,2) ); surv3.f.event <- c(rep(1,8),rep(0,2))
+    surv4.f.time <- c( rep(5,2), rep(6,2), rep(7,6) ); surv4.f.event <- c(rep(1,4),rep(0,6))
+    object$timetoevent <- c(surv1.m.time,  surv2.m.time,  surv3.f.time,  surv4.f.time)
+    object$event       <- c(surv1.m.event, surv2.m.event, surv3.f.event, surv4.f.event)
+    object
+    
+}
+
+
+
 #' @rdname dot-fit_survival
 #' @export
 survival_example <- function(){
@@ -121,12 +168,6 @@ survival_example <- function(){
 }
 
 
-#' Survival engines
-#' @export
-#' @examples
-#' SURVIVALENGINES
-SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
-
 
 #' Bin/Factorize assay
 #' @param object  SummarizedExperiment
@@ -135,9 +176,9 @@ SURVIVALENGINES <- c('coxph', 'survdiff', 'logrank')
 #' @param verbose TRUE or FALSE
 #' @return SummarizedExperiment
 #' @examples
-#' object <- survival_example()
-#'       bin_assay(object)
-#' factorize_assay(object)
+#' object <- survex()
+#'       bin_assay(object, k = 4)
+#' factorize_assay(object, k = 4)
 #' @export
 bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
 # Assert
@@ -191,22 +232,22 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' @param verbose   TRUE or FALSE
 #' @examples
 #' # Load/Transform
-#'    object <- survival_example()
-#'    object %<>% bin_assay()
-#'    object %<>% factorize_assay()
+#'    object <- survex()
+#'    object %<>% bin_assay(k = 2)
+#'    object %<>% factorize_assay(k = 2)
 #' # coxph{survival}
 #'   .fit_survival(object)
-#'   .fit_survival(object, ~ exprs)                             #      expr effect
-#'   .fit_survival(object, ~ exprs3bins)                        #   exprbin effect
-#'   .fit_survival(object, ~ exprs3levels)                      # exprlevel effect
-#'   .fit_survival(object, formula = ~ subgroup)                #  subgroup effect
-#'   .fit_survival(object, formula = ~ subgroup + expr3levels)  #  subgroup effect ACROSS exprlevels,  exprlevel effect ACROSS subgroups.
-#'   .fit_survival(object, formula = ~ subgroup / expr3levels)  # exprlevel effect WITHIN subgroup,     subgroup effect ACROSS exprlevels.
-#'   .fit_survival(object, formula = ~ expr3levels / subgroup)  #  subgroup effect WITHIN exprlevel,   exprlevel effect ACROSS subgroups.
-#'   .fit_survival(object, formula = ~ expr3levels * subgroup)  #  subgroup effect differences BETWEEN exprlevels
+#'   .fit_survival(object, ~ exprs)                         #      expr effect
+#'   .fit_survival(object, ~ exprs2bins)                    #   exprbin effect
+#'   .fit_survival(object, ~ exprs2levels)                  # exprlevel effect
+#'   .fit_survival(object, formula = ~ sex)                 #       sex effect
+#'   .fit_survival(object, formula = ~ sex + exprs2levels)  #       sex effect ACROSS exprlevels,  exprlevel effect ACROSS sexes.
+#'   .fit_survival(object, formula = ~ sex / exprs2levels)  # exprlevel effect WITHIN sex,               sex effect ACROSS exprlevels.
+#'   .fit_survival(object, formula = ~ exprs2levels / sex)  #       sex effect WITHIN exprlevel,   exprlevel effect ACROSS sexes
+#'   .fit_survival(object, formula = ~ exprs2levels * sex)  #       sex effect differences BETWEEN exprlevels
 #' # survdiff{survival}
-#'   .fit_survival(object, formula = ~ exprs3levels, engine = 'survdiff')
-#'   .fit_survival(object, formula = ~ exprs3levels, engine = 'logrank')
+#'   .fit_survival(object, formula = ~ exprs2levels, engine = 'survdiff')
+#'   .fit_survival(object, formula = ~ exprs2levels, engine = 'logrank')
 .fit_survival <- function( 
        object,
        formula = as.formula(sprintf('~%s', assayNames(object)[1])),
@@ -396,22 +437,28 @@ svar_formula <- function(formula, object)  all(all.vars(formula) %in% svars(obje
 #' @param nrow       number of rows
 #' @return ggplot
 #' @examples
+#' # ~ survgroup
+#'     object <- survex()
+#'     object %<>% fit_survival(~ survgroup)
+#'     plot_survival(object, formula = ~ survgroup)
+#'     plot_survival(object, formula = ~ survgroup)
+#' 
 #' # ~ exprs2levels
-#'     object <- survival_example()
+#'     object <- survex()
 #'     object %<>% factorize_assay(k = 2)
 #'     object %<>% fit_survival(~ exprs2levels)
 #'     plot_survival(object, formula = ~ exprs2levels)
 #'
-#' # ~ subgroup
-#'     object <- survival_example()
-#'     object %<>% fit_survival(~ subgroup)
-#'     plot_survival(object, formula = ~ subgroup)
+#' # ~ sex
+#'     object <- survex()
+#'     object %<>% fit_survival(~ sex)
+#'     plot_survival(object, formula = ~ sex)
 #'
 #' #' ~ expr2levels + subgroup
-#'      object <- survival_example() 
+#'      object <- survex()
 #'      object %<>% factorize_assay(k = 2)
-#'      object %<>% fit_survival(~ exprs2levels + subgroup)
-#'      plot_survival(object, formula = ~ exprs2levels + subgroup)
+#'      object %<>% fit_survival(~ sex + exprs2levels)
+#'      plot_survival(object, formula = ~ sex + exprs2levels, nrow = 2, ncol = 2) + scale_x_continuous(breaks = 0:8)
 #' 
 #' # Engines
 #'     object <- survival_example()
