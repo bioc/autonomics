@@ -515,6 +515,7 @@ plot_survival <- function(
     setorderv(plotdt, c('feature_id', 'survivalgroup', 'timetoevent'))
     plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', 'survivalgroup')][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
     plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'survivalgroup')][, timetoevent := max(timetoevent)+1][, curOut := 0]
+    plotdtn <- plotdtn[totDead!=totObs]  # vertically end survival curve when all dead
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
     pcols <- pvar(object, fit = engine, coef = coef) # `copy` is very important !
