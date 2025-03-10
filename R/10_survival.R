@@ -517,10 +517,10 @@ plot_survival <- function(
     plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', 'survivalgroup')][, timetoevent := max(timetoevent)+1][, curOut := 0]
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
-    pcols <- pvar(object, fit = engine, coef = coef)
-    tcol  <- tvar(object, fit = engine, coef = coef)
-    statdt <- if (length(assayvar)==0){  statdt <- metadata(object)$survival
-              } else {                   statdt <- fdt(object)[, c('feature_id', pcols, tcol), with = FALSE] }
+    pcols <- pvar(object, fit = engine, coef = coef) # `copy` is very important !
+    tcol  <- tvar(object, fit = engine, coef = coef) # without modifies are performed in the object!
+    statdt <- if (length(assayvar)==0){  copy(metadata(object)$survival)
+              } else {                   fdt(object)[, c('feature_id', pcols, tcol), with = FALSE] }
     statdt[, (pcols) := lapply(.SD, formatC, format = 'g', digits = 2), .SDcols = pcols]
     statdt[, facet := paste0(.SD, collapse = '      '), .SDcols = pcols, by = 'feature_id']
     statdt[, (pcols) := NULL]
