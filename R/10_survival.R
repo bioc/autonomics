@@ -491,16 +491,16 @@ plot_survival <- function(
     event <- timetoevent <- NULL      # svar
     curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
 # Prepare
-    obj <- extract_coef_features(object, fit = engine, coefs = coef, n = n)
+    object %<>% extract_coef_features(fit = engine, coefs = coef, n = n)
     assayvar <- all.vars(formula) %>% intersect(assayNames(object))
   samplevars <- all.vars(formula) %>% intersect(svars(object))
     if (length(assayvar)==0){
-        plotdt <- sdt(obj)[, c('sample_id', samplevars, 'timetoevent', 'event'), with = FALSE]
+        plotdt <- sdt(object)[, c('sample_id', samplevars, 'timetoevent', 'event'), with = FALSE]
         plotdt[, feature_id := formula2str(formula)]
     } else {
         assert_is_a_string(assayvar)
         assert_character_matrix(assays(object)[[assayvar]], .xname = sprintf('assays(object)$%s', assayvar))
-        plotdt <- sumexp_to_longdt(obj, assay = assayvar, svars = c(samplevars, 'timetoevent', 'event'), value.name = assayvar)
+        plotdt <- sumexp_to_longdt(object, assay = assayvar, svars = c(samplevars, 'timetoevent', 'event'), value.name = assayvar)
     }
     plotdt[, alive := 1-event]
     setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent', 'alive'))
