@@ -2,11 +2,13 @@
 % Please edit documentation in R/1_assertions.R
 \name{is_diann_report}
 \alias{is_diann_report}
+\alias{is_diann_parquet_report}
 \alias{is_fragpipe_tsv}
 \alias{is_maxquant_proteingroups}
 \alias{is_maxquant_phosphosites}
 \alias{is_compounddiscoverer_output}
 \alias{assert_diann_report}
+\alias{assert_diann_parquet_report}
 \alias{assert_fragpipe_tsv}
 \alias{assert_maxquant_proteingroups}
 \alias{assert_maxquant_phosphosites}
@@ -14,6 +16,8 @@
 \title{Is diann, fragpipe, proteingroups, phosphosites file?}
 \usage{
 is_diann_report(x, .xname = get_name_in_parent(x))
+
+is_diann_parquet_report(x, .xname = get_name_in_parent(x))
 
 is_fragpipe_tsv(x, .xname = get_name_in_parent(x))
 
@@ -24,6 +28,8 @@ is_maxquant_phosphosites(x, .xname = get_name_in_parent(x))
 is_compounddiscoverer_output(x, .xname = get_name_in_parent(x))
 
 assert_diann_report(x, .xname = get_name_in_parent(x))
+
+assert_diann_parquet_report(x, .xname = get_name_in_parent(x))
 
 assert_fragpipe_tsv(x, .xname = get_name_in_parent(x))
 

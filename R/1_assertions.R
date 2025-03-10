@@ -173,6 +173,23 @@ is_diann_report <- function(x, .xname = get_name_in_parent(x)){
 
 #' @rdname is_diann_report
 #' @export
+#' @importFrom arrow read_parquet
+is_diann_parquet_report <- function(x, .xname = get_name_in_parent(x)){
+  if (is.null(x)){                        false('%s is NULL',                  .xname)
+  } else if (!is_a_string(x)){            false('%s is not a string',          .xname)
+  } else if (!is_existing_file(x)){       false('%s does not exist',           .xname)
+  }
+  
+  x_data <- read_parquet(x)
+  if (names(x_data)[1] != 'Run.Index'){      false('col1(%s) != "Run.Index"', .xname)
+  } else if (names(x_data)[2] != 'Run'){     false('col2(%s) != "Run"',       .xname)
+  } else if (names(x_data)[3] != 'Channel'){ false('col3(%s) != "Channel"',   .xname)
+  } else {                                   TRUE
+  }
+}
+
+#' @rdname is_diann_report
+#' @export
 is_fragpipe_tsv <- function(x, .xname = get_name_in_parent(x)){
     if (is.null(x)){                      false('%s is NULL',                    .xname)
     } else if (!is_a_string(x)){          false('%s is not a string',            .xname)
@@ -225,6 +242,13 @@ is_compounddiscoverer_output <- function(x, .xname = get_name_in_parent(x)){
 assert_diann_report <- function(x, .xname = get_name_in_parent(x)){
     assert_engine(is_diann_report, x, .xname = .xname)
 }
+
+#' @rdname is_diann_report
+#' @export
+assert_diann_parquet_report <- function(x, .xname = get_name_in_parent(x)){
+  assert_engine(is_diann_parquet_report, x, .xname = .xname)
+}
+
 
 #' @rdname is_diann_report
 #' @export

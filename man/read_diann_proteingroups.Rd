@@ -7,12 +7,22 @@
 \alias{read_diann}
 \title{Read diann}
 \usage{
-.read_diann_precursors(file, Lib.PG.Q = 0.01, verbose = TRUE)
+.read_diann_precursors(
+  file,
+  Lib.PG.Q = 0.01,
+  format = c("tsv", "parquet")[1],
+  verbose = TRUE
+)
 
-.read_diann_proteingroups(file, Lib.PG.Q = 0.01)
+.read_diann_proteingroups(
+  file,
+  Lib.PG.Q = 0.01,
+  format = c("tsv", "parquet")[1]
+)
 
 read_diann_proteingroups(
   file,
+  format = .guess_diann_format(file),
   Lib.PG.Q = 0.01,
   simplify_snames = TRUE,
   rm_contaminants = TRUE,
@@ -32,9 +42,11 @@ read_diann_proteingroups(
 read_diann(...)
 }
 \arguments{
-\item{file}{'report.tsv' file}
+\item{file}{DIA-NN report file}
 
 \item{Lib.PG.Q}{Lib.PG.Q cutoff}
+
+\item{format}{Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')}
 
 \item{verbose}{TRUE or FALSE}
 
