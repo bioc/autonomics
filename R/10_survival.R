@@ -431,18 +431,19 @@ installed <- function(pkg){
 
 #' Plot survival
 #' 
-#' @param object     SummarizedExperiment
-#' @param assay      value in assayNames(object)
-#' @param engine    'coxph', 'survdiff' or 'logrank'
-#' @param ntile  number of quantiles
-#' @param title      string
-#' @param subtitle   string
-#' @param file       filepath
-#' @param width      number
-#' @param height     number
-#' @param n          number of features to plot
-#' @param ncol       number of columns
-#' @param nrow       number of rows
+#' @param object        SummarizedExperiment
+#' @param assay         value in assayNames(object)
+#' @param engine       'coxph', 'survdiff' or 'logrank'
+#' @param ntile         number of quantiles
+#' @param title         string
+#' @param subtitle      string
+#' @param dodge_height  number 
+#' @param file          filepath
+#' @param width         number
+#' @param height        number
+#' @param n             number of features to plot
+#' @param ncol          number of columns
+#' @param nrow          number of rows
 #' @return ggplot
 #' @examples
 #' # ~ survgroup
@@ -482,6 +483,7 @@ plot_survival <- function(
         coef = coefs(object, fit = engine)[1],
        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
+dodge_height = 2,
         file = NULL,
        width = 7,
       height = 7,
@@ -567,7 +569,8 @@ plot_survival <- function(
              #ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
              #                      hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
-             geom_step(aes(x = timetoevent, y = survival, group = survivalgroup, color = survivalgroup)) + 
+             geom_step(aes(x = timetoevent, y = survival, group = survivalgroup, color = survivalgroup), 
+                       position = ggstance::position_dodgev(height = dodge_height)) + 
              scale_color_manual(values = colordt$color %>% set_names(colordt$survivalgroup)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
                 # Note that here the dropout is placed after the stepdown.

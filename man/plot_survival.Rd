@@ -12,6 +12,7 @@ plot_survival(
   coef = coefs(object, fit = engine)[1],
   title = if (svar_formula(formula, object)) NULL else formula2str(formula),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
+  dodge_height = 2,
   file = NULL,
   width = 7,
   height = 7,
@@ -29,6 +30,8 @@ plot_survival(
 \item{title}{string}
 
 \item{subtitle}{string}
+
+\item{dodge_height}{number}
 
 \item{file}{filepath}
 
