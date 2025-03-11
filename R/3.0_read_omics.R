@@ -592,10 +592,7 @@ add_subgroup <- function(
 
 add_affy_fdata <- function(object){
 # Assert
-    if (!requireNamespace('AnnotationDbi', quietly = TRUE)){
-        message("`BiocManager::install('AnnotationDbi')`. Then re-run.")
-        return(object)
-    }
+    if (!installed('AnnotationDbi'))  return(object)
 # Extract entrez identifiers
     entrezgs <- vapply(
         stri_split_fixed(fnames(object), '_'), extract, character(1), 1)
@@ -628,14 +625,13 @@ add_affy_fdata <- function(object){
 #' # if (!file.exists(localfile)){  download.file(url, destfile = localfile)
 #' #                                untar(localfile, exdir = path.expand(localdir))  }
 #' # localfile %<>% substr(1, nchar(.)-4)
-#' # if (!requireNamespace("BiocManager", quietly = TRUE))  install.packages('BiocManager')
-#' # if (!requireNamespace("hgu95av2.db", quietly = TRUE))  BiocManager::install('hgu95av2.db')
+#' # if (!installed("BiocManager"))  install.packages('BiocManager')
+#' # if (!installed("hgu95av2.db"))  BiocManager::install('hgu95av2.db')
 #' # read_affymetrix(celfiles = list.files(localfile, full.names = TRUE))
 #' @export
 read_affymetrix <- function(celfiles){
 # Assert
-    if (!requireNamespace('affy', quietly = TRUE)){
-        stop("`BiocManager::install('affy')`. Then re-run.") }
+    if (!installed('affy'))  return(NULL)
 # read
     message('Read Affymetrix CEL files: ', basename(celfiles)[1], ', ...')
     suppressWarnings(eset1 <- affy::just.rma(filenames = celfiles))

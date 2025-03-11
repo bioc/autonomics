@@ -18,7 +18,7 @@ character vector
 Entrezg to genesymbol
 }
 \examples{
-if (requireNamespace('org.Hs.eg.db', quiet = TRUE)){
+if (installed('org.Hs.eg.db')){
     orgdb <- org.Hs.eg.db::org.Hs.eg.db
     entrezg_to_symbol(x = c('7448', '3818', '727'), orgdb)
 }

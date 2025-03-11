@@ -140,7 +140,7 @@ Read rnaseq counts/bams
 }
 \examples{
 # read_rnaseq_bams
-  if (requireNamespace('Rsubread')){
+  if (installed('Rsubread')){
       dir <- download_data('billing16.bam.zip')
       object <- read_rnaseq_bams(dir, paired = TRUE, genome = 'hg38')  
       object <- read_rnaseq_bams(dir, paired = TRUE, genome = 'hg38', plot = TRUE)  

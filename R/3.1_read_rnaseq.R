@@ -382,14 +382,8 @@ download_gtf <- function(
 #' @param verbose    TRUE or FALSE
 #' @noRd
 add_genenames <- function(object, gtffile, verbose = TRUE){
-    if (!requireNamespace('GenomicRanges', quietly = TRUE)){
-        message("BiocManager::install('GenomicRanges'). Then re-run.")
-        return(object) 
-    }
-    if (!requireNamespace('rtracklayer', quietly = TRUE)){
-        message("BiocManager::install('rtracklayer'). Then re-run.")
-        return(object) 
-    }
+    if (!installed('GenomicRanges'))   return(object) 
+    if (!installed('rtracklayer'  ))   return(object) 
     gene_name <- NULL
 
     if (is.null(gtffile)) return(object)
@@ -421,7 +415,7 @@ add_genenames <- function(object, gtffile, verbose = TRUE){
 #' @param orgdb  OrgDb
 #' @return  character vector
 #' @examples
-#' if (requireNamespace('org.Hs.eg.db', quiet = TRUE)){
+#' if (installed('org.Hs.eg.db')){
 #'     orgdb <- org.Hs.eg.db::org.Hs.eg.db
 #'     entrezg_to_symbol(x = c('7448', '3818', '727'), orgdb)
 #' }
@@ -444,7 +438,7 @@ entrezg_to_symbol <- function(x, orgdb){
 #' @param orgdb  OrgDb
 #' @return character vector
 #' @examples
-#' if (requireNamespace('org.Hs.eg.db', quiet = TRUE)){
+#' if (installed('org.Hs.eg.db')){
 #'     x <- c('7448/3818/727', '5034/9601/64374')
 #'     orgdb <- org.Hs.eg.db::org.Hs.eg.db
 #'     collapsed_entrezg_to_symbol(x, sep = '/', orgdb = orgdb)
@@ -469,13 +463,11 @@ collapsed_entrezg_to_symbol <- function(x, sep, orgdb){
 genome_to_orgdb <- function(genome){
     assert_scalar_subset(genome, c('mm10', 'mm9', 'hg38', 'hg19'))
     if (genome %in% c('mm10', 'mm9')){
-        if (!requireNamespace('org.Mm.eg.db', quietly = FALSE)){
-            stop("First: BiocManager::install('org.Mm.eg.db')")}
+        if (!installed('org.Mm.eg.db'))   return(NULL)
         return(org.Mm.eg.db::org.Mm.eg.db)
 
     } else if (genome %in% c('hg38', 'hg19')){
-        if (!requireNamespace('org.Hs.eg.db', quietly = FALSE)){
-            stop("First: BiocManager::install('org.Hs.eg.db')")}
+        if (!installed('org.Hs.eg.db'))   return(NULL)
         return(org.Hs.eg.db::org.Hs.eg.db)
     }
 }
@@ -483,8 +475,7 @@ genome_to_orgdb <- function(genome){
 
 count_reads <- function(files, paired, nthreads, genome){
 # Assert
-    if (!requireNamespace('Rsubread', quietly = TRUE)){
-        stop("BiocManager::install('Rsubread'). Then re-run.") }
+    if (!installed('Rsubread'))   return(NULL)
 # Common args
     . <- NULL
     args <- list(files = files, isPaired = paired, nthreads = nthreads)
@@ -778,9 +769,7 @@ add_ensdb <- function(object, ensdb, verbose = TRUE){
 # Assert
     if (is.null(ensdb)) return(object)
     if (!stri_startswith_fixed(fdt(object)$feature_id[1],'ENS'))  return(object)
-    if (!requireNamespace('ensembldb', quietly = TRUE)){
-        message("BiocManager::install('ensembldb'). Then re-run.")
-        return(object) }
+    if (!installed('ensembldb'))   return(object)
 # Genesize
     genesize <- ensembldb::lengthOf(
         ensdb, filter = ensembldb::GeneidFilter(fdt(object)$feature_id))
@@ -953,7 +942,7 @@ read_rnaseq_bams <- function(
 #' @return SummarizedExperiment
 #' @examples
 #' # read_rnaseq_bams
-#'   if (requireNamespace('Rsubread')){
+#'   if (installed('Rsubread')){
 #'       dir <- download_data('billing16.bam.zip')
 #'       object <- read_rnaseq_bams(dir, paired = TRUE, genome = 'hg38')  
 #'       object <- read_rnaseq_bams(dir, paired = TRUE, genome = 'hg38', plot = TRUE)  
@@ -1062,9 +1051,7 @@ read_salmon <- function(
     dir, sfile = NULL, by = NULL, ensdb = NULL
 ){
 # Assert
-    if (!requireNamespace('ensembldb', quietly = TRUE)){
-        message("BiocManager::install('ensembldb'). Then re-run.")
-        return(object) }
+    if (!installed('ensembldb'))  return(object)
     assert_all_are_dirs(dir)
     if (!is.null(ensdb))   assert_is_all_of(ensdb, 'EnsDb')
     if (!is.null(sfile))   assert_all_are_existing_files(sfile)

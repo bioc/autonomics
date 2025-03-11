@@ -43,7 +43,7 @@ add_kegg_pathways <- function(
 #' @param pathway_var kegg pathway fvar
 #' @return character vector
 #' @examples
-#' if (requireNamespace('RCurl', quietly = TRUE)){
+#' if (installed('RCurl')){
 #'    x <- c("C07326", "C04742", "C18218", "C18218", NA_character_,
 #'               NA_character_, "", "")
 #'     kegg_entry_to_pathways(x)
@@ -52,8 +52,7 @@ add_kegg_pathways <- function(
 #' @noRd
 kegg_entry_to_pathways <- function(x){
 # Assert
-    if (!requireNamespace('RCurl', quietly = TRUE)){
-        stop("BiocManager::install('RCurl'). Then re-run.") }
+    if (!installed('RCurl'))  return(NULL)
 # Satisfy check
     Entry <- Pathway <- . <- NULL
     x %<>% as.character()

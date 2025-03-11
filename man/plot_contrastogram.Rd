@@ -30,7 +30,7 @@ list returned by \code{\link[diagram]{plotmat}}
 Plot contrastogram
 }
 \examples{
-if (requireNamespace('diagram', quietly = TRUE)){
+if (installed('diagram')){
    file <- download_data('halama18.metabolon.xlsx')
    object <- read_metabolon(file)
    plot_contrastogram(object, subgroupvar = 'subgroup')

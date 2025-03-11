@@ -1615,10 +1615,7 @@ list2mat <- function(x){
 #' plot_venn_heatmap(x)
 #' @export
 plot_venn_heatmap <- function(x){
-    if (!requireNamespace('pheatmap', quietly = TRUE)){
-        message("`BiocManager::install('pheatmap')`")
-        return(NULL)
-    }
+    if (!installed('pheatmap'))   return(NULL)
     assert_is_list(x)
     x %<>% list2mat()
     pctmat <- matrix(0, nrow = ncol(x), ncol = ncol(x), dimnames = list(colnames(x), colnames(x)))
@@ -1792,10 +1789,7 @@ mdsplot <- function(distmat, title = NULL){
 fcor <- function(object, verbose = TRUE){
 # Assert
     assert_is_valid_sumexp(object)
-    if (!requireNamespace('propagate', quietly = TRUE)){
-        message("\t\t\tBiocManager::install('propagate'). Then re-run.") 
-        return(NULL) 
-    }
+    if (!installed('propagate'))   return(NULL) 
     if (verbose)   cmessage('\t\tFeature correlations')
     idx <- rowAlls(!is.na(values(object)))
     object %<>% extract(idx, )
@@ -1819,10 +1813,7 @@ fcor <- function(object, verbose = TRUE){
 scor <- function(object, verbose = TRUE){
 # Assert
     assert_is_valid_sumexp(object)
-    if (!requireNamespace('propagate', quietly = TRUE)){
-        message("\t\t\tBiocManager::install('propagate'). Then re-run.") 
-        return(NULL) 
-    }
+    if (!installed('propagate'))  return(NULL) 
     if (verbose)   cmessage('\t\tSample correlations')
     idx <- rowAlls(!is.na(values(object)))
     object %<>% extract(idx, )
@@ -1953,10 +1944,7 @@ cluslabel <- function(clusdt, label){
 
 fcluster_cmeans <- function(object, distmat, k, label, verbose){
 # Assert
-    if (!requireNamespace('e1071', quietly = TRUE)){
-        message("BiocManager::install('e1071'). Then re-run")
-        return(object)  
-    }
+    if (!installed('e1071'))   return(object)  
 # Find k
     mat <- assays(filter_full_features(object))$fscale
     if (verbose)  cmessage('%scmeans',  spaces(14))
@@ -2106,10 +2094,7 @@ fclusplot <- function(
     plotlist <- mapply( .fclusplot, meth = tmpdt$method, cl = tmpdt$cluster, 
                     MoreArgs = list(plotdt = plotdt, colo = colo, alpha = alpha), 
                     SIMPLIFY = FALSE )
-    if (!requireNamespace('patchwork', quietly = TRUE)){
-        message("BiocManager::install('patchwork'). Then re-run")
-        return(NULL)
-    }
+    if (!installed('patchwork'))   return(NULL)
     patchwork::wrap_plots(plotlist, nrow = nrow, byrow = TRUE) + 
     patchwork::plot_layout(axes = 'collect', guides = 'collect')
     #grid.arrange(grobs = plotlist, nrow = length(method), ncol = length(unique(plotdt$clus)))
@@ -2139,19 +2124,6 @@ fclusplot <- function(
     geom_line(alpha = alpha) +
     geom_line( data = exemplardt, color = 'white', linewidth = 0.8) + 
     geom_point(data = exemplardt, color = 'white', size = 1.5)
-}
-
-
-
-
-is_installed <- function(x){
-    ok <- requireNamespace(x, quietly = TRUE)
-    if (!ok)  message(sprintf("BiocManager::install('%s'). Then re-run.", x))
-    TRUE
-}
-
-assert_installed <- function(x){
-     assert_engine(  is_installed, x )
 }
 
 

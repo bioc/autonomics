@@ -60,9 +60,7 @@ tag_hdlproteins <- function(object, verbose = TRUE){
 OPENTARGETSDIR <- file.path(tools::R_user_dir('autonomics', 'cache'), 'opentargets', '22.04')
 
 download_opentargets_targets <- function(){
-    if (!requireNamespace('XML', quietly = TRUE)){
-        message("BiocManager::install('XML'). Then re-run.")
-    }
+    if (!installed('XML'))  return(NULL)
     if (!dir.exists(file.path(OPENTARGETSDIR, 'targets'))){
         ftpdir <- 'http://ftp.ebi.ac.uk/pub/databases/opentargets/platform/22.04/output/etl/json/targets/'
         ftpfiles <- XML::getHTMLLinks(ftpdir) %>% setdiff(c('../', '_SUCCESS'))
@@ -98,9 +96,7 @@ extract_functiondescriptions <- function(x){
 # file <- list.files(file.path(OPENTARGETSDIR, 'targets'))[1]
 # read_opentargets_targets(file) 
 .read_opentargets_targets <- function(file){
-    if (!requireNamespace('jsonlite', quietly = TRUE)){
-        message("BiocManager::install('jsonlite'). Then re-run.")
-    }
+    if (!installed('jsonlite'))  return(NULL)
     lines <- readLines(file.path(OPENTARGETSDIR, 'targets', file))
     lines %<>% lapply(jsonlite::fromJSON)
     lines %<>% lapply( function(x){ data.table(

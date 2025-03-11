@@ -263,9 +263,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     assert_is_a_bool(drop)
     assert_is_function(codingfun)
     assert_is_a_bool(verbose)
-    if (engine == 'logrank'){
-        if (!requireNamespace('coin', quietly = TRUE))  message("BiocManager::install('coin'). Then rerun")
-    }
+    if (engine == 'logrank')  if (!installed('coin'))  return(NULL)
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
 # Code
     survivalvars <- c('timetoevent', 'event')
@@ -419,6 +417,18 @@ fit_survival <- function(
 svar_formula <- function(formula, object)  all(all.vars(formula) %in% svars(object))
 
 
+#' Is package installed?
+#' @param pkg package (string)
+#' @return TRUE or FALSE
+#' @export
+installed <- function(pkg){
+    txt <- sprintf("        `BiocManager::install('%s')`. Then rerun.", pkg)
+    if (requireNamespace(pkg, quietly = TRUE)){  return(TRUE )
+    } else {                       message(txt); return(FALSE)
+    }
+}
+
+
 #' Plot survival
 #' 
 #' @param object     SummarizedExperiment
@@ -480,10 +490,8 @@ plot_survival <- function(
         nrow = if (svar_formula(formula, object)) length(all.vars(formula))  else 3
 ){
 # Assert
-    if (!requireNamespace('ggtext', quietly = TRUE)){   
-        message("BiocManager::install('ggtext'). Then rerun")
-        return(NULL)
-    }
+    if (!installed('ggtext'))   return(NULL) 
+    if (!installed('ggstance')) return(NULL)
     assert_is_valid_sumexp(object)
     assert_is_subset(all.vars(formula), c(svars(object), assayNames(object)))
     assert_scalar_subset(engine, fits(object))

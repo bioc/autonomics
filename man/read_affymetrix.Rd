@@ -24,7 +24,7 @@ Read affymetrix microarray
 # if (!file.exists(localfile)){  download.file(url, destfile = localfile)
 #                                untar(localfile, exdir = path.expand(localdir))  }
 # localfile \%<>\% substr(1, nchar(.)-4)
-# if (!requireNamespace("BiocManager", quietly = TRUE))  install.packages('BiocManager')
-# if (!requireNamespace("hgu95av2.db", quietly = TRUE))  BiocManager::install('hgu95av2.db')
+# if (!installed("BiocManager"))  install.packages('BiocManager')
+# if (!installed("hgu95av2.db"))  BiocManager::install('hgu95av2.db')
 # read_affymetrix(celfiles = list.files(localfile, full.names = TRUE))
 }

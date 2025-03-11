@@ -203,10 +203,7 @@ write_xl <- function(
     object, xlfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
 ){
 # Assert
-    if (!requireNamespace('writexl', quietly = TRUE)){
-        message("`BiocManager::install('readxl')`. Then re-run.")
-        return(NULL)
-    }
+    if (!installed('writexl'))  return(NULL)
     assert_is_valid_sumexp(object)
     assert_all_are_dirs(dirname(xlfile))
 # Write
@@ -226,10 +223,7 @@ write_ods <- function(
     object, odsfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
 ){
 # Assert
-    if (!requireNamespace('readODS', quietly = TRUE)){
-        message("`BiocManager::install('readODS')`. Then re-run.")
-        return(NULL)
-    }
+    if (!installed('readODS'))   return(NULL)
     assert_is_valid_sumexp(object)
     assert_all_are_dirs(dirname(odsfile))
 # Prepare    

@@ -99,9 +99,7 @@ which.medoid <- function(mat){
 #' object %<>% filter_medoid(by = 'subgroup', verbose=TRUE)
 #' @export
 filter_medoid <- function(object, by = NULL, verbose = FALSE){
-    if (!requireNamespace('ICSNP', quietly = TRUE)){
-        message("`BiocManager::install('ICSNP')`. Then re-run.")
-        return(object) }
+    if (!installed('ICSNP'))    return(object)
     if (is.null(by))  return(.filter_medoid(object, verbose=verbose))
     object %<>% split_samples(by)
     if (verbose)  message('\t\t\tRetain medoid sample')
@@ -430,9 +428,6 @@ transform_to_fitting_normal <- function(x){
 }
 
 estimate_mean_sd <- function(x){
-    if (!requireNamespace('MASS', quietly = TRUE)){
-        stop("BiocManager::install('MASS'). Then re-run.")
-    }
     . <- NULL
     x %<>% extract(!is.na(.) & !is.infinite(.))
     MASS::fitdistr(x, 'normal')[['estimate']]

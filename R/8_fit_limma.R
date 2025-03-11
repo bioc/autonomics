@@ -328,10 +328,7 @@ contr.treatment.explicit <- function(n){
 #' @rdname code
 #' @export
 code_control <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))  return(n) 
     codingMatrices::code_control(n, abbreviate = FALSE)
 }
 
@@ -339,40 +336,28 @@ code_control <- function(n){
 #' @rdname code
 #' @export
 contr.diff <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))   return(n) 
     codingMatrices::contr.diff(n, abbreviate = FALSE)
 }
 
 #' @rdname code
 #' @export
 code_diff <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))  return(n) 
     codingMatrices::code_diff(n, abbreviate = FALSE)
 }
 
 #' @rdname code
 #' @export
 code_diff_forward <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))  return(n) 
     codingMatrices::code_diff_forward(n, abbreviate = FALSE)
 }
 
 #' @rdname code
 #' @export
 code_deviation <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))   return(n) 
     k <- length(n)
     contrastnames <- paste0(n, collapse = '+')
     contrastnames <- paste0('(', contrastnames, ')')
@@ -386,10 +371,7 @@ code_deviation <- function(n){
 #' @rdname code
 #' @export
 code_deviation_first <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))  return(n) 
     k <- length(n)
     contrastnames <- paste0(n, collapse = '+')
     contrastnames <- paste0('(', contrastnames, ')')
@@ -403,10 +385,7 @@ code_deviation_first <- function(n){
 #' @rdname code
 #' @export
 code_helmert <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))  return(n) 
     y <- codingMatrices::code_helmert(n) # properly scaled version of stats::contr.helmert
     for (i in seq(2, ncol(y)+1)){
         curlevel <- n[i]
@@ -421,10 +400,7 @@ code_helmert <- function(n){
 #' @rdname code
 #' @export
 code_helmert_forward <- function(n){
-    if (!requireNamespace('codingMatrices', quietly = TRUE)){
-        message("install.packages('codingMatrices'). Then re-run.")
-        return(n) 
-    }
+    if (!installed('codingMatrices'))  return(n) 
     y <- codingMatrices::code_helmert_forward(n) # properly scaled version of stats::contr.helmert
     k <- length(n)
     for (i in seq(1, k-1)){

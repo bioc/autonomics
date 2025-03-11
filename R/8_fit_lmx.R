@@ -337,9 +337,7 @@ fit_lme <- function(
 ){
 # Assert
     . <- NULL
-    if (!requireNamespace('nlme', quietly = TRUE)){
-        message("BiocManager::install('nlme'). Then re-run.")
-        return(object)   }
+    if (!installed('nlme'))  return(object)
 # Fit
     sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
     fit_lmx(    object,
@@ -373,12 +371,8 @@ fit_lmer <- function(
 ){
 # Assert
     . <- NULL
-    if (!requireNamespace('lme4', quietly = TRUE)){
-        message("`BiocManager::install('lme4')`. Then re-run.")
-        return(object) }
-    if (!requireNamespace('lmerTest', quietly = TRUE)){
-        message("`BiocManager::install('lmerTest')`. Then re-run.")
-        return(object) }
+    if (!installed('lme4'))      return(object)
+    if (!installed('lmerTest'))  return(object)
 # Fit
     sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
     fit_lmx(    object,

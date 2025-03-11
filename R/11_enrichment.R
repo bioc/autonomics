@@ -93,8 +93,8 @@ read_msigdt <- function(
         cmessage("\t\tNow rerun `read_msigdt()`")
         return(NULL)
     }
-    if (!requireNamespace('DBI',     quietly = TRUE))  message("BiocManager::install('DBI'). Then re-run.")
-    if (!requireNamespace('RSQLite', quietly = TRUE))  message("BiocManager::install('RSQLite'). Then re-run.")
+    if (!installed('DBI'))      return(NULL)
+    if (!installed('RSQLite'))  return(NULL)
     assert_all_are_existing_files(file)
     assert_is_subset(collections, c(MSIGCOLLECTIONSHUMAN, MSIGCOLLECTIONSMOUSE))
     gene_set_id <- gene_symbol_id <- id <- symbol <- NULL

@@ -74,7 +74,7 @@ compute_connections <- function(
 #' @param curve        arrow curvature
 #' @return list returned by \code{\link[diagram]{plotmat}}
 #' @examples
-#' if (requireNamespace('diagram', quietly = TRUE)){
+#' if (installed('diagram')){
 #'    file <- download_data('halama18.metabolon.xlsx')
 #'    object <- read_metabolon(file)
 #'    plot_contrastogram(object, subgroupvar = 'subgroup')
@@ -89,8 +89,7 @@ plot_contrastogram <- function(
 ){
 # Initialize
     V2 <- N <- NULL
-    if (!requireNamespace('diagram', quietly = TRUE)){
-        stop("BiocManager::install('diagram'). Then re-run.") }
+    if (!installed('diagram'))  return(NULL)
 # Fit limma
     design <- create_design(object, formula = formula)
     object %<>% fit_limma_contrastogram(subgroupvar = subgroupvar, design = design)

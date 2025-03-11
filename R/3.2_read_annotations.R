@@ -149,8 +149,7 @@ read_uniprotdt <- function(
 # Assert
     if (is.null(fastafile)) return(NULL)
     assert_all_are_existing_files(fastafile)
-    if (!requireNamespace('Biostrings', quietly = TRUE)){
-        stop("BiocManager::install('Biostrings'). Then re-run.") }
+    if (!installed('Biostrings'))   return(NULL)
 # Read
     if (verbose)   cmessage('%sfastahdrs       %s', spaces(14), fastafile)
     fastahdrs <- Biostrings::readAAStringSet(fastafile)
@@ -401,10 +400,8 @@ save_contaminant_hdrs <- function(confile = CONTAMINANTSURL, verbose = TRUE){
     if (  is.null(confile))  return(NULL)
     assert_are_identical(tools::file_ext(confile), 'fasta')
     tsvfile <- file.path(dirname(confile), 'contaminants.tsv')    # dont mv up - breaks when NULL
-    if (file.exists(tsvfile))  return(fread(tsvfile))
-    if (!requireNamespace('Biostrings', quietly = TRUE)){
-        message("BiocManager::install('Biostrings'). Then re-run.") 
-        return(NULL)  }
+    if (file.exists(tsvfile))      return(fread(tsvfile))
+    if (!installed('Biostrings'))  return(NULL)
     protein <- organism <- dbid <- NULL
 # Read
     fastahdrs <- Biostrings::readAAStringSet(confile)
@@ -847,10 +844,7 @@ annotate_uniprot_ws.data.table <- function(
     x, upws, columns=c('xref_ensembl'), collapse=';', ...
 ){
     # Assert valid inputs
-        if (!requireNamespace('UniProt.ws', quietly = TRUE)){
-            message("`BiocManager::install('UniProt.ws')`. Then re-run.")
-            return(x)
-        }
+        if (!installed('UniProt.ws'))   return(x)
         assert_is_data.table(x)
         assert_is_subset('uniprot', names(x))
         assert_is_identical_to_true(all(!is.na(x$uniprot)))

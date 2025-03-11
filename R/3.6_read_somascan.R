@@ -270,10 +270,7 @@ read_olink <- function(
     file, sample_excel = NULL,  sample_tsv = NULL, by.y = 'SampleID'
 ){
 # Assert
-    if (!requireNamespace('OlinkAnalyze', quietly = TRUE)){
-        message("BiocManager::install('OlinkAnalyze'). Then re-run.")
-        return(NULL) 
-    }
+    if (!installed('OlinkAnalyze'))   return(NULL) 
     Assay <- Assay_Warning <- Index <- N <- OlinkID <- Panel <- SampleID <- UniProt <- NULL
 # Read    
     dt <- OlinkAnalyze::read_NPX(file) %>% data.table()
