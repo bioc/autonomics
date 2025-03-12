@@ -21,7 +21,7 @@ plot_survival(
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   coefs = autonomics::coefs(object, fit = engine),
-  title = if (svar_formula(formula, object)) NULL else formula2str(formula),
+  title = formula2str(formula),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
   dodge_height = 0,
   file = NULL,

@@ -534,7 +534,9 @@ prep_survival <- function(
     statdt[, facet := paste0(.SD, collapse = '      '), .SDcols = pcols, by = 'feature_id']
     statdt[, (pcols) := NULL]
     #statdt[, facet := sprintf('%s\n%s', paste0(engine, collapse = spaces(8)), facet)]
-    statdt[, facet := sprintf('%s\n%s\n%s', feature_id, paste0(coefs, collapse = '      '), facet)]
+    statdt[, facet := sprintf("%s\n%s", paste0(coefs, collapse = '      '), facet)]
+    if (any(all.vars(formula) %in% assayNames(object))){
+    statdt[, facet := sprintf('%s\n%s', feature_id, facet)] }
     plotdt %<>% merge(statdt, by = 'feature_id')
     setorderv(plotdt, tcol)
     plotdt[, facet := factor(facet, unique(facet))]
@@ -548,7 +550,7 @@ plot_survival <- function(
      formula = as.formula(sprintf('~%s', assayNames(object)[1])), 
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
        coefs = autonomics::coefs(object, fit = engine),
-       title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
+       title = formula2str(formula) ,
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
 dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
