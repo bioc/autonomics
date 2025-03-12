@@ -452,6 +452,7 @@ installed <- function(pkg){
 #'     survobj() %>% fit_survival(~age)     %>% plot_survival(~age)
 #'     survobj() %>% fit_survival(~sex)     %>% plot_survival(~sex)
 #'     survobj() %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
+#'     survobj() %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
 #' 
 #' # ~ exprs2levels
 #'     object %<>% factorize_assay(k = 2)
@@ -533,7 +534,7 @@ prep_survival <- function(
     statdt[, facet := paste0(.SD, collapse = '      '), .SDcols = pcols, by = 'feature_id']
     statdt[, (pcols) := NULL]
     #statdt[, facet := sprintf('%s\n%s', paste0(engine, collapse = spaces(8)), facet)]
-    statdt[, facet := sprintf('%s\n%s', feature_id, facet)]
+    statdt[, facet := sprintf('%s\n%s\n%s', feature_id, paste0(coefs, collapse = '      '), facet)]
     plotdt %<>% merge(statdt, by = 'feature_id')
     setorderv(plotdt, tcol)
     plotdt[, facet := factor(facet, unique(facet))]

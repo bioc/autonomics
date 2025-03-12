@@ -70,6 +70,7 @@ Plot survival
     survobj() \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
     survobj() \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
     survobj() \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
+    survobj() \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
 
 # ~ exprs2levels
     object \%<>\% factorize_assay(k = 2)
