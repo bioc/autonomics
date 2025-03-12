@@ -41,7 +41,7 @@ survobj <- function(){
     event.junior.f <- c(rep(1,4),rep(0,6))    
     
     object$timetoevent <- c( time.senior.m,  time.senior.f,  time.junior.m,  time.junior.f )
-    object$event       <- c(event.senior.m, event.senior.f, event.junior.f, event.junior.f )
+    object$event       <- c(event.senior.m, event.senior.f, event.junior.m, event.junior.f )
     object
     
 }
