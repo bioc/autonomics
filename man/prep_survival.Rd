@@ -10,7 +10,7 @@ prep_survival(
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
-  coef = coefs(object, fit = engine)[1],
+  coefs = autonomics::coefs(object, fit = engine),
   n = if (svar_formula(formula, object)) length(all.vars(formula)) else min(nrow(object),
     9)
 )
@@ -20,7 +20,7 @@ plot_survival(
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
-  coef = coefs(object, fit = engine)[1],
+  coefs = autonomics::coefs(object, fit = engine),
   title = if (svar_formula(formula, object)) NULL else formula2str(formula),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
   dodge_height = 0,
@@ -67,9 +67,9 @@ Plot survival
 }
 \examples{
 # samplevar-based
-    object <- survex()
-    object \%>\% fit_survival(~sex) \%>\% plot_survival(~sex)
-    object \%>\% fit_survival(~age) \%>\% plot_survival(~age)
+    survobj() \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
+    survobj() \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
+    survobj() \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
 
 # ~ exprs2levels
     object \%<>\% factorize_assay(k = 2)

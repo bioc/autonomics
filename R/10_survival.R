@@ -480,7 +480,7 @@ prep_survival <- function(
       object, 
      formula = as.formula(sprintf('~%s', assayNames(object)[1])),
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
-        coef = coefs(object, fit = engine)[1],
+       coefs = autonomics::coefs(object, fit = engine),
            n = if (svar_formula(formula, object)) length(all.vars(formula))  else min(nrow(object),9)#,
 #        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
 #     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
@@ -495,11 +495,11 @@ prep_survival <- function(
     assert_is_valid_sumexp(object)
     assert_is_subset(all.vars(formula), c(svars(object), assayNames(object)))
     assert_scalar_subset(engine, fits(object))
-    assert_scalar_subset(coef, coefs(object, fit = engine))
+    assert_is_subset(coefs, autonomics::coefs(object, fit = engine))
     event <- timetoevent <- NULL      # svar
     curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
 # Prepare
-    object %<>% extract_coef_features(fit = engine, coefs = coef, n = n)
+    object %<>% extract_coef_features(fit = engine, coefs = coefs, n = n)
     assayvar <- all.vars(formula) %>% intersect(assayNames(object))
   samplevars <- all.vars(formula) %>% intersect(svars(object))
     if (length(assayvar)==0){
@@ -525,8 +525,8 @@ prep_survival <- function(
     plotdtn <- plotdtn[totDead!=totObs]  # vertically end survival curve when all dead
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
-    pcols <- pvar(object, fit = engine, coef = coef) # `copy` is very important !
-    tcol  <- tvar(object, fit = engine, coef = coef) # without modifies are performed in the object!
+    pcols <- pvar(object, fit = engine, coef = coefs) # `copy` is very important !
+    tcol  <- tvar(object, fit = engine, coef = coefs) # without modifies are performed in the object!
     statdt <- if (length(assayvar)==0){  copy(metadata(object)$survival)
               } else {                   fdt(object)[, c('feature_id', pcols, tcol), with = FALSE] }
     statdt[, (pcols) := lapply(.SD, formatC, format = 'g', digits = 2), .SDcols = pcols]
@@ -535,7 +535,7 @@ prep_survival <- function(
     #statdt[, facet := sprintf('%s\n%s', paste0(engine, collapse = spaces(8)), facet)]
     statdt[, facet := sprintf('%s\n%s', feature_id, facet)]
     plotdt %<>% merge(statdt, by = 'feature_id')
-    plotdt %<>% extract(order(get(tcol)))
+    setorderv(plotdt, tcol)
     plotdt[, facet := factor(facet, unique(facet))]
     plotdt[]
 }
@@ -546,7 +546,7 @@ plot_survival <- function(
       object,
      formula = as.formula(sprintf('~%s', assayNames(object)[1])), 
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
-        coef = coefs(object, fit = engine)[1],
+       coefs = autonomics::coefs(object, fit = engine),
        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
 dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
@@ -561,7 +561,7 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
     if (!installed('ggtext'))   return(NULL) 
     if (!installed('ggstance')) return(NULL)
 # Plot
-    plotdt <- prep_survival(object = object, formula = formula, engine = engine, coef = coef, n = n)
+    plotdt <- prep_survival(object = object, formula = formula, engine = engine, coefs = coefs, n = n)
     maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
     maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("†")   # \u2020
     maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("•")   # \u2022
