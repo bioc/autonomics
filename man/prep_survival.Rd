@@ -18,21 +18,18 @@ prep_survival(
 plot_survival(
   object,
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
-  color = all.vars(formula)[1],
-  linetype = if (length(all.vars(formula)) == 1) NULL else all.vars(formula)[2],
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   coef = coefs(object, fit = engine)[1],
   title = if (svar_formula(formula, object)) NULL else formula2str(formula),
   subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
-  dodge_height = 2,
+  dodge_height = 0,
   file = NULL,
   width = 7,
   height = 7,
-  n = if (svar_formula(formula, object)) length(all.vars(formula)) else min(nrow(object),
-    9),
-  ncol = if (svar_formula(formula, object)) length(all.vars(formula)) else 3,
-  nrow = if (svar_formula(formula, object)) length(all.vars(formula)) else 3
+  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 9),
+  ncol = if (svar_formula(formula, object)) 1 else 3,
+  nrow = if (svar_formula(formula, object)) 1 else 3
 )
 }
 \arguments{
@@ -69,15 +66,14 @@ ggplot
 Plot survival
 }
 \examples{
-# ~ survgroup
+# samplevar-based
     object <- survex()
-    object \%<>\% fit_survival(~ survgroup)
-    plot_survival(object, formula = ~ survgroup)
+    object \%>\% fit_survival(~sex) \%>\% plot_survival(~sex)
+    object \%>\% fit_survival(~age) \%>\% plot_survival(~age)
 
 # ~ exprs2levels
-    object <- survex()
     object \%<>\% factorize_assay(k = 2)
-    object \%<>\% fit_survival(~ exprs2levels)
+    object <- survex()
     plot_survival(object, formula = ~ exprs2levels)
 
 # ~ sex

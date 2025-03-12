@@ -16,30 +16,32 @@
 #' #                                                 |      |
 #' survex()
 #' @export 
-survex <- function(){
+survobj <- function(){
     
     set.seed(1)
-    expr1.m <- rnorm(10,3)
-    expr1.f <- rnorm(10,3)
-    expr2.m <- rnorm(10,5)
-    expr2.f <- rnorm(10,5)# m.surv1  m.surv2  f.surv3  f.surv4
-    mat <- rbind( geneA = c(expr1.m, expr2.m, expr1.f, expr2.f), 
-                  geneB = c(expr2.m, expr1.m, expr2.f, expr1.f),
-                  geneC = c(expr1.m, expr2.m, expr2.f, expr1.f), 
-                  geneD = c(expr2.m, expr1.m, expr1.f, expr2.f))
+    mat <- rbind( geneA = c( rnorm(10,3),  rnorm(10,5),  rnorm(10,3), rnorm(10,5) ), 
+                  geneB = c( rnorm(10,5),  rnorm(10,3),  rnorm(10,5), rnorm(10,3) ), 
+                  geneC = c( rnorm(10,3),  rnorm(10,5),  rnorm(10,5), rnorm(10,3) ),
+                  geneD = c( rnorm(10,5),  rnorm(10,3),  rnorm(10,3), rnorm(10,5) ) )
     object <- SummarizedExperiment::SummarizedExperiment(list(exprs = mat))
     fdt(object)$feature_id <- fnames(object)
-    object$sample_id <- snames(object)  <- c(sprintf('surv1.m.%d', 0:9),  sprintf('surv2.m.%d', 0:9), sprintf('surv3.f.%d', 0:9), sprintf('surv4.f.%d', 0:9))
-    object$survgroup <- object$sample_id %>% split_extract_fixed('.', 1)
+    object$sample_id <- snames(object)  <- c(sprintf('senior.m.%d', 0:9),  sprintf('senior.f.%d', 0:9), sprintf('junior.m.%d', 0:9), sprintf('junior.f.%d', 0:9))
+    object$age       <- object$sample_id %>% split_extract_fixed('.', 1)
     object$sex       <- object$sample_id %>% split_extract_fixed('.', 2)
     object$replicate <- object$sample_id %>% split_extract_fixed('.', 3)
 
-    surv1.m.time <- c( rep(1,4), rep(2,4), rep(3,2) ); surv1.m.event <- rep(1,10)
-    surv2.m.time <- c( rep(2,2), rep(3,4), rep(4,4) ); surv2.m.event <- rep(1,10)
-    surv3.f.time <- c( rep(4,4), rep(5,4), rep(7,2) ); surv3.f.event <- c(rep(1,8),rep(0,2))
-    surv4.f.time <- c( rep(5,2), rep(6,2), rep(7,6) ); surv4.f.event <- c(rep(1,4),rep(0,6))
-    object$timetoevent <- c(surv1.m.time,  surv2.m.time,  surv3.f.time,  surv4.f.time)
-    object$event       <- c(surv1.m.event, surv2.m.event, surv3.f.event, surv4.f.event)
+    time.senior.m <- c( rep(1,4), rep(2,4), rep(3,2) )
+    time.senior.f <- c( rep(2,2), rep(3,4), rep(4,4) )
+    time.junior.m <- c( rep(4,4), rep(5,4), rep(7,2) )
+    time.junior.f <- c( rep(5,2), rep(6,2), rep(7,6) )
+    
+    event.senior.m <- rep(1,10)
+    event.senior.f <- rep(1,10)    
+    event.junior.m <- c(rep(1,8),rep(0,2))
+    event.junior.f <- c(rep(1,4),rep(0,6))    
+    
+    object$timetoevent <- c( time.senior.m,  time.senior.f,  time.junior.m,  time.junior.f )
+    object$event       <- c(event.senior.m, event.senior.f, event.junior.f, event.junior.f )
     object
     
 }
@@ -446,15 +448,14 @@ installed <- function(pkg){
 #' @param nrow          number of rows
 #' @return ggplot
 #' @examples
-#' # ~ survgroup
-#'     object <- survex()
-#'     object %<>% fit_survival(~ survgroup)
-#'     plot_survival(object, formula = ~ survgroup)
+#' # samplevar-based
+#'     survobj() %>% fit_survival(~age)     %>% plot_survival(~age)
+#'     survobj() %>% fit_survival(~sex)     %>% plot_survival(~sex)
+#'     survobj() %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
 #' 
 #' # ~ exprs2levels
-#'     object <- survex()
 #'     object %<>% factorize_assay(k = 2)
-#'     object %<>% fit_survival(~ exprs2levels)
+#'     object <- survex()
 #'     plot_survival(object, formula = ~ exprs2levels)
 #'
 #' # ~ sex
@@ -542,21 +543,19 @@ prep_survival <- function(
 #' @rdname prep_survival
 #' @export
 plot_survival <- function(
-      object, 
-     formula = as.formula(sprintf('~%s', assayNames(object)[1])),
-       color = all.vars(formula)[1],
-    linetype = if (length(all.vars(formula)) == 1)  NULL else all.vars(formula)[2],
+      object,
+     formula = as.formula(sprintf('~%s', assayNames(object)[1])), 
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
         coef = coefs(object, fit = engine)[1],
        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
-dodge_height = 2,
-        file = NULL,
-       width = 7,
+dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
+        file = NULL,    #  softmapping them formula-agnostically doesnt work
+       width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
       height = 7,
-           n = if (svar_formula(formula, object)) length(all.vars(formula))  else min(nrow(object),9),
-        ncol = if (svar_formula(formula, object)) length(all.vars(formula))  else 3,
-        nrow = if (svar_formula(formula, object)) length(all.vars(formula))  else 3
+           n = if (svar_formula(formula, object)) 1  else min(nrow(object),9),
+        ncol = if (svar_formula(formula, object)) 1  else 3,
+        nrow = if (svar_formula(formula, object)) 1  else 3
 ){
 # Assert
     if (!installed('ggtext'))   return(NULL) 
@@ -590,12 +589,16 @@ dodge_height = 2,
              #ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
              #                      hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
+        groupsyms <- syms(all.vars(formula))
+         colorsym <- sym( all.vars(formula)[[1]])
+      linetypesym <- if (length(all.vars(formula))<2) quo(NULL) else sym( all.vars(formula)[[2]])
         p <- p + geom_step( mapping = aes(  x = timetoevent, 
-                                            y = survival, 
-                                        group = interaction(!!!syms(all.vars(formula))), 
-                                        color = interaction(!!!syms(color)), 
-                                     linetype = if (is.null(linetype)) NULL else interaction(!!!syms(linetype))),
-                           position = ggstance::position_dodgev(height = dodge_height)) #+ 
+                                            y = survival,              
+                                        group = interaction(!!!groupsyms),  # !!! for syms
+                                        color = !!colorsym,                 #  !! for sym
+                                     linetype = !!linetypesym ), 
+                           position = ggstance::position_dodgev(dodge_height))
+                            #+ 
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
                 # Note that here the dropout is placed after the stepdown.
