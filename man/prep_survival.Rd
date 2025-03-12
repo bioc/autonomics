@@ -21,8 +21,8 @@ plot_survival(
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   coefs = autonomics::coefs(object, fit = engine),
-  title = formula2str(formula),
-  subtitle = sprintf("\%s", paste0(engine, collapse = "      ")),
+  title = sprintf("\%s : survival ~ \%s", engine, formula2str(formula) \%>\% substr(2,
+    nchar(.))),
   dodge_height = 0,
   file = NULL,
   width = 7,
@@ -41,8 +41,6 @@ plot_survival(
 
 \item{title}{string}
 
-\item{subtitle}{string}
-
 \item{dodge_height}{number}
 
 \item{file}{filepath}
@@ -58,6 +56,8 @@ plot_survival(
 \item{assay}{value in assayNames(object)}
 
 \item{ntile}{number of quantiles}
+
+\item{subtitle}{string}
 }
 \value{
 ggplot

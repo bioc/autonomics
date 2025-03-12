@@ -550,8 +550,7 @@ plot_survival <- function(
      formula = as.formula(sprintf('~%s', assayNames(object)[1])), 
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
        coefs = autonomics::coefs(object, fit = engine),
-       title = formula2str(formula) ,
-    subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
+       title = sprintf('%s : survival ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
 dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
@@ -585,10 +584,9 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
         p <- ggplot(plotdt) + 
              theme_bw() + 
              facet_wrap_paginate(vars(facet), nrow = nrow, ncol = ncol, page = i) + 
-             ggtitle(title, subtitle = subtitle) + 
-             theme(plot.title = element_text(hjust = 0.5),
-                plot.subtitle = element_text(hjust = 0.5),
-                  panel.grid  = element_blank())
+             ggtitle(title) + 
+             theme( plot.title = element_text(hjust = 0.5),
+                   panel.grid  = element_blank())
              #ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
              #                      hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
