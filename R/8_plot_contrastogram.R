@@ -25,8 +25,8 @@ compute_connections <- function(
     fdt(object) %<>% add_adjusted_pvalues('fdr')
     fdrvalues <- fdrmat(object)
     effects <- effectmat(object)
-    colnames(fdrvalues) %<>% split_extract_fixed(FITSEP, 2)
-    colnames(effects)   %<>% split_extract_fixed(FITSEP, 2)
+    colnames(fdrvalues) %<>% split_extract_fixed(FITSEP, 1)
+    colnames(effects)   %<>% split_extract_fixed(FITSEP, 1)
     nsignif <- apply(fdrvalues < 0.05, 2, sum, na.rm=TRUE)
                 #colSums( fdrvalues < 0.05, na.rm=TRUE)  # BREAKS ON SINGLE CONTR!
     nup     <- apply(fdrvalues < 0.05 & effects > 0, 2, sum, na.rm = TRUE)

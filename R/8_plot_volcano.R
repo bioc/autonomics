@@ -120,12 +120,12 @@ add_adjusted_pvalues <- function(object, ...)  UseMethod('add_adjusted_pvalues')
 #' @rdname add_adjusted_pvalues
 #' @export
 add_adjusted_pvalues.data.table <- function(
-    object, 
-       method = 'fdr',
-          fit = fits(object),
-        coefs = autonomics::coefs(object, fit = fit),
-      verbose = TRUE, 
-             ...
+    object,
+    method = 'fdr',
+       fit = fits(object),
+     coefs = autonomics::coefs(object, fit = fit),
+   verbose = TRUE,
+          ...
 ){
 # Assert
     assert_is_subset(method, stats::p.adjust.methods)
@@ -137,8 +137,8 @@ add_adjusted_pvalues.data.table <- function(
 # Compute
     sep <- guess_fitsep(object)
     adjdt <- pdt(object, fit = fit, coef = coefs)
+    colnames(adjdt)[-1] %<>% paste0(method, sep, .)
     adjdt <- adjdt[, lapply(.SD, p.adjust, method = method), .SDcols = names(adjdt)[-1] ]
-    names(adjdt) %<>% stri_replace_first_regex(sprintf('^p%s', sep), sprintf('%s%s', method, sep))
     object %<>% cbind(adjdt)
     object
 }
@@ -504,9 +504,9 @@ fdr2p <- function(fdr){
 #' plot_coef_densities(object)
 #' @export
 plot_coef_densities <- function(
-    object, 
-       fit = fits(object)[1], 
-     coefs = autonomics::coefs(object, fit = fit), 
+    object,
+       fit = fits(object)[1],
+     coefs = autonomics::coefs(object, fit = fit),
        sep = FITSEP,
      label = 'feature_id'
 ){
@@ -516,7 +516,6 @@ plot_coef_densities <- function(
     dt %<>% merge(fdt(object)[ , label, with = FALSE], by = 'feature_id', sort = FALSE)
     dt %<>% melt.data.table(id.vars = unique(c('feature_id', label)), variable.name = 'coef', value.name = 'tvalue')
     coef <- density <- tvalue <- NULL  # R CMD check
-    dt[, coef    := split_extract_fixed(coef, sep, 2:3)]
     dt[, density := approxfun(stats::density(tvalue))(tvalue) , by = 'coef']
 # Plot
     ggplot(dt) + theme_bw() + facet_wrap(vars(coef)) + 

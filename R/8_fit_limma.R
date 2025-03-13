@@ -187,7 +187,7 @@ X <- function(
 beta <- function( object, fit = fits(object)[1] ){
     betas <- effectmat(object, fit = fit, coef = coefs(object, intercept = TRUE))
     sep <- guess_fitsep(object)
-    colnames(betas) %<>% split_extract_fixed(sep, 2)
+    colnames(betas) %<>% split_extract_fixed(sep, 1)
     if ('Intercept' %in% colnames(betas))  betas[ , 'Intercept' ] <- 0
     betas[ pmat(object, fit = fit) > 0.05 ] <- 0
     betas[ is.na(betas) ] <- 0
