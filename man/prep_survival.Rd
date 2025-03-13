@@ -65,21 +65,23 @@ ggplot
 Plot survival
 }
 \examples{
-# samplevar-based
-    survobj() \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
-    survobj() \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
-    survobj() \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
-    survobj() \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
+# survival ~ svars
+    object <- survobj()
+    object \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
+    object \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
+    object \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
+    object \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
 
-# ~ exprs2levels
-    object \%<>\% factorize_assay(k = 2)
-    object <- survex()
-    plot_survival(object, formula = ~ exprs2levels)
+# survival ~ assay
+    object <- survobj() \%>\% factorize_assay(k = 2)
+    object \%>\% fit_survival(~exprs)
+    object \%>\% fit_survival(~exprs2levels) \%>\% plot_survival(~exprs2levels)
 
-# ~ sex
-    object <- survex()
-    object \%<>\% fit_survival(~ sex)
-    plot_survival(object, formula = ~ sex)
+# survival ~ svar + assay
+    object <- survobj() \%>\% factorize_assay(k = 2)
+    object \%>\% fit_survival(~exprs2levels+age) \%>\% plot_survival(~exprs2levels+age)
+    object \%>\% fit_survival(~exprs2levels+sex) \%>\% plot_survival(~exprs2levels+sex)
+    object \%>\% fit_survival(~exprs2levels/sex) \%>\% plot_survival(~exprs2levels/sex)
 
 #' ~ expr2levels + subgroup
      object <- survex()

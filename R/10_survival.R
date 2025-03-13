@@ -19,13 +19,69 @@
 survobj <- function(){
     
     set.seed(1)
-    mat <- rbind( geneA = c( rnorm(10,3),  rnorm(10,5),  rnorm(10,3), rnorm(10,5) ), 
-                  geneB = c( rnorm(10,5),  rnorm(10,3),  rnorm(10,5), rnorm(10,3) ), 
-                  geneC = c( rnorm(10,3),  rnorm(10,5),  rnorm(10,5), rnorm(10,3) ),
-                  geneD = c( rnorm(10,5),  rnorm(10,3),  rnorm(10,3), rnorm(10,5) ) )
+    mat <- rbind( geneA = c( rnorm(10,3),
+                             rnorm(10,4),  
+                             rnorm(10,5), 
+                             rnorm(10,6)),   # age + sex increase expression
+                  geneB = c( rnorm(10,6),    # age + sex decrease expression
+                             rnorm(10,4),  
+                             rnorm(10,3), 
+                             rnorm(10,2)),
+                  geneC = c( rnorm(10,3),
+                             rnorm(10,3),  
+                             rnorm(10,6), 
+                             rnorm(10,6)),   # age increases expression
+                  geneD = c( rnorm(10,6),    # age decreases expression
+                             rnorm(10,6),
+                             rnorm(10,3),
+                             rnorm(10,3)),
+                  geneE = c( rnorm(10,3),
+                             rnorm(10,6),
+                             rnorm(10,3),
+                             rnorm(10,6)),   # female sex increases expression
+                  geneF = c( rnorm(10,6),    # female sex decreases expression
+                             rnorm(10,3),
+                             rnorm(10,6),
+                             rnorm(10,3)), 
+                  geneG = c( rnorm(10,3),
+                             rnorm(10,3),
+                             rnorm(10,6),
+                             rnorm(10,3)),   # m:age increases expression
+                  geneH = c( rnorm(10,3),    # f:age increases expression
+                             rnorm(10,3),
+                             rnorm(10,3),
+                             rnorm(10,6)),
+                  geneI = c( rnorm(10,3),
+                             rnorm(10,3),
+                             rnorm(10,3),
+                             rnorm(10,6)),   # junior:f increases expression
+                  geneJ = c( rnorm(10,3),    # senior:f increases expression
+                             rnorm(10,6),
+                             rnorm(10,3),
+                             rnorm(10,3)), 
+                  geneK = c( rnorm(10,3),    # flat around three
+                             rnorm(10,3),
+                             rnorm(10,3),
+                             rnorm(10,3)), 
+                  geneL = c( rnorm(10,4),    # flat around four
+                             rnorm(10,4),
+                             rnorm(10,4),
+                             rnorm(10,4)), 
+                  geneM = c( rnorm(10,5),    # flat around five
+                             rnorm(10,5),
+                             rnorm(10,5),
+                             rnorm(10,5)), 
+                  geneN = c( rnorm(10,6),    # flat around six
+                             rnorm(10,6),
+                             rnorm(10,6),
+                             rnorm(10,6))
+    )
     object <- SummarizedExperiment::SummarizedExperiment(list(exprs = mat))
     fdt(object)$feature_id <- fnames(object)
-    object$sample_id <- snames(object)  <- c(sprintf('senior.m.%d', 0:9),  sprintf('senior.f.%d', 0:9), sprintf('junior.m.%d', 0:9), sprintf('junior.f.%d', 0:9))
+    object$sample_id <- snames(object)  <- c(sprintf('senior.m.%d', 0:9),  
+                                             sprintf('senior.f.%d', 0:9), 
+                                             sprintf('junior.m.%d', 0:9), 
+                                             sprintf('junior.f.%d', 0:9))
     object$age       <- object$sample_id %>% split_extract_fixed('.', 1)
     object$sex       <- object$sample_id %>% split_extract_fixed('.', 2)
     object$replicate <- object$sample_id %>% split_extract_fixed('.', 3)
@@ -448,21 +504,23 @@ installed <- function(pkg){
 #' @param nrow          number of rows
 #' @return ggplot
 #' @examples
-#' # samplevar-based
-#'     survobj() %>% fit_survival(~age)     %>% plot_survival(~age)
-#'     survobj() %>% fit_survival(~sex)     %>% plot_survival(~sex)
-#'     survobj() %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
-#'     survobj() %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
+#' # survival ~ svars
+#'     object <- survobj()
+#'     object %>% fit_survival(~age)     %>% plot_survival(~age)
+#'     object %>% fit_survival(~sex)     %>% plot_survival(~sex)
+#'     object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
+#'     object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
 #' 
-#' # ~ exprs2levels
-#'     object %<>% factorize_assay(k = 2)
-#'     object <- survex()
-#'     plot_survival(object, formula = ~ exprs2levels)
+#' # survival ~ assay
+#'     object <- survobj() %>% factorize_assay(k = 2)
+#'     object %>% fit_survival(~exprs)
+#'     object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
 #'
-#' # ~ sex
-#'     object <- survex()
-#'     object %<>% fit_survival(~ sex)
-#'     plot_survival(object, formula = ~ sex)
+#' # survival ~ svar + assay
+#'     object <- survobj() %>% factorize_assay(k = 2)
+#'     object %>% fit_survival(~exprs2levels+age) %>% plot_survival(~exprs2levels+age)
+#'     object %>% fit_survival(~exprs2levels+sex) %>% plot_survival(~exprs2levels+sex)
+#'     object %>% fit_survival(~exprs2levels/sex) %>% plot_survival(~exprs2levels/sex)
 #'
 #' #' ~ expr2levels + subgroup
 #'      object <- survex()
