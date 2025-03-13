@@ -11,8 +11,7 @@ prep_survival(
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   coefs = autonomics::coefs(object, fit = engine),
-  n = if (svar_formula(formula, object)) length(all.vars(formula)) else min(nrow(object),
-    9)
+  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 9)
 )
 
 plot_survival(

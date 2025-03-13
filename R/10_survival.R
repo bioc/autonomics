@@ -482,7 +482,7 @@ prep_survival <- function(
      formula = as.formula(sprintf('~%s', assayNames(object)[1])),
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
        coefs = autonomics::coefs(object, fit = engine),
-           n = if (svar_formula(formula, object)) length(all.vars(formula))  else min(nrow(object),9)#,
+           n = if (svar_formula(formula, object)) 1  else min(nrow(object),9)#,
 #        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
 #     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
 # dodge_height = 2,
@@ -526,19 +526,21 @@ prep_survival <- function(
     plotdtn <- plotdtn[totDead!=totObs]  # vertically end survival curve when all dead
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
 # Statistics
-    pcols <- pvar(object, fit = engine, coef = coefs) # `copy` is very important !
-    tcol  <- tvar(object, fit = engine, coef = coefs) # without modifies are performed in the object!
-    statdt <- if (length(assayvar)==0){  copy(metadata(object)$survival)
-              } else {                   fdt(object)[, c('feature_id', pcols, tcol), with = FALSE] }
-    statdt[, (pcols) := lapply(.SD, formatC, format = 'g', digits = 2), .SDcols = pcols]
-    statdt[, facet := paste0(.SD, collapse = '      '), .SDcols = pcols, by = 'feature_id']
-    statdt[, (pcols) := NULL]
-    #statdt[, facet := sprintf('%s\n%s', paste0(engine, collapse = spaces(8)), facet)]
-    statdt[, facet := sprintf("%s\n%s", paste0(coefs, collapse = '      '), facet)]
-    if (any(all.vars(formula) %in% assayNames(object))){
-    statdt[, facet := sprintf('%s\n%s', feature_id, facet)] }
+    plongdt <- pdt(object, fit = engine, coef = coefs)
+    tlongdt <- tdt(object, fit = engine, coef = coefs)
+    plongdt %<>% melt.data.table(id.vars = 'feature_id', variable.name = 'coef', value.name = 'p')
+    tlongdt %<>% melt.data.table(id.vars = 'feature_id', variable.name = 'coef', value.name = 't')
+    statdt <- merge(plongdt, tlongdt, by = c('feature_id', 'coef'))
+    statdt[, coef := split_extract_fixed(coef, '~', 1)]
+    statdt[, p := formatC(p, format = 'g', digits = 2)]
+    statdt[, p := stri_pad_both(p, nchar(coef))]
+    statdt[, coef := stri_pad_both(coef, nchar(p))]
+    statdt <- statdt[, .(coef = paste0(coef, collapse = '        '), 
+                            p = paste0(p,    collapse = '        ') ), by = 'feature_id']
+    statdt[, facet := sprintf('%s\n%s', coef, p) , by = 'feature_id']
+    if (any(all.vars(formula) %in% assayNames(object)))  statdt[, facet := sprintf('%s\n%s', feature_id, facet)]
     plotdt %<>% merge(statdt, by = 'feature_id')
-    setorderv(plotdt, tcol)
+    #setorderv(plotdt, tcol)
     plotdt[, facet := factor(facet, unique(facet))]
     plotdt[]
 }

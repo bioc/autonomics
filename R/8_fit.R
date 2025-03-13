@@ -559,7 +559,7 @@ modeldt.data.table <- function(
     var <- modelvar(object, quantity, coef = coef, fit = fit)
     if (is.null(var))  return(NULL)
     dt <- object[, c('feature_id', var), with = FALSE]
-    names(dt) %<>% stri_replace_first_fixed(paste0(quantity, sep), '')
+    names(dt) %<>% stri_replace_first_fixed(paste0(quantity, '~'), '')
     dt
 }
 
