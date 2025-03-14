@@ -518,9 +518,8 @@ installed <- function(pkg){
 #'
 #' # survival ~ svar + assay
 #'     object <- survobj() %>% factorize_assay(k = 2)
-#'     object %>% fit_survival(~exprs2levels+age) %>% plot_survival(~exprs2levels+age)
-#'     object %>% fit_survival(~exprs2levels+sex) %>% plot_survival(~exprs2levels+sex)
-#'     object %>% fit_survival(~exprs2levels/sex) %>% plot_survival(~exprs2levels/sex)
+#'     object %>% fit_survival(~age+exprs2levels) %>% plot_survival(~age+exprs2levels)
+#'     object %>% fit_survival(~age/exprs2levels) %>% plot_survival(~age/exprs2levels)
 #'
 #' #' ~ expr2levels + subgroup
 #'      object <- survex()
@@ -615,9 +614,7 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
       height = 7,
-           n = if (svar_formula(formula, object)) 1  else min(nrow(object),9),
-        ncol = if (svar_formula(formula, object)) 1  else 3,
-        nrow = if (svar_formula(formula, object)) 1  else 3
+           n = if (svar_formula(formula, object)) 1  else min(nrow(object),4)
 ){
 # Assert
     if (!installed('ggtext'))   return(NULL) 
@@ -638,12 +635,12 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
     ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
     ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
     nfacets <- nrow(ndt)
-    npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nfacets / nrow / ncol)
+    npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nfacets / n)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
         p <- ggplot(plotdt) + 
              theme_bw() + 
-             facet_wrap_paginate(vars(facet), nrow = nrow, ncol = ncol, page = i) + 
+             facet_wrap_paginate(vars(facet), nrow = floor(sqrt(n)), ncol = n/floor(sqrt(n)), page = i) + 
              ggtitle(title) + 
              theme( plot.title = element_text(hjust = 0.5),
                    panel.grid  = element_blank())

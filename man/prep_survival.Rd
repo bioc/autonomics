@@ -26,9 +26,7 @@ plot_survival(
   file = NULL,
   width = 7,
   height = 7,
-  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 9),
-  ncol = if (svar_formula(formula, object)) 1 else 3,
-  nrow = if (svar_formula(formula, object)) 1 else 3
+  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 4)
 )
 }
 \arguments{
@@ -48,15 +46,15 @@ plot_survival(
 
 \item{height}{number}
 
-\item{ncol}{number of columns}
-
-\item{nrow}{number of rows}
-
 \item{assay}{value in assayNames(object)}
 
 \item{ntile}{number of quantiles}
 
 \item{subtitle}{string}
+
+\item{ncol}{number of columns}
+
+\item{nrow}{number of rows}
 }
 \value{
 ggplot
@@ -79,9 +77,8 @@ Plot survival
 
 # survival ~ svar + assay
     object <- survobj() \%>\% factorize_assay(k = 2)
-    object \%>\% fit_survival(~exprs2levels+age) \%>\% plot_survival(~exprs2levels+age)
-    object \%>\% fit_survival(~exprs2levels+sex) \%>\% plot_survival(~exprs2levels+sex)
-    object \%>\% fit_survival(~exprs2levels/sex) \%>\% plot_survival(~exprs2levels/sex)
+    object \%>\% fit_survival(~age+exprs2levels) \%>\% plot_survival(~age+exprs2levels)
+    object \%>\% fit_survival(~age/exprs2levels) \%>\% plot_survival(~age/exprs2levels)
 
 #' ~ expr2levels + subgroup
      object <- survex()
