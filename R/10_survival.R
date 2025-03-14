@@ -440,8 +440,8 @@ fit_survival <- function(
                                    drop = drop,
                               codingfun = codingfun,
                                 verbose = verbose )
-                 object %<>% merge_fdt(outdt[feature_id != formula2str(formula)])
-        metadata(object)$survival  <-  outdt[feature_id == formula2str(formula)]
+        if (all(all.vars(formula) %in% svars(object))){  metadata(object)$survival <-  outdt
+        } else {                                         object %<>% merge_fdt(outdt)  }
     }
 # Write
     if (!is.null(outdir)){
