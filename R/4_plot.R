@@ -1053,8 +1053,10 @@ extract_coef_features <- function(
     object <- do.call(       .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
     object <- do.call(                  order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
     object <- do.call(.extract_effectsize_features, c(args, list(object = object, features = features, effectsize = effectsize )))
-    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign   )))
-    object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n  )))
+    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign       )))
+    if (!is.infinite(n)){
+    object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n          )))
+    }
 # Return
     object
 }
