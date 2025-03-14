@@ -970,27 +970,26 @@ order_on_effect <- function(
 # Assert
     assert_is_valid_sumexp(object)
     assert_positive_number(n)
-# Order on t and p
-    object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # dimred
-    if (fit %in% LINMODENGINES){
-        object %<>% order_on_p(     fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # linmod
-    }
-# Filter top
+# Order
+    object %<>% order_on_t(fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)
     n %<>% min(nrow(object))
-    idx <- c(rep(TRUE, n), rep(FALSE, nrow(object)-n))
-    if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
+    ntop <- ceiling(n/2)
+    nbottom <- n - ntop
+    idx <- seq(1,ntop)
+    idx %<>% c(seq(nrow(object)-nbottom+1, nrow(object)))
+    idx %<>% c(which(fdt(object) %in% features))
+    idx %<>% unique()
+    idx %<>% sort()
+    object %<>% extract(idx, )
+# Return
     n0 <- length(idx)
     n1 <- sum(idx, na.rm = TRUE)
-    obj <- object[idx, ]
-# Order up-> down
-    obj %<>% order_on_t( fit = fit, coefs = coefs, combiner = combiner, verbose = FALSE)  # linmod
     if (verbose & n1<n0){
         combiner <- paste0(' ', combiner, ' ')
         y <- paste0(coefs, collapse = combiner)
         cmessage('\t\t\tRetain %d/%d features: p(%s) or effect(%s) in best %d', n1, n0, y, y, n)
     }
-# Return
-    obj
+    object
 }
 
 
@@ -1050,12 +1049,12 @@ extract_coef_features <- function(
 # Filter
     args <- list(coefs = coefs, fit = fit, combiner = combiner, verbose = verbose)
     object %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
-    object <- do.call(     .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
-    object <- do.call(   .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
-    object <- do.call(              order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
+    object <- do.call(         .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
+    object <- do.call(       .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
+    object <- do.call(                  order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
     object <- do.call(.extract_effectsize_features, c(args, list(object = object, features = features, effectsize = effectsize )))
-    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign       )))
-    object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n          )))
+    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign   )))
+    object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n  )))
 # Return
     object
 }
