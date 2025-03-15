@@ -9,7 +9,14 @@
 \usage{
 .read_diann_precursors(
   file,
+  Q = 0.01,
+  Lib.Q = 0.01,
+  Global.Q = 0.01,
   Lib.PG.Q = 0.01,
+  Global.PG.Q = 0.01,
+  Lib.Peptidoform.Q = 0.01,
+  Global.Peptidoform.Q = 0.01,
+  PG.Q = 0.05,
   format = c("tsv", "parquet")[1],
   verbose = TRUE
 )
@@ -44,7 +51,21 @@ read_diann(...)
 \arguments{
 \item{file}{DIA-NN report file}
 
+\item{Q}{Q cutoff}
+
+\item{Lib.Q}{Lib.Q cutoff}
+
+\item{Global.Q}{Global.Q cutoff}
+
 \item{Lib.PG.Q}{Lib.PG.Q cutoff}
+
+\item{Global.PG.Q}{Global.PG.Q cutoff}
+
+\item{Lib.Peptidoform.Q}{Lib.Peptidoform.Q cutoff}
+
+\item{Global.Peptidoform.Q}{Global.Peptidoform.Q cutoff}
+
+\item{PG.Q}{PG.Q cutoff}
 
 \item{format}{Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')}
 
@@ -81,6 +102,12 @@ data.table or SummarizedExperiment
 }
 \description{
 Read diann
+}
+\details{
+Defaults for various Q value cutoffs corresppond to recommendations by the
+DIA-NN teen for DIA-NN v.2 (as of 03.2025). Of these, the reader of the
+legacy file format (flat tab seperated values, pre-DIA-NN v.2) only utilizes
+Lib.PG.Q.
 }
 \examples{
 # Read

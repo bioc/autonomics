@@ -155,10 +155,27 @@ uniprot2isoforms <- function(x){
 #' @importFrom arrow read_parquet
 #' @export
 .read_diann_precursors <- function(
-    file, Lib.PG.Q = 0.01, format = c("tsv", "parquet")[1], verbose  = TRUE
-){
+    file,
+    Q                    = 0.01,
+    Lib.Q                = 0.01,
+    Global.Q             = 0.01, 
+    Lib.PG.Q             = 0.01,
+    Global.PG.Q          = 0.01, 
+    Lib.Peptidoform.Q    = 0.01, 
+    Global.Peptidoform.Q = 0.01,
+    PG.Q                 = 0.05,
+    format               = c("tsv", "parquet")[1],
+    verbose              = TRUE)
+{
 # Assert
+    assert_is_fraction(Q)
+    assert_is_fraction(Lib.Q)
+    assert_is_fraction(Global.Q)
     assert_is_fraction(Lib.PG.Q)
+    assert_is_fraction(Global.PG.Q)
+    assert_is_fraction(Lib.Peptidoform.Q)
+    assert_is_fraction(Global.Peptidoform.Q)
+    assert_is_fraction(PG.Q)
     assert_is_a_string(format)
     switch(format,
       'tsv'     = assert_diann_report(file),
@@ -171,12 +188,23 @@ uniprot2isoforms <- function(x){
     run        <- top1       <- top3         <- total     <- NULL
     uniprot    <- NULL
 # Read
-    anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group', 'Precursor.Id',
-                 'Q.Value', 'Lib.PG.Q.Value', 'Stripped.Sequence')
-    numcols <- switch(format,
-      "tsv"     = c('Precursor.Quantity', 'PG.Quantity', 'PG.MaxLFQ'),
-      "parquet" = c('Precursor.Quantity', 'PG.TopN',     'PG.MaxLFQ'),
-      stop("Not implemented DIA-NN output format: ", format))
+    if (format == 'tsv')
+    {
+      anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
+                 'Precursor.Id', 'Q.Value', 'Lib.PG.Q.Value',
+                 'Stripped.Sequence')
+      numcols <- c('Precursor.Quantity', 'PG.Quantity', 'PG.MaxLFQ')
+    } else if (format == 'parquet')
+    {
+      anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
+                 'Precursor.Id', 'Q.Value', 'Lib.Q.Value', 'Global.Q.Value',
+                 'Lib.PG.Q.Value', 'Global.PG.Q.Value',
+                 'Lib.Peptidoform.Q.Value', 'Global.Peptidoform.Q.Value', 
+                 'PG.Q.Value', 'Stripped.Sequence')
+      numcols <- c('Precursor.Quantity', 'PG.TopN', 'PG.MaxLFQ')
+    } else {
+      stop("Not implemented DIA-NN output format: ", format)
+    }
     cols <- c(anncols, numcols)
     if (format == 'tsv')
     {
@@ -192,6 +220,17 @@ uniprot2isoforms <- function(x){
     setnames(dt, 'Protein.Names',      'protein')
     setnames(dt, 'Protein.Group',      'uniprot')
     setnames(dt, 'Precursor.Id',       'precursor')
+    if (format == 'parquet')
+    {
+      setnames(dt, 'Q.Value',                    'Q')
+      setnames(dt, 'Lib.Q.Value',                'Lib.Q')
+      setnames(dt, 'Global.Q.Value',             'Global.Q')
+      # setnames(dt, 'Lib.PG.Q.Value',             'Lib.PG.Q')
+      setnames(dt, 'Lib.Peptidoform.Q.Value',    'Lib.Peptidoform.Q')
+      setnames(dt, 'Global.Peptidoform.Q.Value', 'Global.Peptidoform.Q')
+      setnames(dt, 'PG.Q.Value',                 'PG.Q')
+      setnames(dt, 'Global.PG.Q.Value',          'Global.PG.Q')
+    }
     setnames(dt, 'Lib.PG.Q.Value',     'Lib.PG.Q')
     setnames(dt, 'Stripped.Sequence',  'sequence')
     setnames(dt, 'PG.MaxLFQ',          'maxlfq')
@@ -204,11 +243,10 @@ uniprot2isoforms <- function(x){
       'intensity')
     setnames(dt, 'Precursor.Quantity', 'preintensity')
 # Filter
-    n0 <- length(unique(dt$uniprot))
-    q <- Lib.PG.Q
-    dt %<>% extract(Lib.PG.Q < q)
-    n1 <- length(unique(dt$uniprot))
-    if (verbose)  message('\t\tRetain ', n1, '/', n0, ' proteingroups: Lib.PG.Q < ', Lib.PG.Q)
+    if (format == 'parquet') dt %<>% .filter_dianne_proteingroups(
+      Q, Lib.Q, Global.Q, Global.PG.Q, Lib.Peptidoform.Q, Global.Peptidoform.Q,
+      PG.Q, verbose = verbose)
+    dt %<>% .filter_dianne_proteingroups(Lib.PG.Q)
 # Order precursors
     dt <- dt[, .SD[rev(order(preintensity))], by = c('uniprot', 'run')]
     dt[, iprecursor := seq_len(.N),                      by = c('uniprot', 'run')]
@@ -250,6 +288,21 @@ uniprot2isoforms <- function(x){
     dt[]
 }
 
+.filter_dianne_proteingroups <- function(dt, ..., verbose = TRUE)
+{
+  filters <- rlang::dots_list(...,  .named = TRUE)
+  assert_is_subset(c(names(filters), 'uniprot'), colnames(dt))
+  for (fl in names(filters))
+  {
+    n0 <- length(unique(dt$uniprot))
+    dt %<>% extract(dt[[fl]] < filters[[fl]])
+    n1 <- length(unique(dt$uniprot))
+    if (verbose)  message('\t\tRetain ', n1, '/', n0, ' proteingroups: ', fl,
+                          ' < ', filters[[fl]])
+  }
+  dt
+}
+
 #' @rdname read_diann_proteingroups
 #' @export
 .read_diann_proteingroups <- function(
@@ -269,24 +322,36 @@ uniprot2isoforms <- function(x){
 
 #' Read diann
 #'
-#' @param file                DIA-NN report file
-#' @param format              Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')
-#' @param Lib.PG.Q            Lib.PG.Q cutoff
-#' @param simplify_snames     TRUE or FALSE: simplify (drop common parts in) samplenames ?
-#' @param rm_contaminants     TRUE or FALSE: rm contaminants ?
-#' @param impute              TRUE or FALSE: impute group-specific NA values ?
-#' @param plot                TRUE or FALSE
-#' @param pca                 TRUE or FALSE: run pca ?
-#' @param pls                 TRUE or FALSE: run pls ?
-#' @param fit                 model engine: 'limma', 'lm', 'lme(r)', 'wilcoxon' or NULL
-#' @param formula             model formula
-#' @param block               model blockvar: string or NULL
-#' @param coefs               model coefficients    of interest: character vector or NULL
-#' @param contrasts           coefficient contrasts of interest: character vector or NULL
-#' @param palette             color palette: named string vector
-#' @param verbose             TRUE or FALSE
-#' @param ...                 used to maintain deprecated functions
+#' @param file                    DIA-NN report file
+#' @param format                  Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')
+#' @param Q                       Q cutoff
+#' @param Lib.Q                   Lib.Q cutoff
+#' @param Global.Q                Global.Q cutoff
+#' @param Lib.PG.Q                Lib.PG.Q cutoff
+#' @param Global.PG.Q             Global.PG.Q cutoff
+#' @param Lib.Peptidoform.Q       Lib.Peptidoform.Q cutoff
+#' @param Global.Peptidoform.Q    Global.Peptidoform.Q cutoff
+#' @param PG.Q                    PG.Q cutoff
+#' @param simplify_snames         TRUE or FALSE: simplify (drop common parts in) samplenames ?
+#' @param rm_contaminants         TRUE or FALSE: rm contaminants ?
+#' @param impute                  TRUE or FALSE: impute group-specific NA values ?
+#' @param plot                    TRUE or FALSE
+#' @param pca                     TRUE or FALSE: run pca ?
+#' @param pls                     TRUE or FALSE: run pls ?
+#' @param fit                     model engine: 'limma', 'lm', 'lme(r)', 'wilcoxon' or NULL
+#' @param formula                 model formula
+#' @param block                   model blockvar: string or NULL
+#' @param coefs                   model coefficients    of interest: character vector or NULL
+#' @param contrasts               coefficient contrasts of interest: character vector or NULL
+#' @param palette                 color palette: named string vector
+#' @param verbose                 TRUE or FALSE
+#' @param ...                     used to maintain deprecated functions
 #' @return  data.table or SummarizedExperiment
+#' @details
+#' Defaults for various Q value cutoffs corresppond to recommendations by the
+#' DIA-NN teen for DIA-NN v.2 (as of 03.2025). Of these, the reader of the
+#' legacy file format (flat tab seperated values, pre-DIA-NN v.2) only utilizes
+#' Lib.PG.Q.
 #' @examples
 #' # Read
 #'    file <- download_data('dilution.report.tsv')
