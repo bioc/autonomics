@@ -406,7 +406,7 @@ quantnorm <- function(object, verbose = FALSE){
 #' @rdname log2transform
 #' @export
 invnorm <- function(object, verbose = FALSE){
-    if (verbose)  message('Invnorm')
+    if (verbose)  message('\t\tInvnorm')
     values(object) %<>% apply(2, transform_to_fitting_normal)
     object
 }
@@ -483,7 +483,7 @@ gglegend<-function(p){
 plot_transformation_densities <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('quantnorm', 'vsn' , 'zscore', 'invnorm'),
+    transformations = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     ...,
     fixed = list(na.rm = TRUE, alpha = 0.3),
     nrow = 1, ncol = NULL
@@ -507,7 +507,7 @@ plot_transformation_densities <- function(
 plot_transformation_violins <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('quantnorm', 'vsn', 'zscore', 'invnorm'),
+    transformations = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     ...,
     fixed = list(na.rm=TRUE)
 ){
@@ -530,14 +530,14 @@ plot_transformation_violins <- function(
 
 # file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 # object <- read_maxquant_proteingroups(file)
-# plot_transformation_biplots(object, transformations = c('quantnorm', 'zscore', 'invnorm'))
+# plot_transformation_biplots(object, transformations = c('center', 'invnorm', 'quantnorm', 'zscore'))
 plot_transformation_biplots <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('quantnorm', 'vsn', 'zscore', 'invnorm'),
+    transformations = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     method = c('pca', 'pls')[1], by = 'sample_id',
-    dims = 1:2, color = subgroupvar, sep = FITSEP, ...,
-    fixed = list(shape = 15, size = 3), nrow = 1, ncol = NULL
+    dims = 1:2, verbose = FALSE, color = subgroupvar, sep = FITSEP, ...,
+    fixed = list(shape = 15, size = 3), nrow = 2, ncol = NULL
 ){
     . <- NULL
     assert_is_subset(subgroupvar, svars(object))
@@ -545,36 +545,33 @@ plot_transformation_biplots <- function(
     assert_is_subset(method, c('pca', 'pls'))
     assert_are_same_length(dims, 1:2)
     assert_is_numeric(dims)
-    str_elem <- c(pca = 'by', pls = 'subgroupvar')
-    xy <- paste0('effect', sep, get(str_elem[method]), sep, method, dims)
-    x <- xy[1]; y <- xy[2]
-    tmpobj <- object
-    tmpobj %<>% get(method)(ndim = max(dims), verbose = FALSE)
-    scoredt <- sdt(tmpobj) %>% cbind(transfo = 'input')
-    mdidx <- paste0(get(str_elem[method]), sep, method)
-    xvariance <- round(metadata(tmpobj)[[mdidx]][[paste0('effect', dims[1])]])
-    yvariance <- round(metadata(tmpobj)[[mdidx]][[paste0('effect', dims[2])]])
-    scoredt$transfo <- switch(
-      method,
-      pca = sprintf('input : %d + %d %%', xvariance, yvariance),
-      pls = sprintf('input : %d %%'     , xvariance))
-    for (transfo in transformations){
-        tmpobj <- get(transfo)(object)
-        tmpobj %<>% get(method)(dims = dims, verbose = FALSE)
-        xvariance <- round(metadata(tmpobj)[[ mdidx ]][[ paste0('effect', dims[1]) ]])
-        yvariance <- round(metadata(tmpobj)[[ mdidx ]][[ paste0('effect', dims[2]) ]])
-        tmpdt <- sdt(tmpobj)
-        tmpdt$transfo <- switch(
-          method,
-          pca = sprintf('%s : %d + %d %%', transfo, xvariance, yvariance),
-          pls = sprintf('%s : %d %%',      transfo, xvariance))
-        scoredt %<>% rbind(tmpdt)
-    }
+    assert_is_a_bool(verbose)
+    strelem <- switch(method, pca = 'by', pls = 'subgroupvar')
+    xylabs <- paste0('t', sep, get(strelem), sep, method, dims)
+    xlab <- xylabs[1]; ylab <- xylabs[2]
+    mthdhndl <- paste0(get(strelem), sep, method)
+    scoredt <- lapply(
+        c('input', transformations),
+        function(tf){
+          tmpobj <- object
+          if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
+          tmpobj %<>% get(method)(dims = dims, verbose = verbose)
+          xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
+          yvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't2' ]])
+          tmpdt <- sdt(tmpobj)
+          tmpdt$transfo <- switch(
+            method,
+            pca = sprintf('%s : %d + %d %%', tf, xvariance, yvariance),
+            pls = sprintf('%s : %d %%',      tf, xvariance))
+          tmpdt
+        }) %>%
+      rbindlist()
     scoredt$transfo %<>% factor(unique(.))
     p <- plot_data(
-      scoredt, x = !!sym(x), y = !!sym(y), color = !!sym(color), ...,
-                    fixed = fixed)
-    p + facet_wrap(vars(transfo), nrow = nrow, ncol = ncol, scales = "free")
+      scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
+      fixed = fixed)
+    p + facet_wrap(
+      vars(transfo), nrow = nrow, ncol = ncol, scales = "free", ...)
 }
 
 
