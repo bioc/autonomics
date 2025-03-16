@@ -288,17 +288,18 @@ uniprot2isoforms <- function(x){
     dt[]
 }
 
+#' @importFrom rlang dots_list
 .filter_dianne_proteingroups <- function(dt, ..., verbose = TRUE)
 {
-  filters <- rlang::dots_list(...,  .named = TRUE)
+  filters <- dots_list(...,  .named = TRUE)
   assert_is_subset(c(names(filters), 'uniprot'), colnames(dt))
   for (fl in names(filters))
   {
     n0 <- length(unique(dt$uniprot))
     dt %<>% extract(dt[[fl]] < filters[[fl]])
     n1 <- length(unique(dt$uniprot))
-    if (verbose)  message('\t\tRetain ', n1, '/', n0, ' proteingroups: ', fl,
-                          ' < ', filters[[fl]])
+    if (verbose)  message(
+      '\t\tRetain ', n1, '/', n0, ' proteingroups: ', fl, ' < ', filters[[fl]])
   }
   dt
 }
