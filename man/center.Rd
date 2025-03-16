@@ -2,6 +2,8 @@
 % Please edit documentation in R/6_transform.R
 \name{center}
 \alias{center}
+\alias{center_mean}
+\alias{center_median}
 \title{Center samples}
 \usage{
 center(
@@ -10,6 +12,10 @@ center(
   fun = "median",
   verbose = TRUE
 )
+
+center_mean(object, ...)
+
+center_median(object, ...)
 }
 \arguments{
 \item{object}{SummarizedExperiment}
@@ -19,6 +25,8 @@ center(
 \item{fun}{aggregation function (string)}
 
 \item{verbose}{TRUE/FALSE}
+
+\item{...}{parameters handed through to center()}
 }
 \value{
 SummarizedExperiment

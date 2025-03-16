@@ -368,6 +368,7 @@ fscale <- function(mat, verbose = FALSE){
 #' @param selector logical vector (length = nrow(object))
 #' @param fun      aggregation function (string)
 #' @param verbose  TRUE/FALSE
+#' @param ...      parameters handed through to center()
 #' @return SummarizedExperiment
 #' @examples
 #' require(matrixStats)
@@ -393,6 +394,19 @@ center <- function(
     object
 }
 
+#' @rdname center
+#' @export
+center_mean <- function(object, ...)
+{
+  object %<>% center(fun = 'mean', ...)
+}
+
+#' @rdname center
+#' @export
+center_median <- function(object, ...)
+{
+  object %<>% center(fun = 'median', ...)
+}
 
 #' @rdname log2transform
 #' @export
