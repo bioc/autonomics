@@ -263,7 +263,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     binnedassay <- sprintf('%s%dbins', assay, k)
     mat <- assays(object)[[binnedassay]]
     mode(mat) <- 'character'
-    mat %<>% paste0('xpr', .)
+    mat %<>% paste0('bin', .)
     dim(mat) <- dim(object)
     dimnames(mat) <- dimnames(object)
 # Add
@@ -582,6 +582,8 @@ prep_survival <- function(
     plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', all.vars(formula))][, timetoevent := max(timetoevent)+1][, curOut := 0]
     plotdtn <- plotdtn[totDead!=totObs]  # vertically end survival curve when all dead
     plotdt <- rbind(plotdt0, plotdt, plotdtn)
+    plotdt[, feature_id := factor(feature_id, fdt(object)$feature_id)]
+    plotdt <- plotdt[order(feature_id)]
 # Statistics
     plongdt <- pdt(object, fit = engine, coef = coefs)
     tlongdt <- tdt(object, fit = engine, coef = coefs)
@@ -596,7 +598,7 @@ prep_survival <- function(
                             p = paste0(p,    collapse = '        ') ), by = 'feature_id']
     statdt[, facet := sprintf('%s\n%s', coef, p) , by = 'feature_id']
     if (any(all.vars(formula) %in% assayNames(object)))  statdt[, facet := sprintf('%s\n%s', feature_id, facet)]
-    plotdt %<>% merge(statdt, by = 'feature_id')
+    plotdt %<>% merge(statdt, by = 'feature_id', sort = FALSE)
     #setorderv(plotdt, tcol)
     plotdt[, facet := factor(facet, unique(facet))]
     plotdt[]
