@@ -156,26 +156,28 @@ uniprot2isoforms <- function(x){
 #' @export
 .read_diann_precursors <- function(
     file,
-    Q                    = 0.01,
-    Lib.Q                = 0.01,
     Global.Q             = 0.01, 
-    Lib.PG.Q             = 0.01,
-    Global.PG.Q          = 0.01, 
-    Lib.Peptidoform.Q    = 0.01, 
-    Global.Peptidoform.Q = 0.01,
+    Q                    = 0.01,
+    Global.PG.Q          = 0.01,
     PG.Q                 = 0.05,
+    Global.Peptidoform.Q = 0.01,
+    Peptidoform.Q        = 0.01,
+    Lib.Q                = 0.01,
+    Lib.PG.Q             = 0.01,
+    Lib.Peptidoform.Q    = 0.01, 
     format               = c("tsv", "parquet")[1],
     verbose              = TRUE)
 {
 # Assert
-    assert_is_fraction(Q)
-    assert_is_fraction(Lib.Q)
     assert_is_fraction(Global.Q)
-    assert_is_fraction(Lib.PG.Q)
+    assert_is_fraction(Q)
     assert_is_fraction(Global.PG.Q)
-    assert_is_fraction(Lib.Peptidoform.Q)
-    assert_is_fraction(Global.Peptidoform.Q)
     assert_is_fraction(PG.Q)
+    assert_is_fraction(Global.Peptidoform.Q)
+    assert_is_fraction(Peptidoform.Q)
+    assert_is_fraction(Lib.Q)
+    assert_is_fraction(Lib.PG.Q)
+    assert_is_fraction(Lib.Peptidoform.Q)
     assert_is_a_string(format)
     switch(format,
       'tsv'     = assert_diann_report(file),
@@ -197,10 +199,11 @@ uniprot2isoforms <- function(x){
     } else if (format == 'parquet')
     {
       anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
-                 'Precursor.Id', 'Q.Value', 'Lib.Q.Value', 'Global.Q.Value',
-                 'Lib.PG.Q.Value', 'Global.PG.Q.Value',
-                 'Lib.Peptidoform.Q.Value', 'Global.Peptidoform.Q.Value', 
-                 'PG.Q.Value', 'Stripped.Sequence')
+                 'Precursor.Id', 'Global.Q.Value', 'Q.Value', 
+                 'Global.PG.Q.Value', 'PG.Q.Value',
+                 'Global.Peptidoform.Q.Value', 'Peptidoform.Q.Value',
+                 'Lib.Q.Value', 'Lib.PG.Q.Value', 'Lib.Peptidoform.Q.Value', 
+                 'Stripped.Sequence')
       numcols <- c('Precursor.Quantity', 'PG.TopN', 'PG.MaxLFQ')
     } else {
       stop("Not implemented DIA-NN output format: ", format)
@@ -222,14 +225,15 @@ uniprot2isoforms <- function(x){
     setnames(dt, 'Precursor.Id',       'precursor')
     if (format == 'parquet')
     {
-      setnames(dt, 'Q.Value',                    'Q')
-      setnames(dt, 'Lib.Q.Value',                'Lib.Q')
       setnames(dt, 'Global.Q.Value',             'Global.Q')
+      setnames(dt, 'Q.Value',                    'Q')
+      setnames(dt, 'Global.PG.Q.Value',          'Global.PG.Q')
+      setnames(dt, 'PG.Q.Value',                 'PG.Q')
+      setnames(dt, 'Global.Peptidoform.Q.Value', 'Global.Peptidoform.Q')
+      setnames(dt, 'Peptidoform.Q.Value',        'Peptidoform.Q')
+      setnames(dt, 'Lib.Q.Value',                'Lib.Q')
       # setnames(dt, 'Lib.PG.Q.Value',             'Lib.PG.Q')
       setnames(dt, 'Lib.Peptidoform.Q.Value',    'Lib.Peptidoform.Q')
-      setnames(dt, 'Global.Peptidoform.Q.Value', 'Global.Peptidoform.Q')
-      setnames(dt, 'PG.Q.Value',                 'PG.Q')
-      setnames(dt, 'Global.PG.Q.Value',          'Global.PG.Q')
     }
     setnames(dt, 'Lib.PG.Q.Value',     'Lib.PG.Q')
     setnames(dt, 'Stripped.Sequence',  'sequence')
@@ -244,8 +248,8 @@ uniprot2isoforms <- function(x){
     setnames(dt, 'Precursor.Quantity', 'preintensity')
 # Filter
     if (format == 'parquet') dt %<>% .filter_dianne_proteingroups(
-      Q, Lib.Q, Global.Q, Global.PG.Q, Lib.Peptidoform.Q, Global.Peptidoform.Q,
-      PG.Q, verbose = verbose)
+      Global.Q, Q, Global.PG.Q, PG.Q, Global.Peptidoform.Q, Peptidoform.Q,
+      Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
     dt %<>% .filter_dianne_proteingroups(Lib.PG.Q)
 # Order precursors
     dt <- dt[, .SD[rev(order(preintensity))], by = c('uniprot', 'run')]
@@ -307,9 +311,32 @@ uniprot2isoforms <- function(x){
 #' @rdname read_diann_proteingroups
 #' @export
 .read_diann_proteingroups <- function(
-    file, Lib.PG.Q = 0.01, format = c("tsv", "parquet")[1]
+    file,
+    format               = c("tsv", "parquet")[1],
+    Global.Q             = 0.01, 
+    Q                    = 0.01,
+    Global.PG.Q          = 0.01,
+    PG.Q                 = 0.05,
+    Global.Peptidoform.Q = 0.01,
+    Peptidoform.Q        = 0.01,
+    Lib.Q                = 0.01,
+    Lib.PG.Q             = 0.01,
+    Lib.Peptidoform.Q    = 0.01,
+    verbose              = TRUE
 ){
-    dt <- .read_diann_precursors(file, Lib.PG.Q = Lib.PG.Q, format = format)
+    dt <- .read_diann_precursors(
+      file,
+      format               = format,
+      Global.Q             = Global.Q, 
+      Q                    = Q,
+      Global.PG.Q          = Global.PG.Q,
+      PG.Q                 = PG.Q,
+      Global.Peptidoform.Q = Global.Peptidoform.Q,
+      Peptidoform.Q        = Peptidoform.Q,
+      Lib.Q                = Lib.Q,
+      Lib.PG.Q             = Lib.PG.Q,
+      Lib.Peptidoform.Q    = Lib.Peptidoform.Q,
+      verbose              = verbose)
     dt[, sequence := sequence[1], by = c('uniprot', 'run')]
     cols <- c('gene', 'feature_id', 'protein', 'organism', 'uniprot', 'run',
               'pepcounts', 'precounts', 'sequence',
@@ -372,25 +399,45 @@ uniprot2isoforms <- function(x){
 #'     PR[intensity != top1][feature_id == unique(feature_id)[3]][run == unique(run)[1]][1:3, 1:6]
 #' @export
 read_diann_proteingroups <- function(
-               file,
-             format = .guess_diann_format(file),
-           Lib.PG.Q = 0.01,
-    simplify_snames = TRUE,
-    rm_contaminants = TRUE, 
-             impute = FALSE, 
-               plot = FALSE, 
-                pca = plot, 
-                pls = plot, 
-                fit = if (plot) 'limma' else NULL,
-            formula = as.formula('~ subgroup'),
-              block = NULL,
-              coefs = NULL,
-          contrasts = NULL,
-            palette = NULL,
-            verbose = TRUE
+                    file,
+                  format = .guess_diann_format(file),
+                Global.Q = 0.01, 
+                       Q = 0.01,
+             Global.PG.Q = 0.01,
+                    PG.Q = 0.05,
+    Global.Peptidoform.Q = 0.01,
+           Peptidoform.Q = 0.01,
+                   Lib.Q = 0.01,
+                Lib.PG.Q = 0.01,
+       Lib.Peptidoform.Q = 0.01,
+         simplify_snames = TRUE,
+         rm_contaminants = TRUE, 
+                  impute = FALSE, 
+                    plot = FALSE, 
+                     pca = plot, 
+                     pls = plot, 
+                     fit = if (plot) 'limma' else NULL,
+                 formula = as.formula('~ subgroup'),
+                   block = NULL,
+                   coefs = NULL,
+               contrasts = NULL,
+                 palette = NULL,
+                 verbose = TRUE
 ){
 # SumExp
-    dt <- .read_diann_proteingroups(file, Lib.PG.Q = Lib.PG.Q, format = format)
+    dt <- .read_diann_proteingroups(
+      file,
+      format               = format,
+      Global.Q             = Global.Q, 
+      Q                    = Q,
+      Global.PG.Q          = Global.PG.Q,
+      PG.Q                 = PG.Q,
+      Global.Peptidoform.Q = Global.Peptidoform.Q,
+      Peptidoform.Q        = Peptidoform.Q,
+      Lib.Q                = Lib.Q,
+      Lib.PG.Q             = Lib.PG.Q,
+      Lib.Peptidoform.Q    = Lib.Peptidoform.Q,
+      verbose              = verbose)
     assert_is_identical_to_true(length(unique(dt$run)) > 1) # SumExp generation fails on single run case
     object <- SummarizedExperiment(list(
         log2maxlfq    = dcast_diann(dt, 'maxlfq',    fill = NA, log2 = TRUE),
