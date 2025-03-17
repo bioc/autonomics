@@ -551,7 +551,8 @@ prep_survival <- function(
   samplevars <- all.vars(formula) %>% intersect(svars(object))
     if (length(assayvar)==0){
         plotdt <- sdt(object)[, c('sample_id', samplevars, 'timetoevent', 'event'), with = FALSE]
-        plotdt[, feature_id := formula2str(formula)]
+        plotdt[, feature_id := formula2str(formula)] # allows for generic data.table code
+        plotdt[, feature_id := factor(feature_id)]   # allows for levels(.) to work later
     } else {
         assert_is_a_string(assayvar)
         assert_character_matrix(assays(object)[[assayvar]], .xname = sprintf('assays(object)$%s', assayvar))
@@ -569,9 +570,10 @@ prep_survival <- function(
     setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent'))
     plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', all.vars(formula))][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
     plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', all.vars(formula))][, timetoevent := max(timetoevent)+1][, curOut := 0]
-    plotdtn <- plotdtn[totDead!=totObs]  # vertically end survival curve when all dead
-    plotdt <- rbind(plotdt0, plotdt, plotdtn)
-    plotdt[, feature_id := factor(feature_id, fdt(object)$feature_id)]
+    plotdtn <- plotdtn[totDead!=totObs]                  # Vertically end survival curve when all dead
+    features <- plotdt[, levels(feature_id)]
+    plotdt <- rbind(plotdt0, plotdt, plotdtn)            # Preserve tvar order
+    plotdt[, feature_id := factor(feature_id, features)] # Note that for svar-formula feature_id is the formula!
     plotdt <- plotdt[order(feature_id)]
 # Statistics
     plongdt <- pdt(object, fit = engine, coef = coefs)
