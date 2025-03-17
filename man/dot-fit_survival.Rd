@@ -38,7 +38,7 @@ Compute survival effect of svars, exprs, and their interactions
 }
 \examples{
 # Load/Transform
-   object <- survex()
+   object <- survobj()
    object \%<>\% bin_assay(k = 2)
    object \%<>\% factorize_assay(k = 2)
 # coxph{survival}

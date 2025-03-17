@@ -25,7 +25,7 @@ SummarizedExperiment
 Bin/Factorize assay
 }
 \examples{
-object <- survex()
+object <- survobj()
       bin_assay(object, k = 4)
 factorize_assay(object, k = 4)
 }

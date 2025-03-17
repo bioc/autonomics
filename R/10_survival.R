@@ -3,18 +3,7 @@
 #' Survival analysis example
 #' @return SummarizedExperiment
 #' @examples
-#' #  Background    BOC   CD4   PLG   XCL1
-#' #                ===   ===   ===   ====
-#' #                Flo   Fhi   Flo   Fhi    _______________
-#' #                Fhi   Flo   Fhi   Flo    ____________  |
-#' #                Mlo   Mhi   Mhi   Mlo    _____      |  |_____
-#' #                Mhi   Mlo   Mlo   Mhi    __   |__   |__     |__
-#' #                                           |     |     |
-#' #                                           |__   |__   |_______
-#' #                                              |     |
-#' #                                              |__    |__
-#' #                                                 |      |
-#' survex()
+#' survobj()
 #' @export 
 survobj <- function(){
     
@@ -232,7 +221,7 @@ survival_example <- function(){
 #' @param verbose TRUE or FALSE
 #' @return SummarizedExperiment
 #' @examples
-#' object <- survex()
+#' object <- survobj()
 #'       bin_assay(object, k = 4)
 #' factorize_assay(object, k = 4)
 #' @export
@@ -288,7 +277,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' @param verbose   TRUE or FALSE
 #' @examples
 #' # Load/Transform
-#'    object <- survex()
+#'    object <- survobj()
 #'    object %<>% bin_assay(k = 2)
 #'    object %<>% factorize_assay(k = 2)
 #' # coxph{survival}
@@ -522,7 +511,7 @@ installed <- function(pkg){
 #'     object %>% fit_survival(~age/exprs2levels) %>% plot_survival(~age/exprs2levels)
 #'
 #' #' ~ expr2levels + subgroup
-#'      object <- survex()
+#'      object <- survobj()
 #'      object %<>% factorize_assay(k = 2)
 #'      object %<>% fit_survival(~ sex + exprs2levels)
 #'      plot_survival(object, formula = ~ sex + exprs2levels, nrow = 2, ncol = 2) + scale_x_continuous(breaks = 0:8)

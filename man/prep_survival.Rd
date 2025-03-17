@@ -81,7 +81,7 @@ Plot survival
     object \%>\% fit_survival(~age/exprs2levels) \%>\% plot_survival(~age/exprs2levels)
 
 #' ~ expr2levels + subgroup
-     object <- survex()
+     object <- survobj()
      object \%<>\% factorize_assay(k = 2)
      object \%<>\% fit_survival(~ sex + exprs2levels)
      plot_survival(object, formula = ~ sex + exprs2levels, nrow = 2, ncol = 2) + scale_x_continuous(breaks = 0:8)

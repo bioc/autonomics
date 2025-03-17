@@ -13,16 +13,5 @@ SummarizedExperiment
 Survival analysis example
 }
 \examples{
-#  Background    BOC   CD4   PLG   XCL1
-#                ===   ===   ===   ====
-#                Flo   Fhi   Flo   Fhi    _______________
-#                Fhi   Flo   Fhi   Flo    ____________  |
-#                Mlo   Mhi   Mhi   Mlo    _____      |  |_____
-#                Mhi   Mlo   Mlo   Mhi    __   |__   |__     |__
-#                                           |     |     |
-#                                           |__   |__   |_______
-#                                              |     |
-#                                              |__    |__
-#                                                 |      |
-survex()
+survobj()
 }
