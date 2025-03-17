@@ -1047,6 +1047,7 @@ extract_coef_features <- function(
        verbose = TRUE
 ){
 # Filter
+    if (all(coefs %in% autonomics::coefs(metadata(object)$survival)))  return(object[0,])
     args <- list(coefs = coefs, fit = fit, combiner = combiner, verbose = verbose)
     object %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
     object <- do.call(         .extract_p_features, c(args, list(object = object, features = features,          p = p          )))
