@@ -554,20 +554,23 @@ plot_transformation_biplots <- function(
     fixed = list(shape = 15, size = 3), nrow = 2, ncol = NULL
 ){
     . <- NULL
-    assert_is_subset(subgroupvar, svars(object))
-    assert_is_a_string(method)
-    assert_is_subset(method, c('pca', 'pls'))
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
       transforms,
       c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm',
         'vsn' , 'zscore'))
+    assert_scalar_subset(method, c('pca', 'pls'))
     assert_are_same_length(dims, 1:2)
     assert_is_numeric(dims)
     assert_is_a_bool(verbose)
+    assert_is_a_string(sep)
+    
     strelem <- switch(method, pca = 'by', pls = 'subgroupvar')
     xylabs <- paste0('t', sep, get(strelem), sep, method, dims)
     xlab <- xylabs[1]; ylab <- xylabs[2]
     mthdhndl <- paste0(get(strelem), sep, method)
+    
     scoredt <- lapply(
       c('input', transforms),
       function(tf){
@@ -585,11 +588,10 @@ plot_transformation_biplots <- function(
       }) %>%
       rbindlist()
     scoredt$transfo %<>% factor(unique(.))
+
     p <- plot_data(
       scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
       fixed = fixed)
     p + facet_wrap(
       vars(transfo), nrow = nrow, ncol = ncol, scales = "free", ...)
 }
-
-
