@@ -519,6 +519,7 @@ plot_transformation_densities <- function(
 
 
 # plot_transformation_violins(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @author Johannes Graumann
 plot_transformation_violins <- function(
     object,
     subgroupvar = 'subgroup',
@@ -548,6 +549,7 @@ plot_transformation_violins <- function(
     coord_flip()
 }
 
+#' @author Johannes Graumann
 .ldt_transforms <- function(object, transforms, subgroupvar, verbose = TRUE)
 {
   dt <- lapply(
@@ -568,6 +570,7 @@ plot_transformation_violins <- function(
 # file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 # object <- read_maxquant_proteingroups(file)
 # plot_transformation_biplots(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @author Johannes Graumann
 plot_transformation_biplots <- function(
     object,
     subgroupvar = 'subgroup',
