@@ -518,29 +518,52 @@ plot_transformation_densities <- function(
 }
 
 
+# plot_transformation_violins(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
 plot_transformation_violins <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
+    transforms = c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore'),
     ...,
-    fixed = list(na.rm=TRUE)
+    fixed = list(
+      na.rm=TRUE, trim = FALSE, draw_quantiles = c(0.25, 0.5, 0.75),
+      show.legend = FALSE),
+    verbose = TRUE
 ){
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(subgroupvar, svars(object))
+    assert_is_subset(
+      transforms,
+      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm', 'vsn',
+        'zscore'))
+    assert_is_a_bool(verbose)
+    
     value <- sample_id <- NULL
-    assert_is_subset(subgroupvar, svars(object))
-    dt <- sumexp_to_longdt(object, svars = subgroupvar)
-    dt$transfo <- 'input'
-    for (transfo in transformations){
-        dt1 <- sumexp_to_longdt(get(transfo)(object), svars = subgroupvar)
-        dt1$transfo <- transfo
-        dt %<>% rbind(dt1)
-    }
-    dt$transfo %<>% factor(c('input', transformations))
-    plot_data(dt, geom_violin, x = sample_id, y = value, group = sample_id, 
-                color = NULL, fill = !!sym(subgroupvar), ..., fixed = fixed) +
+    
+    dt <- .ldt_transforms(object, transforms, subgroupvar, verbose = verbose)
+    
+    plot_data(dt, geom_violin, x = sample_id, y = value, 
+                         color = NULL, fill = !!sym(subgroupvar), ...,
+                         fixed = fixed) +
     facet_grid(rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free") +
     coord_flip()
 }
 
+.ldt_transforms <- function(object, transforms, subgroupvar, verbose = TRUE)
+{
+  dt <- lapply(
+    c('input', transforms),
+    function(tf)
+    {
+      tmpdt <- switch(tf,
+        'input' = sumexp_to_longdt(object, svars = subgroupvar),
+        sumexp_to_longdt(get(tf)(object, verbose = verbose), svars = subgroupvar))
+      tmpdt$transfo <- tf
+      tmpdt
+    }) %>%
+    rbindlist()
+  dt$transfo %<>% factor(unique(.))
+  dt
+}
 
 # file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 # object <- read_maxquant_proteingroups(file)
