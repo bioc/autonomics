@@ -92,6 +92,7 @@ Suggests:
   GenomicDataCommons,
   GenomicRanges,
   GEOquery,
+  ggridges,
   ggtext,
   hgu95av2.db,
   ICSNP,

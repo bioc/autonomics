@@ -494,27 +494,35 @@ gglegend<-function(p){
 }
 
 
+# plot_transformation_densities(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @author Johannes Graumann
 plot_transformation_densities <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
+    transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     ...,
-    fixed = list(na.rm = TRUE, alpha = 0.3),
-    nrow = 1, ncol = NULL
+    fixed = list(na.rm = TRUE, show.legend = FALSE, verbose = FALSE),
+    verbose = TRUE
 ){
-    value <- sample_id <- NULL
-    assert_is_subset(subgroupvar, svars(object))
-    dt <- sumexp_to_longdt(object, svars = c(subgroupvar))
-    dt$transfo <- 'input'
-    for (transfo in transformations){
-        dt1 <- sumexp_to_longdt(get(transfo)(object), svars = c(subgroupvar))
-        dt1$transfo <- transfo
-        dt %<>% rbind(dt1)
+    if (!requireNamespace('ggridges', quietly = TRUE)){
+      message("`BiocManager::install('ggridges')`. Then re-run.")
+      return(NULL)
     }
-    dt$transfo %<>% factor(c('input', transformations))
-    plot_data(dt, geom_density, x = value, group = sample_id,
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(subgroupvar, svars(object))
+    assert_is_subset(
+      transforms,
+      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm', 'vsn',
+        'zscore'))
+    assert_is_a_bool(verbose)
+    value <- sample_id <- NULL
+
+    dt <- .ldt_transforms(object, transforms, subgroupvar, verbose = verbose)
+
+    plot_data(dt, ggridges::geom_density_ridges, x = value, y = sample_id,
             color = NULL, fill = !!sym(subgroupvar), ..., fixed = fixed) +
-    facet_wrap(vars(transfo), scales = "free", nrow = nrow, ncol = ncol)
+    facet_grid(
+      rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free")
 }
 
 
