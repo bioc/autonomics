@@ -87,50 +87,10 @@ survobj <- function(){
     
     object$timetoevent <- c( time.senior.m,  time.senior.f,  time.junior.m,  time.junior.f )
     object$event       <- c(event.senior.m, event.senior.f, event.junior.m, event.junior.f )
-    object
-    
-}
-
-
-
-#' @rdname dot-fit_survival
-#' @export
-survival_example <- function(){
-    sampledt <- rbind(  data.table( subgroup = 'Control',  sample_id = 'C01', timetoevent = 3, event = 1), 
-                        data.table( subgroup = 'Control',  sample_id = 'C02', timetoevent = 3, event = 1), 
-                        data.table( subgroup = 'Control',  sample_id = 'C03', timetoevent = 4, event = 1),
-                        data.table( subgroup = 'Control',  sample_id = 'C04', timetoevent = 4, event = 1),
-                        data.table( subgroup = 'Control',  sample_id = 'C05', timetoevent = 4, event = 0),
-                        data.table( subgroup = 'Control',  sample_id = 'C06', timetoevent = 4, event = 0),
-                        data.table( subgroup = 'Control',  sample_id = 'C07', timetoevent = 4, event = 0), 
-                        data.table( subgroup = 'Control',  sample_id = 'C08', timetoevent = 4, event = 0), 
-                        data.table( subgroup = 'Control',  sample_id = 'C09', timetoevent = 4, event = 0),
-                        data.table( subgroup = 'Control',  sample_id = 'C10', timetoevent = 4, event = 0),
-                        data.table( subgroup = 'Diseased', sample_id = 'D01', timetoevent = 1, event = 1), 
-                        data.table( subgroup = 'Diseased', sample_id = 'D02', timetoevent = 1, event = 1), 
-                        data.table( subgroup = 'Diseased', sample_id = 'D03', timetoevent = 2, event = 1),
-                        data.table( subgroup = 'Diseased', sample_id = 'D04', timetoevent = 2, event = 1),
-                        data.table( subgroup = 'Diseased', sample_id = 'D05', timetoevent = 2, event = 0), # lets include right censoring examples too !
-                        data.table( subgroup = 'Diseased', sample_id = 'D06', timetoevent = 2, event = 0),
-                        data.table( subgroup = 'Diseased', sample_id = 'D07', timetoevent = 3, event = 1), 
-                        data.table( subgroup = 'Diseased', sample_id = 'D08', timetoevent = 3, event = 1), 
-                        data.table( subgroup = 'Diseased', sample_id = 'D09', timetoevent = 4, event = 1), 
-                        data.table( subgroup = 'Diseased', sample_id = 'D10', timetoevent = 4, event = 1) )
-    n <- nrow(sampledt)/2
-    object <- rbind( ASGR1 = c(rnorm(n, mean =  2), rnorm(n, mean =  5)),
-                       BOC = c(rnorm(n, mean =  2), rnorm(n, mean =  6)),
-                       CD4 = c(rnorm(n, mean =  2), rnorm(n, mean =  7)),
-                      LY86 = c(rnorm(n, mean =  2), rnorm(n, mean =  8)),
-                       CFI = c(rnorm(n, mean =  6), rnorm(n, mean =  3)),
-                       PLG = c(rnorm(n, mean =  7), rnorm(n, mean =  3)),
-                      PROC = c(rnorm(n, mean =  8), rnorm(n, mean =  3)),
-                      XCL1 = c(rnorm(n, mean =  9), rnorm(n, mean =  3)) )
-    colnames(object) <- sampledt$sample_id
-    object <- SummarizedExperiment(list(exprs = object))
-    fdt(object) <- data.table(feature_id = fnames(object))
-    sdt(object) <- sampledt
+    object %<>% factorize_assay(k = 2)
     object
 }
+
 
 
 #' Fit onefeature survival 
