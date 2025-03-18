@@ -76,19 +76,15 @@ Plot survival
     object \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
 
 # survival ~ assay
-    object <- survobj() \%>\% factorize_assay(k = 2)
+    object <- survobj()
     object \%>\% fit_survival(~exprs)
     object \%>\% fit_survival(~exprs2levels) \%>\% plot_survival(~exprs2levels)
 
 # survival ~ svar / assay
-    object <- survobj() \%>\% factorize_assay(k = 2)
+    object <- survobj()
     object \%<>\% fit_survival(~age/exprs2levels)
     object \%>\% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
 
-# Engines
-    object <- survobj() \%>\% factorize_assay(k = 2)
-    object \%<>\% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
-    plot_survival(object)
 # Pdf
     # plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
 }
