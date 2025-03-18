@@ -507,19 +507,13 @@ installed <- function(pkg){
 #'     object %>% fit_survival(~exprs)
 #'     object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
 #'
-#' # survival ~ svar + assay
+#' # survival ~ svar / assay
 #'     object <- survobj() %>% factorize_assay(k = 2)
 #'     object %<>% fit_survival(~age/exprs2levels)
-#'     object %>% plot_survival(~age/exprs2levels, coefs = c('senior:bin2-bin1', 'junior:bin2-bin1'))
+#'     object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
 #'
-#' #' ~ expr2levels + subgroup
-#'      object <- survobj()
-#'      object %<>% factorize_assay(k = 2)
-#'      object %<>% fit_survival(~ sex + exprs2levels)
-#'      plot_survival(object, formula = ~ sex + exprs2levels, nrow = 2, ncol = 2) + scale_x_continuous(breaks = 0:8)
-#' 
 #' # Engines
-#'     object <- survival_example()
+#'     object <- survobj() %>% factorize_assay(k = 2)
 #'     object %<>% fit_survival(engine = c('coxph', 'survdiff', 'logrank'))
 #'     plot_survival(object)
 #' # Pdf
@@ -639,10 +633,11 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
     npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nfacets / n)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
+        subtitle <- if (svar_formula(formula, object)) NULL else paste0(order, collapse = '  ')
         p <- ggplot(plotdt) + 
              theme_bw() + 
              facet_wrap_paginate(vars(facet), nrow = floor(sqrt(n)), ncol = n/floor(sqrt(n)), page = i) + 
-             ggtitle(title, subtitle = paste0(order, collapse = '  ')) + 
+             ggtitle(title, subtitle = subtitle) + 
              theme( plot.title    = element_text(hjust = 0.5),
                     plot.subtitle = element_text(hjust = 0.5),
                       panel.grid  = element_blank())
