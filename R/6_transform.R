@@ -544,11 +544,11 @@ plot_transformation_violins <- function(
 
 # file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 # object <- read_maxquant_proteingroups(file)
-# plot_transformation_biplots(object, transformations = c('center', 'invnorm', 'quantnorm', 'zscore'))
+# plot_transformation_biplots(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
 plot_transformation_biplots <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
+    transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     method = c('pca', 'pls')[1], by = 'sample_id',
     dims = 1:2, verbose = FALSE, color = subgroupvar, sep = FITSEP, ...,
     fixed = list(shape = 15, size = 3), nrow = 2, ncol = NULL
@@ -557,6 +557,10 @@ plot_transformation_biplots <- function(
     assert_is_subset(subgroupvar, svars(object))
     assert_is_a_string(method)
     assert_is_subset(method, c('pca', 'pls'))
+    assert_is_subset(
+      transforms,
+      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm',
+        'vsn' , 'zscore'))
     assert_are_same_length(dims, 1:2)
     assert_is_numeric(dims)
     assert_is_a_bool(verbose)
@@ -565,20 +569,20 @@ plot_transformation_biplots <- function(
     xlab <- xylabs[1]; ylab <- xylabs[2]
     mthdhndl <- paste0(get(strelem), sep, method)
     scoredt <- lapply(
-        c('input', transformations),
-        function(tf){
-          tmpobj <- object
-          if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
-          tmpobj %<>% get(method)(dims = dims, verbose = verbose)
-          xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
-          yvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't2' ]])
-          tmpdt <- sdt(tmpobj)
-          tmpdt$transfo <- switch(
-            method,
-            pca = sprintf('%s : %d + %d %%', tf, xvariance, yvariance),
-            pls = sprintf('%s : %d %%',      tf, xvariance))
-          tmpdt
-        }) %>%
+      c('input', transforms),
+      function(tf){
+        tmpobj <- object
+        if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
+        tmpobj %<>% get(method)(dims = dims, verbose = verbose)
+        xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
+        yvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't2' ]])
+        tmpdt <- sdt(tmpobj)
+        tmpdt$transfo <- switch(
+          method,
+          pca = sprintf('%s : %d + %d %%', tf, xvariance, yvariance),
+          pls = sprintf('%s : %d %%',      tf, xvariance))
+        tmpdt
+      }) %>%
       rbindlist()
     scoredt$transfo %<>% factor(unique(.))
     p <- plot_data(
