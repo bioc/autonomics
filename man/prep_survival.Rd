@@ -10,7 +10,8 @@ prep_survival(
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
-  coefs = autonomics::coefs(object, fit = engine),
+  order = autonomics::coefs(object, fit = engine)[1],
+  stats = autonomics::coefs(object, fit = engine),
   n = if (svar_formula(formula, object)) 1 else min(nrow(object), 9)
 )
 
@@ -19,9 +20,9 @@ plot_survival(
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
-  coefs = autonomics::coefs(object, fit = engine),
-  title = sprintf("\%s : survival ~ \%s", engine, formula2str(formula) \%>\% substr(2,
-    nchar(.))),
+  order = autonomics::coefs(object, fit = engine)[1],
+  stats = autonomics::coefs(object, fit = engine),
+  title = sprintf("\%s ~ \%s", engine, formula2str(formula) \%>\% substr(2, nchar(.))),
   dodge_height = 0,
   file = NULL,
   width = 7,
@@ -33,6 +34,10 @@ plot_survival(
 \item{object}{SummarizedExperiment}
 
 \item{engine}{'coxph', 'survdiff' or 'logrank'}
+
+\item{order}{coefs to order plots}
+
+\item{stats}{coefs to print stats}
 
 \item{n}{number of features to plot}
 
@@ -77,8 +82,8 @@ Plot survival
 
 # survival ~ svar + assay
     object <- survobj() \%>\% factorize_assay(k = 2)
-    object \%>\% fit_survival(~age+exprs2levels) \%>\% plot_survival(~age+exprs2levels)
-    object \%>\% fit_survival(~age/exprs2levels) \%>\% plot_survival(~age/exprs2levels)
+    object \%<>\% fit_survival(~age/exprs2levels)
+    object \%>\% plot_survival(~age/exprs2levels, coefs = c('senior:bin2-bin1', 'junior:bin2-bin1'))
 
 #' ~ expr2levels + subgroup
      object <- survobj()

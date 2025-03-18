@@ -481,6 +481,8 @@ installed <- function(pkg){
 #' @param object        SummarizedExperiment
 #' @param assay         value in assayNames(object)
 #' @param engine       'coxph', 'survdiff' or 'logrank'
+#' @param order         coefs to order plots
+#' @param stats         coefs to print stats
 #' @param ntile         number of quantiles
 #' @param title         string
 #' @param subtitle      string
@@ -507,8 +509,8 @@ installed <- function(pkg){
 #'
 #' # survival ~ svar + assay
 #'     object <- survobj() %>% factorize_assay(k = 2)
-#'     object %>% fit_survival(~age+exprs2levels) %>% plot_survival(~age+exprs2levels)
-#'     object %>% fit_survival(~age/exprs2levels) %>% plot_survival(~age/exprs2levels)
+#'     object %<>% fit_survival(~age/exprs2levels)
+#'     object %>% plot_survival(~age/exprs2levels, coefs = c('senior:bin2-bin1', 'junior:bin2-bin1'))
 #'
 #' #' ~ expr2levels + subgroup
 #'      object <- survobj()
@@ -527,7 +529,8 @@ prep_survival <- function(
       object, 
      formula = as.formula(sprintf('~%s', assayNames(object)[1])),
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
-       coefs = autonomics::coefs(object, fit = engine),
+       order = autonomics::coefs(object, fit = engine)[1],
+       stats = autonomics::coefs(object, fit = engine),
            n = if (svar_formula(formula, object)) 1  else min(nrow(object),9)#,
 #        title = if (svar_formula(formula, object)) NULL else formula2str(formula) , # svar_formula becomes facethdr
 #     subtitle = sprintf('%s', paste0(engine, collapse = '      ')),
@@ -542,11 +545,12 @@ prep_survival <- function(
     assert_is_valid_sumexp(object)
     assert_is_subset(all.vars(formula), c(svars(object), assayNames(object)))
     assert_scalar_subset(engine, fits(object))
-    assert_is_subset(coefs, autonomics::coefs(object, fit = engine))
+    assert_is_subset(order, autonomics::coefs(object, fit = engine))
+    assert_is_subset(stats, autonomics::coefs(object, fit = engine))
     event <- timetoevent <- NULL      # svar
     curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
 # Prepare
-    object %<>% extract_coef_features(fit = engine, coefs = coefs, n = n)
+    object %<>% extract_coef_features(fit = engine, coefs = order, n = n)
     assayvar <- all.vars(formula) %>% intersect(assayNames(object))
   samplevars <- all.vars(formula) %>% intersect(svars(object))
     if (length(assayvar)==0){
@@ -576,13 +580,16 @@ prep_survival <- function(
     plotdt[, feature_id := factor(feature_id, features)] # Note that for svar-formula feature_id is the formula!
     plotdt <- plotdt[order(feature_id)]
 # Statistics
-    plongdt <- pdt(object, fit = engine, coef = coefs)
-    tlongdt <- tdt(object, fit = engine, coef = coefs)
+    plongdt <- pdt(object, fit = engine, coef = stats)
+    tlongdt <- tdt(object, fit = engine, coef = stats)
     plongdt %<>% melt.data.table(id.vars = 'feature_id', variable.name = 'coef', value.name = 'p')
     tlongdt %<>% melt.data.table(id.vars = 'feature_id', variable.name = 'coef', value.name = 't')
     statdt <- merge(plongdt, tlongdt, by = c('feature_id', 'coef'))
     statdt[, coef := split_extract_fixed(coef, '~', 1)]
     statdt[, p := formatC(p, format = 'g', digits = 2)]
+    statdt[sign(t)=='-1', p := sprintf('-%s', p)]
+    statdt[, p := sprintf('p = %s', p ) ]
+    statdt[sign(t)=='-1', p := sprintf('-%s', p)]
     statdt[, p := stri_pad_both(p, nchar(coef))]
     statdt[, coef := stri_pad_both(coef, nchar(p))]
     statdt <- statdt[, .(coef = paste0(coef, collapse = '        '), 
@@ -601,8 +608,9 @@ plot_survival <- function(
       object,
      formula = as.formula(sprintf('~%s', assayNames(object)[1])), 
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
-       coefs = autonomics::coefs(object, fit = engine),
-       title = sprintf('%s : survival ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
+       order = autonomics::coefs(object, fit = engine)[1],
+       stats = autonomics::coefs(object, fit = engine),
+       title = sprintf('%s ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
 dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
@@ -613,7 +621,7 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
     if (!installed('ggtext'))   return(NULL) 
     if (!installed('ggstance')) return(NULL)
 # Plot
-    plotdt <- prep_survival(object = object, formula = formula, engine = engine, coefs = coefs, n = n)
+    plotdt <- prep_survival(object = object, formula = formula, engine = engine, order = order, stats = stats, n = n)
     maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
     maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("†")   # \u2020
     maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("•")   # \u2022
@@ -634,9 +642,10 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
         p <- ggplot(plotdt) + 
              theme_bw() + 
              facet_wrap_paginate(vars(facet), nrow = floor(sqrt(n)), ncol = n/floor(sqrt(n)), page = i) + 
-             ggtitle(title) + 
-             theme( plot.title = element_text(hjust = 0.5),
-                   panel.grid  = element_blank())
+             ggtitle(title, subtitle = paste0(order, collapse = '  ')) + 
+             theme( plot.title    = element_text(hjust = 0.5),
+                    plot.subtitle = element_text(hjust = 0.5),
+                      panel.grid  = element_blank())
              #ggtext::geom_richtext(data = ndt, aes(x = maxtime, y = maxsurvival, label = label), 
              #                      hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
