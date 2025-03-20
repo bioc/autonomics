@@ -27,7 +27,9 @@ plot_survival(
   file = NULL,
   width = 7,
   height = 7,
-  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 4)
+  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 4),
+  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
+  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4)
 )
 }
 \arguments{

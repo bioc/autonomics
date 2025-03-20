@@ -566,11 +566,14 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
       height = 7,
-           n = if (svar_formula(formula, object)) 1  else min(nrow(object),4)
+           n = if (svar_formula(formula, object)) 1  else min(nrow(object),4), # Inf works
+       n_col = n %>% min(nrow(object)) %>% sqrt() %>% floor()   %>% min(4),
+       n_row = n %>% min(ncol(object)) %>% sqrt() %>% ceiling() %>% min(4)
 ){
 # Assert
     if (!installed('ggtext'))   return(NULL) 
     if (!installed('ggstance')) return(NULL)
+    if (is.infinite(n))  n <- nrow(object)
 # Plot
     plotdt <- prep_survival(object = object, formula = formula, engine = engine, order = order, stats = stats, n = n)
     maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
@@ -586,14 +589,13 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
     ndt[ , color := make_colors(do.call(paste., .SD)) , .SDcols = all.vars(formula) ]
     ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
     ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
-    nfacets <- nrow(ndt)
-    npages <- if (is.null(nrow) | is.null(ncol)) 1 else ceiling(nfacets / n)
+    npages <- if (is.null(n_row) | is.null(n_col)) 1 else ceiling(n / n_row/ n_col)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
         subtitle <- if (svar_formula(formula, object)) NULL else paste0(order, collapse = '  ')
         p <- ggplot(plotdt) + 
              theme_bw() + 
-             facet_wrap_paginate(vars(facet), nrow = floor(sqrt(n)), ncol = n/floor(sqrt(n)), page = i) + 
+             facet_wrap_paginate(vars(facet), nrow = n_row, ncol = n_col, page = i) + 
              ggtitle(title, subtitle = subtitle) + 
              theme( plot.title    = element_text(hjust = 0.5),
                     plot.subtitle = element_text(hjust = 0.5),
