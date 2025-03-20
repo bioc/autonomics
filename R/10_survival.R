@@ -125,6 +125,7 @@ survobj <- function(){
     fitmat <- matrix(fitres, nrow = 1)
     colnames(fitmat) <- paste(rep(colnames(fitres),  each = nrow(fitres)), 
                               rep(rownames(fitres), times = ncol(fitres)), sep = '~')
+    colnames(fitmat) %<>% paste0('~coxph')
     data.table(fitmat)
     #data.table(cbind(fitmat, t(tF), t(pF)))
 }
@@ -302,7 +303,6 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     if (drop)   for (var in c(assayvar, samplevars)){  
                     pat <- sprintf('%s(.+)', var)
                     names(fitres) %<>% stri_replace_first_regex(pat, '$1')  }
-    names(fitres)[-1] %<>% paste0('~coxph')
 # Merge    
     if (verbose)  message_df('                      %s', summarize_fit(fitres))
     #if ('expr' %in% all.vars(formula)){  object %<>% merge_fit(fitres)
@@ -456,21 +456,21 @@ installed <- function(pkg){
 #' @return ggplot
 #' @examples
 #' # survival ~ svars
-#'     object <- survobj()
-#'     object %>% fit_survival(~age)     %>% plot_survival(~age)
-#'     object %>% fit_survival(~sex)     %>% plot_survival(~sex)
-#'     object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
-#'     object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
+#'   object <- survobj()
+#'   object %>% fit_survival(~age)     %>% plot_survival(~age)
+#'   object %>% fit_survival(~sex)     %>% plot_survival(~sex)
+#'   object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
+#'   object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
 #' 
 #' # survival ~ assay
-#'     object <- survobj()
-#'     object %>% fit_survival(~exprs)
-#'     object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
+#'   object <- survobj()
+#'   object %>% fit_survival(~exprs)
+#'   object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
 #'
 #' # survival ~ svar / assay
-#'     object <- survobj()
-#'     object %<>% fit_survival(~age/exprs2levels)
-#'     object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
+#'   object <- survobj()
+#'   object %<>% fit_survival(~age/exprs2levels)
+#'   object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
 #'
 #' # Pdf
 #'     # plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))

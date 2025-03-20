@@ -69,21 +69,21 @@ Plot survival
 }
 \examples{
 # survival ~ svars
-    object <- survobj()
-    object \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
-    object \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
-    object \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
-    object \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
+  object <- survobj()
+  object \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
+  object \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
+  object \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
+  object \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
 
 # survival ~ assay
-    object <- survobj()
-    object \%>\% fit_survival(~exprs)
-    object \%>\% fit_survival(~exprs2levels) \%>\% plot_survival(~exprs2levels)
+  object <- survobj()
+  object \%>\% fit_survival(~exprs)
+  object \%>\% fit_survival(~exprs2levels) \%>\% plot_survival(~exprs2levels)
 
 # survival ~ svar / assay
-    object <- survobj()
-    object \%<>\% fit_survival(~age/exprs2levels)
-    object \%>\% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
+  object <- survobj()
+  object \%<>\% fit_survival(~age/exprs2levels)
+  object \%>\% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
 
 # Pdf
     # plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
