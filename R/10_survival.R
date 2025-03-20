@@ -224,36 +224,37 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 }
 
 
-#' Fit survival
-#' 
-#' Compute survival effect of svars, exprs, and their interactions
-#' 
-#' @param object    SummarizedExperiment
-#' @param formula   Formula
-#' @param bins      Number of value bins. Zero means unbinned.
-#' @param bintype  'factor' or 'numeric'
-#' @param engine   'coxph', 'survdiff', or 'logrank'
-#' @param drop      Whether to drop factor varname in coefnames
-#' @param codingfun (factor) coding function
-#' @param verbose   TRUE or FALSE
-#' @examples
-#' # Load/Transform
-#'    object <- survobj()
-#'    object %<>% bin_assay(k = 2)
-#'    object %<>% factorize_assay(k = 2)
-#' # coxph{survival}
-#'   .fit_survival(object)
-#'   .fit_survival(object, ~ exprs)                         #      expr effect
-#'   .fit_survival(object, ~ exprs2bins)                    #   exprbin effect
-#'   .fit_survival(object, ~ exprs2levels)                  # exprlevel effect
-#'   .fit_survival(object, formula = ~ sex)                 #       sex effect
-#'   .fit_survival(object, formula = ~ sex + exprs2levels)  #       sex effect ACROSS exprlevels,  exprlevel effect ACROSS sexes.
-#'   .fit_survival(object, formula = ~ sex / exprs2levels)  # exprlevel effect WITHIN sex,               sex effect ACROSS exprlevels.
-#'   .fit_survival(object, formula = ~ exprs2levels / sex)  #       sex effect WITHIN exprlevel,   exprlevel effect ACROSS sexes
-#'   .fit_survival(object, formula = ~ exprs2levels * sex)  #       sex effect differences BETWEEN exprlevels
-#' # survdiff{survival}
-#'   .fit_survival(object, formula = ~ exprs2levels, engine = 'survdiff')
-#'   .fit_survival(object, formula = ~ exprs2levels, engine = 'logrank')
+# Fit survival
+# 
+# Compute survival effect of svars, exprs, and their interactions
+# 
+# @param object    SummarizedExperiment
+# @param formula   Formula
+# @param bins      Number of value bins. Zero means unbinned.
+# @param bintype  'factor' or 'numeric'
+# @param engine   'coxph', 'survdiff', or 'logrank'
+# @param drop      Whether to drop factor varname in coefnames
+# @param codingfun (factor) coding function
+# @param verbose   TRUE or FALSE
+# @examples
+# # Load/Transform
+#       object <- survobj()
+# # coxph{survival}
+#      .fit_survival(object)
+#      .fit_survival(object, ~ exprs)                         #      expr effect
+#      .fit_survival(object, ~ exprs2bins)                    #   exprbin effect
+#      .fit_survival(object, ~ exprs2levels)                  # exprlevel effect
+#      .fit_survival(object, formula = ~ sex)                 #       sex effect
+#      .fit_survival(object, formula = ~ sex + exprs2levels)  #       sex effect ACROSS exprlevels,  exprlevel effect ACROSS sexes.
+#      .fit_survival(object, formula = ~ sex / exprs2levels)  # exprlevel effect WITHIN sex,               sex effect ACROSS exprlevels.
+#      .fit_survival(object, formula = ~ exprs2levels / sex)  #       sex effect WITHIN exprlevel,   exprlevel effect ACROSS sexes
+#      .fit_survival(object, formula = ~ exprs2levels * sex)  #       sex effect differences BETWEEN exprlevels
+#      .fit_survival(object, formula = ~ exprs2levels, engine = 'survdiff')
+#      .fit_survival(object, formula = ~ exprs2levels, engine = 'logrank')
+# # survdiff
+#       fit_survival(object, ~ exprs2levels)                  # exprlevel effect
+#' @rdname fit_survival
+#' @export
 .fit_survival <- function( 
        object,
        formula = as.formula(sprintf('~%s', assayNames(object)[1])),
@@ -313,56 +314,51 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 
 
 
-#' Fit survival 
+#' Fit/Plot survival
 #' 
-#' Compute association between survival and expression (or svar)
+#' @param object        SummarizedExperiment
+#' @param formula       model formula: contains svars/assayNames
+#' @param engine       'coxph', 'survdiff' or 'logrank'
+#' @param drop          TRUE or FALSE : whether to drop var in coefname
+#' @param codingfun     coding function
+#' @param verbose       TRUE or FALSE
+#' @param outdir        output directory
+#' @param plot          TRUE or FALSE
+#' @param width         number
+#' @param height        number
+#' @param n             number of features to plot
+#' @param n_col         number of columns
+#' @param n_row         number of rows
+#' @param writefunname  'write_xl' or 'write_ods'
+#' @param order         coefs to order plots
+#' @param stats         coefs to print stats for
+#' @param title         string
+#' @param subtitle      string
+#' @param dodge_height  number 
+#' @param file          filepath
+#' @return SummarizedExperiment/ggplot
+#' @examples
+#' # survival ~ svars
+#'   object <- survobj()
+#'   object %>% fit_survival(~age)                          %>% plot_survival(~age)
+#'   object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
+#'   object %>% fit_survival(~sex)     %>% plot_survival(~sex)
+#'   object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
+#'   object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
 #' 
-#' Compute association between survival and expression (or svar)
-#' \verb{    } Continuous for \code{coxph}.                                         \cr
-#' \verb{    } Categorical for \code{survdiff} or \code{logrank}                    \cr
-#' \verb{        } Samples are split into \code{ntile} expression groups.           \cr
-#' \verb{        } Survival is compared between highest and lowest expressors.      \cr 
-#' 
-#' Three statistics recorded per engine                                             \cr
-#' \verb{        } \code{p}                                                         \cr
-#' \verb{   } \code{effect: } coef (\code{coxph})                                   \cr
-#' \verb{           } mean survival difference (\code{survdiff, logrank})           \cr
-#' \verb{        } \code{t: } \eqn{z}  (\code{coxph})                               \cr
-#' \verb{           }         \eqn{ \chi^2} (\code{survdiff}, \code{logrank})       \cr
-#' \verb{                } sign reflects whether expression                         \cr
-#' \verb{                } increases (positive) or decreases (negative) survival
-#' @param object      SummarizedExperiment
-#' @param splitvar    svar or assayName
-#' @param engine     'coxph' 'survdiff' or 'logrank'
-#' @param drop        TRUE or FALSE
-#' @param ntile       number
-#' @param splitvar       string
-#' @param sep         fvar string separator : e.g. '~' gives p~surv~LR50 
-#' @param verbose     TRUE or FALSE
-#' @param plot        TRUE or FALSE
-#' @param width       number
-#' @param height      number
-#' @param n           number of features to plot
-#' @param nrow        number of rows
-#' @param ncol        number of cols
-#' @param outdir      dir
-#' @param writefunname 'write_xl' or 'write_ods'
-#' @return SummarizedExperiment
-#' @examples                                                 # Innerfun
-#'  object <- survival_example()                             #     returns data.table
-#'                                                           #     accepts scalar args
-#' .fit_survival(object)                                     #         effect of exprquantile (2-1) on survival
-#' .fit_survival(object, ntile = 3)                          #         effect of exprquantile (3-1) on survival
-#' .fit_survival(object, splitvar = 'subgroup')              #         effect of subgroup (Disease-Control) on survival
-#' .fit_survival(object, engine = 'coxph')                   #         effect of exprvalue (continous) on survival
-#'                                                           # Outerfun 
-#'  fit_survival(object)                                     #     returns SummarizedExperiment
-#'                                                           #     accepts vector args
-#'  fit_survival(object, ntile = c(2,3))                     #             ntile: multiple contrasts: exprquantiles contrasts: (2-1) and (3-1)
-#'  fit_survival(object, splitvar = c('subgroup', 'exprs'))  #          splitvar: multiple exprquantile  (2-1) and subgroups
-#'  fit_survival(object, engine = c('survdiff', 'coxph'))    #            engine: survdiff (categorical) and coxph (continous)
-#'                                                           #     Writes
-#'                                                           #     Plots
+#' # survival ~ assay
+#'   object <- survobj()
+#'   object %>% fit_survival(~exprs)
+#'   object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
+#'
+#' # survival ~ svar / assay
+#'   object <- survobj()
+#'   object %<>% fit_survival(~age/exprs2levels)
+#'   object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
+#'
+#' # Plot
+#'   fit_survival(object, ~exprs2levels, plot = TRUE)
+#'  #fit_survival(object, ~exprs2levels, plot = TRUE, outdir = 'outdir', n = Inf)
 #' @export
 fit_survival <- function(
         object, 
@@ -375,9 +371,9 @@ fit_survival <- function(
           plot = if (is.null(outdir)) FALSE else TRUE,
          width = 7,
         height = 7,
-             n = min(nrow(object), 9),
-          ncol = 3,
-          nrow = 3,
+             n = if (svar_formula(formula, object)) 1  else min(nrow(object),4), # Inf works
+         n_col = n %>% min(nrow(object)) %>% sqrt() %>% floor()   %>% min(4),
+         n_row = n %>% min(ncol(object)) %>% sqrt() %>% ceiling() %>% min(4),
   writefunname = 'write_xl'
 ){
     if (verbose)  cmessage('%sSurvival', spaces(8))
@@ -403,18 +399,15 @@ fit_survival <- function(
 # Plot
     if (plot){
         file <- if (is.null(outdir)) NULL else file.path(outdir, 'survival.pdf')
-        print( plot_survival(
-                    object = object, 
-                     assay = splitvar, 
-                    engine = engine, 
-                     ntile = ntile,
-                      file = file, 
-                     width = width, 
-                    height = height,
-                         n = n, 
-                      nrow = nrow, 
-                      ncol = ncol
-        ) )
+        print( plot_survival(   object = object, 
+                               formula = formula,
+                                engine = engine,
+                                  file = file, 
+                                 width = width, 
+                                height = height,
+                                     n = n, 
+                                 n_row = n_row, 
+                                 n_col = n_col      ) )
     }
 # Return
     object
@@ -436,45 +429,7 @@ installed <- function(pkg){
 }
 
 
-#' Plot survival
-#' 
-#' @param object        SummarizedExperiment
-#' @param assay         value in assayNames(object)
-#' @param engine       'coxph', 'survdiff' or 'logrank'
-#' @param order         coefs to order plots
-#' @param stats         coefs to print stats
-#' @param ntile         number of quantiles
-#' @param title         string
-#' @param subtitle      string
-#' @param dodge_height  number 
-#' @param file          filepath
-#' @param width         number
-#' @param height        number
-#' @param n             number of features to plot
-#' @param ncol          number of columns
-#' @param nrow          number of rows
-#' @return ggplot
-#' @examples
-#' # survival ~ svars
-#'   object <- survobj()
-#'   object %>% fit_survival(~age)                          %>% plot_survival(~age)
-#'   object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
-#'   object %>% fit_survival(~sex)     %>% plot_survival(~sex)
-#'   object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
-#'   object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
-#' 
-#' # survival ~ assay
-#'   object <- survobj()
-#'   object %>% fit_survival(~exprs)
-#'   object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
-#'
-#' # survival ~ svar / assay
-#'   object <- survobj()
-#'   object %<>% fit_survival(~age/exprs2levels)
-#'   object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
-#'
-#' # Pdf
-#'     # plot_survival(object, file = file.path('testdir', 'survival', 'survival.pdf'))
+#' @rdname fit_survival
 #' @export
 prep_survival <- function(
       object, 
@@ -553,7 +508,7 @@ prep_survival <- function(
     plotdt[]
 }
 
-#' @rdname prep_survival
+#' @rdname fit_survival
 #' @export
 plot_survival <- function(
       object,
