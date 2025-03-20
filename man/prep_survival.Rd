@@ -70,7 +70,8 @@ Plot survival
 \examples{
 # survival ~ svars
   object <- survobj()
-  object \%>\% fit_survival(~age)     \%>\% plot_survival(~age)
+  object \%>\% fit_survival(~age)                          \%>\% plot_survival(~age)
+  object \%>\% fit_survival(~age, engine = 'survdiff')     \%>\% plot_survival(~age, engine = 'survdiff')
   object \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
   object \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
   object \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
