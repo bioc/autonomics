@@ -28,10 +28,10 @@ Fit onefeature survival
 }
 \examples{
 # Prepare
-     sd <- survdt()
-     sd[ , quantile := factor(dplyr::ntile(BOC, 2)) ]
+     sd <- sumexp_to_longdt(survobj()[1,], svars = c('timetoevent', 'event'), assay = 'exprs2levels')
+     sd[ , value := factor(value)]
 # Survival
-       .coxph(sd, Surv(timetoevent, event) ~ quantile)
-    .survdiff(sd, Surv(timetoevent, event) ~ quantile)
-     .logrank(sd, Surv(timetoevent, event) ~ quantile)
+       .coxph(sd, Surv(timetoevent, event) ~ value)
+    .survdiff(sd, Surv(timetoevent, event) ~ value)
+     .logrank(sd, Surv(timetoevent, event) ~ value)
 }
