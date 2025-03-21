@@ -480,9 +480,9 @@ transform_to_standard_normal <- function(x){
 
 #==============================================================================
 #
-#                        plot_transformation_biplots
-#                        plot_transformation_densities
-#                        plot_transformation_violins
+#                        plot_transform_biplots
+#                        plot_transform_densities
+#                        plot_transform_violins
 #
 #==============================================================================
 
@@ -494,9 +494,9 @@ gglegend<-function(p){
 }
 
 
-# plot_transformation_densities(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+# plot_transform_densities(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
 #' @author Johannes Graumann
-plot_transformation_densities <- function(
+plot_transform_densities <- function(
     object,
     subgroupvar = 'subgroup',
     transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
@@ -526,9 +526,9 @@ plot_transformation_densities <- function(
 }
 
 
-# plot_transformation_violins(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+# plot_transform_violins(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
 #' @author Johannes Graumann
-plot_transformation_violins <- function(
+plot_transform_violins <- function(
     object,
     subgroupvar = 'subgroup',
     transforms = c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore'),
@@ -577,9 +577,9 @@ plot_transformation_violins <- function(
 
 # file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 # object <- read_maxquant_proteingroups(file)
-# plot_transformation_biplots(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+# plot_transform_biplots(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
 #' @author Johannes Graumann
-plot_transformation_biplots <- function(
+plot_transform_biplots <- function(
     object,
     subgroupvar = 'subgroup',
     transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
