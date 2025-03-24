@@ -21,10 +21,8 @@ TRUE or false
 Is character matrix
 }
 \examples{
-object <- survival_example()
-object \%<>\% bin_assay()
-object \%<>\% factorize_assay()
-is_character_matrix(assays(object)$exprs)
-is_character_matrix(assays(object)$expr3bins)
-is_character_matrix(assays(object)$exprs3levels)
+object <- survobj()
+is_character_matrix(SummarizedExperiment::assays(object)$exprs)
+is_character_matrix(SummarizedExperiment::assays(object)$exprs2bins)
+is_character_matrix(SummarizedExperiment::assays(object)$exprs2levels)
 }

@@ -4,12 +4,10 @@
 #' @param  x     matrix
 #' @param .xname string
 #' @examples
-#' object <- survival_example()
-#' object %<>% bin_assay()
-#' object %<>% factorize_assay()
-#' is_character_matrix(assays(object)$exprs)
-#' is_character_matrix(assays(object)$expr3bins)
-#' is_character_matrix(assays(object)$exprs3levels)
+#' object <- survobj()
+#' is_character_matrix(SummarizedExperiment::assays(object)$exprs)
+#' is_character_matrix(SummarizedExperiment::assays(object)$exprs2bins)
+#' is_character_matrix(SummarizedExperiment::assays(object)$exprs2levels)
 #' @return TRUE or false
 #' @export
 is_character_matrix <- function(x, .xname = get_name_in_parent(x)){
