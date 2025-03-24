@@ -976,7 +976,7 @@ order_on_effect <- function(
     ntop <- ceiling(n/2)
     nbottom <- n - ntop
     idx <- seq(1,ntop)
-    idx %<>% c(seq(nrow(object)-nbottom+1, nrow(object)))
+    if (nbottom>0)  idx %<>% c(seq(nrow(object)-nbottom+1, nrow(object)))
     idx %<>% c(which(fdt(object) %in% features))
     idx %<>% unique()
     idx %<>% sort()
