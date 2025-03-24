@@ -37,6 +37,7 @@ Depends:
     R (>= 4.0)
 Imports: 
   abind,
+  arrow,
   BiocFileCache,
   BiocGenerics,
   bit64,
@@ -91,7 +92,11 @@ Suggests:
   GenomicDataCommons,
   GenomicRanges,
   GEOquery,
+<<<<<<< HEAD
   ggstance,
+=======
+  ggridges,
+>>>>>>> devel
   ggtext,
   hgu95av2.db,
   ICSNP,

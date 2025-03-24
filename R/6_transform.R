@@ -366,6 +366,7 @@ fscale <- function(mat, verbose = FALSE){
 #' @param selector logical vector (length = nrow(object))
 #' @param fun      aggregation function (string)
 #' @param verbose  TRUE/FALSE
+#' @param ...      parameters handed through to center()
 #' @return SummarizedExperiment
 #' @examples
 #' require(matrixStats)
@@ -391,6 +392,19 @@ center <- function(
     object
 }
 
+#' @rdname center
+#' @export
+center_mean <- function(object, ...)
+{
+  object %<>% center(fun = 'mean', ...)
+}
+
+#' @rdname center
+#' @export
+center_median <- function(object, ...)
+{
+  object %<>% center(fun = 'median', ...)
+}
 
 #' @rdname log2transform
 #' @export
@@ -404,7 +418,7 @@ quantnorm <- function(object, verbose = FALSE){
 #' @rdname log2transform
 #' @export
 invnorm <- function(object, verbose = FALSE){
-    if (verbose)  message('Invnorm')
+    if (verbose)  message('\t\tInvnorm')
     values(object) %<>% apply(2, transform_to_fitting_normal)
     object
 }
@@ -461,9 +475,9 @@ transform_to_standard_normal <- function(x){
 
 #==============================================================================
 #
-#                        plot_transformation_biplots
-#                        plot_transformation_densities
-#                        plot_transformation_violins
+#                        plot_transform_biplots
+#                        plot_transform_densities
+#                        plot_transform_violins
 #
 #==============================================================================
 
@@ -475,101 +489,140 @@ gglegend<-function(p){
 }
 
 
-plot_transformation_densities <- function(
+# plot_transform_densities(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @author Johannes Graumann
+plot_transform_densities <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('quantnorm', 'vsn' , 'zscore', 'invnorm'),
+    transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     ...,
-    fixed = list(na.rm = TRUE, alpha = 0.3),
-    nrow = 1, ncol = NULL
+    fixed = list(na.rm = TRUE, show.legend = FALSE, verbose = FALSE),
+    verbose = TRUE
 ){
-    value <- sample_id <- NULL
-    assert_is_subset(subgroupvar, svars(object))
-    dt <- sumexp_to_longdt(object, svars = c(subgroupvar))
-    dt$transfo <- 'input'
-    for (transfo in transformations){
-        dt1 <- sumexp_to_longdt(get(transfo)(object), svars = c(subgroupvar))
-        dt1$transfo <- transfo
-        dt %<>% rbind(dt1)
+    if (!requireNamespace('ggridges', quietly = TRUE)){
+      message("`BiocManager::install('ggridges')`. Then re-run.")
+      return(NULL)
     }
-    dt$transfo %<>% factor(c('input', transformations))
-    plot_data(dt, geom_density, x = value, group = sample_id,
+    . <- transfo <- NULL
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(subgroupvar, svars(object))
+    assert_is_subset(
+      transforms,
+      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm', 'vsn',
+        'zscore'))
+    assert_is_a_bool(verbose)
+    value <- sample_id <- NULL
+
+    dt <- .ldt_transforms(object, transforms, subgroupvar, verbose = verbose)
+
+    plot_data(dt, ggridges::geom_density_ridges, x = value, y = sample_id,
             color = NULL, fill = !!sym(subgroupvar), ..., fixed = fixed) +
-    facet_wrap(vars(transfo), scales = "free", nrow = nrow, ncol = ncol)
+    facet_grid(
+      rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free")
 }
 
 
-plot_transformation_violins <- function(
+# plot_transform_violins(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @author Johannes Graumann
+plot_transform_violins <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('quantnorm', 'vsn', 'zscore', 'invnorm'),
+    transforms = c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore'),
     ...,
-    fixed = list(na.rm=TRUE)
+    fixed = list(
+      na.rm=TRUE, trim = FALSE, draw_quantiles = c(0.25, 0.5, 0.75),
+      show.legend = FALSE),
+    verbose = TRUE
 ){
+    . <- transfo <- NULL
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(subgroupvar, svars(object))
+    assert_is_subset(
+      transforms,
+      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm', 'vsn',
+        'zscore'))
+    assert_is_a_bool(verbose)
+    
     value <- sample_id <- NULL
-    assert_is_subset(subgroupvar, svars(object))
-    dt <- sumexp_to_longdt(object, svars = subgroupvar)
-    dt$transfo <- 'input'
-    for (transfo in transformations){
-        dt1 <- sumexp_to_longdt(get(transfo)(object), svars = subgroupvar)
-        dt1$transfo <- transfo
-        dt %<>% rbind(dt1)
-    }
-    dt$transfo %<>% factor(c('input', transformations))
-    plot_data(dt, geom_violin, x = sample_id, y = value, group = sample_id, 
-                color = NULL, fill = !!sym(subgroupvar), ..., fixed = fixed) +
+    
+    dt <- .ldt_transforms(object, transforms, subgroupvar, verbose = verbose)
+    
+    plot_data(dt, geom_violin, x = sample_id, y = value, 
+                         color = NULL, fill = !!sym(subgroupvar), ...,
+                         fixed = fixed) +
     facet_grid(rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free") +
     coord_flip()
 }
 
+#' @author Johannes Graumann
+.ldt_transforms <- function(object, transforms, subgroupvar, verbose = TRUE)
+{
+  dt <- lapply(
+    c('input', transforms),
+    function(tf)
+    {
+      tmpdt <- switch(tf,
+        'input' = sumexp_to_longdt(object, svars = subgroupvar),
+        sumexp_to_longdt(get(tf)(object, verbose = verbose), svars = subgroupvar))
+      tmpdt$transfo <- tf
+      tmpdt
+    }) %>%
+    rbindlist()
+  dt$transfo %<>% factor(unique(.))
+  dt
+}
 
 # file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 # object <- read_maxquant_proteingroups(file)
-# plot_transformation_biplots(object, transformations = c('quantnorm', 'zscore', 'invnorm'))
-plot_transformation_biplots <- function(
+# plot_transform_biplots(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @author Johannes Graumann
+plot_transform_biplots <- function(
     object,
     subgroupvar = 'subgroup',
-    transformations = c('quantnorm', 'vsn', 'zscore', 'invnorm'),
+    transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     method = c('pca', 'pls')[1], by = 'sample_id',
-    dims = 1:2, color = subgroupvar, sep = FITSEP, ...,
-    fixed = list(shape = 15, size = 3), nrow = 1, ncol = NULL
+    dims = 1:2, verbose = FALSE, color = subgroupvar, sep = FITSEP, ...,
+    fixed = list(shape = 15, size = 3), nrow = 2, ncol = NULL
 ){
-    . <- NULL
-    assert_is_subset(subgroupvar, svars(object))
-    assert_is_a_string(method)
-    assert_is_subset(method, c('pca', 'pls'))
+    . <- transfo <- NULL
+    assert_is_valid_sumexp(object)
+    assert_scalar_subset(subgroupvar, svars(object))
+    assert_is_subset(
+      transforms,
+      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm',
+        'vsn' , 'zscore'))
+    assert_scalar_subset(method, c('pca', 'pls'))
     assert_are_same_length(dims, 1:2)
     assert_is_numeric(dims)
-    str_elem <- c(pca = 'by', pls = 'subgroupvar')
-    xy <- paste0('effect', sep, get(str_elem[method]), sep, method, dims)
-    x <- xy[1]; y <- xy[2]
-    tmpobj <- object
-    tmpobj %<>% get(method)(ndim = max(dims), verbose = FALSE)
-    scoredt <- sdt(tmpobj) %>% cbind(transfo = 'input')
-    mdidx <- paste0(get(str_elem[method]), sep, method)
-    xvariance <- round(metadata(tmpobj)[[mdidx]][[paste0('effect', dims[1])]])
-    yvariance <- round(metadata(tmpobj)[[mdidx]][[paste0('effect', dims[2])]])
-    scoredt$transfo <- switch(
-      method,
-      pca = sprintf('input : %d + %d %%', xvariance, yvariance),
-      pls = sprintf('input : %d %%'     , xvariance))
-    for (transfo in transformations){
-        tmpobj <- get(transfo)(object)
-        tmpobj %<>% get(method)(dims = dims, verbose = FALSE)
-        xvariance <- round(metadata(tmpobj)[[ mdidx ]][[ paste0('effect', dims[1]) ]])
-        yvariance <- round(metadata(tmpobj)[[ mdidx ]][[ paste0('effect', dims[2]) ]])
+    assert_is_a_bool(verbose)
+    assert_is_a_string(sep)
+    
+    strelem <- switch(method, pca = 'by', pls = 'subgroupvar')
+    xylabs <- paste0('t', sep, get(strelem), sep, method, dims)
+    xlab <- xylabs[1]; ylab <- xylabs[2]
+    mthdhndl <- paste0(get(strelem), sep, method)
+    
+    scoredt <- lapply(
+      c('input', transforms),
+      function(tf){
+        tmpobj <- object
+        if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
+        tmpobj %<>% get(method)(dims = dims, verbose = verbose)
+        xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
+        yvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't2' ]])
         tmpdt <- sdt(tmpobj)
         tmpdt$transfo <- switch(
           method,
-          pca = sprintf('%s : %d + %d %%', transfo, xvariance, yvariance),
-          pls = sprintf('%s : %d %%',      transfo, xvariance))
-        scoredt %<>% rbind(tmpdt)
-    }
+          pca = sprintf('%s : %d + %d %%', tf, xvariance, yvariance),
+          pls = sprintf('%s : %d %%',      tf, xvariance))
+        tmpdt
+      }) %>%
+      rbindlist()
     scoredt$transfo %<>% factor(unique(.))
+
     p <- plot_data(
-      scoredt, x = !!sym(x), y = !!sym(y), color = !!sym(color), ...,
-                    fixed = fixed)
-    p + facet_wrap(vars(transfo), nrow = nrow, ncol = ncol, scales = "free")
+      scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
+      fixed = fixed)
+    p + facet_wrap(
+      vars(transfo), nrow = nrow, ncol = ncol, scales = "free", ...)
 }
-
-

@@ -7,13 +7,48 @@
 \alias{read_diann}
 \title{Read diann}
 \usage{
-.read_diann_precursors(file, Lib.PG.Q = 0.01, verbose = TRUE)
+.read_diann_precursors(
+  file,
+  Global.Q = 0.01,
+  Q = 0.01,
+  Global.PG.Q = 0.01,
+  PG.Q = 0.05,
+  Global.Peptidoform.Q = 0.01,
+  Peptidoform.Q = 0.01,
+  Lib.Q = 0.01,
+  Lib.PG.Q = 0.01,
+  Lib.Peptidoform.Q = 0.01,
+  format = c("tsv", "parquet")[1],
+  verbose = TRUE
+)
 
-.read_diann_proteingroups(file, Lib.PG.Q = 0.01)
+.read_diann_proteingroups(
+  file,
+  format = c("tsv", "parquet")[1],
+  Global.Q = 0.01,
+  Q = 0.01,
+  Global.PG.Q = 0.01,
+  PG.Q = 0.05,
+  Global.Peptidoform.Q = 0.01,
+  Peptidoform.Q = 0.01,
+  Lib.Q = 0.01,
+  Lib.PG.Q = 0.01,
+  Lib.Peptidoform.Q = 0.01,
+  verbose = TRUE
+)
 
 read_diann_proteingroups(
   file,
+  format = .guess_diann_format(file),
+  Global.Q = 0.01,
+  Q = 0.01,
+  Global.PG.Q = 0.01,
+  PG.Q = 0.05,
+  Global.Peptidoform.Q = 0.01,
+  Peptidoform.Q = 0.01,
+  Lib.Q = 0.01,
   Lib.PG.Q = 0.01,
+  Lib.Peptidoform.Q = 0.01,
   simplify_snames = TRUE,
   rm_contaminants = TRUE,
   impute = FALSE,
@@ -32,9 +67,27 @@ read_diann_proteingroups(
 read_diann(...)
 }
 \arguments{
-\item{file}{'report.tsv' file}
+\item{file}{DIA-NN report file}
+
+\item{Global.Q}{Global.Q cutoff}
+
+\item{Q}{Q cutoff}
+
+\item{Global.PG.Q}{Global.PG.Q cutoff}
+
+\item{PG.Q}{PG.Q cutoff}
+
+\item{Global.Peptidoform.Q}{Global.Peptidoform.Q cutoff}
+
+\item{Peptidoform.Q}{Peptidoform.Q cutoff}
+
+\item{Lib.Q}{Lib.Q cutoff}
 
 \item{Lib.PG.Q}{Lib.PG.Q cutoff}
+
+\item{Lib.Peptidoform.Q}{Lib.Peptidoform.Q cutoff}
+
+\item{format}{Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')}
 
 \item{verbose}{TRUE or FALSE}
 
@@ -69,6 +122,12 @@ data.table or SummarizedExperiment
 }
 \description{
 Read diann
+}
+\details{
+Defaults for various Q value cutoffs corresppond to recommendations by the
+DIA-NN teen for DIA-NN v.2 (as of 03.2025). Of these, the reader of the
+legacy file format (flat tab seperated values, pre-DIA-NN v.2) only utilizes
+Lib.PG.Q.
 }
 \examples{
 # Read

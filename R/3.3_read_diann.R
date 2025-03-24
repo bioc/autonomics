@@ -152,13 +152,37 @@ uniprot2isoforms <- function(x){
 }
 
 #' @rdname read_diann_proteingroups
+#' @importFrom arrow read_parquet
 #' @export
 .read_diann_precursors <- function(
-    file, Lib.PG.Q = 0.01, verbose  = TRUE
-){
+    file,
+    Global.Q             = 0.01, 
+    Q                    = 0.01,
+    Global.PG.Q          = 0.01,
+    PG.Q                 = 0.05,
+    Global.Peptidoform.Q = 0.01,
+    Peptidoform.Q        = 0.01,
+    Lib.Q                = 0.01,
+    Lib.PG.Q             = 0.01,
+    Lib.Peptidoform.Q    = 0.01, 
+    format               = c("tsv", "parquet")[1],
+    verbose              = TRUE)
+{
 # Assert
-    assert_diann_report(file)
+    assert_is_fraction(Global.Q)
+    assert_is_fraction(Q)
+    assert_is_fraction(Global.PG.Q)
+    assert_is_fraction(PG.Q)
+    assert_is_fraction(Global.Peptidoform.Q)
+    assert_is_fraction(Peptidoform.Q)
+    assert_is_fraction(Lib.Q)
     assert_is_fraction(Lib.PG.Q)
+    assert_is_fraction(Lib.Peptidoform.Q)
+    assert_is_a_string(format)
+    switch(format,
+      'tsv'     = assert_diann_report(file),
+      'parquet' = assert_diann_parquet_report(file),
+      stop("Not implemented DIA-NN output format: ", format))
     assert_is_a_bool(verbose)
     iprecursor <- isoform    <- NULL
     log2maxlfq <- maxlfq     <- organism     <- pepcounts <- NULL
@@ -166,29 +190,67 @@ uniprot2isoforms <- function(x){
     run        <- top1       <- top3         <- total     <- NULL
     uniprot    <- NULL
 # Read
-    anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group', 'Precursor.Id',
-                 'Q.Value', 'Lib.PG.Q.Value', 'Stripped.Sequence')
-    numcols <- c('Precursor.Quantity', 'PG.Quantity', 'PG.MaxLFQ')
+    if (format == 'tsv')
+    {
+      anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
+                 'Precursor.Id', 'Q.Value', 'Lib.PG.Q.Value',
+                 'Stripped.Sequence')
+      numcols <- c('Precursor.Quantity', 'PG.Quantity', 'PG.MaxLFQ')
+    } else if (format == 'parquet')
+    {
+      anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
+                 'Precursor.Id', 'Global.Q.Value', 'Q.Value', 
+                 'Global.PG.Q.Value', 'PG.Q.Value',
+                 'Global.Peptidoform.Q.Value', 'Peptidoform.Q.Value',
+                 'Lib.Q.Value', 'Lib.PG.Q.Value', 'Lib.Peptidoform.Q.Value', 
+                 'Stripped.Sequence')
+      numcols <- c('Precursor.Quantity', 'PG.TopN', 'PG.MaxLFQ')
+    } else {
+      stop("Not implemented DIA-NN output format: ", format)
+    }
     cols <- c(anncols, numcols)
-    dt <- fread(file, select = cols)                  # 1977.16 but 1,35E+11
-    for (col in numcols){   dt[, (col) := stri_replace_first_fixed(get(col), ',', '.') ] 
-                            dt[, (col) := as.numeric(get(col))  ] }
+    if (format == 'tsv')
+    {
+      dt <- fread(file, select = cols)                  # 1977.16 but 1,35E+11
+      for (col in numcols){ dt[, (col) := stri_replace_first_fixed(get(col), ',', '.') ] 
+        dt[, (col) := as.numeric(get(col))  ] }
+    } else if (format == 'parquet') {
+      dt <- read_parquet(file, col_select = cols) %>%
+        as.data.table()
+    } else stop("Not implemented DIA-NN output format: ", format)
     setnames(dt, 'Run',                'run')
     setnames(dt, 'Genes',              'gene')
     setnames(dt, 'Protein.Names',      'protein')
     setnames(dt, 'Protein.Group',      'uniprot')
     setnames(dt, 'Precursor.Id',       'precursor')
+    if (format == 'parquet')
+    {
+      setnames(dt, 'Global.Q.Value',             'Global.Q')
+      setnames(dt, 'Q.Value',                    'Q')
+      setnames(dt, 'Global.PG.Q.Value',          'Global.PG.Q')
+      setnames(dt, 'PG.Q.Value',                 'PG.Q')
+      setnames(dt, 'Global.Peptidoform.Q.Value', 'Global.Peptidoform.Q')
+      setnames(dt, 'Peptidoform.Q.Value',        'Peptidoform.Q')
+      setnames(dt, 'Lib.Q.Value',                'Lib.Q')
+      # setnames(dt, 'Lib.PG.Q.Value',             'Lib.PG.Q')
+      setnames(dt, 'Lib.Peptidoform.Q.Value',    'Lib.Peptidoform.Q')
+    }
     setnames(dt, 'Lib.PG.Q.Value',     'Lib.PG.Q')
     setnames(dt, 'Stripped.Sequence',  'sequence')
     setnames(dt, 'PG.MaxLFQ',          'maxlfq')
-    setnames(dt, 'PG.Quantity',        'intensity')
+    setnames(
+      dt,
+      switch(format,
+        'tsv'     = 'PG.Quantity',
+        'parquet' = 'PG.TopN',
+        stop("Not implemented DIA-NN output format: ", format)),
+      'intensity')
     setnames(dt, 'Precursor.Quantity', 'preintensity')
 # Filter
-    n0 <- length(unique(dt$uniprot))
-    q <- Lib.PG.Q
-    dt %<>% extract(Lib.PG.Q < q)
-    n1 <- length(unique(dt$uniprot))
-    if (verbose)  message('\t\tRetain ', n1, '/', n0, ' proteingroups: Lib.PG.Q < ', Lib.PG.Q)
+    if (format == 'parquet') dt %<>% .filter_dianne_proteingroups(
+      Global.Q, Q, Global.PG.Q, PG.Q, Global.Peptidoform.Q, Peptidoform.Q,
+      Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
+    dt %<>% .filter_dianne_proteingroups(Lib.PG.Q)
 # Order precursors
     dt <- dt[, .SD[rev(order(preintensity))], by = c('uniprot', 'run')]
     dt[, iprecursor := seq_len(.N),                      by = c('uniprot', 'run')]
@@ -230,12 +292,51 @@ uniprot2isoforms <- function(x){
     dt[]
 }
 
+#' @importFrom rlang dots_list
+.filter_dianne_proteingroups <- function(dt, ..., verbose = TRUE)
+{
+  filters <- dots_list(...,  .named = TRUE)
+  assert_is_subset(c(names(filters), 'uniprot'), colnames(dt))
+  for (fl in names(filters))
+  {
+    n0 <- length(unique(dt$uniprot))
+    dt %<>% extract(dt[[fl]] < filters[[fl]])
+    n1 <- length(unique(dt$uniprot))
+    if (verbose)  message(
+      '\t\tRetain ', n1, '/', n0, ' proteingroups: ', fl, ' < ', filters[[fl]])
+  }
+  dt
+}
+
 #' @rdname read_diann_proteingroups
 #' @export
 .read_diann_proteingroups <- function(
-    file, Lib.PG.Q = 0.01
+    file,
+    format               = c("tsv", "parquet")[1],
+    Global.Q             = 0.01, 
+    Q                    = 0.01,
+    Global.PG.Q          = 0.01,
+    PG.Q                 = 0.05,
+    Global.Peptidoform.Q = 0.01,
+    Peptidoform.Q        = 0.01,
+    Lib.Q                = 0.01,
+    Lib.PG.Q             = 0.01,
+    Lib.Peptidoform.Q    = 0.01,
+    verbose              = TRUE
 ){
-    dt <- .read_diann_precursors(file, Lib.PG.Q = Lib.PG.Q)
+    dt <- .read_diann_precursors(
+      file,
+      format               = format,
+      Global.Q             = Global.Q, 
+      Q                    = Q,
+      Global.PG.Q          = Global.PG.Q,
+      PG.Q                 = PG.Q,
+      Global.Peptidoform.Q = Global.Peptidoform.Q,
+      Peptidoform.Q        = Peptidoform.Q,
+      Lib.Q                = Lib.Q,
+      Lib.PG.Q             = Lib.PG.Q,
+      Lib.Peptidoform.Q    = Lib.Peptidoform.Q,
+      verbose              = verbose)
     dt[, sequence := sequence[1], by = c('uniprot', 'run')]
     cols <- c('gene', 'feature_id', 'protein', 'organism', 'uniprot', 'run',
               'pepcounts', 'precounts', 'sequence',
@@ -247,27 +348,39 @@ uniprot2isoforms <- function(x){
     dt
 }
 
-
-
 #' Read diann
 #'
-#' @param file               'report.tsv' file
-#' @param Lib.PG.Q            Lib.PG.Q cutoff
-#' @param simplify_snames     TRUE or FALSE: simplify (drop common parts in) samplenames ?
-#' @param rm_contaminants     TRUE or FALSE: rm contaminants ?
-#' @param impute              TRUE or FALSE: impute group-specific NA values ?
-#' @param plot                TRUE or FALSE
-#' @param pca                 TRUE or FALSE: run pca ?
-#' @param pls                 TRUE or FALSE: run pls ?
-#' @param fit                 model engine: 'limma', 'lm', 'lme(r)', 'wilcoxon' or NULL
-#' @param formula             model formula
-#' @param block               model blockvar: string or NULL
-#' @param coefs               model coefficients    of interest: character vector or NULL
-#' @param contrasts           coefficient contrasts of interest: character vector or NULL
-#' @param palette             color palette: named string vector
-#' @param verbose             TRUE or FALSE
-#' @param ...                 used to maintain deprecated functions
+#' @param file                    DIA-NN report file
+#' @param format                  Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')
+#' @param Q                       Q cutoff
+#' @param Lib.Q                   Lib.Q cutoff
+#' @param Global.Q                Global.Q cutoff
+#' @param Lib.PG.Q                Lib.PG.Q cutoff
+#' @param Global.PG.Q             Global.PG.Q cutoff
+#' @param Lib.Peptidoform.Q       Lib.Peptidoform.Q cutoff
+#' @param Global.Peptidoform.Q    Global.Peptidoform.Q cutoff
+#' @param Peptidoform.Q           Peptidoform.Q cutoff
+#' @param PG.Q                    PG.Q cutoff
+#' @param simplify_snames         TRUE or FALSE: simplify (drop common parts in) samplenames ?
+#' @param rm_contaminants         TRUE or FALSE: rm contaminants ?
+#' @param impute                  TRUE or FALSE: impute group-specific NA values ?
+#' @param plot                    TRUE or FALSE
+#' @param pca                     TRUE or FALSE: run pca ?
+#' @param pls                     TRUE or FALSE: run pls ?
+#' @param fit                     model engine: 'limma', 'lm', 'lme(r)', 'wilcoxon' or NULL
+#' @param formula                 model formula
+#' @param block                   model blockvar: string or NULL
+#' @param coefs                   model coefficients    of interest: character vector or NULL
+#' @param contrasts               coefficient contrasts of interest: character vector or NULL
+#' @param palette                 color palette: named string vector
+#' @param verbose                 TRUE or FALSE
+#' @param ...                     used to maintain deprecated functions
 #' @return  data.table or SummarizedExperiment
+#' @details
+#' Defaults for various Q value cutoffs corresppond to recommendations by the
+#' DIA-NN teen for DIA-NN v.2 (as of 03.2025). Of these, the reader of the
+#' legacy file format (flat tab seperated values, pre-DIA-NN v.2) only utilizes
+#' Lib.PG.Q.
 #' @examples
 #' # Read
 #'    file <- download_data('dilution.report.tsv')
@@ -287,24 +400,46 @@ uniprot2isoforms <- function(x){
 #'     PR[intensity != top1][feature_id == unique(feature_id)[3]][run == unique(run)[1]][1:3, 1:6]
 #' @export
 read_diann_proteingroups <- function(
-               file, 
-           Lib.PG.Q = 0.01,
-    simplify_snames = TRUE,
-    rm_contaminants = TRUE, 
-             impute = FALSE, 
-               plot = FALSE, 
-                pca = plot, 
-                pls = plot, 
-                fit = if (plot) 'limma' else NULL,
-            formula = as.formula('~ subgroup'),
-              block = NULL,
-              coefs = NULL,
-          contrasts = NULL,
-            palette = NULL,
-            verbose = TRUE
+                    file,
+                  format = .guess_diann_format(file),
+                Global.Q = 0.01, 
+                       Q = 0.01,
+             Global.PG.Q = 0.01,
+                    PG.Q = 0.05,
+    Global.Peptidoform.Q = 0.01,
+           Peptidoform.Q = 0.01,
+                   Lib.Q = 0.01,
+                Lib.PG.Q = 0.01,
+       Lib.Peptidoform.Q = 0.01,
+         simplify_snames = TRUE,
+         rm_contaminants = TRUE, 
+                  impute = FALSE, 
+                    plot = FALSE, 
+                     pca = plot, 
+                     pls = plot, 
+                     fit = if (plot) 'limma' else NULL,
+                 formula = as.formula('~ subgroup'),
+                   block = NULL,
+                   coefs = NULL,
+               contrasts = NULL,
+                 palette = NULL,
+                 verbose = TRUE
 ){
 # SumExp
-    dt <- .read_diann_proteingroups(file, Lib.PG.Q = Lib.PG.Q)
+    dt <- .read_diann_proteingroups(
+      file,
+      format               = format,
+      Global.Q             = Global.Q, 
+      Q                    = Q,
+      Global.PG.Q          = Global.PG.Q,
+      PG.Q                 = PG.Q,
+      Global.Peptidoform.Q = Global.Peptidoform.Q,
+      Peptidoform.Q        = Peptidoform.Q,
+      Lib.Q                = Lib.Q,
+      Lib.PG.Q             = Lib.PG.Q,
+      Lib.Peptidoform.Q    = Lib.Peptidoform.Q,
+      verbose              = verbose)
+    assert_is_identical_to_true(length(unique(dt$run)) > 1) # SumExp generation fails on single run case
     object <- SummarizedExperiment(list(
         log2maxlfq    = dcast_diann(dt, 'maxlfq',    fill = NA, log2 = TRUE),
         log2intensity = dcast_diann(dt, 'intensity', fill = NA, log2 = TRUE),
@@ -312,7 +447,7 @@ read_diann_proteingroups <- function(
         log2top3      = dcast_diann(dt, 'top3',      fill = NA, log2 = TRUE),
         log2total     = dcast_diann(dt, 'total',     fill = NA             ),
         pepcounts     = dcast_diann(dt, 'pepcounts', fill = 0              ),
-        precounts     = dcast_diann(dt, 'precounts', fill = 0              ), 
+        precounts     = dcast_diann(dt, 'precounts', fill = 0              ),
         sequence      = dcast_diann(dt, 'sequence',  fill = '')))
     sdt(object)$sample_id  <- snames(object)
     fdt(object)$feature_id <- fnames(object)
@@ -343,6 +478,34 @@ read_diann_proteingroups <- function(
     object
 }
 
+.guess_diann_format <- function (x)
+{
+  assert_is_a_string(x)
+  assert_all_are_existing_files(x)
+  
+  parquet_magic <- charToRaw("PAR1")
+  con_bin <- file(x, "rb")
+  on.exit(close(con_bin), add = TRUE)
+  header <- readBin(con_bin, what = "raw", n = 4)
+  
+  if (identical(header, parquet_magic)) {
+    seek(con_bin, where = -4, origin = "end")
+    footer <- readBin(con_bin, what = "raw", n = 4)
+    if (identical(footer, parquet_magic)) return("parquet")
+  }
+  
+  con_text <- file(x, "r")
+  lines <- readLines(con_text, n = 5)
+  close(con_text)
+  if (length(lines) == 0) stop("File empty or cannot be read: ", x)
+
+  tc <- textConnection(lines)
+  tab_counts <- count.fields(tc, sep = "\t")
+  close(tc)
+  if (all(tab_counts >= 2) && length(unique(tab_counts)) == 1) return("tsv")
+  
+  stop("Not a file in a supported DIA-NN format: ", x)
+}
 
 #' @rdname read_diann_proteingroups
 #' @export
