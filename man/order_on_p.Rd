@@ -59,7 +59,7 @@ Order on p
     object \%<>\% fit_limma()
     order_on_p(object)
 # Survival
-    object <- survival_example()
+    object <- survobj()
     object \%<>\% fit_survival()
     order_on_p(object)
 }

@@ -25,30 +25,6 @@ assert_character_matrix <- function(x, .xname = get_name_in_parent(x)){
 }
 
 
-# This assertion was written to ensure that .survdiff is fed only 
-# binned data. But then it was realized that the required of survdiff 
-# is stricter. Binned data needs to be factorized to ensure proper factor
-# ordering, which in turns ensure intuitive coefficient interpretation.
-# So rather than this assertion, character columns are now explicitly factorized
-# before sending them to .survdiff, .logrank, or .coxph.
-# Is binned assay
-# @examples
-# object <- survival_example()
-# is_binned_assay(assays(object)[[1]])
-# @return TRUE or false
-# @export
-#is_binned_assay <- function(x, .xname = get_name_in_parent(x)){
-#    if (length(unique(c(x))) >= ncol(x))  return(false("%s is not a binned assay", .xname))
-#    return(TRUE)
-#}
-
-# @rdname is_binned_assay
-# @export
-#assert_binned_assay <- function(x, .xname = get_name_in_parent(x)){
-#    assert_engine(is_binned_assay, x, .xname = get_name_in_parent(x))    
-#}
-
-
 
 #==============================================================================
 # has/contains
