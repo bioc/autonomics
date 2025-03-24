@@ -9,6 +9,11 @@ is_character_matrix(x, .xname = get_name_in_parent(x))
 
 assert_character_matrix(x, .xname = get_name_in_parent(x))
 }
+\arguments{
+\item{x}{matrix}
+
+\item{.xname}{string}
+}
 \value{
 TRUE or false
 }

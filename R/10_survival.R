@@ -65,7 +65,7 @@ survobj <- function(){
                             rnorm(10,6),
                             rnorm(10,6))
     )
-    object <- SummarizedExperiment::SummarizedExperiment(list(exprs = mat))
+    object <- SummarizedExperiment(list(exprs = mat))
     fdt(object)$feature_id <- fnames(object)
     object$sample_id <- snames(object)  <- c(sprintf('senior.m.%d', 0:9),  
                                              sprintf('senior.f.%d', 0:9), 
@@ -94,19 +94,16 @@ survobj <- function(){
 
 
 #' Fit onefeature survival 
-#' @param timetoevent  numeric (time to event)
-#' @param event        numeric (1=event, 0=not)
-#' @param xvalues      numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)
-#' @param xname        string: used in fvar
-#' @param drop         TRUE or FALSE : drop xname in output fvar ?
+#' @param sd       data.table
+#' @param formula  model formula
 #' @examples
 #' # Prepare
 #'      sd <- sumexp_to_longdt(survobj()[1,], svars = c('timetoevent', 'event'), assay = 'exprs2levels')
 #'      sd[ , value := factor(value)]
 #' # Survival
-#'        .coxph(sd, Surv(timetoevent, event) ~ value)
-#'     .survdiff(sd, Surv(timetoevent, event) ~ value)
-#'      .logrank(sd, Surv(timetoevent, event) ~ value)
+#'        .coxph(sd, survival::Surv(timetoevent, event) ~ value)
+#'     .survdiff(sd, survival::Surv(timetoevent, event) ~ value)
+#'      .logrank(sd, survival::Surv(timetoevent, event) ~ value)
 #' @rdname dot-coxph
 #' @export
 .coxph <- function(sd, formula){
@@ -134,7 +131,9 @@ survobj <- function(){
 #' @rdname dot-coxph
 #' @export
 .survdiff <- function(sd, formula){
-    xvar <- labels(terms(formula))
+    
+    timetoevent <- NULL
+    xvar <- labels(stats::terms(formula))
     xvalues <- sd[[xvar]]
     xlevel1 <-     levels(xvalues)[1]
     xleveln <- rev(levels(xvalues))[1]
@@ -155,12 +154,13 @@ survobj <- function(){
 #' @rdname dot-coxph
 #' @export
 .logrank <- function(sd, formula){
-    xvar <- labels(terms(formula))
+    
+    timetoevent <- NULL
+    xvar <- labels(stats::terms(formula))
     xvalues <- sd[[xvar]]                                #   NOTE  The coin statistic is signed for twogroup comparisons 
     xlevel1 <-     levels(xvalues )[1]                        #   But unsigned for multigroup comparisons (which are anova like)
     xleveln <- rev(levels(xvalues))[1]                        #   But unsigned for multigroup comparisons (which are anova like)
             
-
     sd %<>% extract(get(xvar) %in% c(xlevel1, xleveln))         
     survout <- suppressWarnings(coin::logrank_test(formula = formula, data = sd))
   meandiff <- sd[ , mean(timetoevent[get(xvar)==xleveln]) -
@@ -273,6 +273,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     assert_is_function(codingfun)
     assert_is_a_bool(verbose)
     if (engine == 'logrank')  if (!installed('coin'))  return(NULL)
+    event <- timetoevent <- NULL
     object %<>% filter_samples(!is.na(event) & !is.na(timetoevent))
 # Code
     survivalvars <- c('timetoevent', 'event')
@@ -333,7 +334,6 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' @param order         coefs to order plots
 #' @param stats         coefs to print stats for
 #' @param title         string
-#' @param subtitle      string
 #' @param dodge_height  number 
 #' @param file          filepath
 #' @return SummarizedExperiment/ggplot
@@ -455,6 +455,7 @@ prep_survival <- function(
     assert_is_subset(stats, autonomics::coefs(object, fit = engine))
     event <- timetoevent <- NULL      # svar
     curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
+    alive <- coef <- p <- NULL
 # Prepare
     object %<>% extract_coef_features(fit = engine, coefs = order, n = n)
     assayvar <- all.vars(formula) %>% intersect(assayNames(object))
@@ -529,6 +530,8 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
     if (!installed('ggtext'))   return(NULL) 
     if (!installed('ggstance')) return(NULL)
     if (is.infinite(n))  n <- nrow(object)
+    totObs <- totDead <- nalive <- nout <- label <- color <- facet <- NULL
+    timetoevent <- survival <- NULL
 # Plot
     plotdt <- prep_survival(object = object, formula = formula, engine = engine, order = order, stats = stats, n = n)
     maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0

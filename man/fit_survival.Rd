@@ -98,8 +98,6 @@ plot_survival(
 \item{dodge_height}{number}
 
 \item{file}{filepath}
-
-\item{subtitle}{string}
 }
 \value{
 SummarizedExperiment/ggplot

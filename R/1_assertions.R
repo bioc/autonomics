@@ -1,6 +1,8 @@
 
 
 #' Is character matrix
+#' @param  x     matrix
+#' @param .xname string
 #' @examples
 #' object <- survival_example()
 #' object %<>% bin_assay()

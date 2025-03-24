@@ -13,15 +13,9 @@
 .logrank(sd, formula)
 }
 \arguments{
-\item{timetoevent}{numeric (time to event)}
+\item{sd}{data.table}
 
-\item{event}{numeric (1=event, 0=not)}
-
-\item{xvalues}{numeric (.coxph) or twolevel-factor (.survdiff, .logrank_test)}
-
-\item{xname}{string: used in fvar}
-
-\item{drop}{TRUE or FALSE : drop xname in output fvar ?}
+\item{formula}{model formula}
 }
 \description{
 Fit onefeature survival
@@ -31,7 +25,7 @@ Fit onefeature survival
      sd <- sumexp_to_longdt(survobj()[1,], svars = c('timetoevent', 'event'), assay = 'exprs2levels')
      sd[ , value := factor(value)]
 # Survival
-       .coxph(sd, Surv(timetoevent, event) ~ value)
-    .survdiff(sd, Surv(timetoevent, event) ~ value)
-     .logrank(sd, Surv(timetoevent, event) ~ value)
+       .coxph(sd, survival::Surv(timetoevent, event) ~ value)
+    .survdiff(sd, survival::Surv(timetoevent, event) ~ value)
+     .logrank(sd, survival::Surv(timetoevent, event) ~ value)
 }
