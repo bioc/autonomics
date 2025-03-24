@@ -860,7 +860,8 @@ coefs.NULL <- function(object, ...)  NULL
     testmat <- matrix(0, nrow(issig), ncol(issig), dimnames=dimnames(issig))
     testmat[isdown] <- -1
     testmat[isup]   <-  1
-    col <- modelvar(object, fit = fit, coef = contrast, quantity = quantity)
+    col <- sprintf('%s~%s', rep(contrast, times = length(fit)), 
+                            rep(fit, each = length(contrast)))
     testmat[, col, drop = FALSE]
 }
 
