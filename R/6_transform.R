@@ -508,6 +508,7 @@ plot_transform_densities <- function(
       message("`BiocManager::install('ggridges')`. Then re-run.")
       return(NULL)
     }
+    . <- transfo <- NULL
     assert_is_valid_sumexp(object)
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
@@ -538,6 +539,7 @@ plot_transform_violins <- function(
       show.legend = FALSE),
     verbose = TRUE
 ){
+    . <- transfo <- NULL
     assert_is_valid_sumexp(object)
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
@@ -587,7 +589,7 @@ plot_transform_biplots <- function(
     dims = 1:2, verbose = FALSE, color = subgroupvar, sep = FITSEP, ...,
     fixed = list(shape = 15, size = 3), nrow = 2, ncol = NULL
 ){
-    . <- NULL
+    . <- transfo <- NULL
     assert_is_valid_sumexp(object)
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(

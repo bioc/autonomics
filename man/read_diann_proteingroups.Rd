@@ -79,6 +79,8 @@ read_diann(...)
 
 \item{Global.Peptidoform.Q}{Global.Peptidoform.Q cutoff}
 
+\item{Peptidoform.Q}{Peptidoform.Q cutoff}
+
 \item{Lib.Q}{Lib.Q cutoff}
 
 \item{Lib.PG.Q}{Lib.PG.Q cutoff}

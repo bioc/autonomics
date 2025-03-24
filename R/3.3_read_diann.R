@@ -359,6 +359,7 @@ uniprot2isoforms <- function(x){
 #' @param Global.PG.Q             Global.PG.Q cutoff
 #' @param Lib.Peptidoform.Q       Lib.Peptidoform.Q cutoff
 #' @param Global.Peptidoform.Q    Global.Peptidoform.Q cutoff
+#' @param Peptidoform.Q           Peptidoform.Q cutoff
 #' @param PG.Q                    PG.Q cutoff
 #' @param simplify_snames         TRUE or FALSE: simplify (drop common parts in) samplenames ?
 #' @param rm_contaminants         TRUE or FALSE: rm contaminants ?
