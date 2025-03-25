@@ -396,7 +396,7 @@ parse_strep_contaminants <- function(hdrs){
 #' @examples
 #' save_contaminant_hdrs()
 #' @noRd
-save_contaminant_hdrs <- function(confile = download_contaminants(), verbose = TRUE){
+save_contaminant_hdrs <- function(confile = CONTAMINANTSURL, verbose = TRUE){
 # Assert
     if (  is.null(confile))  return(NULL)
     assert_are_identical(tools::file_ext(confile), 'fasta')
