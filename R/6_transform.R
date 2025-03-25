@@ -555,7 +555,9 @@ plot_transform_violins <- function(
 }
 
 #' @author Johannes Graumann
-.ldt_transforms <- function(object, transforms, subgroupvar, verbose = TRUE)
+.ldt_transforms <- function(
+    object,
+    transforms, subgroupvar, verbose = TRUE)
 {
   dt <- lapply(
     c('input', transforms),
@@ -569,6 +571,7 @@ plot_transform_violins <- function(
     }) %>%
     rbindlist()
   dt$transfo %<>% factor(unique(.))
+  dt$assay <- assayNames(object) %>% intersect(c(.[1], 'is_imputed'))
   dt
 }
 
