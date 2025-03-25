@@ -488,9 +488,39 @@ gglegend<-function(p){
     if (length(leg)==0)  grid::nullGrob()  else  tmp$grobs[[leg]]
 }
 
-
-# plot_transform_densities(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' Visually evaluate transformation effects
+#' 
+#' @param  object       SummarizedExperiment
+#' @param  subgroupvar  svar
+#' @param  transforms   character vector : transformations explored
+#' @param  method       string           : dimension reduction technique
+#' @param  by           svar or NULL
+#' @param  dims         numbers          : biplot dimensions
+#' @param  color        svar
+#' @param  sep          string
+#' @param  ...                           : further blotting parameters
+#' @param  fixed        list             : fixed  aesthetics
+#' @param  verbose      TRUE/FALSE       : message?
+#' @return ggplot2 object
 #' @author Johannes Graumann
+#' @rdname explore-transforms
+#' @examples
+#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
+#' object <- read_maxquant_proteingroups(file)
+#'
+#' # `vsn` implemented, but example data set to small
+#' transformations <- c(
+#'   'center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore')
+#'
+#' # object %>% plot_transform_densities(transforms = transformations) # Requires package ggridges
+#' object %>% plot_transform_violins(transforms = transformations)
+#' 
+#' object %>% plot_transform_biplots(
+#'   method  = 'pca', transforms = transformations, nrow = 2)
+#' object %>% plot_transform_biplots(
+#'   method  = 'pls', transforms = transformations, nrow = 2)
+#' @author Johannes Graumann
+#' @export
 plot_transform_densities <- function(
     object,
     subgroupvar = 'subgroup',
@@ -521,9 +551,9 @@ plot_transform_densities <- function(
       rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free")
 }
 
-
-# plot_transform_violins(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @rdname explore-transforms
 #' @author Johannes Graumann
+#' @export
 plot_transform_violins <- function(
     object,
     subgroupvar = 'subgroup',
@@ -575,17 +605,16 @@ plot_transform_violins <- function(
   dt
 }
 
-# file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
-# object <- read_maxquant_proteingroups(file)
-# plot_transform_biplots(object, transforms = c('center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore'))
+#' @rdname explore-transforms
 #' @author Johannes Graumann
+#' @export
 plot_transform_biplots <- function(
     object,
     subgroupvar = 'subgroup',
     transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     method = c('pca', 'pls')[1], by = 'sample_id',
     dims = 1:2, verbose = FALSE, color = subgroupvar, sep = FITSEP, ...,
-    fixed = list(shape = 15, size = 3), nrow = 2, ncol = NULL
+    fixed = list(shape = 15, size = 3)
 ){
     . <- transfo <- NULL
     assert_is_valid_sumexp(object)
@@ -627,5 +656,5 @@ plot_transform_biplots <- function(
       scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
       fixed = fixed)
     p + facet_wrap(
-      vars(transfo), nrow = nrow, ncol = ncol, scales = "free", ...)
+      vars(transfo), scales = "free", ...)
 }
