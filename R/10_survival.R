@@ -301,10 +301,20 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     if (engine == 'coxph')     fitres <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
     if (engine == 'survdiff')  fitres <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
     if (engine == 'logrank')   fitres <- dt[,  .logrank(.SD, twosideformula), by = 'feature_id']
-    
-    if (drop)   for (var in c(assayvar, samplevars)){  
-                    pat <- sprintf('%s(.+)', var)
-                    names(fitres) %<>% stri_replace_first_regex(pat, '$1')  }
+
+    if (drop){ # drop varname from non-numeric vars
+        anum <- assays(object)
+        snum <- sdt(object)[, samplevars, with = FALSE]
+        anum  %<>% vapply(is.not.numeric, logical(1))
+        snum %<>% vapply(is.not.numeric, logical(1))
+        anum <- names(anum)[anum]
+        snum <- names(snum)[snum]
+        anum %<>% intersect(assayvar)
+        snum %<>% intersect(samplevars)
+        for (var in c(anum, snum)){  
+            pat <- sprintf('%s(.+)', var)
+            names(fitres) %<>% stri_replace_first_regex(pat, '$1')  
+    }}
 # Merge    
     if (verbose)  message_df('                      %s', summarize_fit(fitres))
     #if ('expr' %in% all.vars(formula)){  object %<>% merge_fit(fitres)
@@ -314,6 +324,8 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 }
 
 
+is.not.numeric <- function(x)  !is.numeric(x)
+    
 
 #' Fit/Plot survival
 #' 
