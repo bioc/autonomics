@@ -29,7 +29,7 @@ plot_transform_violins(
 
 plot_transform_biplots(
   object,
-  assay = assayNames(object)[1],
+  assays = assayNames(object)[1],
   subgroupvar = "subgroup",
   transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
   method = c("pca", "pls")[1],
@@ -56,6 +56,8 @@ plot_transform_biplots(
 \item{fixed}{list             : fixed  aesthetics}
 
 \item{verbose}{TRUE/FALSE       : message?}
+
+\item{assays}{character vector : assay names to operate on}
 
 \item{method}{string           : dimension reduction technique}
 
@@ -90,6 +92,7 @@ object \%>\% plot_transform_biplots(
   method  = 'pls', transforms = transformations, nrow = 2)
   
 object[['replicate']] <- gsub('^.*\\\\.(.+)$', '\\\\1', object[['sample_id']])
+library(ggplot2)
 object \%>\%
   plot_transform_biplots(
   transforms = transformations, geom = geom_text, label = replicate)

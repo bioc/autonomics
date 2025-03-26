@@ -492,6 +492,7 @@ gglegend<-function(p){
 #' 
 #' @param  object       SummarizedExperiment
 #' @param  assay        string           : assay name to operate on
+#' @param  assays       character vector : assay names to operate on
 #' @param  subgroupvar  svar
 #' @param  transforms   character vector : transformations explored
 #' @param  method       string           : dimension reduction technique
@@ -522,6 +523,7 @@ gglegend<-function(p){
 #'   method  = 'pls', transforms = transformations, nrow = 2)
 #'   
 #' object[['replicate']] <- gsub('^.*\\.(.+)$', '\\1', object[['sample_id']])
+#' library(ggplot2)
 #' object %>%
 #'   plot_transform_biplots(
 #'   transforms = transformations, geom = geom_text, label = replicate)
@@ -631,7 +633,7 @@ plot_transform_violins <- function(
 #' @export
 plot_transform_biplots <- function(
     object,
-    assay       = assayNames(object)[1],
+    assays      = assayNames(object)[1],
     subgroupvar = 'subgroup',
     transforms  = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     method      = c('pca', 'pls')[1],
@@ -641,9 +643,9 @@ plot_transform_biplots <- function(
     color       = subgroupvar, sep = FITSEP, ...,
     fixed       = list(shape = 15, size = 3)
 ){
-    . <- transfo <- NULL
+    . <- assay <- annot <- transfo <- transfoannot <- NULL
     assert_is_valid_sumexp(object)
-    assert_scalar_subset(assay, assayNames(object))
+    assert_is_subset(assays, setdiff(assayNames(object), "imputed"))
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
       transforms,
@@ -661,30 +663,52 @@ plot_transform_biplots <- function(
     mthdhndl <- paste0(get(strelem), sep, method)
     
     scoredt <- lapply(
-      c('input', transforms),
-      function(tf){
+      assays,
+      function(as){
         tmpobj <- object
-        assays(tmpobj) <- assays(tmpobj)[
-          c(assay, setdiff(assayNames(tmpobj), assay))]
-        if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
-        tmpobj %<>% get(method)(dims = dims, verbose = verbose)
-        xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
-        yvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't2' ]])
-        tmpdt <- sdt(tmpobj)
-        tmpdt$transfo <- switch(
-          method,
-          pca = sprintf('%s : %d + %d %%', tf, xvariance, yvariance),
-          pls = sprintf('%s : %d %%',      tf, xvariance))
-        tmpdt
-      }) %>%
+        assays(tmpobj) <- assays(tmpobj)[c(as, setdiff(assayNames(tmpobj), as))]
+        test <- lapply(
+          c('input', transforms),
+          function(tf){
+            if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
+            tmpobj %<>% get(method)(dims = dims, verbose = verbose)
+            xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
+            yvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't2' ]])
+            tmpdt <- sdt(tmpobj)
+            tmpdt$transfoannot <- switch(
+              method,
+              pca = sprintf('%s : %d & %d%%', tf, xvariance, yvariance),
+              pls = sprintf('%s : %d%%',      tf, xvariance))
+            tmpdt$annot <- switch(
+              method,
+              pca = sprintf('%d & %d%%', xvariance, yvariance),
+              pls = sprintf('%d%%',      xvariance))
+            tmpdt$transfo <- tf
+            tmpdt$assay <- as
+            tmpdt
+          }) %>%
+          rbindlist()
+      }
+    ) %>%
       rbindlist()
+    scoredt$assay %<>% factor(unique(.))
+    scoredt$annot %<>% factor(unique(.))
     scoredt$transfo %<>% factor(unique(.))
-
+    scoredt$transfoannot %<>% factor(unique(.))
+    
     p <- plot_data(
       scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
       fixed = fixed)
-    p + facet_wrap(
-      vars(transfo), scales = "free") +
-      labs(title = paste("Assay:", assay))
-
+    if (length(assays) > 1) p %<>%
+      add(
+        geom_text(
+          data = scoredt[, .SD[1], by = .(assay, transfo)],
+          aes(x = -Inf, y = Inf, label = annot),
+          color = "black",vjust = "inward", hjust = "inward")) %>%
+      add(
+        facet_grid(rows = vars(assay), cols = vars(transfo), scales = "free"))
+    else p %<>% add(
+      facet_wrap(vars(transfoannot), scales = "free")) %>%
+      add(labs(title = paste("Assay:", assays[1])))
+    p
 }
