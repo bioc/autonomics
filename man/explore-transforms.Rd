@@ -8,6 +8,7 @@
 \usage{
 plot_transform_densities(
   object,
+  assay = assayNames(object)[1],
   subgroupvar = "subgroup",
   transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
   ...,
@@ -17,6 +18,7 @@ plot_transform_densities(
 
 plot_transform_violins(
   object,
+  assay = assayNames(object)[1],
   subgroupvar = "subgroup",
   transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
   ...,
@@ -27,6 +29,7 @@ plot_transform_violins(
 
 plot_transform_biplots(
   object,
+  assay = assayNames(object)[1],
   subgroupvar = "subgroup",
   transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
   method = c("pca", "pls")[1],
@@ -41,6 +44,8 @@ plot_transform_biplots(
 }
 \arguments{
 \item{object}{SummarizedExperiment}
+
+\item{assay}{string           : assay name to operate on}
 
 \item{subgroupvar}{svar}
 

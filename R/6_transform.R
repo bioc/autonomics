@@ -491,6 +491,7 @@ gglegend<-function(p){
 #' Visually evaluate transformation effects
 #' 
 #' @param  object       SummarizedExperiment
+#' @param  assay        string           : assay name to operate on
 #' @param  subgroupvar  svar
 #' @param  transforms   character vector : transformations explored
 #' @param  method       string           : dimension reduction technique
@@ -523,11 +524,12 @@ gglegend<-function(p){
 #' @export
 plot_transform_densities <- function(
     object,
+    assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
-    transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
+    transforms  = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
     ...,
-    fixed = list(na.rm = TRUE, show.legend = FALSE, verbose = FALSE),
-    verbose = TRUE
+    fixed       = list(na.rm = TRUE, show.legend = FALSE, verbose = FALSE),
+    verbose     = TRUE
 ){
     if (!requireNamespace('ggridges', quietly = TRUE)){
       message("`BiocManager::install('ggridges')`. Then re-run.")
@@ -535,6 +537,7 @@ plot_transform_densities <- function(
     }
     . <- transfo <- NULL
     assert_is_valid_sumexp(object)
+    assert_scalar_subset(assay, assayNames(object))
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
       transforms,
@@ -543,12 +546,16 @@ plot_transform_densities <- function(
     assert_is_a_bool(verbose)
     value <- sample_id <- NULL
 
-    dt <- .ldt_transforms(object, transforms, subgroupvar, verbose = verbose)
+    dt <- .ldt_transforms(
+      object, assay, transforms, subgroupvar, verbose = verbose)
 
     plot_data(dt, ggridges::geom_density_ridges, x = value, y = sample_id,
             color = NULL, fill = !!sym(subgroupvar), ..., fixed = fixed) +
-    facet_grid(
-      rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free")
+      facet_grid(
+        rows   = vars(!!sym(subgroupvar)),
+        cols   = vars(transfo),
+        scales = "free") +
+      labs(title = paste("Assay:", assay))
 }
 
 #' @rdname explore-transforms
@@ -556,16 +563,18 @@ plot_transform_densities <- function(
 #' @export
 plot_transform_violins <- function(
     object,
+    assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
-    transforms = c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore'),
+    transforms  = c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore'),
     ...,
-    fixed = list(
+    fixed       = list(
       na.rm=TRUE, trim = FALSE, draw_quantiles = c(0.25, 0.5, 0.75),
       show.legend = FALSE),
-    verbose = TRUE
+    verbose     = TRUE
 ){
     . <- transfo <- NULL
     assert_is_valid_sumexp(object)
+    assert_scalar_subset(assay, assayNames(object))
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
       transforms,
@@ -575,33 +584,40 @@ plot_transform_violins <- function(
     
     value <- sample_id <- NULL
     
-    dt <- .ldt_transforms(object, transforms, subgroupvar, verbose = verbose)
+    dt <- .ldt_transforms(
+      object, assay, transforms, subgroupvar, verbose = verbose)
     
     plot_data(dt, geom_violin, x = sample_id, y = value, 
                          color = NULL, fill = !!sym(subgroupvar), ...,
                          fixed = fixed) +
-    facet_grid(rows = vars(!!sym(subgroupvar)), cols = vars(transfo), scales = "free") +
-    coord_flip()
+      facet_grid(
+        rows   = vars(!!sym(subgroupvar)),
+        cols   = vars(transfo),
+        scales = "free") +
+      coord_flip() +
+      labs(title = paste("Assay:", assay))
 }
 
 #' @author Johannes Graumann
 .ldt_transforms <- function(
     object,
-    transforms, subgroupvar, verbose = TRUE)
+    assay = assayNames(object)[1], transforms, subgroupvar, verbose = TRUE)
 {
   dt <- lapply(
     c('input', transforms),
     function(tf)
     {
       tmpdt <- switch(tf,
-        'input' = sumexp_to_longdt(object, svars = subgroupvar),
-        sumexp_to_longdt(get(tf)(object, verbose = verbose), svars = subgroupvar))
+        'input' = sumexp_to_longdt(object, assay = assay, svars = subgroupvar),
+        sumexp_to_longdt(
+          get(tf)(object, verbose = verbose),
+          assay = assay, svars = subgroupvar))
       tmpdt$transfo <- tf
       tmpdt
     }) %>%
     rbindlist()
   dt$transfo %<>% factor(unique(.))
-  dt$assay <- assayNames(object) %>% intersect(c(.[1], 'is_imputed'))
+  dt$assay <- assay
   dt
 }
 
@@ -610,14 +626,19 @@ plot_transform_violins <- function(
 #' @export
 plot_transform_biplots <- function(
     object,
+    assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
-    transforms = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
-    method = c('pca', 'pls')[1], by = 'sample_id',
-    dims = 1:2, verbose = FALSE, color = subgroupvar, sep = FITSEP, ...,
-    fixed = list(shape = 15, size = 3)
+    transforms  = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
+    method      = c('pca', 'pls')[1],
+    by          = 'sample_id',
+    dims        = 1:2,
+    verbose     = FALSE,
+    color       = subgroupvar, sep = FITSEP, ...,
+    fixed       = list(shape = 15, size = 3)
 ){
     . <- transfo <- NULL
     assert_is_valid_sumexp(object)
+    assert_scalar_subset(assay, assayNames(object))
     assert_scalar_subset(subgroupvar, svars(object))
     assert_is_subset(
       transforms,
@@ -638,6 +659,8 @@ plot_transform_biplots <- function(
       c('input', transforms),
       function(tf){
         tmpobj <- object
+        assays(object) <- assays(object)[
+          c(assay, setdiff(assayNames(object), assay))]
         if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
         tmpobj %<>% get(method)(dims = dims, verbose = verbose)
         xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
@@ -656,5 +679,7 @@ plot_transform_biplots <- function(
       scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
       fixed = fixed)
     p + facet_wrap(
-      vars(transfo), scales = "free", ...)
+      vars(transfo), scales = "free", ...) +
+      labs(title = paste("Assay:", assay))
+
 }
