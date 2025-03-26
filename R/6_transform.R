@@ -520,6 +520,11 @@ gglegend<-function(p){
 #'   method  = 'pca', transforms = transformations, nrow = 2)
 #' object %>% plot_transform_biplots(
 #'   method  = 'pls', transforms = transformations, nrow = 2)
+#'   
+#' object[['replicate']] <- gsub('^.*\\.(.+)$', '\\1', object[['sample_id']])
+#' object %>%
+#'   plot_transform_biplots(
+#'   transforms = transformations, geom = geom_text, label = replicate)
 #' @author Johannes Graumann
 #' @export
 plot_transform_densities <- function(
@@ -679,7 +684,7 @@ plot_transform_biplots <- function(
       scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
       fixed = fixed)
     p + facet_wrap(
-      vars(transfo), scales = "free", ...) +
+      vars(transfo), scales = "free") +
       labs(title = paste("Assay:", assay))
 
 }
