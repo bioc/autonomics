@@ -664,8 +664,8 @@ plot_transform_biplots <- function(
       c('input', transforms),
       function(tf){
         tmpobj <- object
-        assays(object) <- assays(object)[
-          c(assay, setdiff(assayNames(object), assay))]
+        assays(tmpobj) <- assays(tmpobj)[
+          c(assay, setdiff(assayNames(tmpobj), assay))]
         if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
         tmpobj %<>% get(method)(dims = dims, verbose = verbose)
         xvariance <- round(metadata(tmpobj)[[ mthdhndl ]][[ 't1' ]])
