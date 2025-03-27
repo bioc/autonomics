@@ -445,7 +445,7 @@ read_diann_proteingroups <- function(
         log2intensity = dcast_diann(dt, 'intensity', fill = NA, log2 = TRUE),
         log2top1      = dcast_diann(dt, 'top1',      fill = NA, log2 = TRUE),
         log2top3      = dcast_diann(dt, 'top3',      fill = NA, log2 = TRUE),
-        log2total     = dcast_diann(dt, 'total',     fill = NA             ),
+        log2total     = dcast_diann(dt, 'total',     fill = NA, log2 = TRUE),
         pepcounts     = dcast_diann(dt, 'pepcounts', fill = 0              ),
         precounts     = dcast_diann(dt, 'precounts', fill = 0              ),
         sequence      = dcast_diann(dt, 'sequence',  fill = '')))
