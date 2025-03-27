@@ -4,6 +4,7 @@
 \alias{plot_transform_densities}
 \alias{plot_transform_violins}
 \alias{plot_transform_biplots}
+\alias{plot_transform_assay_biplots}
 \title{Visually evaluate transformation effects}
 \usage{
 plot_transform_densities(
@@ -28,6 +29,21 @@ plot_transform_violins(
 )
 
 plot_transform_biplots(
+  object,
+  assay = assayNames(object)[1],
+  subgroupvar = "subgroup",
+  transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
+  method = c("pca", "pls")[1],
+  by = "sample_id",
+  dims = 1:2,
+  verbose = FALSE,
+  color = subgroupvar,
+  sep = FITSEP,
+  ...,
+  fixed = list(shape = 15, size = 3)
+)
+
+plot_transform_assay_biplots(
   object,
   assays = assayNames(object)[1],
   subgroupvar = "subgroup",
@@ -57,8 +73,6 @@ plot_transform_biplots(
 
 \item{verbose}{TRUE/FALSE       : message?}
 
-\item{assays}{character vector : assay names to operate on}
-
 \item{method}{string           : dimension reduction technique}
 
 \item{by}{svar or NULL}
@@ -68,6 +82,8 @@ plot_transform_biplots(
 \item{color}{svar}
 
 \item{sep}{string}
+
+\item{assays}{character vector : assay names to operate on}
 }
 \value{
 ggplot2 object
