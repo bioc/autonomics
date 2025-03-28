@@ -429,6 +429,7 @@ vsn <- function(object, verbose = FALSE, delog = TRUE){
     if (verbose) message('\t\tVSN')
     if (delog) object %<>% exp2()
     values(object) %<>% vsn::justvsn(verbose = FALSE)
+    if (delog) object %<>% log2()
     object
 }
 
