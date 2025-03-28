@@ -632,42 +632,34 @@ plot_transform_violins <- function(
 #' @author Johannes Graumann
 .ldt_transforms_dimred <- function(
     object, assay = assayNames(object)[1],
-    transforms, method, by, subgroupvar, dims = 1:2,
-    sep = FITSEP, verbose = TRUE)
+    transforms, method, methodname, dims = 1:2,
+    verbose = TRUE)
 {
     annot <- transfo <- transfoannot <- NULL
-    
-    # Define method-specific transformation element and metadata handle
-    transform_element <- switch(method, pca = 'by', pls = 'subgroupvar')
-    method_handle <- paste0(get(transform_element), sep, method)
     
     # Process each transformation and return a merged data.table
     result_data <- lapply(
       c('input', transforms),
-      function(tf) {
+      function(transform) {
         tmpobj <- object
         assays(tmpobj) <- assays(tmpobj)[
           c(assay, setdiff(assayNames(tmpobj), assay))]
         
         # Apply transformation if it's not the 'input' transformation
-        if (tf != 'input') tmpobj %<>% get(tf)(verbose = verbose)
-        tmpobj %<>% get(method)(dims = dims, verbose = verbose)
+        if (transform != 'input') tmpobj %<>% get(transform)(verbose = verbose)
         
-        # Extract variance values
-        x_variance <- round(metadata(tmpobj)[[method_handle]][['t1']])
-        y_variance <- round(metadata(tmpobj)[[method_handle]][['t2']])
+        # Perform requested dimensional reduction
+        tmpobj %<>% get(method)(dims = dims, verbose = verbose)
+        variances <- variances(tmpobj, method = method, dims = dims)
         
         # Process the transformed data
         transformed_data <- sdt(tmpobj)
-        transformed_data$transfoannot <- switch(
-          method,
-          pca = sprintf('%s : %d & %d%%', tf, x_variance, y_variance),
-          pls = sprintf('%s : %d%%', tf, x_variance))
-        transformed_data$annot <- switch(
-          method,
-          pca = sprintf('%d & %d%%', x_variance, y_variance),
-          pls = sprintf('%d%%', x_variance))
-        transformed_data$transfo = tf
+        transformed_data$variance.annot <- if (method %in% DIMREDUN) {
+          sprintf('%d & %d%%', variances[1], variances[2])
+        } else { sprintf('%d%%', variances[1]) }
+        transformed_data$variance.annot.ext <- paste0(
+          transform, ': ', transformed_data$variance.annot)
+        transformed_data$transform = transform
         transformed_data$assay = assay
         
         return(transformed_data)
@@ -676,13 +668,28 @@ plot_transform_violins <- function(
   
     # Convert relevant columns to factors with unique levels
     result_data$assay %<>% factor(unique(.))
-    result_data$annot %<>% factor(unique(.))
-    result_data$transfo %<>% factor(unique(.))
-    result_data$transfoannot %<>% factor(unique(.))
+    result_data$transform %<>% factor(unique(.))
+    result_data$variance.annot.ext %<>% factor(unique(.))
+    result_data$variance.annot %<>% factor(unique(.))
     
     return(result_data)
 }
 
+.dimredstrings <- function(object, method, dims)
+{
+    tmp_object <- get(method)(object, dims = dims, verbose = FALSE)
+    by         <- biplot_by(tmp_object, method)[1]
+    methodname <- methodname(method, by)
+    sep        <- guess_fitsep(fdt(tmp_object))
+    x          <- scorenames(method, by = by, dims = dims[[1]], sep = sep)
+    y          <- scorenames(method, by = by, dims = dims[[2]], sep = sep)
+    c(
+      by         = by,
+      methodname = methodname,
+      sep        = sep,
+      x          = x,
+      y          = y)
+}
 
 #' @rdname explore-transforms
 #' @author Johannes Graumann
@@ -691,38 +698,32 @@ plot_transform_biplots <- function(
     object,
     assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
-    transforms  = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
-    method      = c('pca', 'pls')[1],
-    by          = 'sample_id',
+    transforms  = TRANSFORMSTRICT,
+    method      = DIMREDENGINES[1], # 'pca'
     dims        = 1:2,
     verbose     = FALSE,
-    color       = subgroupvar, sep = FITSEP, ...,
+    color       = subgroupvar, ...,
     fixed       = list(shape = 15, size = 3)
 ){
     . <- transfoannot <- NULL
     assert_is_valid_sumexp(object)
     assert_scalar_subset(assay, setdiff(assayNames(object), "imputed"))
     assert_scalar_subset(subgroupvar, svars(object))
-    assert_is_subset(
-      transforms,
-      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm',
-        'vsn' , 'zscore'))
-    assert_scalar_subset(method, c('pca', 'pls'))
-    assert_are_same_length(dims, 1:2)
+    assert_is_subset(transforms, TRANSFORMENGINES)
+    assert_scalar_subset(method, DIMREDENGINES)
     assert_is_numeric(dims)
+    assert_are_same_length(dims, numeric(2))
     assert_is_a_bool(verbose)
-    assert_is_a_string(sep)
-    
+
+    drstrings <- .dimredstrings(object, method, dims)
+
     scoredt <- .ldt_transforms_dimred(
-      object, assay, transforms, method, by, subgroupvar, dims, sep, verbose)
+      object, assay, transforms, method, drstrings['methodname'], dims, verbose)
     
-    strelem <- switch(method, pca = 'by', pls = 'subgroupvar')
-    xylabs <- paste0('t', sep, get(strelem), sep, method, dims)
-    xlab <- xylabs[1]; ylab <- xylabs[2]
     plot_data(
-      scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
+      scoredt, x = !!sym(drstrings['x']), y = !!sym(drstrings['y']), color = !!sym(color), ...,
       fixed = fixed) +
-      facet_wrap(vars(transfoannot), scales = "free") +
+      facet_wrap(vars(variance.annot.ext), scales = "free") +
       labs(title = paste("Assay:", assay))
 }
 
@@ -781,3 +782,16 @@ plot_transform_assay_biplots <- function(
         color = "black",vjust = "inward", hjust = "inward") +
       facet_grid(rows = vars(assay), cols = vars(transfo), scales = "free")
 }
+
+#' Data Transformation Methods
+#' @details  \itemize{
+#'     \item \code{TRANSFORMENGINES: c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm', 'vsn', 'zscore')}
+#'     \item \code{TRANSFORMSTRICT:  c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore')}
+#' }
+#' @export
+TRANSFORMENGINES <- c('center', 'center_mean', 'center_median', 'invnorm',
+                      'quantnorm', 'vsn', 'zscore')
+
+#' @rdname TRANSFORMENGINES
+#' @export
+TRANSFORMSTRICT <- c('center', 'invnorm', 'quantnorm', 'vsn', 'zscore')
