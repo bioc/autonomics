@@ -691,7 +691,6 @@ plot_subgroup_violins <- function(
 #                   .extract_fdr_features
 #                   .extract_effectsize_features
 #                       ..extract_statistic_features
-#                   .extract_sign_features
 #                   .extract_n_features
 #
 #==============================================================================
@@ -820,37 +819,6 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
                                   verbose = verbose )
 }
 
-#' @rdname extract_coef_features
-#' @export
-.extract_sign_features <- function(
-       object, 
-        coefs, 
-         sign, 
-          fit = fits(object)[1], 
-     combiner = '|',
-     features = NULL,
-      verbose = TRUE
-){
-# Assert
-    assert_is_valid_sumexp(object)
-    assert_is_subset(sign, c(-1, +1))
-    if (is.null(fit))    return(object)
-    if (is.null(coefs))  return(object)
-# Filter
-    x <- tmat(object, fit = fit, coef = coefs)
-    x[is.na(x)] <- 0
-    idx <- unname(apply(sign(x), 1, function(y)  Reduce(get(combiner), sign(y) %in% sign) ))
-    if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
-# Return
-    n0 <- length(idx)
-    n1 <- sum(idx, na.rm = TRUE)
-    if (verbose & n1<n0){
-        combiner <- paste0(' ', combiner, ' ')
-        cmessage('\t\t\tRetain %d/%d features: sign(%s) %%in%% c(%s)', 
-            n1, n0, paste0(coefs, collapse = combiner), paste0(sign,  collapse = ','))
-    }
-    object[idx, ]
-}
 
 #' Order on p 
 #' @param object      SummarizedExperiment
@@ -1023,7 +991,6 @@ order_on_effect <- function(
 #'     object %<>% .extract_p_features(         coefs = 't1-t0', p = 0.05)
 #'     object %<>% .extract_fdr_features(       coefs = 't1-t0', fdr = 0.05)
 #'     object %<>% .extract_effectsize_features(coefs = 't1-t0', effectsize = 1)
-#'     object %<>% .extract_sign_features(      coefs = 't1-t0', sign = -1)
 #'     object %<>% .extract_n_features(         coefs = 't1-t0', n = 1)
 #'     object <- object0
 #'     object %<>%  extract_coef_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
@@ -1032,7 +999,6 @@ order_on_effect <- function(
 #'     object %<>% .extract_p_features(         coefs = c('t1-t0', 't2-t0'), p = 0.05)
 #'     object %<>% .extract_fdr_features(       coefs = c('t1-t0', 't2-t0'), fdr = 0.01)
 #'     object %<>% .extract_effectsize_features(coefs = c('t1-t0', 't2-t0'), effectsize = 1)
-#'     object %<>% .extract_sign_features(      coefs = c('t1-t0', 't2-t0'), sign = -1)
 #'     object %<>% .extract_n_features(         coefs = c('t1-t0', 't2-t0'), n = 1)
 #'     object <- object0
 #'     object %<>%  extract_coef_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)

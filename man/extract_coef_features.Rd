@@ -4,7 +4,6 @@
 \alias{.extract_p_features}
 \alias{.extract_fdr_features}
 \alias{.extract_effectsize_features}
-\alias{.extract_sign_features}
 \alias{.extract_n_features}
 \alias{extract_coef_features}
 \title{Extract coefficient features}
@@ -34,16 +33,6 @@
   coefs,
   effectsize = 1,
   fit = fits(object),
-  combiner = "|",
-  features = NULL,
-  verbose = TRUE
-)
-
-.extract_sign_features(
-  object,
-  coefs,
-  sign,
-  fit = fits(object)[1],
   combiner = "|",
   features = NULL,
   verbose = TRUE
@@ -93,11 +82,11 @@ extract_coef_features(
 
 \item{effectsize}{effectsize threshold}
 
-\item{sign}{effect sign}
-
 \item{n}{number of top features (Inf means all)}
 
 \item{decreasing}{TRUE or FALSE}
+
+\item{sign}{effect sign}
 }
 \value{
 SummarizedExperiment
@@ -116,7 +105,6 @@ Extract coefficient features
     object \%<>\% .extract_p_features(         coefs = 't1-t0', p = 0.05)
     object \%<>\% .extract_fdr_features(       coefs = 't1-t0', fdr = 0.05)
     object \%<>\% .extract_effectsize_features(coefs = 't1-t0', effectsize = 1)
-    object \%<>\% .extract_sign_features(      coefs = 't1-t0', sign = -1)
     object \%<>\% .extract_n_features(         coefs = 't1-t0', n = 1)
     object <- object0
     object \%<>\%  extract_coef_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
@@ -125,7 +113,6 @@ Extract coefficient features
     object \%<>\% .extract_p_features(         coefs = c('t1-t0', 't2-t0'), p = 0.05)
     object \%<>\% .extract_fdr_features(       coefs = c('t1-t0', 't2-t0'), fdr = 0.01)
     object \%<>\% .extract_effectsize_features(coefs = c('t1-t0', 't2-t0'), effectsize = 1)
-    object \%<>\% .extract_sign_features(      coefs = c('t1-t0', 't2-t0'), sign = -1)
     object \%<>\% .extract_n_features(         coefs = c('t1-t0', 't2-t0'), n = 1)
     object <- object0
     object \%<>\%  extract_coef_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
