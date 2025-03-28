@@ -705,6 +705,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
      statistic, 
       comparer, 
      threshold, 
+      na.value,
            fit = fits(object)[1], 
       combiner = '|', 
       features = features,
@@ -715,7 +716,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     if (is.null(fit))   return(object)
     if (is.null(coefs)) return(object)
     assert_scalar_subset(statistic, c('p', 'fdr', 'effect', 'effectsize'))
-    assert_scalar_subset(comparer,  c('<', '>', '=='))
+    assert_scalar_subset(comparer,  c('<=', '>=', '=='))
     assert_is_a_number(threshold)
     assert_is_subset(fit,                fits(object))
     assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
@@ -725,8 +726,8 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     fun <- getFromNamespace(sprintf('%smat', statistic), 'autonomics')
     x <- fun(object, fit = fit, coef = coefs)
     if (is.null(x))  return(object)
+    x[is.na(x)] <- na.value
     idx <- get(comparer)(x, threshold)
-    idx[is.na(idx)] <- FALSE
     fun <- function(y) Reduce(get(combiner), y)
     idx %<>% apply(1, fun)
     idx %<>% unname()        # features to include no matter what
@@ -759,8 +760,9 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
       ..extract_statistic_features( object = object,        
                                      coefs = coefs,
                                  statistic = 'p',
-                                  comparer = '<',   
+                                  comparer = '<=', # not `<` otherwise p=1 features dropped
                                  threshold = p,
+                                  na.value = 1,
                                        fit = fit,
                                   combiner = combiner,
                                   features = features,
@@ -783,8 +785,9 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     ..extract_statistic_features(  object = object,
                                     coefs = coefs,
                                 statistic = 'fdr',
-                                 comparer = '<',
+                                 comparer = '<=',
                                 threshold = fdr,
+                                 na.value = 1,
                                       fit = fit,
                                  combiner = combiner,
                                  features = features,
@@ -808,8 +811,9 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     ..extract_statistic_features(  object = object,
                                     coefs = coefs,
                                 statistic = 'effectsize',
-                                 comparer = '>',
+                                 comparer = '>=',
                                 threshold = effectsize,
+                                 na.value = 0,
                                       fit = fit,
                                  combiner = combiner,
                                  features = features,
@@ -834,6 +838,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     if (is.null(coefs))  return(object)
 # Filter
     x <- tmat(object, fit = fit, coef = coefs)
+    x[is.na(x)] <- 0
     idx <- unname(apply(sign(x), 1, function(y)  Reduce(get(combiner), sign(y) %in% sign) ))
     if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
 # Return
@@ -1054,7 +1059,6 @@ extract_coef_features <- function(
     object <- do.call(       .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
     object <- do.call(                  order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
     object <- do.call(.extract_effectsize_features, c(args, list(object = object, features = features, effectsize = effectsize )))
-    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign       )))
     if (!is.infinite(n)){
     object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n          )))
     }
