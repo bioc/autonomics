@@ -889,6 +889,7 @@ order_on_t <- function(
     assert_is_a_bool(verbose)
 # Order    
     tmat <- autonomics::tmat( object, fit = fit, coef = coefs)
+    tmat[is.na(tmat)] <- 0
     if (is.null(tmat))  return(object)
     if (verbose)   cmessage("%sorderby %s %s tvalue", spaces(24),
                             paste0(coefs, collapse = ', '),
