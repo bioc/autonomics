@@ -346,7 +346,6 @@ is.not.numeric <- function(x)  !is.numeric(x)
 #' @param order         coefs to order plots
 #' @param stats         coefs to print stats for
 #' @param title         string
-#' @param dodge_height  number 
 #' @param file          filepath
 #' @return SummarizedExperiment/ggplot
 #' @examples
@@ -530,7 +529,7 @@ plot_survival <- function(
        order = autonomics::coefs(object, fit = engine)[1],
        stats = autonomics::coefs(object, fit = engine),
        title = sprintf('%s ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
-dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
+#dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
       height = 7,
@@ -580,8 +579,8 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
                                             y = survival,              
                                         group = interaction(!!!groupsyms),  # !!! for syms
                                         color = !!colorsym,                 #  !! for sym
-                                     linetype = !!linetypesym ), 
-                           position = ggstance::position_dodgev(dodge_height))
+                                     linetype = !!linetypesym )) #, 
+                           #position = ggstance::position_dodgev(dodge_height))   # dodging slows code
                             #+ 
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 

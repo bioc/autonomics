@@ -51,7 +51,6 @@ plot_survival(
   order = autonomics::coefs(object, fit = engine)[1],
   stats = autonomics::coefs(object, fit = engine),
   title = sprintf("\%s ~ \%s", engine, formula2str(formula) \%>\% substr(2, nchar(.))),
-  dodge_height = 0,
   file = NULL,
   width = 7,
   height = 7,
@@ -94,8 +93,6 @@ plot_survival(
 \item{stats}{coefs to print stats for}
 
 \item{title}{string}
-
-\item{dodge_height}{number}
 
 \item{file}{filepath}
 }
