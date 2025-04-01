@@ -390,8 +390,6 @@ all.non.numeric <- function(object, formula){
 #'       fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
 #'       tmpdir <- tempdir()
 #'       fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
-#'       
-#' 
 #' @export
 fit_survival <- function(
         object, 
@@ -405,11 +403,11 @@ fit_survival <- function(
          order = coefs(object, fit = engine)[1],
          stats = coefs(object, fit = engine),
          dodge = 0,
-         width = 7,
-        height = 7,
              n = if (svar_formula(formula, object)) 1  else min(nrow(object),2), # Inf works
          n_col = n %>% min(nrow(object)) %>% sqrt() %>% ceiling() %>% min(4),
          n_row = n %>% min(ncol(object)) %>% sqrt() %>% floor()   %>% min(4),
+         width = 3*n_col,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
+        height = 3*n_row,
   writefunname = 'write_xl'
 ){
     if (verbose)  cmessage('%sSurvival', spaces(8))
@@ -559,11 +557,11 @@ plot_survival <- function(
        title = sprintf('%s ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
        dodge = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
-       width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
-      height = 7,
            n = if (svar_formula(formula, object)) 1  else min(nrow(object),4), # Inf works
-       n_col = n %>% min(nrow(object)) %>% sqrt() %>% floor()   %>% min(4),
-       n_row = n %>% min(ncol(object)) %>% sqrt() %>% ceiling() %>% min(4)
+       n_col = n %>% min(nrow(object)) %>% sqrt() %>% ceiling() %>% min(4),
+       n_row = n %>% min(ncol(object)) %>% sqrt() %>% floor()   %>% min(4),
+       width = 3*n_col,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
+      height = 3*n_row
 ){
 # Assert
     if (!installed('ggtext'))   return(NULL) 

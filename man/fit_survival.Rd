@@ -28,11 +28,11 @@ fit_survival(
   order = coefs(object, fit = engine)[1],
   stats = coefs(object, fit = engine),
   dodge = 0,
-  width = 7,
-  height = 7,
   n = if (svar_formula(formula, object)) 1 else min(nrow(object), 2),
   n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4),
   n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
+  width = 3 * n_col,
+  height = 3 * n_row,
   writefunname = "write_xl"
 )
 
@@ -56,11 +56,11 @@ plot_survival(
   title = sprintf("\%s ~ \%s", engine, formula2str(formula) \%>\% substr(2, nchar(.))),
   dodge = 0,
   file = NULL,
-  width = 7,
-  height = 7,
   n = if (svar_formula(formula, object)) 1 else min(nrow(object), 4),
-  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
-  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4)
+  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4),
+  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
+  width = 3 * n_col,
+  height = 3 * n_row
 )
 }
 \arguments{
@@ -86,15 +86,15 @@ plot_survival(
 
 \item{dodge}{number}
 
-\item{width}{number}
-
-\item{height}{number}
-
 \item{n}{number of features to plot}
 
 \item{n_col}{number of columns}
 
 \item{n_row}{number of rows}
+
+\item{width}{number}
+
+\item{height}{number}
 
 \item{writefunname}{'write_xl' or 'write_ods'}
 
@@ -132,6 +132,4 @@ Fit/Plot survival
       fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
       tmpdir <- tempdir()
       fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
-      
-
 }
