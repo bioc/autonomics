@@ -301,14 +301,13 @@ code.data.table <- function(object, codingfun, vars = names(object), verbose = T
     if ( length(vars)==0)   return(object)      # when formula = ~1 
     if (is.null(codingfun)) return(object)
 # Code
-    if (verbose)  cmessage('%sLinMod', spaces(4))
     for (var in vars){
         if (is.character(object[[var]]))  object[[var]] %<>% factor()
         if (is.logical(  object[[var]]))  object[[var]] %<>% factor()
     }
     for (var in vars){
         if (is.factor(object[[var]])){
-            if (verbose)  cmessage('              Code %s', var)
+            if (verbose)  cmessage('              Code `%s`', var)
             object[[var]] %<>% code.factor(codingfun, verbose = verbose)
         }
     }
@@ -761,6 +760,7 @@ fit_linmod <- function(
     assert_is_list(volcanoargs)
     assert_is_list(exprargs)
 # Fit
+    if (verbose)  cmessage('%sLinMod', spaces(4)) # unwanted when called during survival
     fitfun <- paste0('fit_', engine)
     object %<>%  get(fitfun)( formula = formula,
                                  drop = drop,

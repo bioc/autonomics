@@ -24,12 +24,15 @@ fit_survival(
   codingfun = code_control,
   verbose = TRUE,
   outdir = NULL,
-  plot = if (is.null(outdir)) FALSE else TRUE,
-  width = 7,
-  height = 7,
-  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 4),
-  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
-  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4),
+  plot = if (all.non.numeric(object, formula)) TRUE else FALSE,
+  order = coefs(object, fit = engine)[1],
+  stats = coefs(object, fit = engine),
+  dodge = 0,
+  n = if (svar_formula(formula, object)) 1 else min(nrow(object), 2),
+  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4),
+  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
+  width = 3 * n_col,
+  height = 3 * n_row,
   writefunname = "write_xl"
 )
 
@@ -51,13 +54,13 @@ plot_survival(
   order = autonomics::coefs(object, fit = engine)[1],
   stats = autonomics::coefs(object, fit = engine),
   title = sprintf("\%s ~ \%s", engine, formula2str(formula) \%>\% substr(2, nchar(.))),
-  dodge_height = 0,
+  dodge = 0,
   file = NULL,
-  width = 7,
-  height = 7,
   n = if (svar_formula(formula, object)) 1 else min(nrow(object), 4),
-  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
-  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4)
+  n_col = n \%>\% min(nrow(object)) \%>\% sqrt() \%>\% ceiling() \%>\% min(4),
+  n_row = n \%>\% min(ncol(object)) \%>\% sqrt() \%>\% floor() \%>\% min(4),
+  width = 3 * n_col,
+  height = 3 * n_row
 )
 }
 \arguments{
@@ -77,9 +80,11 @@ plot_survival(
 
 \item{plot}{TRUE or FALSE}
 
-\item{width}{number}
+\item{order}{coefs to order plots}
 
-\item{height}{number}
+\item{stats}{coefs to print stats for}
+
+\item{dodge}{number}
 
 \item{n}{number of features to plot}
 
@@ -87,15 +92,13 @@ plot_survival(
 
 \item{n_row}{number of rows}
 
+\item{width}{number}
+
+\item{height}{number}
+
 \item{writefunname}{'write_xl' or 'write_ods'}
 
-\item{order}{coefs to order plots}
-
-\item{stats}{coefs to print stats for}
-
 \item{title}{string}
-
-\item{dodge_height}{number}
 
 \item{file}{filepath}
 }
@@ -106,26 +109,27 @@ SummarizedExperiment/ggplot
 Fit/Plot survival
 }
 \examples{
-# survival ~ svars
-  object <- survobj()
-  object \%>\% fit_survival(~age)                          \%>\% plot_survival(~age)
-  object \%>\% fit_survival(~age)                          \%>\% plot_survival(~age, dodge_height = -2)
-  object \%>\% fit_survival(~age, engine = 'survdiff')     \%>\% plot_survival(~age, engine = 'survdiff')
-  object \%>\% fit_survival(~sex)     \%>\% plot_survival(~sex)
-  object \%>\% fit_survival(~age+sex) \%>\% plot_survival(~age+sex)
-  object \%>\% fit_survival(~age/sex) \%>\% plot_survival(~age/sex)
+# Samplevar effects
+      fit_survival(survobj(), ~age)         # age
+      fit_survival(survobj(), ~sex)         # sex
+      fit_survival(survobj(), ~age + sex)   # age across  sexlevels, sex across agelevels
+      fit_survival(survobj(), ~age / sex)   # sex within  agelevel
+      fit_survival(survobj(), ~age * sex)   # sex between agelevels (=age between sexlevels)
+  
+# Assayvar effects
+      fit_survival(survobj(), ~exprs)         #   numerical exprs
+      fit_survival(survobj(), ~exprs2bins)    #     integer exprs
+      fit_survival(survobj(), ~exprs2levels)  # categorical exprs
 
-# survival ~ assay
-  object <- survobj()
-  object \%>\% fit_survival(~exprs)
-  object \%>\% fit_survival(~exprs2levels) \%>\% plot_survival(~exprs2levels)
-
-# survival ~ svar / assay
-  object <- survobj()
-  object \%<>\% fit_survival(~age/exprs2levels)
-  object \%>\% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
-
-# Plot
-  fit_survival(object, ~exprs2levels, plot = TRUE)
- #fit_survival(object, ~exprs2levels, plot = TRUE, outdir = 'outdir', n = Inf)
+# Samplevar/Assayvar interactions
+      fit_survival(survobj(), ~age+exprs2levels, order = 'senior-junior'          ) #  age effect across exprlevels
+      fit_survival(survobj(), ~age+exprs2levels, order = 'bin2-bin1'              ) # expr effect across agelevels
+      fit_survival(survobj(), ~age/exprs2levels, order = 'senior:bin2-bin1'       ) # expr effect within agelevel
+      fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
+  
+# Softcoded args
+      fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')  # different engine
+      fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
+      tmpdir <- tempdir()
+      fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
 }

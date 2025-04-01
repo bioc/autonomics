@@ -198,7 +198,7 @@ bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TR
     colnames(mat) <- colnames(object)
 # Add
     newassayname <- sprintf('%s%dbins', assay, k)
-    if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
     assays(object)[[newassayname]] <- mat
     object
 }
@@ -218,7 +218,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     dimnames(mat) <- dimnames(object)
 # Add
     newassayname <- sprintf('%s%dlevels', assay, k)
-    if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels`
     assays(object)[[newassayname]] <- mat
     object
 }
@@ -296,7 +296,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     twosideformula <- formula
     twosideformula %<>% formula2str()
     twosideformula %<>% paste0('Surv(timetoevent, event)', .)
-    if (verbose)  cmessage('%s%s(%s)', spaces(8), engine, twosideformula)
+    if (verbose)  cmessage('%sModel %s(%s)', spaces(14), engine, twosideformula) # Align with Code `exprs2levels`
     twosideformula %<>% as.formula()
     if (engine == 'coxph')     fitres <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
     if (engine == 'survdiff')  fitres <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
@@ -305,8 +305,8 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     if (drop){ # drop varname from non-numeric vars
         anum <- assays(object)
         snum <- sdt(object)[, samplevars, with = FALSE]
-        anum  %<>% vapply(is.not.numeric, logical(1))
-        snum %<>% vapply(is.not.numeric, logical(1))
+        anum %<>% vapply(is.non.numeric, logical(1))
+        snum %<>% vapply(is.non.numeric, logical(1))
         anum <- names(anum)[anum]
         snum <- names(snum)[snum]
         anum %<>% intersect(assayvar)
@@ -324,8 +324,25 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 }
 
 
-is.not.numeric <- function(x)  !is.numeric(x)
-    
+is.non.numeric <- function(x)  !is.numeric(x)
+
+#' Are all variables non-numeric ?
+#' @examples
+#' all.non.numeric(survobj(), ~ age)
+#' all.non.numeric(survobj(), ~ exprs2levels)
+#' all.non.numeric(survobj(), ~ age/exprs2levels)
+#' all.non.numeric(survobj(), ~ age/exprs)
+#' @return TRUE or FALSE
+#' @export
+all.non.numeric <- function(object, formula){
+    samplevars <- intersect(all.vars(formula),      svars(object))
+    assayvars  <- intersect(all.vars(formula), assayNames(object))
+    snon <- sdt(object)[, samplevars, with = FALSE]
+    anon <- assays(object)[assayvars]
+    snon %<>% vapply(is.non.numeric, logical(1))
+    anon %<>% vapply(is.non.numeric, logical(1))
+    all(c(snon, anon))
+}
 
 #' Fit/Plot survival
 #' 
@@ -346,32 +363,33 @@ is.not.numeric <- function(x)  !is.numeric(x)
 #' @param order         coefs to order plots
 #' @param stats         coefs to print stats for
 #' @param title         string
-#' @param dodge_height  number
+#' @param dodge         number
 #' @param file          filepath
 #' @return SummarizedExperiment/ggplot
 #' @examples
-#' # survival ~ svars
-#'   object <- survobj()
-#'   object %>% fit_survival(~age)                          %>% plot_survival(~age)
-#'   object %>% fit_survival(~age)                          %>% plot_survival(~age, dodge_height = -2)
-#'   object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
-#'   object %>% fit_survival(~sex)     %>% plot_survival(~sex)
-#'   object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
-#'   object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
-#' 
-#' # survival ~ assay
-#'   object <- survobj()
-#'   object %>% fit_survival(~exprs)
-#'   object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
+#' # Samplevar effects
+#'       fit_survival(survobj(), ~age)         # age
+#'       fit_survival(survobj(), ~sex)         # sex
+#'       fit_survival(survobj(), ~age + sex)   # age across  sexlevels, sex across agelevels
+#'       fit_survival(survobj(), ~age / sex)   # sex within  agelevel
+#'       fit_survival(survobj(), ~age * sex)   # sex between agelevels (=age between sexlevels)
+#'   
+#' # Assayvar effects
+#'       fit_survival(survobj(), ~exprs)         #   numerical exprs
+#'       fit_survival(survobj(), ~exprs2bins)    #     integer exprs
+#'       fit_survival(survobj(), ~exprs2levels)  # categorical exprs
 #'
-#' # survival ~ svar / assay
-#'   object <- survobj()
-#'   object %<>% fit_survival(~age/exprs2levels)
-#'   object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
-#'
-#' # Plot
-#'   fit_survival(object, ~exprs2levels, plot = TRUE)
-#'  #fit_survival(object, ~exprs2levels, plot = TRUE, outdir = 'outdir', n = Inf)
+#' # Samplevar/Assayvar interactions
+#'       fit_survival(survobj(), ~age+exprs2levels, order = 'senior-junior'          ) #  age effect across exprlevels
+#'       fit_survival(survobj(), ~age+exprs2levels, order = 'bin2-bin1'              ) # expr effect across agelevels
+#'       fit_survival(survobj(), ~age/exprs2levels, order = 'senior:bin2-bin1'       ) # expr effect within agelevel
+#'       fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
+#'   
+#' # Softcoded args
+#'       fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')  # different engine
+#'       fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
+#'       tmpdir <- tempdir()
+#'       fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
 #' @export
 fit_survival <- function(
         object, 
@@ -381,15 +399,18 @@ fit_survival <- function(
      codingfun = code_control,
        verbose = TRUE,
         outdir = NULL,
-          plot = if (is.null(outdir)) FALSE else TRUE,
-         width = 7,
-        height = 7,
-             n = if (svar_formula(formula, object)) 1  else min(nrow(object),4), # Inf works
-         n_col = n %>% min(nrow(object)) %>% sqrt() %>% floor()   %>% min(4),
-         n_row = n %>% min(ncol(object)) %>% sqrt() %>% ceiling() %>% min(4),
+          plot = if (all.non.numeric(object, formula)) TRUE else FALSE,
+         order = coefs(object, fit = engine)[1],
+         stats = coefs(object, fit = engine),
+         dodge = 0,
+             n = if (svar_formula(formula, object)) 1  else min(nrow(object),2), # Inf works
+         n_col = n %>% min(nrow(object)) %>% sqrt() %>% ceiling() %>% min(4),
+         n_row = n %>% min(ncol(object)) %>% sqrt() %>% floor()   %>% min(4),
+         width = 3*n_col,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
+        height = 3*n_row,
   writefunname = 'write_xl'
 ){
-    if (verbose)  cmessage('%sSurvival', spaces(8))
+    if (verbose)  cmessage('%sSurvival', spaces(4))
 # Compute
     for (eng in engine){
         outdt <- .fit_survival(  object = object, 
@@ -403,6 +424,7 @@ fit_survival <- function(
     }
 # Write
     if (!is.null(outdir)){
+        cmessage('%sPrint', spaces(14))
         outdir <- sprintf('%s/survival', outdir)
         dir.create(outdir, showWarnings = FALSE)
         tableext <- switch(writefunname, write_xl = 'xlsx', write_ods = 'ods')
@@ -415,6 +437,9 @@ fit_survival <- function(
         print( plot_survival(   object = object, 
                                formula = formula,
                                 engine = engine,
+                                 order = order,
+                                 stats = stats,
+                                 dodge = dodge,
                                   file = file, 
                                  width = width, 
                                 height = height,
@@ -531,13 +556,13 @@ plot_survival <- function(
        order = autonomics::coefs(object, fit = engine)[1],
        stats = autonomics::coefs(object, fit = engine),
        title = sprintf('%s ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
-dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
+       dodge = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
-       width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
-      height = 7,
            n = if (svar_formula(formula, object)) 1  else min(nrow(object),4), # Inf works
-       n_col = n %>% min(nrow(object)) %>% sqrt() %>% floor()   %>% min(4),
-       n_row = n %>% min(ncol(object)) %>% sqrt() %>% ceiling() %>% min(4)
+       n_col = n %>% min(nrow(object)) %>% sqrt() %>% ceiling() %>% min(4),
+       n_row = n %>% min(ncol(object)) %>% sqrt() %>% floor()   %>% min(4),
+       width = 3*n_col,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
+      height = 3*n_row
 ){
 # Assert
     if (!installed('ggtext'))   return(NULL) 
@@ -561,6 +586,7 @@ dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(fo
     ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
     ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
     npages <- if (is.null(n_row) | is.null(n_col)) 1 else ceiling(n / n_row/ n_col)
+    if (!is.null(file))  cmessage('%s%s', spaces(21), file)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
         subtitle <- if (svar_formula(formula, object)) NULL else paste0(order, collapse = '  ')
@@ -582,7 +608,7 @@ dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(fo
                                         group = interaction(!!!groupsyms),  # !!! for syms
                                         color = !!colorsym,                 #  !! for sym
                                      linetype = !!linetypesym ) ,           # position_identity speedsup code 2.5 times
-                                     position = if (dodge_height == 0) position_identity() else ggstance::position_dodgev(dodge_height))
+                                     position = if (dodge == 0) position_identity() else ggstance::position_dodgev(dodge))
                             #+ 
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
