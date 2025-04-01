@@ -198,7 +198,7 @@ bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TR
     colnames(mat) <- colnames(object)
 # Add
     newassayname <- sprintf('%s%dbins', assay, k)
-    if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
     assays(object)[[newassayname]] <- mat
     object
 }
@@ -218,7 +218,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     dimnames(mat) <- dimnames(object)
 # Add
     newassayname <- sprintf('%s%dlevels', assay, k)
-    if (verbose)   cmessage('%sAdd `%s`', spaces(8), newassayname)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels`
     assays(object)[[newassayname]] <- mat
     object
 }
@@ -296,7 +296,7 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     twosideformula <- formula
     twosideformula %<>% formula2str()
     twosideformula %<>% paste0('Surv(timetoevent, event)', .)
-    if (verbose)  cmessage('%s%s(%s)', spaces(8), engine, twosideformula)
+    if (verbose)  cmessage('%sModel %s(%s)', spaces(14), engine, twosideformula) # Align with Code `exprs2levels`
     twosideformula %<>% as.formula()
     if (engine == 'coxph')     fitres <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
     if (engine == 'survdiff')  fitres <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
@@ -410,7 +410,7 @@ fit_survival <- function(
         height = 3*n_row,
   writefunname = 'write_xl'
 ){
-    if (verbose)  cmessage('%sSurvival', spaces(8))
+    if (verbose)  cmessage('%sSurvival', spaces(4))
 # Compute
     for (eng in engine){
         outdt <- .fit_survival(  object = object, 
@@ -424,6 +424,7 @@ fit_survival <- function(
     }
 # Write
     if (!is.null(outdir)){
+        cmessage('%sPrint', spaces(14))
         outdir <- sprintf('%s/survival', outdir)
         dir.create(outdir, showWarnings = FALSE)
         tableext <- switch(writefunname, write_xl = 'xlsx', write_ods = 'ods')
