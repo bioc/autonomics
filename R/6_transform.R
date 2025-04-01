@@ -476,9 +476,10 @@ transform_to_standard_normal <- function(x){
 
 #==============================================================================
 #
-#                        plot_transform_biplots
-#                        plot_transform_densities
-#                        plot_transform_violins
+#                        biplot_transforms
+#                        biplot_transforms_assays
+#                        plot_densities_transforms
+#                        plot_violins_transforms
 #
 #==============================================================================
 
@@ -521,8 +522,8 @@ gglegend<-function(p){
 #' transformations <- c(
 #'   'center_mean', 'center_median', 'invnorm', 'quantnorm', 'zscore')
 #'
-#' # object %>% plot_transform_densities(transforms = transformations) # Requires package ggridges
-#' object %>% plot_transform_violins(transforms = transformations)
+#' # object %>% plot_densities_transforms(transforms = transformations) # Requires package ggridges
+#' object %>% plot_violins_transforms(transforms = transformations)
 #' 
 #' object %>% biplot_transforms(
 #'   method  = 'pca', transforms = transformations, nrow = 2)
@@ -535,7 +536,7 @@ gglegend<-function(p){
 #'   transforms = transformations, label = 'replicate')
 #' @author Johannes Graumann
 #' @export
-plot_transform_densities <- function(
+plot_densities_transforms <- function(
     object,
     assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
@@ -574,7 +575,7 @@ plot_transform_densities <- function(
 #' @rdname explore-transforms
 #' @author Johannes Graumann
 #' @export
-plot_transform_violins <- function(
+plot_violins_transforms <- function(
     object,
     assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
