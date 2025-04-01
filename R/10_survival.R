@@ -363,32 +363,36 @@ all.non.numeric <- function(object, formula){
 #' @param order         coefs to order plots
 #' @param stats         coefs to print stats for
 #' @param title         string
-#' @param dodge_height  number
+#' @param dodge         number
 #' @param file          filepath
 #' @return SummarizedExperiment/ggplot
 #' @examples
-#' # survival ~ svars
-#'   object <- survobj()
-#'   object %>% fit_survival(~age)                          %>% plot_survival(~age)
-#'   object %>% fit_survival(~age)                          %>% plot_survival(~age, dodge_height = -2)
-#'   object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
-#'   object %>% fit_survival(~sex)     %>% plot_survival(~sex)
-#'   object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
-#'   object %>% fit_survival(~age/sex) %>% plot_survival(~age/sex)
+#' # Samplevar effects
+#'       fit_survival(survobj(), ~age)         # age
+#'       fit_survival(survobj(), ~sex)         # sex
+#'       fit_survival(survobj(), ~age + sex)   # age across  sexlevels, sex across agelevels
+#'       fit_survival(survobj(), ~age / sex)   # sex within  agelevel
+#'       fit_survival(survobj(), ~age * sex)   # sex between agelevels (=age between sexlevels)
+#'   
+#' # Assayvar effects
+#'       fit_survival(survobj(), ~exprs)         #   numerical exprs
+#'       fit_survival(survobj(), ~exprs2bins)    #     integer exprs
+#'       fit_survival(survobj(), ~exprs2levels)  # categorical exprs
+#'
+#' # Samplevar/Assayvar interactions
+#'       fit_survival(survobj(), ~age+exprs2levels, order = 'senior-junior'          ) #  age effect across exprlevels
+#'       fit_survival(survobj(), ~age+exprs2levels, order = 'bin2-bin1'              ) # expr effect across agelevels
+#'       fit_survival(survobj(), ~age/exprs2levels, order = 'senior:bin2-bin1'       ) # expr effect within agelevel
+#'       fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
+#'   
+#' # Softcoded args
+#'       fit_survival(survobj(), ~ exprs2levels)
+#'       fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')
+#'       fit_survival(survobj(), ~exprs2levels, plot = TRUE, dodge = 2)
+#'       fit_survival(survobj(), ~age/sex, plot = TRUE, order = 'junior:m-f')
+#'       object %>% fit_survival(~age)                          %>% plot_survival(~age, dodge_height = -2)
+#'       object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
 #' 
-#' # survival ~ assay
-#'   object <- survobj()
-#'   object %>% fit_survival(~exprs)
-#'   object %>% fit_survival(~exprs2levels) %>% plot_survival(~exprs2levels)
-#'
-#' # survival ~ svar / assay
-#'   object <- survobj()
-#'   object %<>% fit_survival(~age/exprs2levels)
-#'   object %>% plot_survival(~age/exprs2levels, stats = c('senior:bin2-bin1', 'junior:bin2-bin1'))
-#'
-#' # Plot
-#'   fit_survival(object, ~exprs2levels, plot = TRUE)
-#'  #fit_survival(object, ~exprs2levels, plot = TRUE, outdir = 'outdir', n = Inf)
 #' @export
 fit_survival <- function(
         object, 
@@ -398,12 +402,15 @@ fit_survival <- function(
      codingfun = code_control,
        verbose = TRUE,
         outdir = NULL,
-          plot = if (is.null(outdir)) FALSE else TRUE,
+          plot = if (all.non.numeric(object, formula)) TRUE else FALSE,
+         order = coefs(object, fit = fit)[1],
+         stats = coefs(object, fit = fit),
+         dodge = 0,
          width = 7,
         height = 7,
-             n = if (svar_formula(formula, object)) 1  else min(nrow(object),4), # Inf works
-         n_col = n %>% min(nrow(object)) %>% sqrt() %>% floor()   %>% min(4),
-         n_row = n %>% min(ncol(object)) %>% sqrt() %>% ceiling() %>% min(4),
+             n = if (svar_formula(formula, object)) 1  else min(nrow(object),2), # Inf works
+         n_col = n %>% min(nrow(object)) %>% sqrt() %>% ceiling() %>% min(4),
+         n_row = n %>% min(ncol(object)) %>% sqrt() %>% floor()   %>% min(4),
   writefunname = 'write_xl'
 ){
     if (verbose)  cmessage('%sSurvival', spaces(8))
@@ -432,6 +439,9 @@ fit_survival <- function(
         print( plot_survival(   object = object, 
                                formula = formula,
                                 engine = engine,
+                                 order = order,
+                                 stats = stats,
+                                 dodge = dodge,
                                   file = file, 
                                  width = width, 
                                 height = height,
@@ -548,7 +558,7 @@ plot_survival <- function(
        order = autonomics::coefs(object, fit = engine)[1],
        stats = autonomics::coefs(object, fit = engine),
        title = sprintf('%s ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
-dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
+       dodge = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
       height = 7,
@@ -599,7 +609,7 @@ dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(fo
                                         group = interaction(!!!groupsyms),  # !!! for syms
                                         color = !!colorsym,                 #  !! for sym
                                      linetype = !!linetypesym ) ,           # position_identity speedsup code 2.5 times
-                                     position = if (dodge_height == 0) position_identity() else ggstance::position_dodgev(dodge_height))
+                                     position = if (dodge == 0) position_identity() else ggstance::position_dodgev(dodge))
                             #+ 
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
