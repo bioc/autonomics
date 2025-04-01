@@ -128,11 +128,10 @@ Fit/Plot survival
       fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
   
 # Softcoded args
-      fit_survival(survobj(), ~ exprs2levels)
-      fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')
-      fit_survival(survobj(), ~exprs2levels, plot = TRUE, dodge = 2)
-      fit_survival(survobj(), ~age/sex, plot = TRUE, order = 'junior:m-f')
-      object \%>\% fit_survival(~age)                          \%>\% plot_survival(~age, dodge_height = -2)
-      object \%>\% fit_survival(~age, engine = 'survdiff')     \%>\% plot_survival(~age, engine = 'survdiff')
+      fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')  # different engine
+      fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
+      tmpdir <- tempdir()
+      fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
+      
 
 }

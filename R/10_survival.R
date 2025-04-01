@@ -386,12 +386,11 @@ all.non.numeric <- function(object, formula){
 #'       fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
 #'   
 #' # Softcoded args
-#'       fit_survival(survobj(), ~ exprs2levels)
-#'       fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')
-#'       fit_survival(survobj(), ~exprs2levels, plot = TRUE, dodge = 2)
-#'       fit_survival(survobj(), ~age/sex, plot = TRUE, order = 'junior:m-f')
-#'       object %>% fit_survival(~age)                          %>% plot_survival(~age, dodge_height = -2)
-#'       object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
+#'       fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')  # different engine
+#'       fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
+#'       tmpdir <- tempdir()
+#'       fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
+#'       
 #' 
 #' @export
 fit_survival <- function(
@@ -588,6 +587,7 @@ plot_survival <- function(
     ndt[ , label := sprintf("<span style='color:%s'>%s</span>", color, label) ]
     ndt <- ndt[, .(label = paste0(label, collapse = '<br>')), by = 'facet' ]
     npages <- if (is.null(n_row) | is.null(n_col)) 1 else ceiling(n / n_row/ n_col)
+    if (!is.null(file))  cmessage('%s%s', spaces(21), file)
     if (!is.null(file))  pdf(file, width = width, height = height)
     for (i in seq_len(npages)){
         subtitle <- if (svar_formula(formula, object)) NULL else paste0(order, collapse = '  ')
