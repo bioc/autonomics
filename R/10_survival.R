@@ -346,13 +346,14 @@ is.not.numeric <- function(x)  !is.numeric(x)
 #' @param order         coefs to order plots
 #' @param stats         coefs to print stats for
 #' @param title         string
-#' @param dodge_height  number 
+#' @param dodge_height  number
 #' @param file          filepath
 #' @return SummarizedExperiment/ggplot
 #' @examples
 #' # survival ~ svars
 #'   object <- survobj()
 #'   object %>% fit_survival(~age)                          %>% plot_survival(~age)
+#'   object %>% fit_survival(~age)                          %>% plot_survival(~age, dodge_height = -2)
 #'   object %>% fit_survival(~age, engine = 'survdiff')     %>% plot_survival(~age, engine = 'survdiff')
 #'   object %>% fit_survival(~sex)     %>% plot_survival(~sex)
 #'   object %>% fit_survival(~age+sex) %>% plot_survival(~age+sex)
@@ -530,7 +531,7 @@ plot_survival <- function(
        order = autonomics::coefs(object, fit = engine)[1],
        stats = autonomics::coefs(object, fit = engine),
        title = sprintf('%s ~ %s', engine, formula2str(formula) %>% substr(2,nchar(.))),
-dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(formula)`
+dodge_height = 0,      # `color` and `linetype` are hardmapped from `all.vars(formula)`
         file = NULL,    #  softmapping them formula-agnostically doesnt work
        width = 7,       #  Only for formula group is sample property (e.g. sex) sharing guaranteed
       height = 7,
@@ -580,8 +581,8 @@ dodge_height = 0,       # `color` and `linetype` are hardmapped from `all.vars(f
                                             y = survival,              
                                         group = interaction(!!!groupsyms),  # !!! for syms
                                         color = !!colorsym,                 #  !! for sym
-                                     linetype = !!linetypesym ), 
-                           position = ggstance::position_dodgev(dodge_height))
+                                     linetype = !!linetypesym ) ,           # position_identity speedsup code 2.5 times
+                                     position = if (dodge_height == 0) position_identity() else ggstance::position_dodgev(dodge_height))
                             #+ 
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 

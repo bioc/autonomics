@@ -691,7 +691,6 @@ plot_subgroup_violins <- function(
 #                   .extract_fdr_features
 #                   .extract_effectsize_features
 #                       ..extract_statistic_features
-#                   .extract_sign_features
 #                   .extract_n_features
 #
 #==============================================================================
@@ -705,6 +704,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
      statistic, 
       comparer, 
      threshold, 
+      na.value,
            fit = fits(object)[1], 
       combiner = '|', 
       features = features,
@@ -715,7 +715,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     if (is.null(fit))   return(object)
     if (is.null(coefs)) return(object)
     assert_scalar_subset(statistic, c('p', 'fdr', 'effect', 'effectsize'))
-    assert_scalar_subset(comparer,  c('<', '>', '=='))
+    assert_scalar_subset(comparer,  c('<=', '>=', '=='))
     assert_is_a_number(threshold)
     assert_is_subset(fit,                fits(object))
     assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
@@ -725,8 +725,8 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     fun <- getFromNamespace(sprintf('%smat', statistic), 'autonomics')
     x <- fun(object, fit = fit, coef = coefs)
     if (is.null(x))  return(object)
+    x[is.na(x)] <- na.value
     idx <- get(comparer)(x, threshold)
-    idx[is.na(idx)] <- FALSE
     fun <- function(y) Reduce(get(combiner), y)
     idx %<>% apply(1, fun)
     idx %<>% unname()        # features to include no matter what
@@ -759,8 +759,9 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
       ..extract_statistic_features( object = object,        
                                      coefs = coefs,
                                  statistic = 'p',
-                                  comparer = '<',   
+                                  comparer = '<=', # not `<` otherwise p=1 features dropped
                                  threshold = p,
+                                  na.value = 1,
                                        fit = fit,
                                   combiner = combiner,
                                   features = features,
@@ -783,8 +784,9 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     ..extract_statistic_features(  object = object,
                                     coefs = coefs,
                                 statistic = 'fdr',
-                                 comparer = '<',
+                                 comparer = '<=',
                                 threshold = fdr,
+                                 na.value = 1,
                                       fit = fit,
                                  combiner = combiner,
                                  features = features,
@@ -808,44 +810,15 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     ..extract_statistic_features(  object = object,
                                     coefs = coefs,
                                 statistic = 'effectsize',
-                                 comparer = '>',
+                                 comparer = '>=',
                                 threshold = effectsize,
+                                 na.value = 0,
                                       fit = fit,
                                  combiner = combiner,
                                  features = features,
                                   verbose = verbose )
 }
 
-#' @rdname extract_coef_features
-#' @export
-.extract_sign_features <- function(
-       object, 
-        coefs, 
-         sign, 
-          fit = fits(object)[1], 
-     combiner = '|',
-     features = NULL,
-      verbose = TRUE
-){
-# Assert
-    assert_is_valid_sumexp(object)
-    assert_is_subset(sign, c(-1, +1))
-    if (is.null(fit))    return(object)
-    if (is.null(coefs))  return(object)
-# Filter
-    x <- tmat(object, fit = fit, coef = coefs)
-    idx <- unname(apply(sign(x), 1, function(y)  Reduce(get(combiner), sign(y) %in% sign) ))
-    if (!is.null(features))  idx %<>% or(fdt(object)$feature_id %in% features)
-# Return
-    n0 <- length(idx)
-    n1 <- sum(idx, na.rm = TRUE)
-    if (verbose & n1<n0){
-        combiner <- paste0(' ', combiner, ' ')
-        cmessage('\t\t\tRetain %d/%d features: sign(%s) %%in%% c(%s)', 
-            n1, n0, paste0(coefs, collapse = combiner), paste0(sign,  collapse = ','))
-    }
-    object[idx, ]
-}
 
 #' Order on p 
 #' @param object      SummarizedExperiment
@@ -916,6 +889,7 @@ order_on_t <- function(
     assert_is_a_bool(verbose)
 # Order    
     tmat <- autonomics::tmat( object, fit = fit, coef = coefs)
+    tmat[is.na(tmat)] <- 0
     if (is.null(tmat))  return(object)
     if (verbose)   cmessage("%sorderby %s %s tvalue", spaces(24),
                             paste0(coefs, collapse = ', '),
@@ -1018,7 +992,6 @@ order_on_effect <- function(
 #'     object %<>% .extract_p_features(         coefs = 't1-t0', p = 0.05)
 #'     object %<>% .extract_fdr_features(       coefs = 't1-t0', fdr = 0.05)
 #'     object %<>% .extract_effectsize_features(coefs = 't1-t0', effectsize = 1)
-#'     object %<>% .extract_sign_features(      coefs = 't1-t0', sign = -1)
 #'     object %<>% .extract_n_features(         coefs = 't1-t0', n = 1)
 #'     object <- object0
 #'     object %<>%  extract_coef_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
@@ -1027,7 +1000,6 @@ order_on_effect <- function(
 #'     object %<>% .extract_p_features(         coefs = c('t1-t0', 't2-t0'), p = 0.05)
 #'     object %<>% .extract_fdr_features(       coefs = c('t1-t0', 't2-t0'), fdr = 0.01)
 #'     object %<>% .extract_effectsize_features(coefs = c('t1-t0', 't2-t0'), effectsize = 1)
-#'     object %<>% .extract_sign_features(      coefs = c('t1-t0', 't2-t0'), sign = -1)
 #'     object %<>% .extract_n_features(         coefs = c('t1-t0', 't2-t0'), n = 1)
 #'     object <- object0
 #'     object %<>%  extract_coef_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
@@ -1054,7 +1026,6 @@ extract_coef_features <- function(
     object <- do.call(       .extract_fdr_features, c(args, list(object = object, features = features,        fdr = fdr        )))
     object <- do.call(                  order_on_t, c(args, list(object = object,                      decreasing = decreasing )))
     object <- do.call(.extract_effectsize_features, c(args, list(object = object, features = features, effectsize = effectsize )))
-    object <- do.call(      .extract_sign_features, c(args, list(object = object, features = features,       sign = sign       )))
     if (!is.infinite(n)){
     object <- do.call(         .extract_n_features, c(args, list(object = object, features = features,          n = n          )))
     }
