@@ -3,8 +3,8 @@
 \name{plot_transform_densities}
 \alias{plot_transform_densities}
 \alias{plot_transform_violins}
-\alias{plot_transform_biplots}
-\alias{plot_transform_assay_biplots}
+\alias{biplot_transforms}
+\alias{biplot_transforms_assays}
 \title{Visually evaluate transformation effects}
 \usage{
 plot_transform_densities(
@@ -28,33 +28,42 @@ plot_transform_violins(
   verbose = TRUE
 )
 
-plot_transform_biplots(
+biplot_transforms(
   object,
   assay = assayNames(object)[1],
   subgroupvar = "subgroup",
-  transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
-  method = c("pca", "pls")[1],
-  by = "sample_id",
+  transforms = TRANSFORMSTRICT,
+  method = DIMREDENGINES[1],
   dims = 1:2,
-  verbose = FALSE,
   color = subgroupvar,
-  sep = FITSEP,
+  shape = NULL,
+  size = NULL,
+  alpha = NULL,
+  group = NULL,
+  label = NULL,
+  ncol = NULL,
+  nrow = NULL,
   ...,
-  fixed = list(shape = 15, size = 3)
+  fixed = list(shape = 15, size = 3),
+  verbose = FALSE
 )
 
-plot_transform_assay_biplots(
+biplot_transforms_assays(
   object,
   assays = assayNames(object)[1],
   subgroupvar = "subgroup",
-  transforms = c("center", "invnorm", "quantnorm", "vsn", "zscore"),
-  method = c("pca", "pls")[1],
-  by = "sample_id",
+  transforms = TRANSFORMSTRICT,
+  method = DIMREDENGINES[1],
+  by = biplot_by(object, method)[1],
   dims = 1:2,
-  verbose = FALSE,
   color = subgroupvar,
-  sep = FITSEP,
+  shape = NULL,
+  size = NULL,
+  alpha = NULL,
+  group = NULL,
+  label = NULL,
   ...,
+  verbose = FALSE,
   fixed = list(shape = 15, size = 3)
 )
 }
@@ -67,7 +76,7 @@ plot_transform_assay_biplots(
 
 \item{transforms}{character vector : transformations explored}
 
-\item{...}{: further blotting parameters}
+\item{...}{: further plotting parameters}
 
 \item{fixed}{list             : fixed  aesthetics}
 
@@ -75,15 +84,27 @@ plot_transform_assay_biplots(
 
 \item{method}{string           : dimension reduction technique}
 
-\item{by}{svar or NULL}
-
 \item{dims}{numbers          : biplot dimensions}
 
 \item{color}{svar}
 
-\item{sep}{string}
+\item{shape}{svar}
+
+\item{size}{svar}
+
+\item{alpha}{svar}
+
+\item{group}{svar}
+
+\item{label}{svar}
+
+\item{ncol}{integer          : columns for facet wraping}
+
+\item{nrow}{integer          : rows for facet wraping}
 
 \item{assays}{character vector : assay names to operate on}
+
+\item{by}{svar or NULL}
 }
 \value{
 ggplot2 object
@@ -102,16 +123,15 @@ transformations <- c(
 # object \%>\% plot_transform_densities(transforms = transformations) # Requires package ggridges
 object \%>\% plot_transform_violins(transforms = transformations)
 
-object \%>\% plot_transform_biplots(
+object \%>\% biplot_transforms(
   method  = 'pca', transforms = transformations, nrow = 2)
-object \%>\% plot_transform_biplots(
+object \%>\% biplot_transforms(
   method  = 'pls', transforms = transformations, nrow = 2)
   
 object[['replicate']] <- gsub('^.*\\\\.(.+)$', '\\\\1', object[['sample_id']])
-library(ggplot2)
 object \%>\%
-  plot_transform_biplots(
-  transforms = transformations, geom = geom_text, label = replicate)
+  biplot_transforms(
+  transforms = transformations, label = 'replicate')
 }
 \author{
 Johannes Graumann

@@ -500,8 +500,14 @@ gglegend<-function(p){
 #' @param  by           svar or NULL
 #' @param  dims         numbers          : biplot dimensions
 #' @param  color        svar
-#' @param  sep          string
-#' @param  ...                           : further blotting parameters
+#' @param  shape        svar
+#' @param  size         svar
+#' @param  alpha        svar
+#' @param  group        svar
+#' @param  label        svar
+#' @param  ncol         integer          : columns for facet wraping
+#' @param  nrow         integer          : rows for facet wraping
+#' @param  ...                           : further plotting parameters
 #' @param  fixed        list             : fixed  aesthetics
 #' @param  verbose      TRUE/FALSE       : message?
 #' @return ggplot2 object
@@ -518,16 +524,15 @@ gglegend<-function(p){
 #' # object %>% plot_transform_densities(transforms = transformations) # Requires package ggridges
 #' object %>% plot_transform_violins(transforms = transformations)
 #' 
-#' object %>% plot_transform_biplots(
+#' object %>% biplot_transforms(
 #'   method  = 'pca', transforms = transformations, nrow = 2)
-#' object %>% plot_transform_biplots(
+#' object %>% biplot_transforms(
 #'   method  = 'pls', transforms = transformations, nrow = 2)
 #'   
 #' object[['replicate']] <- gsub('^.*\\.(.+)$', '\\1', object[['sample_id']])
-#' library(ggplot2)
 #' object %>%
-#'   plot_transform_biplots(
-#'   transforms = transformations, geom = geom_text, label = replicate)
+#'   biplot_transforms(
+#'   transforms = transformations, label = 'replicate')
 #' @author Johannes Graumann
 #' @export
 plot_transform_densities <- function(
@@ -694,18 +699,27 @@ plot_transform_violins <- function(
 #' @rdname explore-transforms
 #' @author Johannes Graumann
 #' @export
-plot_transform_biplots <- function(
+biplot_transforms <- function(
     object,
     assay       = assayNames(object)[1],
     subgroupvar = 'subgroup',
-    transforms  = TRANSFORMSTRICT,
+    transforms  = TRANSFORMSTRICT,  # without 'center_mean' & 'center_median'
     method      = DIMREDENGINES[1], # 'pca'
     dims        = 1:2,
-    verbose     = FALSE,
-    color       = subgroupvar, ...,
-    fixed       = list(shape = 15, size = 3)
+    color       = subgroupvar, 
+    shape       = NULL, 
+    size        = NULL, 
+    alpha       = NULL,
+    group       = NULL,
+    label       = NULL,
+    ncol        = NULL,
+    nrow        = NULL,
+    ... ,
+    fixed       = list(shape = 15, size = 3),
+    verbose     = FALSE
 ){
-    . <- transfoannot <- NULL
+    variance.annot.ext <- NULL
+    
     assert_is_valid_sumexp(object)
     assert_scalar_subset(assay, setdiff(assayNames(object), "imputed"))
     assert_scalar_subset(subgroupvar, svars(object))
@@ -720,67 +734,159 @@ plot_transform_biplots <- function(
     scoredt <- .ldt_transforms_dimred(
       object, assay, transforms, method, drstrings['methodname'], dims, verbose)
     
-    plot_data(
-      scoredt, x = !!sym(drstrings['x']), y = !!sym(drstrings['y']), color = !!sym(color), ...,
-      fixed = fixed) +
-      facet_wrap(vars(variance.annot.ext), scales = "free") +
+    .sdata_biplot(
+      scoredt,
+      x        = drstrings['x'],
+      y        = drstrings['y'],
+      method   = method, 
+      by       = drstrings['by'],
+      dims     = dims,
+      color    = color,
+      shape    = shape,
+      size     = size,
+      alpha    = alpha,
+      group    = group,
+      label    = label,
+      ... ) +
+      facet_wrap(
+        vars(variance.annot.ext), ncol = ncol, nrow = nrow, scales = "free") +
       labs(title = paste("Assay:", assay))
 }
 
 #' @rdname explore-transforms
 #' @author Johannes Graumann
 #' @export
-plot_transform_assay_biplots <- function(
+biplot_transforms_assays <- function(
     object,
     assays      = assayNames(object)[1],
     subgroupvar = 'subgroup',
-    transforms  = c('center', 'invnorm', 'quantnorm', 'vsn' , 'zscore'),
-    method      = c('pca', 'pls')[1],
-    by          = 'sample_id',
+    transforms  = TRANSFORMSTRICT,  # without 'center_mean' & 'center_median'
+    method      = DIMREDENGINES[1], # 'pca'
+    by          = biplot_by(object, method)[1],
     dims        = 1:2,
+    color       = subgroupvar, 
+    shape       = NULL, 
+    size        = NULL, 
+    alpha       = NULL,
+    group       = NULL,
+    label       = NULL,
+    ... ,
     verbose     = FALSE,
-    color       = subgroupvar, sep = FITSEP, ...,
     fixed       = list(shape = 15, size = 3)
 ){
-    . <- assay <- annot <- transfo <- transfoannot <- NULL
+    assay <- variance.annot <- NULL
+    
     assert_is_valid_sumexp(object)
     assert_is_subset(assays, setdiff(assayNames(object), "imputed"))
     assert_scalar_subset(subgroupvar, svars(object))
-    assert_is_subset(
-      transforms,
-      c('center', 'center_mean', 'center_median', 'invnorm', 'quantnorm',
-        'vsn' , 'zscore'))
-    assert_scalar_subset(method, c('pca', 'pls'))
-    assert_are_same_length(dims, 1:2)
+    assert_is_subset(transforms, TRANSFORMENGINES)
+    assert_scalar_subset(method, DIMREDENGINES)
     assert_is_numeric(dims)
+    assert_are_same_length(dims, numeric(2))
     assert_is_a_bool(verbose)
-    assert_is_a_string(sep)
     
-    strelem <- switch(method, pca = 'by', pls = 'subgroupvar')
-    xylabs <- paste0('t', sep, get(strelem), sep, method, dims)
-    xlab <- xylabs[1]; ylab <- xylabs[2]
+    drstrings <- .dimredstrings(object, method, dims)
     
     scoredt <- lapply(
       assays,
       function(as){
         tmpobj <- object
         .ldt_transforms_dimred(
-          object, as, transforms, method, by, subgroupvar, dims, sep, verbose)
+          object, as, transforms, method, drstrings['methodname'], dims, verbose)
       }) %>%
       rbindlist()
     scoredt$assay %<>% factor(unique(.))
-    scoredt$annot %<>% factor(unique(.))
-    scoredt$transfo %<>% factor(unique(.))
-    scoredt$transfoannot %<>% factor(unique(.))
+    scoredt$transform %<>% factor(unique(.))
+    scoredt$variance.annot.ext %<>% factor(unique(.))
+    scoredt$variance.annot %<>% factor(unique(.))
     
-    plot_data(
-      scoredt, x = !!sym(xlab), y = !!sym(ylab), color = !!sym(color), ...,
-      fixed = fixed) +
+    .sdata_biplot(
+      scoredt,
+      x        = drstrings['x'],
+      y        = drstrings['y'],
+      method   = method, 
+      by       = drstrings['by'],
+      dims     = dims,
+      color    = color,
+      shape    = shape,
+      size     = size,
+      alpha    = alpha,
+      group    = group,
+      label    = label,
+      ... ) +
       geom_text(
-        data = scoredt[, .SD[1], by = .(assay, transfo)],
-        aes(x = -Inf, y = Inf, label = annot),
+        data = scoredt[, .SD[1], by = .(assay, transform)],
+        aes(x = -Inf, y = Inf, label = variance.annot),
         color = "black",vjust = "inward", hjust = "inward") +
-      facet_grid(rows = vars(assay), cols = vars(transfo), scales = "free")
+      facet_grid(rows = vars(assay), cols = vars(transform), scales = "free")
+}
+
+.sdata_biplot <- function(
+    sdata,
+    assay,
+    x        = scorenames(
+                 method, by = by, dims = dims[[1]], sep = guess_fitsep(sdata)),
+    y        = scorenames(
+                 method, by = by, dims = dims[[2]], sep = guess_fitsep(sdata)),
+    method   = DIMREDENGINES[1], # 'pca'
+    by       = 'sample_id', 
+    dims     = 1:2,
+    color    = if (method %in% DIMREDSUPER) by else 'subgroup', 
+    shape    = NULL, 
+    size     = NULL, 
+    alpha    = NULL,
+    group    = NULL,         # Use 'feature_id' (not 'gene')
+    label    = NULL,         # Which use 'feature_id' to guarantee uniqueness
+    fixed    = list(shape = 15, size = 3), 
+    colorpalette =  make_colors(sort(unique(sdata[[color]]))),
+    alphapalette = if (is.null(alpha)) NULL
+                   else .make_alpha_palette(sdata[[alpha]]), 
+    title = paste0(method, guess_fitsep(sdata, by)), 
+    theme = ggplot2::theme(plot.title = element_text(hjust = 0.5), 
+                           panel.grid = element_blank()),
+    ...
+){
+    # Assert / Process
+    assert_is_all_of(sdata, 'data.table')
+    assert_scalar_subset(x, names(sdata))
+    assert_scalar_subset(y, names(sdata))
+    if (!is.null(color)){ assert_is_a_string(color)
+      assert_is_subset(color, names(sdata)) }
+    if (!is.null(group)){ assert_is_a_string(group)
+      assert_scalar_subset(group, names(sdata)) }
+    if (!is.null(shape)){ assert_is_a_string(shape)
+      assert_scalar_subset(shape, names(sdata)) 
+      fixed %<>% extract(names(.) %>% setdiff('shape'))}
+    if (!is.null(size)){  assert_is_a_string(size)
+      assert_scalar_subset(size,  names(sdata)) 
+      fixed %<>% extract(names(.) %>% setdiff('size'))}
+    
+    # Plot
+    p <- ggplot(
+      data    = sdata,
+      mapping = aes(
+        x = !!sym(x), y = !!sym(y), color = !!sym(color),
+        shape = shape, size = size, alpha = alpha, group = group),
+      fixed   = fixed,
+      ...) +
+      geom_point() +
+      theme_bw() + theme
+    if (!is.null(colorpalette))  p <- p +
+      scale_color_manual(values = colorpalette, na.value = 'gray80')
+    if (!is.null(alphapalette))  p <- p +
+      scale_alpha_manual(values = alphapalette)
+    if (!is.null(label))  p <- p + 
+      geom_text_repel(aes(label = !!sym(label)), show.legend = FALSE)
+    if (!is.null(shape)){
+      n <- if (is.factor(sdata[[shape]])) levels(sdata[['shape']])
+      else sort(unique(sdata[[shape]]))
+      if (n > 6)  p <- p + scale_shape_manual(values = seq(15, 15+n-1))
+      # Warning messages: The shape palette can deal with a maximum 
+      # of 6 discrete values
+      # https://stackoverflow.com/questions/16813278
+    }
+    # Return
+    p
 }
 
 #' Data Transformation Methods

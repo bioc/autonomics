@@ -648,10 +648,17 @@ make_alpha_palette <- function(object, alpha){
     assert_scalar_subset(alpha, svars(object))
 # Create
     levels <- slevels(object, alpha)
-    palette <- seq(1, 0.4, length.out = length(levels))
-    names(palette) <- levels
+    palette <- .make_alpha_palette(levels)
 # Return
     palette
+}
+
+.make_alpha_palette <- function(levels)
+{
+  assert_is_character(levels)
+  palette <- seq(1, 0.4, length.out = length(levels))
+  names(palette) <- levels
+  palette
 }
     
 biplot_methods <- function(object){
