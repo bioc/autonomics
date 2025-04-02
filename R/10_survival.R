@@ -305,8 +305,8 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     if (drop){ # drop varname from non-numeric vars
         anum <- assays(object)
         snum <- sdt(object)[, samplevars, with = FALSE]
-        anum %<>% vapply(is.non.numeric, logical(1))
-        snum %<>% vapply(is.non.numeric, logical(1))
+        anum %<>% vapply(is_non_numeric, logical(1))
+        snum %<>% vapply(is_non_numeric, logical(1))
         anum <- names(anum)[anum]
         snum <- names(snum)[snum]
         anum %<>% intersect(assayvar)
@@ -324,25 +324,32 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 }
 
 
-is.non.numeric <- function(x)  !is.numeric(x)
+#' @rdname all_non_numeric
+#' @export
+is_non_numeric <- function(x)  !is.numeric(x)
+
 
 #' Are all variables non-numeric ?
-#' @examples
-#' all.non.numeric(survobj(), ~ age)
-#' all.non.numeric(survobj(), ~ exprs2levels)
-#' all.non.numeric(survobj(), ~ age/exprs2levels)
-#' all.non.numeric(survobj(), ~ age/exprs)
+#' @param object  SummarizedExperiment
+#' @param formula formula
+#' @param x vector
 #' @return TRUE or FALSE
+#' @examples
+#' all_non_numeric(survobj(), ~ age)
+#' all_non_numeric(survobj(), ~ exprs2levels)
+#' all_non_numeric(survobj(), ~ age/exprs2levels)
+#' all_non_numeric(survobj(), ~ age/exprs)
 #' @export
-all.non.numeric <- function(object, formula){
+all_non_numeric <- function(object, formula){
     samplevars <- intersect(all.vars(formula),      svars(object))
     assayvars  <- intersect(all.vars(formula), assayNames(object))
     snon <- sdt(object)[, samplevars, with = FALSE]
     anon <- assays(object)[assayvars]
-    snon %<>% vapply(is.non.numeric, logical(1))
-    anon %<>% vapply(is.non.numeric, logical(1))
+    snon %<>% vapply(is_non_numeric, logical(1))
+    anon %<>% vapply(is_non_numeric, logical(1))
     all(c(snon, anon))
 }
+
 
 #' Fit/Plot survival
 #' 
@@ -399,7 +406,7 @@ fit_survival <- function(
      codingfun = code_control,
        verbose = TRUE,
         outdir = NULL,
-          plot = if (all.non.numeric(object, formula)) TRUE else FALSE,
+          plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
          order = coefs(object, fit = engine)[1],
          stats = coefs(object, fit = engine),
          dodge = 0,

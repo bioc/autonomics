@@ -24,7 +24,7 @@ fit_survival(
   codingfun = code_control,
   verbose = TRUE,
   outdir = NULL,
-  plot = if (all.non.numeric(object, formula)) TRUE else FALSE,
+  plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
   order = coefs(object, fit = engine)[1],
   stats = coefs(object, fit = engine),
   dodge = 0,
