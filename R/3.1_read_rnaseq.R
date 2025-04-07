@@ -461,8 +461,8 @@ collapsed_entrezg_to_symbol <- function(x, sep, orgdb){
 #' }
 #' @export
 genome_to_orgdb <- function(genome){
-    assert_scalar_subset(genome, c('mm10', 'mm9', 'hg38', 'hg19'))
-    if (genome %in% c('mm10', 'mm9')){
+    assert_scalar_subset(genome, c('mm39', 'mm10', 'mm9', 'hg38', 'hg19'))
+    if (genome %in% c('mm39', 'mm10', 'mm9')){
         if (!installed('org.Mm.eg.db'))   return(NULL)
         return(org.Mm.eg.db::org.Mm.eg.db)
 
@@ -480,7 +480,7 @@ count_reads <- function(files, paired, nthreads, genome){
     . <- NULL
     args <- list(files = files, isPaired = paired, nthreads = nthreads)
 # Inbuilt genome
-    if (genome %in% c('mm10', 'mm9', 'hg38', 'hg19')){
+    if (genome %in% c('mm39', 'mm10', 'mm9', 'hg38', 'hg19')){
         args %<>% c(list(annot.inbuilt = genome))
         fcounts <- do.call(Rsubread::featureCounts, args)
         orgdb <- genome_to_orgdb(genome)

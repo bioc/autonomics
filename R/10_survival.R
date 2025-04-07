@@ -305,8 +305,8 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
     if (drop){ # drop varname from non-numeric vars
         anum <- assays(object)
         snum <- sdt(object)[, samplevars, with = FALSE]
-        anum %<>% vapply(is.non.numeric, logical(1))
-        snum %<>% vapply(is.non.numeric, logical(1))
+        anum %<>% vapply(is_non_numeric, logical(1))
+        snum %<>% vapply(is_non_numeric, logical(1))
         anum <- names(anum)[anum]
         snum <- names(snum)[snum]
         anum %<>% intersect(assayvar)
@@ -324,25 +324,32 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 }
 
 
-is.non.numeric <- function(x)  !is.numeric(x)
+#' @rdname all_non_numeric
+#' @export
+is_non_numeric <- function(x)  !is.numeric(x)
+
 
 #' Are all variables non-numeric ?
-#' @examples
-#' all.non.numeric(survobj(), ~ age)
-#' all.non.numeric(survobj(), ~ exprs2levels)
-#' all.non.numeric(survobj(), ~ age/exprs2levels)
-#' all.non.numeric(survobj(), ~ age/exprs)
+#' @param object  SummarizedExperiment
+#' @param formula formula
+#' @param x vector
 #' @return TRUE or FALSE
+#' @examples
+#' all_non_numeric(survobj(), ~ age)
+#' all_non_numeric(survobj(), ~ exprs2levels)
+#' all_non_numeric(survobj(), ~ age/exprs2levels)
+#' all_non_numeric(survobj(), ~ age/exprs)
 #' @export
-all.non.numeric <- function(object, formula){
+all_non_numeric <- function(object, formula){
     samplevars <- intersect(all.vars(formula),      svars(object))
     assayvars  <- intersect(all.vars(formula), assayNames(object))
     snon <- sdt(object)[, samplevars, with = FALSE]
     anon <- assays(object)[assayvars]
-    snon %<>% vapply(is.non.numeric, logical(1))
-    anon %<>% vapply(is.non.numeric, logical(1))
+    snon %<>% vapply(is_non_numeric, logical(1))
+    anon %<>% vapply(is_non_numeric, logical(1))
     all(c(snon, anon))
 }
+
 
 #' Fit/Plot survival
 #' 
@@ -367,29 +374,66 @@ all.non.numeric <- function(object, formula){
 #' @param file          filepath
 #' @return SummarizedExperiment/ggplot
 #' @examples
-#' # Samplevar effects
-#'       fit_survival(survobj(), ~age)         # age
-#'       fit_survival(survobj(), ~sex)         # sex
-#'       fit_survival(survobj(), ~age + sex)   # age across  sexlevels, sex across agelevels
-#'       fit_survival(survobj(), ~age / sex)   # sex within  agelevel
-#'       fit_survival(survobj(), ~age * sex)   # sex between agelevels (=age between sexlevels)
+#' # Formula
+#'     # Samplevar-based
+#'           fit_survival(survobj(), ~age)           # age
+#'           fit_survival(survobj(), ~sex)           # sex
+#'           fit_survival(survobj(), ~age + sex)     # age across  sexlevels, sex across agelevels
+#'           fit_survival(survobj(), ~age / sex)     # sex within  agelevel
+#'           fit_survival(survobj(), ~age * sex)     # sex between agelevels (=age between sexlevels)
 #'   
-#' # Assayvar effects
-#'       fit_survival(survobj(), ~exprs)         #   numerical exprs
-#'       fit_survival(survobj(), ~exprs2bins)    #     integer exprs
-#'       fit_survival(survobj(), ~exprs2levels)  # categorical exprs
+#'     # Assayvar-based
+#'           fit_survival(survobj(), ~exprs)         #   numerical coding
+#'           fit_survival(survobj(), ~exprs2bins)    #     integer coding
+#'           fit_survival(survobj(), ~exprs2levels)  # categorical coding
 #'
-#' # Samplevar/Assayvar interactions
-#'       fit_survival(survobj(), ~age+exprs2levels, order = 'senior-junior'          ) #  age effect across exprlevels
-#'       fit_survival(survobj(), ~age+exprs2levels, order = 'bin2-bin1'              ) # expr effect across agelevels
-#'       fit_survival(survobj(), ~age/exprs2levels, order = 'senior:bin2-bin1'       ) # expr effect within agelevel
-#'       fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
+#'     # Samplevar/Assayvar-based
+#'           fit_survival(survobj(), ~age+exprs2levels, order = 'senior-junior'          ) #  age effect across exprlevels
+#'           fit_survival(survobj(), ~age+exprs2levels, order = 'bin2-bin1'              ) # expr effect across agelevels
+#'           fit_survival(survobj(), ~age/exprs2levels, order = 'senior:bin2-bin1'       ) # expr effect within agelevel
+#'           fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
 #'   
-#' # Softcoded args
-#'       fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')  # different engine
-#'       fit_survival(survobj(), ~ exprs2levels, dodge = 2)            # dodge
-#'       tmpdir <- tempdir()
-#'       fit_survival(survobj(), ~ exprs2levels, outdir = tmpdir)      # print to file
+#' # Other arguments
+#'     # engine: 'coxph' -> 'survdiff'
+#'           fit_survival(survobj(), ~ exprs2levels)                        # coxph
+#'           fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')   # survdiff
+#' 
+#'     # drop: drop varname in coefnames -> dont
+#'           fit_survival(survobj(), ~ exprs2levels)                # bin2-bin1
+#'           fit_survival(survobj(), ~ exprs2levels, drop = FALSE)  # exprs2levelsbin2-bin1
+#' 
+#'     # codingfun: code_control -> contr.treatment
+#'           fit_survival(survobj(), ~ exprs2levels)                              # code_control
+#'           fit_survival(survobj(), ~ exprs2levels, codingfun = contr.treatment) # contr.treatment
+#'
+#'     # outdir: print to object/screen -> print to xlsx/pdf
+#'           fit_survival(survobj(), ~ exprs2levels)                                                 # print to object/screen
+#'           fit_survival(survobj(), ~ exprs2levels, outdir = tempdir())                             # print to   xlsx/pdf
+#'           fit_survival(survobj(), ~ exprs2levels, outdir = tempdir(), writefunname = 'write_ods') # print to    ods/pdf
+#' 
+#'     # plot: plot -> dont
+#'           fit_survival(survobj(), ~ exprs2levels)                # plot
+#'           fit_survival(survobj(), ~ exprs2levels, plot = FALSE)  # dont
+#' 
+#'     # order: order on first coef -> order on custom coef
+#'           fit_survival(survobj(), ~ age+exprs2levels)                        # order on 'senior-junior'
+#'           fit_survival(survobj(), ~ age+exprs2levels, order = 'bin2-bin1')   # order on 'bin2-bin1'
+#' 
+#'     # stats: show stats for all coefs -> show stats for custom coefs
+#'           fit_survival(survobj(), ~ age+exprs2levels)                          # show stats for 'senior-junior' and 'bin2-bin1'
+#'           fit_survival(survobj(), ~ age+exprs2levels, stats = 'senior-junior') # show stats for 'senior-junior'
+#' 
+#'     # dodge: overlap curves -> dodge curves
+#'           fit_survival(survobj(), ~ age+exprs2levels)            # overlap curves
+#'           fit_survival(survobj(), ~ age+exprs2levels, dodge = 2) # dodge curves
+#' 
+#'     # n: (plot) top2 -> top4
+#'           fit_survival(survobj(), ~ age+exprs2levels)         # top2
+#'           fit_survival(survobj(), ~ age+exprs2levels, n = 4)  # top4
+#' 
+#'     # n_row n_col: 1 row 2 col -> 2 row 1 col
+#'           fit_survival(survobj(), ~ age+exprs2levels)                       # 1 row 2 col
+#'           fit_survival(survobj(), ~ age+exprs2levels, n_row = 2, n_col = 1) # 2 row 1 col
 #' @export
 fit_survival <- function(
         object, 
@@ -399,7 +443,7 @@ fit_survival <- function(
      codingfun = code_control,
        verbose = TRUE,
         outdir = NULL,
-          plot = if (all.non.numeric(object, formula)) TRUE else FALSE,
+          plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
          order = coefs(object, fit = engine)[1],
          stats = coefs(object, fit = engine),
          dodge = 0,
