@@ -2,7 +2,7 @@
 % Please edit documentation in R/6_transform.R
 \name{log2transform}
 \alias{log2transform}
-\alias{exp2}
+\alias{exp2transform}
 \alias{zscore}
 \alias{sscale}
 \alias{fscale}
@@ -18,7 +18,7 @@ log2transform(
   verbose = FALSE
 )
 
-exp2(object, verbose = FALSE)
+exp2transform(object, assay = assayNames(object)[1], verbose = FALSE)
 
 zscore(object, verbose = FALSE)
 
@@ -30,7 +30,7 @@ quantnorm(object, verbose = FALSE)
 
 invnorm(object, verbose = FALSE)
 
-vsn(object, verbose = FALSE, delog = TRUE)
+vsn(object, delog = TRUE, relog = delog, verbose = FALSE)
 }
 \arguments{
 \item{object}{SummarizedExperiment}
@@ -44,6 +44,8 @@ vsn(object, verbose = FALSE, delog = TRUE)
 \item{mat}{matrix}
 
 \item{delog}{TRUE or FALSE (vsn)}
+
+\item{relog}{TRUE or FALSE (vsn)}
 }
 \value{
 Transformed sumexp

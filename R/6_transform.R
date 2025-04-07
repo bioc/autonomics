@@ -284,6 +284,7 @@ subtract_differences <- function(object, block, subgroupvar, verbose=TRUE){
 #' @param  pseudo   number           : pseudo value to be added prior to transformation
 #' @param  verbose  TRUE or FALSE    : whether to msg
 #' @param  delog    TRUE or FALSE (vsn)
+#' @param  relog    TRUE or FALSE (vsn)
 #' @return Transformed sumexp
 #' @examples
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
@@ -330,13 +331,27 @@ log2transform <- function(
 
 #' @rdname log2transform
 #' @export
-exp2 <- function(object, verbose = FALSE){
-    . <- NULL
-    if (verbose)  message('\t\tExp2 transform')
-    values(object) %<>% magrittr::raise_to_power(2, .)
-    object
+exp2transform <- function(
+    object, 
+    assay   = assayNames(object)[1], 
+    verbose = FALSE
+){
+  assert_is_all_of(object, 'SummarizedExperiment')
+  assert_is_not_null(assayNames(object))
+  assert_is_subset(assay, assayNames(object))
+  . <- NULL
+  for (ass in assay){
+    i <- match(ass, assayNames(object))
+    if (verbose)  cmessage('%sexp2 %s', spaces(14), ass)
+    assays(object)[[i]] %<>% magrittr::raise_to_power(2, .)
+    if (stri_startswith(assayNames(object)[i], "log2")) {
+      assayNames(object)[i] %<>% stri_replace_first_regex('^log2\\s*', '')
+    } else {
+      assayNames(object)[i] %<>% paste0('log2', .)
+    }
+  }
+  object
 }
-
 
 #' @rdname log2transform
 #' @export
@@ -425,11 +440,16 @@ invnorm <- function(object, verbose = FALSE){
 
 #' @rdname log2transform
 #' @export
-vsn <- function(object, verbose = FALSE, delog = TRUE){
+vsn <- function(object, delog = TRUE, relog = delog, verbose = FALSE)
+{
+    assert_is_valid_sumexp(object)
+    assert_is_a_bool(delog)
+    assert_is_a_bool(relog)
+    assert_is_a_bool(verbose)
     if (verbose) message('\t\tVSN')
-    if (delog) object %<>% exp2()
+    if (delog) object %<>% exp2transform(verbose = FALSE)
     values(object) %<>% vsn::justvsn(verbose = FALSE)
-    if (delog) object %<>% log2()
+    if (relog) object %<>% log2transform(verbose = FALSE)
     object
 }
 
