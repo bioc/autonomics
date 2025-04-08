@@ -2254,9 +2254,9 @@ get_density <- function(x, y, ...) {
 #' @param object SummarizedExperiment
 #' @param xvar   svar
 #' @param yvar   svar
-#' @param color   TRUE or FALSE
-#' @param contour TRUE or FALSE
-#' @param smooth  TRUE or FALSE
+#' @param density2color   whether to map density to color in scatterplot
+#' @param density2contour whether to map density to contour in scatterplot
+#' @param smooth          whether to add smooth line in scatterplot
 #' @return ggplot
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
@@ -2266,11 +2266,11 @@ get_density <- function(x, y, ...) {
 #' object$Weight <- rnorm(ncol(object), mean = 85.4)
 #' plot_joint_density(object, 'Height', 'Weight')
 #' plot_joint_density(object, 'Height', 'Weight',  smooth = TRUE)
-#' plot_joint_density(object, 'Height', 'Weight',   color = TRUE)
-#' plot_joint_density(object, 'Height', 'Weight', contour = TRUE)
+#' plot_joint_density(object, 'Height', 'Weight',   density2color = TRUE)
+#' plot_joint_density(object, 'Height', 'Weight', density2contour = TRUE)
 #' @export
 plot_joint_density <- function(
-     object, xvar, yvar, color = TRUE, contour = TRUE, smooth = TRUE
+     object, xvar, yvar, density2color = FALSE, density2contour = FALSE, smooth = FALSE
 ){
     # Filter out na values
         obj <- object
@@ -2305,10 +2305,10 @@ plot_joint_density <- function(
     # XY
         obj$xydensity <- get_density(obj[[xvar]], obj[[yvar]])
         pXY <- ggplot(sdt(obj), aes(x = !!sym(xvar), y = !!sym(yvar))) + theme_bw()
-        if (contour) pXY <- pXY + geom_density_2d(color = 'gray80')
+        if (density2contour) pXY <- pXY + geom_density_2d(color = 'gray80')
       # if (fill)    pXY <- pXY + geom_density_2d_filled()
         if (smooth)  pXY <- pXY + geom_smooth(se = FALSE, formula = y~x, method = 'lm', color = '#24517f')
-        if (color){  pXY <- pXY + geom_point(aes(x = !!sym(xvar), y = !!sym(yvar), color = !!sym('xydensity'))) + 
+        if (density2color){  pXY <- pXY + geom_point(aes(x = !!sym(xvar), y = !!sym(yvar), color = !!sym('xydensity'))) + 
                                   scale_color_gradient(low = '#56B1F7', high = '#132B43')
         } else {     pXY <- pXY + geom_point() }
         pXY <- pXY + ylab(NULL) + xlab(NULL) + 

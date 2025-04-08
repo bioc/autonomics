@@ -8,9 +8,9 @@ plot_joint_density(
   object,
   xvar,
   yvar,
-  color = TRUE,
-  contour = TRUE,
-  smooth = TRUE
+  density2color = FALSE,
+  density2contour = FALSE,
+  smooth = FALSE
 )
 }
 \arguments{
@@ -20,11 +20,11 @@ plot_joint_density(
 
 \item{yvar}{svar}
 
-\item{color}{TRUE or FALSE}
+\item{density2color}{whether to map density to color in scatterplot}
 
-\item{contour}{TRUE or FALSE}
+\item{density2contour}{whether to map density to contour in scatterplot}
 
-\item{smooth}{TRUE or FALSE}
+\item{smooth}{whether to add smooth line in scatterplot}
 }
 \value{
 ggplot
@@ -40,6 +40,6 @@ object$Height <- rnorm(ncol(object), mean = 176)
 object$Weight <- rnorm(ncol(object), mean = 85.4)
 plot_joint_density(object, 'Height', 'Weight')
 plot_joint_density(object, 'Height', 'Weight',  smooth = TRUE)
-plot_joint_density(object, 'Height', 'Weight',   color = TRUE)
-plot_joint_density(object, 'Height', 'Weight', contour = TRUE)
+plot_joint_density(object, 'Height', 'Weight',   density2color = TRUE)
+plot_joint_density(object, 'Height', 'Weight', density2contour = TRUE)
 }
