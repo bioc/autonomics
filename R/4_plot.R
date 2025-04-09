@@ -2254,8 +2254,7 @@ get_density <- function(x, y, ...) {
 #' @param object SummarizedExperiment
 #' @param xvar   svar
 #' @param yvar   svar
-#' @param xcolor svar or NULL
-#' @param ycolor svar or NULL
+#' @param palette color palette (named character vector)
 #' @param density2color   whether to map density to color in scatterplot
 #' @param density2contour whether to map density to contour in scatterplot
 #' @param smooth          whether to add smooth line in scatterplot
@@ -2270,12 +2269,13 @@ get_density <- function(x, y, ...) {
 #' plot_joint_density(object, 'Height', 'Weight',  smooth = TRUE)
 #' plot_joint_density(object, 'Height', 'Weight',   density2color = TRUE)
 #' plot_joint_density(object, 'Height', 'Weight', density2contour = TRUE)
-#' plot_joint_density(object, 'Height', 'Weight')
+#' plot_joint_density(object, 'Height', 'Weight', palette = c(Height = 'red', Weight = 'forestgreen'))
 #' @export
 plot_joint_density <- function(
               object, 
                 xvar, 
                 yvar, 
+              palette = make_colors(c(xvar,yvar)),
               xcolor = make_colors(c(xvar, yvar))[[1]], 
               ycolor = make_colors(c(xvar, yvar))[[2]], 
        density2color = FALSE, 
@@ -2290,33 +2290,36 @@ plot_joint_density <- function(
         xvalues <- obj[[xvar]]
         densityfun <- approxfun(density(xvalues, na.rm = TRUE))
         pX <- ggplot() + theme_bw() + 
-                         annotate('point', x = sort(xvalues), y = densityfun(sort(xvalues)), color = xcolor) + 
-                         annotate('path',  x = sort(xvalues), y = densityfun(sort(xvalues)), color = xcolor) + 
+                         annotate('point', x = sort(xvalues), y = densityfun(sort(xvalues)), color = palette[[xvar]]) + 
+                         annotate('path',  x = sort(xvalues), y = densityfun(sort(xvalues)), color = palette[[xvar]]) + 
                          scale_x_continuous(position = 'top') + 
                          xlab(NULL) + 
                          ylab('') + 
                          theme(axis.text.y = element_text(color = 'white'), # 5.5 each is default
-                                panel.grid = element_blank(), # t=0 & b=10.5 preserves asp ratio
-                               plot.margin = unit(c(t = 0, r = 5.5, b = 10.5, l = 5.5), 'points'), 
-                              axis.title.x = element_text(color = xcolor), 
+                                panel.grid = element_blank(),
+                               plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), 'points'), 
+                              axis.title.x = element_text(color = palette[[xvar]]), 
                               panel.border = element_blank(), 
                                axis.line.x = element_blank(), 
                                axis.text.x = element_blank(), 
-                              axis.ticks.x = element_blank(),
-                              axis.ticks.y = element_blank())
+                              axis.ticks.x = element_blank(),  # theme_get()$plot.margin
+                              axis.ticks.y = element_blank()
+                         )
     # Y
         yvalues <- sort(obj[[yvar]])
         densityfun <- approxfun(density(yvalues, na.rm = TRUE))
         pY <- ggplot() + theme_bw() + 
-                         annotate('point', y = sort(yvalues), x = -densityfun(sort(yvalues)), color = ycolor) + 
-                         annotate('path',  y = sort(yvalues), x = -densityfun(sort(yvalues)), color = ycolor) + 
+                         annotate('point', y = sort(yvalues), x = -densityfun(sort(yvalues)), color = palette[[yvar]]) + 
+                         annotate('path',  y = sort(yvalues), x = -densityfun(sort(yvalues)), color = palette[[yvar]]) + 
                          scale_x_continuous(position = 'top') + 
                          scale_y_continuous(position = 'left') + 
                          xlab('') + 
                          ylab(NULL) + 
-                         theme(axis.text.x = element_text(color = 'white'), 
+                         theme(
+                               plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), 'points'), 
+                               axis.text.x = element_text(color = 'white'), 
                                axis.text.y = element_blank(),
-                              axis.title.y = element_text(color = ycolor),
+                              axis.title.y = element_text(color = palette[[yvar]]),
                                 panel.grid = element_blank(), 
                               panel.border = element_blank(),
                                axis.line.y = element_blank(), 
@@ -2336,14 +2339,18 @@ plot_joint_density <- function(
                    scale_x_continuous(position = 'top') + 
                    guides(fill = 'none', color = 'none') + 
                    theme(
+                       plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), 'points'), 
                        panel.border = element_blank(),
-                       axis.line.x  = element_line(color = xcolor),    axis.line.y  = element_line(color = ycolor),
-                       axis.title.x = element_text(color = xcolor),  axis.title.y = element_text(color = ycolor), 
-                       axis.ticks.x = element_line(color = xcolor),  axis.ticks.y = element_line(color = ycolor), 
-                       axis.text.x  = element_text(color = xcolor),  axis.text.y  = element_text(color = ycolor), 
-                       panel.grid = element_blank() 
+                       axis.line.x  = element_line(color = palette[[xvar]]),  axis.line.y  = element_line(color = palette[[yvar]]),
+                       axis.title.x = element_text(color = palette[[xvar]]),  axis.title.y = element_text(color = palette[[yvar]]), 
+                       axis.ticks.x = element_line(color = palette[[xvar]]),  axis.ticks.y = element_line(color = palette[[yvar]]), 
+                       axis.text.x  = element_text(color = palette[[xvar]]),  axis.text.y  = element_text(color = palette[[yvar]]), 
+                       panel.grid = element_blank(),
+                       
                     )
-        layout <- matrix(c(4,1,2,3), byrow = TRUE, nrow = 2)
+        layout <- matrix(c(4,1,1,
+                           2,3,3,
+                           2,3,3), byrow = TRUE, nrow = 3)
         gridExtra::grid.arrange(pX, pY, pXY, layout_matrix = layout)
 }
 

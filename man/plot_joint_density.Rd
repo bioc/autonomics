@@ -8,6 +8,7 @@ plot_joint_density(
   object,
   xvar,
   yvar,
+  palette = make_colors(c(xvar, yvar)),
   xcolor = make_colors(c(xvar, yvar))[[1]],
   ycolor = make_colors(c(xvar, yvar))[[2]],
   density2color = FALSE,
@@ -22,9 +23,7 @@ plot_joint_density(
 
 \item{yvar}{svar}
 
-\item{xcolor}{svar or NULL}
-
-\item{ycolor}{svar or NULL}
+\item{palette}{color palette (named character vector)}
 
 \item{density2color}{whether to map density to color in scatterplot}
 
@@ -48,5 +47,5 @@ plot_joint_density(object, 'Height', 'Weight')
 plot_joint_density(object, 'Height', 'Weight',  smooth = TRUE)
 plot_joint_density(object, 'Height', 'Weight',   density2color = TRUE)
 plot_joint_density(object, 'Height', 'Weight', density2contour = TRUE)
-plot_joint_density(object, 'Height', 'Weight')
+plot_joint_density(object, 'Height', 'Weight', palette = c(Height = 'red', Weight = 'forestgreen'))
 }
