@@ -2275,9 +2275,7 @@ plot_joint_density <- function(
               object, 
                 xvar, 
                 yvar, 
-              palette = make_colors(c(xvar,yvar)),
-              xcolor = make_colors(c(xvar, yvar))[[1]], 
-              ycolor = make_colors(c(xvar, yvar))[[2]], 
+             palette = make_colors(c(xvar,yvar)),
        density2color = FALSE, 
      density2contour = FALSE, 
               smooth = FALSE

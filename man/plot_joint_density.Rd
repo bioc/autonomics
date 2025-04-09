@@ -9,8 +9,6 @@ plot_joint_density(
   xvar,
   yvar,
   palette = make_colors(c(xvar, yvar)),
-  xcolor = make_colors(c(xvar, yvar))[[1]],
-  ycolor = make_colors(c(xvar, yvar))[[2]],
   density2color = FALSE,
   density2contour = FALSE,
   smooth = FALSE
