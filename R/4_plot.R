@@ -2276,15 +2276,18 @@ mode <- function(x){
 #' object$Height <- rnorm(ncol(object), mean = 176)
 #' object$Weight <- rnorm(ncol(object), mean = 85.4)
 #' plot_joint_density(object, 'Height', 'Weight')
+#' plot_joint_density(object, 'Height', 'Weight', xlines = c(175, 177), ylines = c(85, 86))
 #' plot_joint_density(object, 'Height', 'Weight',  smooth = TRUE)
 #' plot_joint_density(object, 'Height', 'Weight',   density2color = TRUE)
 #' plot_joint_density(object, 'Height', 'Weight', density2contour = TRUE)
 #' plot_joint_density(object, 'Height', 'Weight', palette = c(Height = 'red', Weight = 'forestgreen'))
 #' @export
 plot_joint_density <- function(
-              object, 
-                xvar, 
-                yvar, 
+              object,
+                xvar,
+                yvar,
+               xlines = quantile(object[[xvar]], c(0.33,0.66)),
+               ylines = quantile(object[[yvar]], c(0.33,0.66)),
              palette = make_colors(c(xvar,yvar)),
        density2color = FALSE, 
      density2contour = FALSE, 
@@ -2298,11 +2301,12 @@ plot_joint_density <- function(
         xvalues <- obj[[xvar]]
         densityfun <- approxfun(density(xvalues, na.rm = TRUE))
         pX <- ggplot() + theme_bw() + 
-                         annotate('point', x = sort(xvalues), y = densityfun(sort(xvalues)), color = palette[[xvar]]) + 
-                         annotate('path',  x = sort(xvalues), y = densityfun(sort(xvalues)), color = palette[[xvar]]) + 
+                         annotate('point',   x = sort(xvalues), y = densityfun(sort(xvalues)),    color = palette[[xvar]]) + 
+                         annotate('path',    x = sort(xvalues), y = densityfun(sort(xvalues)),    color = palette[[xvar]]) + 
+                         annotate('segment', x = xlines, xend = xlines, y = 0, yend = densityfun(xlines), color = palette[[xvar]]) + 
                          scale_x_continuous(position = 'top') + 
                          xlab(NULL) + 
-                         ylab('') + 
+                         ylab(NULL) + 
                          theme(axis.text.y = element_text(color = 'white'), # 5.5 each is default
                                 panel.grid = element_blank(),
                                plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), 'points'), 
@@ -2319,6 +2323,7 @@ plot_joint_density <- function(
         pY <- ggplot() + theme_bw() + 
                          annotate('point', y = sort(yvalues), x = -densityfun(sort(yvalues)), color = palette[[yvar]]) + 
                          annotate('path',  y = sort(yvalues), x = -densityfun(sort(yvalues)), color = palette[[yvar]]) + 
+                         annotate('segment', y = ylines, yend = ylines, x = 0, xend = -densityfun(ylines), color = palette[[yvar]]) + 
                          scale_x_continuous(position = 'top') + 
                          scale_y_continuous(position = 'left') + 
                          xlab('') + 
@@ -2343,19 +2348,23 @@ plot_joint_density <- function(
         if (density2color){  pXY <- pXY + geom_point(aes(x = !!sym(xvar), y = !!sym(yvar), color = !!sym('xydensity'))) + 
                                   scale_color_gradient(low = '#56B1F7', high = '#132B43')
         } else {     pXY <- pXY + geom_point() }
-        pXY <- pXY + ylab(yvar) + xlab(xvar) + 
-                   scale_x_continuous(position = 'top') + 
-                   guides(fill = 'none', color = 'none') + 
-                   theme(
-                       plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), 'points'), 
-                       panel.border = element_blank(),
-                       axis.line.x  = element_line(color = palette[[xvar]]),  axis.line.y  = element_line(color = palette[[yvar]]),
-                       axis.title.x = element_text(color = palette[[xvar]]),  axis.title.y = element_text(color = palette[[yvar]]), 
-                       axis.ticks.x = element_line(color = palette[[xvar]]),  axis.ticks.y = element_line(color = palette[[yvar]]), 
-                       axis.text.x  = element_text(color = palette[[xvar]]),  axis.text.y  = element_text(color = palette[[yvar]]), 
-                       panel.grid = element_blank(),
-                       
-                    )
+        pXY <- pXY +
+               annotate('segment', x = xlines, xend = xlines, y = min(obj[[yvar]]), yend = max(obj[[yvar]]), color = palette[[xvar]]) + 
+               annotate('segment', y = ylines, yend = ylines, x = min(obj[[xvar]]), xend = max(obj[[xvar]]), color = palette[[yvar]]) + 
+               ylab(yvar) + 
+               xlab(xvar) + 
+               scale_x_continuous(position = 'top') + 
+               guides(fill = 'none', color = 'none') + 
+               theme(
+                   plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), 'points'), 
+                   panel.border = element_blank(),
+                   axis.line.x  = element_line(color = palette[[xvar]]),  axis.line.y  = element_line(color = palette[[yvar]]),
+                   axis.title.x = element_text(color = palette[[xvar]]),  axis.title.y = element_text(color = palette[[yvar]]), 
+                   axis.ticks.x = element_line(color = palette[[xvar]]),  axis.ticks.y = element_line(color = palette[[yvar]]), 
+                   axis.text.x  = element_text(color = palette[[xvar]]),  axis.text.y  = element_text(color = palette[[yvar]]), 
+                   panel.grid = element_blank(),
+                   
+                )
         layout <- matrix(c(4,1,1,
                            2,3,3,
                            2,3,3), byrow = TRUE, nrow = 3)

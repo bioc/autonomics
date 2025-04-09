@@ -8,6 +8,8 @@ plot_joint_density(
   object,
   xvar,
   yvar,
+  xlines = quantile(object[[xvar]], c(0.33, 0.66)),
+  ylines = quantile(object[[yvar]], c(0.33, 0.66)),
   palette = make_colors(c(xvar, yvar)),
   density2color = FALSE,
   density2contour = FALSE,
@@ -42,6 +44,7 @@ set.seed(20)
 object$Height <- rnorm(ncol(object), mean = 176)
 object$Weight <- rnorm(ncol(object), mean = 85.4)
 plot_joint_density(object, 'Height', 'Weight')
+plot_joint_density(object, 'Height', 'Weight', xlines = c(175, 177), ylines = c(85, 86))
 plot_joint_density(object, 'Height', 'Weight',  smooth = TRUE)
 plot_joint_density(object, 'Height', 'Weight',   density2color = TRUE)
 plot_joint_density(object, 'Height', 'Weight', density2contour = TRUE)
