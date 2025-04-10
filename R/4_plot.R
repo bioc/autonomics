@@ -2249,21 +2249,13 @@ get_density <- function(x, y, ...) {
     return(dens$z[ii])
 }
 
-#' Mode
-#' @param x numeric vector
-#' @return number
-#' @examples
-#' mode(c(1,2,3,3,3,4,5))
-#' @export
-mode <- function(x){
-    dens <- density(x, na.rm = TRUE)
-    dens$x[which.max(dens$y)]
-}
 
 #' Plot joint density
 #' @param object SummarizedExperiment
 #' @param xvar   svar
 #' @param yvar   svar
+#' @param xlines numeric vector
+#' @param ylines numeric vector
 #' @param palette color palette (named character vector)
 #' @param density2color   whether to map density to color in scatterplot
 #' @param density2contour whether to map density to contour in scatterplot

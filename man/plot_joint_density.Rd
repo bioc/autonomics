@@ -23,6 +23,10 @@ plot_joint_density(
 
 \item{yvar}{svar}
 
+\item{xlines}{numeric vector}
+
+\item{ylines}{numeric vector}
+
 \item{palette}{color palette (named character vector)}
 
 \item{density2color}{whether to map density to color in scatterplot}
