@@ -57,19 +57,19 @@ Transform values
 file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 object <- read_maxquant_proteingroups(file)
 
-object                       \%>\% plot_sample_densities()
-invnorm(object)              \%>\% plot_sample_densities()
+object                                \%>\% plot_sample_densities()
+invnorm(object)                       \%>\% plot_sample_densities()
 
-object                       \%>\% plot_sample_densities()
-quantnorm(object)            \%>\% plot_sample_densities()
+object                                \%>\% plot_sample_densities()
+quantnorm(object)                     \%>\% plot_sample_densities()
 
-object                       \%>\% plot_sample_densities()
-#vsn(object)                  \%>\% plot_sample_densities()  # dataset too small
+object                                \%>\% plot_sample_densities()
+#vsn(object)                           \%>\% plot_sample_densities()  # dataset too small
 
-object                       \%>\% plot_sample_densities()
-zscore(object)               \%>\% plot_sample_densities()
+object                                \%>\% plot_sample_densities()
+zscore(object)                        \%>\% plot_sample_densities()
 
-object                       \%>\% plot_sample_densities()
-exp2(object)                 \%>\% plot_sample_densities()
-log2transform(exp2(object))  \%>\% plot_sample_densities()
+object                                \%>\% plot_sample_densities()
+exp2transform(object)                 \%>\% plot_sample_densities()
+log2transform(exp2transform(object))  \%>\% plot_sample_densities()
 }
