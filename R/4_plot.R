@@ -2249,16 +2249,6 @@ get_density <- function(x, y, ...) {
     return(dens$z[ii])
 }
 
-#' Mode
-#' @param x numeric vector
-#' @return number
-#' @examples
-#' mode(c(1,2,3,3,3,4,5))
-#' @export
-mode <- function(x){
-    dens <- density(x, na.rm = TRUE)
-    dens$x[which.max(dens$y)]
-}
 
 #' Plot joint density
 #' @param object SummarizedExperiment
