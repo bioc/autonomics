@@ -759,7 +759,6 @@ biplot_transforms <- function(
       x        = drstrings['x'],
       y        = drstrings['y'],
       method   = method, 
-      by       = drstrings['by'],
       dims     = dims,
       color    = color,
       shape    = shape,
@@ -767,6 +766,7 @@ biplot_transforms <- function(
       alpha    = alpha,
       group    = group,
       label    = label,
+      fixed    = fixed,
       ... ) +
       facet_wrap(
         vars(variance.annot.ext), ncol = ncol, nrow = nrow, scales = "free") +
@@ -824,7 +824,6 @@ biplot_transforms_assays <- function(
       x        = drstrings['x'],
       y        = drstrings['y'],
       method   = method, 
-      by       = drstrings['by'],
       dims     = dims,
       color    = color,
       shape    = shape,
@@ -848,7 +847,6 @@ biplot_transforms_assays <- function(
     y        = scorenames(
                  method, by = by, dims = dims[[2]], sep = guess_fitsep(sdata)),
     method   = DIMREDENGINES[1], # 'pca'
-    by       = 'sample_id', 
     dims     = 1:2,
     color    = if (method %in% DIMREDSUPER) by else 'subgroup', 
     shape    = NULL, 
@@ -871,12 +869,17 @@ biplot_transforms_assays <- function(
     xsym <- symbolize(x)
     assert_scalar_subset(y, names(sdata))
     ysym <- symbolize(y)
-    assert_scalar_subset(by, names(sdata))
     if (!is.null(color)) assert_scalar_subset(color, names(sdata))
     colorsym <- symbolize(color)
-    if (!is.null(shape)) assert_scalar_subset(shape, names(sdata))
+    if (!is.null(shape)){
+      assert_scalar_subset(shape, names(sdata))
+      fixed %<>% extract(names(.) %>% setdiff('shape'))
+    }
     shapesym <- symbolize(shape)
-    if (!is.null(size)) assert_scalar_subset(size, names(sdata))
+    if (!is.null(size)){
+      assert_scalar_subset(size, names(sdata))
+      fixed %<>% extract(names(.) %>% setdiff('size'))
+    }
     sizesym <- symbolize(size)
     if (!is.null(alpha)) assert_scalar_subset(alpha, names(sdata))
     alphasym <- symbolize(alpha)
@@ -886,21 +889,27 @@ biplot_transforms_assays <- function(
     labelsym <- symbolize(label)
  
     # Plot
-    p <- ggplot(
-      data    = sdata,
-      mapping = aes(
-        x = !!xsym, y = !!ysym, color = !!colorsym, shape = !!shapesym,
-        size = !!sizesym, alpha = !!alphasym, group = !!groupsym,),
-      fixed   = fixed,
-      ...) +
-      geom_point() +
-      theme_bw() + theme
+    mapped_aes <- aes(
+      x = !!xsym, y = !!ysym, color = !!colorsym, shape = !!shapesym,
+      size = !!sizesym, alpha = !!alphasym, group = !!groupsym)
+    p <- ggplot() + theme_bw() + theme +
+      layer(
+        geom     = 'point',
+        stat     = 'identity',
+        position = 'identity',
+        data     = sdata,
+        mapping  = mapped_aes,
+        params = fixed,
+        ...)
     if (!is.null(colorpalette))  p <- p +
       scale_color_manual(values = colorpalette, na.value = 'gray80')
     if (!is.null(alphapalette))  p <- p +
       scale_alpha_manual(values = alphapalette)
     if (!is.null(label))  p <- p + 
-      geom_text_repel(aes(label = !!labelsym), show.legend = FALSE)
+      geom_text_repel(
+        data        = sdata,
+        mapping     = modifyList(mapped_aes, aes(label = !!labelsym)),
+        show.legend = FALSE)
     if (!is.null(shape)){
       n <- if (is.factor(sdata[[shape]]))
         { length(levels(sdata[[shape]])) }
