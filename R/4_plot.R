@@ -2254,6 +2254,8 @@ get_density <- function(x, y, ...) {
 #' @param object SummarizedExperiment
 #' @param xvar   svar
 #' @param yvar   svar
+#' @param xlines numeric vector
+#' @param ylines numeric vector
 #' @param palette color palette (named character vector)
 #' @param density2color   whether to map density to color in scatterplot
 #' @param density2contour whether to map density to contour in scatterplot
