@@ -344,7 +344,7 @@ exp2transform <- function(
     i <- match(ass, assayNames(object))
     if (verbose)  cmessage('%sexp2 %s', spaces(14), ass)
     assays(object)[[i]] %<>% magrittr::raise_to_power(2, .)
-    if (stri_startswith(assayNames(object)[i], "log2")) {
+    if (stri_startswith_fixed(assayNames(object)[i], "log2")) {
       assayNames(object)[i] %<>% stri_replace_first_regex('^log2\\s*', '')
     } else {
       assayNames(object)[i] %<>% paste0('log2', .)
