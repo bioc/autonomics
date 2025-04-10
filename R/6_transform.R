@@ -908,7 +908,7 @@ biplot_transforms_assays <- function(
     if (!is.null(label))  p <- p + 
       geom_text_repel(
         data        = sdata,
-        mapping     = modifyList(mapped_aes, aes(label = !!labelsym)),
+        mapping     = utils::modifyList(mapped_aes, aes(label = !!labelsym)),
         show.legend = FALSE)
     if (!is.null(shape)){
       n <- if (is.factor(sdata[[shape]]))
