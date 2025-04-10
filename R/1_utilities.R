@@ -87,3 +87,18 @@ pull_columns <- function(df, first_cols, verbose = TRUE){
 is_collapsed_subset <- function(x, y, sep = ';'){
     mapply(.is_collapsed_subset, x, y, MoreArgs = list(sep = sep))
 }
+
+# NULL aware sym conversion for usage with ggplot2
+#' @param x string or NULL
+#' @return sym(x) or quo(NULL)
+#' @examples
+#' symbolize('test')
+#' symbolize(NULL)
+#' try(symbolize(2))
+#' @noRd
+symbolize <- function(x)
+{
+  if (is.null(x)) return(quo(NULL))
+  assert_is_a_string(x)
+  sym(x)
+}

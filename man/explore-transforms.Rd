@@ -54,7 +54,6 @@ biplot_transforms_assays(
   subgroupvar = "subgroup",
   transforms = TRANSFORMSTRICT,
   method = DIMREDENGINES[1],
-  by = biplot_by(object, method)[1],
   dims = 1:2,
   color = subgroupvar,
   shape = NULL,
@@ -103,8 +102,6 @@ biplot_transforms_assays(
 \item{nrow}{integer          : rows for facet wraping}
 
 \item{assays}{character vector : assay names to operate on}
-
-\item{by}{svar or NULL}
 }
 \value{
 ggplot2 object

@@ -518,7 +518,6 @@ gglegend<-function(p){
 #' @param  subgroupvar  svar
 #' @param  transforms   character vector : transformations explored
 #' @param  method       string           : dimension reduction technique
-#' @param  by           svar or NULL
 #' @param  dims         numbers          : biplot dimensions
 #' @param  color        svar
 #' @param  shape        svar
@@ -783,7 +782,6 @@ biplot_transforms_assays <- function(
     subgroupvar = 'subgroup',
     transforms  = TRANSFORMSTRICT,  # without 'center_mean' & 'center_median'
     method      = DIMREDENGINES[1], # 'pca'
-    by          = biplot_by(object, method)[1],
     dims        = 1:2,
     color       = subgroupvar, 
     shape       = NULL, 
@@ -859,9 +857,9 @@ biplot_transforms_assays <- function(
     group    = NULL,         # Use 'feature_id' (not 'gene')
     label    = NULL,         # Which use 'feature_id' to guarantee uniqueness
     fixed    = list(shape = 15, size = 3), 
-    colorpalette =  make_colors(sort(unique(sdata[[color]]))),
+    colorpalette = make_colors(sort(unique(sdata[[color]]))),
     alphapalette = if (is.null(alpha)) NULL
-                   else .make_alpha_palette(sdata[[alpha]]), 
+                     else .make_alpha_palette(sdata[[alpha]]), 
     title = paste0(method, guess_fitsep(sdata, by)), 
     theme = ggplot2::theme(plot.title = element_text(hjust = 0.5), 
                            panel.grid = element_blank()),
@@ -870,24 +868,29 @@ biplot_transforms_assays <- function(
     # Assert / Process
     assert_is_all_of(sdata, 'data.table')
     assert_scalar_subset(x, names(sdata))
+    xsym <- symbolize(x)
     assert_scalar_subset(y, names(sdata))
-    if (!is.null(color)){ assert_is_a_string(color)
-      assert_is_subset(color, names(sdata)) }
-    if (!is.null(group)){ assert_is_a_string(group)
-      assert_scalar_subset(group, names(sdata)) }
-    if (!is.null(shape)){ assert_is_a_string(shape)
-      assert_scalar_subset(shape, names(sdata)) 
-      fixed %<>% extract(names(.) %>% setdiff('shape'))}
-    if (!is.null(size)){  assert_is_a_string(size)
-      assert_scalar_subset(size,  names(sdata)) 
-      fixed %<>% extract(names(.) %>% setdiff('size'))}
-    
+    ysym <- symbolize(y)
+    assert_scalar_subset(by, names(sdata))
+    if (!is.null(color)) assert_scalar_subset(color, names(sdata))
+    colorsym <- symbolize(color)
+    if (!is.null(shape)) assert_scalar_subset(shape, names(sdata))
+    shapesym <- symbolize(shape)
+    if (!is.null(size)) assert_scalar_subset(size, names(sdata))
+    sizesym <- symbolize(size)
+    if (!is.null(alpha)) assert_scalar_subset(alpha, names(sdata))
+    alphasym <- symbolize(alpha)
+    if (!is.null(group)) assert_scalar_subset(group, names(sdata))
+    groupsym <- symbolize(group)
+    if (!is.null(label)) assert_scalar_subset(label, names(sdata))
+    labelsym <- symbolize(label)
+ 
     # Plot
     p <- ggplot(
       data    = sdata,
       mapping = aes(
-        x = !!sym(x), y = !!sym(y), color = !!sym(color),
-        shape = shape, size = size, alpha = alpha, group = group),
+        x = !!xsym, y = !!ysym, color = !!colorsym, shape = !!shapesym,
+        size = !!sizesym, alpha = !!alphasym, group = !!groupsym,),
       fixed   = fixed,
       ...) +
       geom_point() +
@@ -897,10 +900,12 @@ biplot_transforms_assays <- function(
     if (!is.null(alphapalette))  p <- p +
       scale_alpha_manual(values = alphapalette)
     if (!is.null(label))  p <- p + 
-      geom_text_repel(aes(label = !!sym(label)), show.legend = FALSE)
+      geom_text_repel(aes(label = !!labelsym), show.legend = FALSE)
     if (!is.null(shape)){
-      n <- if (is.factor(sdata[[shape]])) levels(sdata[['shape']])
-      else sort(unique(sdata[[shape]]))
+      n <- if (is.factor(sdata[[shape]]))
+        { length(levels(sdata[[shape]])) }
+      else 
+        { length(unique(sdata[[shape]])) }
       if (n > 6)  p <- p + scale_shape_manual(values = seq(15, 15+n-1))
       # Warning messages: The shape palette can deal with a maximum 
       # of 6 discrete values
