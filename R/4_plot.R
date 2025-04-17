@@ -2250,6 +2250,11 @@ get_density <- function(x, y, ...) {
 }
 
 
+#' @rdname densities
+#' @export
+.densities <- function(x, xpred = x)  approxfun(density(x, na.rm = TRUE))(xpred)
+
+
 #' Unmix density components
 #' @param x numeric vector
 #' @param k number of components
