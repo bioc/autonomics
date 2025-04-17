@@ -2291,6 +2291,83 @@ unmix_mixtools <- function(x, k = 2){
 }
 
 
+#' Densities
+#' @param x      numeric vector: data points
+#' @param xpred  numeric vector: prediction points
+#' @param plot   whether to plot
+#' @param color  string
+#' @param unmix  method to unmix density comonents: 'none', 'mclust', or 'mixtools'
+#' @param k      number of components
+#' @return numeric vector with same length as xpred
+#' @examples
+#' # Data
+#'     set.seed(1)
+#'     x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#'     xpred <- seq(min(x), max(x), length.out = 100)
+#' # Innerfun
+#'     .densities(x, xpred)
+#' # Outerfun
+#'      densities(x, xpred)
+#'      densities(x, xpred, unmix = 'mclust')
+#'      densities(x, xpred, unmix = 'mixtools', k = 3)
+#' @export
+densities <- function(
+    x, 
+    xpred = x, 
+     plot = TRUE, 
+    color = '#F8766D', 
+    unmix = c('none', 'mclust', 'mixtools')[1],
+        k = switch(unmix, none = 0, mclust = NULL, mixtools = 2)
+){
+# Assert
+    assert_is_numeric(x)
+    assert_is_numeric(xpred)
+    assert_is_a_bool(plot)
+    assertive::assert_all_are_hex_colors(color)
+    assert_scalar_subset(unmix, c('mclust', 'mixtools', 'none'))
+# Densities
+        y <- .densities(x)
+    ypred <- .densities(x, xpred)
+# Mixture components
+    if (installed(unmix)){
+        componentdt <- if (unmix == 'mclust'  ){ unmix_mclust(  x, k = k) 
+               }  else if (unmix == 'mixtools'){ unmix_mixtools(x, k = k) }
+        k <- nrow(componentdt)
+        xpreds <- xpred
+        xpreds %<>% replicate(k, ., simplify = FALSE)
+        xpreds %<>% set_names(seq_along(.))
+        ymix <- xpreds 
+        ymix %<>% mapply(dnorm, x = ., mean = componentdt$mean, sd = componentdt$sd, SIMPLIFY = FALSE)
+        ymix %<>% mapply(multiply_by, e1 = ., e2 = componentdt$weight, SIMPLIFY = FALSE)
+        ymix %<>% Reduce(cbind, .)
+        ymix %<>% set_colnames(seq_len(ncol(.)))
+        ymix %<>% rowSums()
+    }
+# Plot
+    if (plot){
+        # Densities
+            pointdt <- data.table(x = x, y = y)
+            linedt  <- data.table(x = xpred, y = ypred, method = '')
+            p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
+            p <- p + geom_point(aes(x = x, y = y), pointdt, color = color)
+            p <- p + geom_line( aes(x = x, y = y), linedt,  color = color)
+        # Components
+        if (installed(unmix)){
+            mixturedt <- data.table(x = xpred, y = ymix, method = unmix)
+            p <- p + geom_line(aes(x = x, y = y, linetype = method), mixturedt, color = color)
+            p <- p + scale_linetype_manual(values = 'dotted')
+            idx <- 1+which(diff(sign(diff(ymix))) > 0)
+            segmentdt <- data.table(x = xpred[idx], 
+                                 xend = xpred[idx],
+                                    y = min(c(ypred, ymix)), 
+                                 yend = ypred[idx])
+            p <- p + geom_segment(aes(x = x, xend = xend, y = y, yend = yend), segmentdt, color = color)
+            p <- p + geom_label(  aes(x = x, y = y+(yend-y)/2, label = formatC(x, 2)),     segmentdt, color = color)
+        }
+        print(p)
+    }
+    ypred
+}
 #' Plot joint density
 #' @param object SummarizedExperiment
 #' @param xvar   svar
