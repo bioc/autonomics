@@ -1,47 +1,172 @@
-#----------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------
 #
-#                      `assertive` functions - Richard Cotton
+#   https://bitbucket.org/richierocks/assertive
+#   Richard Cotton's suite of R packages for (runtime) function argument testing
+#   Dropped off CRAN due to Richie's time limitations
+#   Unparallelled paradigm and functionality remains
+#   Autonomics keeps using it, by having relevant functions copied over in this file
+#   To be outsourced again when assertive finds its way back onto CRAN.
 #
-#     `assertive` was a suite of CRAN packages by Richard Cotton.
-#      Its usage was beautifully documented in the O Reilly book `Testing R` by Richard Cotton.
-#      The suite is still fully available at bitbucket/richierocks.
-#      But, sadly, the CRAN packages are being deprecated.
-#      Multicrispr, as BioC package, requires dependencies to be available on CRAN (or BioC).
-#      Therefore, in response, used assertive functionality is now copied into this file.
-#      Explicit dependency on assertive is being phased out.
-#      Gratefulness towards Richard Cotton for his amazing functionality remains : )
 #
-#----------------------------------------------------------------------------------------------
+#   ASSERTIVE.BASE    ->  assertive.properties  ->  assertive.types  ->  assertive.strings  -> assertive.data
+#                         assertive.numbers     ->  assertive.files
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
 
 
-#===========
-# BASE
-#===========
-
-    #-------
-    # engine
-    #-------
-
-        print_and_capture <- function(x, ...){
-            # call to enc2utf8 is a workaround for
-            # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16539
-            enc2utf8(paste(utils::capture.output(print(x, ...)), collapse = "\n"))
-        }
+# (assert-)are-identical.R
 
 
-        safe_deparse <- function(expr, ...){
-            paste0(deparse(expr, width.cutoff = 500L, ...), collapse = "")
+        are_identical <- function(
+                           x, 
+                           y, 
+            allow_attributes = FALSE, 
+                      .xname = get_name_in_parent(x),
+                      .yname = get_name_in_parent(y)
+        ){  
+            if(allow_attributes){
+                x <- strip_attributes(x)
+                y <- strip_attributes(y)
+            }
+            if(!identical(x, y))  return( false( gettext("%s and %s are not identical."), 
+                                                 .xname, .yname ) )
+            TRUE
         }
         
         
-        get_name_in_parent <- function(x, escape_percent = TRUE){
-            xname <- safe_deparse(  do.call(  substitute, 
-                                              list(substitute(x), parent.frame()) )  )
-            if(escape_percent)  xname <- gsub("%", "%%", xname)
-            xname
+        assert_are_identical <- function(
+            x, y, allow_attributes = FALSE, severity = getOption("assertive.severity", "stop")
+        ){
+            assert_engine(  are_identical,
+                                        x, 
+                                        y = y,
+                                   .xname = get_name_in_parent(x),
+                                   .yname = get_name_in_parent(y),
+                                 severity = severity  )
+        }
+        
+        
+# (assert-)is-true-false-na.R
+        
+
+        is_identical_to_true <- function(
+            x, allow_attributes = FALSE, .xname = get_name_in_parent(x)
+        ){
+            if(allow_attributes)  x <- strip_attributes(x)
+            if(!identical(TRUE, x)){
+                msg <- gettextf(  "%s is not identical to TRUE; its value is %s.", 
+                                  .xname, 
+                                   safe_deparse(x),
+                                   domain = "R-assertive.base"  )
+                return(false(msg))
+            }
+            TRUE
+        }
+        
+        is_identical_to_false <- function(
+            x, allow_attributes = FALSE, .xname = get_name_in_parent(x)
+        ){
+            if(allow_attributes)   x <- strip_attributes(x)
+            if(!identical(FALSE, x)){
+                msg <- gettextf(  "%s is not identical to FALSE; its value is %s.", 
+                                  .xname, 
+                                   safe_deparse(x),
+                                   domain = "R-assertive.base"  )
+                return(false(msg))
+            }
+            TRUE
+        }                  
+        
+        is_true <- function(x, .xname = get_name_in_parent(x)){
+            x <- coerce_to(x, "logical", .xname)
+            call_and_name(  function(x){  is_na_x <- is.na(x)
+                                          ok <- x & !is_na_x
+                                          set_cause(ok, ifelse(is_na_x, "missing", "false"))  }, 
+                            x  )
+        }
+        
+        assert_is_identical_to_true <- function(
+            x, allow_attributes = FALSE, severity = getOption("assertive.severity", "stop")
+        ){                                                  
+            assert_engine(  is_identical_to_true,
+                                               x,
+                                allow_attributes = allow_attributes, 
+                                          .xname = get_name_in_parent(x),
+                                        severity = severity )
+        }
+        
+        assert_is_identical_to_false <- function(
+            x, allow_attributes = FALSE, severity = getOption("assertive.severity", "stop")
+        ){                                                  
+            assert_engine(  is_identical_to_false,
+                                                x, 
+                                 allow_attributes = allow_attributes, 
+                                           .xname = get_name_in_parent(x),
+                                         severity = severity )
+        }
+        
+        assert_all_are_true <- function(x, severity = getOption("assertive.severity", "stop")){                                                     
+            msg <- gettextf(  "The values of %s are not all TRUE.", 
+                               get_name_in_parent(x), 
+                               domain = "R-assertive.base"  )
+            assert_engine(  is_true, 
+                                  x, 
+                                msg = msg, 
+                             .xname = get_name_in_parent(x), 
+                           severity = severity )
         }
 
+        assert_any_are_true <- function(x, severity = getOption("assertive.severity", "stop")){                                                     
+            msg <- gettextf(  "The values of %s are never TRUE.", 
+                               get_name_in_parent(x), 
+                               domain = "R-assertive.base"  )
+            assert_engine(  is_true, 
+                                  x, 
+                                msg = msg, 
+                               what = "any",
+                             .xname = get_name_in_parent(x), 
+                           severity = severity )
+        }
         
+        is_na <- function(x, coerce_to_logical = FALSE, .xname = get_name_in_parent(x)){
+            call_and_name(  
+                function(x){  if(coerce_to_logical)   x <- coerce_to(x, "logical", .xname)
+                              ok <- is.na(x)
+                              if(is.logical(x)){      set_cause(ok, ifelse(x, "true", "false"))
+                              } else {                set_cause(ok, "not missing")
+                              }  }, 
+                x  )
+        }
+        
+        is_not_na <- function(x, coerce_to_logical = FALSE, .xname = get_name_in_parent(x)){
+            call_and_name(
+                function(x){
+                    if(coerce_to_logical)   x <- coerce_to(x, "logical", .xname)
+                    ok <- !is.na(x)
+                    set_cause(ok, "missing")
+                }, 
+                x  )
+        }
+        
+        assert_all_are_not_na <- function(x, severity = getOption("assertive.severity", "stop")){                                                      
+            msg <- gettextf( "The values of %s are sometimes NA.", 
+                              get_name_in_parent(x), 
+                              domain = "R-assertive.base" )
+            assert_engine(  is_not_na, 
+                                    x, 
+                    coerce_to_logical = FALSE, 
+                                  msg = msg, 
+                               .xname = get_name_in_parent(x), 
+                             severity = severity )
+        }
+        
+        
+# cause.R
+        
+
         cause <- function(x){
             y <- attr(x, "cause")
             if(is.null(y))  return(noquote(character(length(x))))
@@ -60,16 +185,6 @@
             x
         }
         
-        
-        false <- function(...){
-            msg <- if(nargs() > 0L) sprintf(...) else ""
-            x <- FALSE
-            cause(x) <- msg[1]
-            class(x) <- c("scalar_with_cause", "logical")
-            x
-        }
-
-
         set_cause <- function(x, false_value, missing_value = "missing"){
             if(!anyNA(x) && all(x, na.rm = TRUE)) return(x)  # fast version of all(!is.na(x) & x)
             is_na_x <- is.na(x)
@@ -97,30 +212,9 @@
         }
 
         
-        to_names <- function(x){                                 # special handling for double, complex only
-            if(is.double(x) && is.vector(x)){
-                ifelse(is.na(x), NA_real_, sprintf("%.17g", x))  # is.vector prevents matching to POSIXct
-            } else if(is.complex(x)){
-                ifelse(is.na(x), NA_complex_, sprintf("%.17g+%.17gi", Re(x), Im(x)))
-            } else {
-                as.character(x)
-            }
-        }
+# conditions.R
         
-        
-        bapply <- function(x, predicate, ...){
-            vapply(x, predicate, logical(1L), ..., USE.NAMES = TRUE)
-        }
-        
-        
-        call_and_name <- function(fn, x, ...){
-            y <- fn(x, ...)
-            dim(y) <- dim(x)
-            names(y) <- to_names(x)
-            y
-        }
-        
-        
+
         assertionError <- function(message, call = NULL, predicate_name = NULL){
             aerr <- list(    message = as.character(message), 
                                 call = call,
@@ -149,6 +243,66 @@
                             "simpleMessage", "message", "condition" )
           amsg
         }
+        
+        
+# engine.R
+        
+
+        false <- function(...){
+            msg <- if(nargs() > 0L) sprintf(...) else ""
+            x <- FALSE
+            cause(x) <- msg[1]
+            class(x) <- c("scalar_with_cause", "logical")
+            x
+        }
+
+
+# utils.R
+        
+
+        print_and_capture <- function(x, ...){
+            # call to enc2utf8 is a workaround for
+            # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16539
+            enc2utf8(paste(utils::capture.output(print(x, ...)), collapse = "\n"))
+        }
+
+
+        safe_deparse <- function(expr, ...){
+            paste0(deparse(expr, width.cutoff = 500L, ...), collapse = "")
+        }
+        
+        
+        get_name_in_parent <- function(x, escape_percent = TRUE){
+            xname <- safe_deparse(  do.call(  substitute, 
+                                              list(substitute(x), parent.frame()) )  )
+            if(escape_percent)  xname <- gsub("%", "%%", xname)
+            xname
+        }
+
+        
+        to_names <- function(x){                                 # special handling for double, complex only
+            if(is.double(x) && is.vector(x)){
+                ifelse(is.na(x), NA_real_, sprintf("%.17g", x))  # is.vector prevents matching to POSIXct
+            } else if(is.complex(x)){
+                ifelse(is.na(x), NA_complex_, sprintf("%.17g+%.17gi", Re(x), Im(x)))
+            } else {
+                as.character(x)
+            }
+        }
+        
+        
+        bapply <- function(x, predicate, ...){
+            vapply(x, predicate, logical(1L), ..., USE.NAMES = TRUE)
+        }
+        
+        
+        call_and_name <- function(fn, x, ...){
+            y <- fn(x, ...)
+            dim(y) <- dim(x)
+            names(y) <- to_names(x)
+            y
+        }
+        
         
         
         give_feedback <- function(handler_type, msg, predicate_name){
@@ -276,177 +430,19 @@
         }
         
         
-    #-------------
-    # true / false
-    #-------------
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  ASSERTIVE.PROPERTIES  ->  assertive.types  ->  assertive.strings  -> assertive.data
+#                         assertive.numbers     ->  assertive.files
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
 
         
-        is_identical_to_true <- function(
-            x, allow_attributes = FALSE, .xname = get_name_in_parent(x)
-        ){
-            if(allow_attributes)  x <- strip_attributes(x)
-            if(!identical(TRUE, x)){
-                msg <- gettextf(  "%s is not identical to TRUE; its value is %s.", 
-                                  .xname, 
-                                   safe_deparse(x),
-                                   domain = "R-assertive.base"  )
-                return(false(msg))
-            }
-            TRUE
-        }
+# (assert-)is-null.R
         
-        
-        is_identical_to_false <- function(
-            x, allow_attributes = FALSE, .xname = get_name_in_parent(x)
-        ){
-            if(allow_attributes)   x <- strip_attributes(x)
-            if(!identical(FALSE, x)){
-                msg <- gettextf(  "%s is not identical to FALSE; its value is %s.", 
-                                  .xname, 
-                                   safe_deparse(x),
-                                   domain = "R-assertive.base"  )
-                return(false(msg))
-            }
-            TRUE
-        }                  
-        
-        is_true <- function(x, .xname = get_name_in_parent(x)){
-            x <- coerce_to(x, "logical", .xname)
-            call_and_name(  function(x){  is_na_x <- is.na(x)
-                                          ok <- x & !is_na_x
-                                          set_cause(ok, ifelse(is_na_x, "missing", "false"))  }, 
-                            x  )
-        }
-        
-        
-        assert_is_identical_to_true <- function(
-            x, allow_attributes = FALSE, severity = getOption("assertive.severity", "stop")
-        ){                                                  
-            assert_engine(  is_identical_to_true,
-                                               x,
-                                allow_attributes = allow_attributes, 
-                                          .xname = get_name_in_parent(x),
-                                        severity = severity )
-        }
-        
-        
-        assert_is_identical_to_false <- function(
-            x, allow_attributes = FALSE, severity = getOption("assertive.severity", "stop")
-        ){                                                  
-            assert_engine(  is_identical_to_false,
-                                                x, 
-                                 allow_attributes = allow_attributes, 
-                                           .xname = get_name_in_parent(x),
-                                         severity = severity )
-        }
-        
-        
-        assert_all_are_true <- function(x, severity = getOption("assertive.severity", "stop")){                                                     
-            msg <- gettextf(  "The values of %s are not all TRUE.", 
-                               get_name_in_parent(x), 
-                               domain = "R-assertive.base"  )
-            assert_engine(  is_true, 
-                                  x, 
-                                msg = msg, 
-                             .xname = get_name_in_parent(x), 
-                           severity = severity )
-        }
-        
-
-        assert_any_are_true <- function(x, severity = getOption("assertive.severity", "stop")){                                                     
-            msg <- gettextf(  "The values of %s are never TRUE.", 
-                               get_name_in_parent(x), 
-                               domain = "R-assertive.base"  )
-            assert_engine(  is_true, 
-                                  x, 
-                                msg = msg, 
-                               what = "any",
-                             .xname = get_name_in_parent(x), 
-                           severity = severity )
-        }
-        
-        
-    #-------------
-    # na
-    #-------------
-        
-        
-        is_na <- function(x, coerce_to_logical = FALSE, .xname = get_name_in_parent(x)){
-            call_and_name(  
-                function(x){  if(coerce_to_logical)   x <- coerce_to(x, "logical", .xname)
-                              ok <- is.na(x)
-                              if(is.logical(x)){      set_cause(ok, ifelse(x, "true", "false"))
-                              } else {                set_cause(ok, "not missing")
-                              }  }, 
-                x  )
-        }
-        
-        
-        is_not_na <- function(x, coerce_to_logical = FALSE, .xname = get_name_in_parent(x)){
-            call_and_name(
-                function(x){
-                    if(coerce_to_logical)   x <- coerce_to(x, "logical", .xname)
-                    ok <- !is.na(x)
-                    set_cause(ok, "missing")
-                }, 
-                x  )
-        }
-        
-        
-        assert_all_are_not_na <- function(x, severity = getOption("assertive.severity", "stop")){                                                      
-            msg <- gettextf( "The values of %s are sometimes NA.", 
-                              get_name_in_parent(x), 
-                              domain = "R-assertive.base" )
-            assert_engine(  is_not_na, 
-                                    x, 
-                    coerce_to_logical = FALSE, 
-                                  msg = msg, 
-                               .xname = get_name_in_parent(x), 
-                             severity = severity )
-        }
-        
-    #----------
-    # identical
-    #----------
-
-        are_identical <- function(
-                           x, 
-                           y, 
-            allow_attributes = FALSE, 
-                      .xname = get_name_in_parent(x),
-                      .yname = get_name_in_parent(y)
-        ){  
-            if(allow_attributes){
-                x <- strip_attributes(x)
-                y <- strip_attributes(y)
-            }
-            if(!identical(x, y))  return( false( gettext("%s and %s are not identical."), 
-                                                 .xname, .yname ) )
-            TRUE
-        }
-        
-        
-        assert_are_identical <- function(
-            x, y, allow_attributes = FALSE, severity = getOption("assertive.severity", "stop")
-        ){
-            assert_engine(  are_identical,
-                                        x, 
-                                        y = y,
-                                   .xname = get_name_in_parent(x),
-                                   .yname = get_name_in_parent(y),
-                                 severity = severity  )
-        }
-        
-        
-        
-#===========
-# PROPERTIES
-#===========
-
-    #-----------
-    # null
-    #-----------
-
 
         is_not_null <- function(x, .xname = get_name_in_parent(x)){
             if(is.null(x))   return(false("%s is NULL.", .xname))
@@ -458,16 +454,13 @@
         }
         
         
-    #-----------
-    # duplicates
-    #-----------
-
+# (assert-)has-dupes.R
+        
 
         has_duplicates <- function(x, .xname = get_name_in_parent(x)){
             if(!anyDuplicated(x))  return(false(gettext("%s has no duplicates."), .xname))
             TRUE
         }
-        
         
         has_no_duplicates <- function(x, .xname = get_name_in_parent(x)){
             if(anyDuplicated(x)){
@@ -480,7 +473,6 @@
             }
             TRUE
         }
-
         
         assert_has_duplicates <- function(x, severity = getOption("assertive.severity", "stop")){                                                                
             assert_engine(  has_duplicates, 
@@ -488,7 +480,6 @@
                             .xname = get_name_in_parent(x), 
                             severity = severity )
         }
-        
         
         assert_has_no_duplicates <- function(x, severity = getOption("assertive.severity", "stop")){
             assert_engine(  has_no_duplicates,
@@ -498,10 +489,9 @@
         }
         
         
-    #-------
-    # length
-    #-------
+# (assert-)are-same-size
         
+
         are_same_length <- function(
             x, y, .xname = get_name_in_parent(x), .yname = get_name_in_parent(y)
         ){
@@ -528,8 +518,36 @@
                 severity = severity
             )
         }
-        
 
+                
+# utils.R 
+        
+        
+        DIM <- function(x){
+            dim_x <- dim(x)
+            if(is.null(dim_x)) length(x) else dim_x
+        }
+        
+        
+        n_elements <- function(x){
+            if(is.recursive(x)){    sum(vapply(x, n_elements, integer(1)))
+            } else {                as.integer(prod(DIM(x)))
+            }  
+        }
+        
+        
+        
+        get_metric <- function(metric){
+            switch(  metric,
+                     length = is_of_length,
+                   elements = has_elements,
+                   stop("Bug in assertive; the metric", metric, "is not valid.", domain = NA) )
+        }
+    
+        
+# (assert-)is-empty-scalar.R
+        
+        
         check_n <- function(n)
         {
             if(any(n < 0 | n != round(n)))
@@ -546,20 +564,6 @@
             TRUE
         }
 
-        
-        DIM <- function(x){
-            dim_x <- dim(x)
-            if(is.null(dim_x)) length(x) else dim_x
-        }
-        
-        
-        n_elements <- function(x){
-            if(is.recursive(x)){    sum(vapply(x, n_elements, integer(1)))
-            } else {                as.integer(prod(DIM(x)))
-            }  
-        }
-        
-                
         has_elements <- function(x, n, .xname = get_name_in_parent(x)){
             n <- use_first(n)
             check_n(n)
@@ -575,14 +579,6 @@
             TRUE
         }
         
-        
-        get_metric <- function(metric){
-            switch(  metric,
-                     length = is_of_length,
-                   elements = has_elements,
-                   stop("Bug in assertive; the metric", metric, "is not valid.", domain = NA) )
-        }
-    
         
         is_scalar <- function(x, metric = c("length", "elements"), .xname = get_name_in_parent(x)){
             metric <- match.arg(metric)
@@ -635,10 +631,10 @@
                             severity = severity  )
         }        
         
-    #-------
-    # names
-    #-------
         
+# (assert-)has-names.R
+        
+
         has_names <- function(x, .xname = get_name_in_parent(x)){
             namesx <- names(x)
             if(    is.null(namesx))   return(false("The names of %s are NULL.",      .xname))
@@ -669,13 +665,19 @@
         
                         
 
-#======
-# TYPES
-#======
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  assertive.properties  ->  ASSERTIVE.TYPES  ->  assertive.strings  -> assertive.data
+#                         assertive.numbers     ->  assertive.files
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
 
-    #--------
-    # logical
-    #--------
+        
+# (assert-)is-type-base.R
+
         
         is_logical <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "logical", .xname)
@@ -702,12 +704,6 @@
                                 .xname = get_name_in_parent(x),
                               severity = severity  )
         }
-        
-        
-    #-------
-    # number
-    #-------
-        
         
         is_numeric <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "numeric", .xname)
@@ -736,10 +732,6 @@
                               severity = severity  )
         }
 
-    #-------
-    # factor
-    #-------
-        
         is_factor <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "factor", .xname)
         }
@@ -752,11 +744,6 @@
                              severity = severity )
         }
         
-                
-    #-------------------
-    # character / string
-    #-------------------
-
                 
         is_character <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "character", .xname)
@@ -784,36 +771,8 @@
                                  .xname = get_name_in_parent(x), 
                                severity = severity  )
         }
-        
-        
-    #--------
-    # formula
-    #--------
-
-        is_formula <- function(x, .xname = get_name_in_parent(x)){
-            is2(x, "formula", .xname)
-        }
-        
-        
-        is_one_sided_formula <- function(x, .xname = get_name_in_parent(x)){
-            if(!(ok <- is_formula(x, .xname)))       return(ok)
-            if(!(ok <- is_of_length(x, 2L, .xname))) return(ok)
-            TRUE
-        }
 
                 
-        assert_is_formula <- function(x, severity = getOption("assertive.severity", "stop")){                                                         
-            assert_engine( is_formula, 
-                                    x, 
-                               .xname = get_name_in_parent(x),
-                             severity = severity )
-        }
-        
-        
-    #---------
-    # function
-    #---------
-        
         is_function <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "function", .xname)
         }
@@ -825,11 +784,8 @@
                                  .xname = get_name_in_parent(x),
                                severity = severity  )
         }        
-        
-    #-----
-    # list
-    #-----
-        
+
+                
         is_list <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "list", .xname)
         }
@@ -842,12 +798,6 @@
                            severity = severity  )
         }
         
-        
-        
-        
-    #-------------------
-    # data.(frame|table)
-    #-------------------
         
         
         is_data.frame <- function(x, .xname = get_name_in_parent(x)){
@@ -877,10 +827,6 @@
         }
 
         
-    #-----------
-    # matrix
-    #-----------
-
         is_matrix <- function(x, .xname = get_name_in_parent(x)){
             is2(x, "matrix", .xname)
         }
@@ -892,12 +838,8 @@
                                .xname = get_name_in_parent(x),
                              severity = severity  )
         }
-        
-        
-    #------
-    # class
-    #------
-    
+
+                
         assert_is_all_of <- function(
             x, classes, severity = getOption("assertive.severity", "stop")
         ){  
@@ -912,9 +854,43 @@
         }
 
         
-#=========
-# STRINGS
-#=========
+# (assert-)is-formula.R
+        
+
+        is_formula <- function(x, .xname = get_name_in_parent(x)){
+            is2(x, "formula", .xname)
+        }
+        
+        
+        is_one_sided_formula <- function(x, .xname = get_name_in_parent(x)){
+            if(!(ok <- is_formula(x, .xname)))       return(ok)
+            if(!(ok <- is_of_length(x, 2L, .xname))) return(ok)
+            TRUE
+        }
+
+                
+        assert_is_formula <- function(x, severity = getOption("assertive.severity", "stop")){                                                         
+            assert_engine( is_formula, 
+                                    x, 
+                               .xname = get_name_in_parent(x),
+                             severity = severity )
+        }
+        
+        
+
+        
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  assertive.properties  ->  assertive.types  ->  ASSERTIVE.STRINGS  -> assertive.data
+#                         assertive.numbers     ->  assertive.files
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
+        
+
+# is-empty-character.R
         
         
         is_missing_or_empty_character <- function(x, .xname = get_name_in_parent(x)){ 
@@ -943,8 +919,9 @@
                                                            msg = msg, 
                                                       severity = severity )
         }
-        
-        #-------------------------------------------------------------------------------------
+ 
+               
+# is-matching-fixed.R
         
         
         is_matching_regex <- function(
@@ -978,8 +955,10 @@
                                     na_ignore = na_ignore,
                                      severity = severity  )
         }
+
+                
+# is-special-string.R
         
-        #-------------------------------------------------------------------------------------
         
         is_numeric_string <- function(x, .xname){
             x <- coerce_to(x, "character", .xname)
@@ -990,11 +969,23 @@
             set_cause(ok, ifelse(is.na(x), "missing", "bad format"))
         }
         
+        
+        
                 
-#=========
-# NUMBERS
-#=========
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  assertive.properties  ->  assertive.types  ->  assertive.strings  -> assertive.data
+#                         ASSERTIVE.NUMBERS     ->  assertive.files
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
+        
 
+# (assert-)is-in-range.R
+        
+        
         is_in_range <- function(
             x, lower = -Inf, upper = Inf, lower_is_strict = FALSE, upper_is_strict = FALSE, 
            .xname = get_name_in_parent(x)
@@ -1077,6 +1068,9 @@
         }
         
         
+# (assert-)is-equal-to.R
+        
+        
         is_greater_than <- function(
             x, y, .xname = get_name_in_parent(x), .yname = get_name_in_parent(x)
         ){
@@ -1151,10 +1145,78 @@
         }
         
                 
-#=====
-# SETS
-#=====
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  assertive.properties  ->  assertive.types  ->  assertive.strings  -> assertive.data
+#                         assertive.numbers     ->  ASSERTIVE.FILES
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
 
+        
+# (assert-)is-file.R        
+    
+            
+        is_existing_file <- function(x, .xname = get_name_in_parent(x)){
+            x <- coerce_to(x, "character", .xname)
+            # file.exists returns FALSE under Windows when there is a trailing slash
+            x <- sub("[\\/]+$", "", x)
+            call_and_name( function(x){
+                                ok <- file.exists(x)
+                                set_cause(ok, ifelse(ok, "", "nonexistent"))
+                            }, 
+                            x )
+        }
+        
+        is_dir <- function(x, .xname = get_name_in_parent(x)){  
+            x <- coerce_to(x, "character", .xname)
+            call_and_name(  function(x){
+                                ok <- file.info(x)$isdir
+                                causes <- ifelse( is.na(ok), "nonexistent", ifelse(ok, "", "file"))
+                                ok <- is_true(ok) 
+                                set_cause(ok, causes)
+                            }, 
+                            x )
+        }
+        
+
+        assert_all_are_dirs <- function(x, severity = getOption("assertive.severity", "stop")){
+            .xname <- get_name_in_parent(x)
+            msg <- gettextf("Some or all of the paths specified by %s are not directories.", .xname)
+            assert_engine( is_dir, 
+                                x, 
+                           .xname = .xname,
+                              msg = msg, 
+                             what = "any",
+                         severity = severity )
+        }
+                
+        assert_all_are_existing_files <- function(x, severity = getOption("assertive.severity", "stop")){
+            .xname <- get_name_in_parent(x)
+            msg <- gettextf("Some or all of the files specified by %s do not exist.", .xname)
+            assert_engine( is_existing_file, 
+                                          x, 
+                                     .xname = .xname,
+                                        msg = msg, 
+                                   severity = severity )
+        }
+        
+
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  assertive.properties  ->  assertive.types  ->  assertive.strings  -> assertive.data
+#                         assertive.numbers     ->  assertive.files
+#                         ASSERTIVE.SETS
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
+        
+        
+# (assert-)is-set.R
+        
         
         is_subset <- function(
             x, y, strictly = FALSE, .xname = get_name_in_parent(x), .yname = get_name_in_parent(y)
@@ -1227,53 +1289,3 @@
                                        .yname = get_name_in_parent(y),
                                      severity = severity  )
         }
-        
-#======
-# FILES
-#======
-
-        is_existing_file <- function(x, .xname = get_name_in_parent(x)){
-            x <- coerce_to(x, "character", .xname)
-            # file.exists returns FALSE under Windows when there is a trailing slash
-            x <- sub("[\\/]+$", "", x)
-            call_and_name( function(x){
-                                ok <- file.exists(x)
-                                set_cause(ok, ifelse(ok, "", "nonexistent"))
-                            }, 
-                            x )
-        }
-        
-        is_dir <- function(x, .xname = get_name_in_parent(x)){  
-            x <- coerce_to(x, "character", .xname)
-            call_and_name(  function(x){
-                                ok <- file.info(x)$isdir
-                                causes <- ifelse( is.na(ok), "nonexistent", ifelse(ok, "", "file"))
-                                ok <- is_true(ok) 
-                                set_cause(ok, causes)
-                            }, 
-                            x )
-        }
-        
-
-        assert_all_are_dirs <- function(x, severity = getOption("assertive.severity", "stop")){
-            .xname <- get_name_in_parent(x)
-            msg <- gettextf("Some or all of the paths specified by %s are not directories.", .xname)
-            assert_engine( is_dir, 
-                                x, 
-                           .xname = .xname,
-                              msg = msg, 
-                             what = "any",
-                         severity = severity )
-        }
-                
-        assert_all_are_existing_files <- function(x, severity = getOption("assertive.severity", "stop")){
-            .xname <- get_name_in_parent(x)
-            msg <- gettextf("Some or all of the files specified by %s do not exist.", .xname)
-            assert_engine( is_existing_file, 
-                                          x, 
-                                     .xname = .xname,
-                                        msg = msg, 
-                                   severity = severity )
-        }
-        
-
