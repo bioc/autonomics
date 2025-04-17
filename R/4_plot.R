@@ -2250,6 +2250,42 @@ get_density <- function(x, y, ...) {
 }
 
 
+#' Unmix density components
+#' @param x numeric vector
+#' @param k number of components
+#' @return data.table: component, mean, sd, weight
+#' @examples
+#' set.seed(1)
+#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#' unmix_mclust(x)
+#' unmix_mixtools(x)
+#' unmix_mixtools(x, k = 3)
+#' @export
+unmix_mclust <- function(x, k = NULL){
+    if (!installed('mclust'))  return(NULL)
+    mclustBIC <- mclust::mclustBIC
+    fit <- mclust::Mclust(x, verbose = FALSE, G = k)
+    means <- fit$parameters$mean
+    sds <- fit$parameters$variance$sigmasq
+    sds %<>% sqrt()
+    sds %<>% rep(length(means))
+    weights <- fit$parameters$pro
+    data.table( component = seq_along(means), mean = means,  sd = sds, weight = weights )
+}
+
+
+#' @rdname unmix_mclust
+#' @export
+unmix_mixtools <- function(x, k = 2){
+    if (!installed('mixtools'))  return(NULL)
+        fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
+      means <- fit$mu
+        sds <- fit$sigma
+    weights <- fit$lambda 
+    data.table( component = seq_along(means), mean = means,  sd = sds, weight = weights )
+}
+
+
 #' Plot joint density
 #' @param object SummarizedExperiment
 #' @param xvar   svar
