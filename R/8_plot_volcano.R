@@ -8,58 +8,59 @@
 
 
 #' Bin continuous variable
-#' @param object numeric or SummarizedExperiment
+#' @param x numeric or SummarizedExperiment
 #' @param fvar   string or NULL
 #' @param probs  numeric
 #' @param ... (S3 dispatch)
 #' @return  factor vector
 #' @examples 
 #' # Numeric vector
-#'     object <- rnorm(10, 5, 1)
-#'     bin(object)
+#'     x <- rnorm(10, 5, 1)
+#'     bin(x)
 #' # SummarizedExperiment
 #'     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
-#'     fdt(object <- read_maxquant_proteingroups(file))
-#'     fdt(bin(object, 'pepcounts'))
+#'     fdt(x <- read_maxquant_proteingroups(file))
+#'     fdt(bin(x, 'pepcounts'))
 #' @export
-bin <- function(object, ...)  UseMethod('bin')
+bin <- function(x, ...)  UseMethod('bin')
 
 
 #' @rdname bin
 #' @export
-bin.logical <- function(object, ...)   object
+bin.logical <- function(x, ...)   x
 
 
 #' @rdname bin
 #' @export
-bin.character <- function(object, ...) object
+bin.character <- function(x, ...) x
 
 
 #' @rdname bin
 #' @export
-bin.factor <- function(object, ...)    object
+bin.factor <- function(x, ...)    x
 
 
 #' @rdname bin
 #' @export
-bin.numeric <- function(object, probs = c(0, 0.33, 0.66, 1), ...){
-    breaks <- quantile(object, probs = probs)
+bin.numeric <- function(x, probs = c(0, 0.33, 0.66, 1), ...){
+    breaks <- quantile(x, probs = probs)
     breaks[1] %<>% subtract(1e-7)           # avoid smallest number from falling outside of bin
-    object %<>% cut(breaks)                 # explicit breaks avoid negative bin
-    levels(object) %<>% substr(2, nchar(.)) #    https://stackoverflow.com/questions/47189232
-    levels(object) %<>% split_extract_fixed(',', 1)
-    levels(object) %<>% paste0('>', .)
-    object
+    x %<>% cut(breaks)                 # explicit breaks avoid negative bin
+    levels(x) %<>% substr(2, nchar(.)) #    https://stackoverflow.com/questions/47189232
+    levels(x) %<>% split_extract_fixed(',', 1)
+    levels(x) %<>% paste0('>', .)
+    x
 }
 
 
-#' @rdname bin
-#' @export
-bin.SummarizedExperiment <- function(object, fvar, probs = c(0, 0.33, 0.66, 1), ...){
-    if (is.null(fvar))  return(object)
-    fdt(object)[[fvar]] %<>% bin()
-    object
-}
+
+# @rdname bin
+# @export
+#bin.SummarizedExperiment <- function(object, fvar, probs = c(0, 0.33, 0.66, 1), ...){
+#    if (is.null(fvar))  return(object)
+#    fdt(object)[[fvar]] %<>% bin()
+#    object
+#}
 
 
 #' Add assay means
@@ -195,9 +196,9 @@ make_volcano_dt <- function(
     assert_any_are_matching_regex(fvars(object), paste0('^p', sep))
     assert_is_subset(fit, fits(object))
     assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
-    if (!is.null(shape)){ assert_is_subset(shape, fvars(object)); object %<>% bin(shape) }
-    if (!is.null(size) ){ assert_is_subset(size,  fvars(object)); object %<>% bin(size)  }
-    if (!is.null(alpha)){ assert_is_subset(alpha, fvars(object)); object %<>% bin(alpha) }
+    if (!is.null(shape)){ assert_is_subset(shape, fvars(object)); fdt(object)[[shape]] %<>% bin() }
+    if (!is.null(size) ){ assert_is_subset(size,  fvars(object)); fdt(object)[[size ]] %<>% bin() }
+    if (!is.null(alpha)){ assert_is_subset(alpha, fvars(object)); fdt(object)[[alpha]] %<>% bin() }
     if (!is.null(label))  assert_is_subset(label, fvars(object))
     fdt(object) %<>% add_adjusted_pvalues('bonferroni', fit = fit, coefs = coefs)
 # Prepare
