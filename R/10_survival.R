@@ -87,7 +87,7 @@ survobj <- function(){
     
     object$timetoevent <- c( time.senior.m,  time.senior.f,  time.junior.m,  time.junior.f )
     object$event       <- c(event.senior.m, event.senior.f, event.junior.m, event.junior.f )
-    object %<>% factorize_assay(k = 2)
+    object %<>% factorize(k = 2)
     object
 }
 
@@ -174,54 +174,50 @@ survobj <- function(){
 }
 
 
-
-#' Bin/Factorize assay
-#' @param object  SummarizedExperiment
-#' @param assay   string
-#' @param k       number of bins/levels
-#' @param verbose TRUE or FALSE
-#' @return SummarizedExperiment
-#' @examples
-#' object <- survobj()
-#'       bin_assay(object, k = 4)
-#' factorize_assay(object, k = 4)
+#' @rdname bin
 #' @export
 bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
+    .Deprecated('bin') # bin.SummarizedExperiment
+    bin.SummarizedExperiment(object, assay = assay, k = k, verbose = verbose)
+}
+
+
+#' @rdname bin
+#' @export
+bin_svar <- function(
+    object, svar, unmix = 'none', k = unmix_k(unmix), verbose = TRUE
+){
 # Assert
     assert_is_valid_sumexp(object)
-    assert_scalar_subset(assay, assayNames(object))
+    assert_scalar_subset(svar, svars(object))
+    assert_is_numeric(object[[svar]])
+    assert_scalar_subset(unmix, c('none', 'mclust', 'mixtools'))
     assert_is_a_number(k)
     assert_is_a_bool(verbose)
 # Bin
-    mat <- assays(object)[[assay]]
-    mat %<>% apply(1, dplyr::ntile, n = k) %>% t()
-    colnames(mat) <- colnames(object)
+    svalues <- object[[svar]]
+    if (unmix == 'none')   svalues %<>% dplyr::ntile(n = k)
+    if (unmix == 'mclust') svalues %<>% bin_unmix
+    
 # Add
-    newassayname <- sprintf('%s%dbins', assay, k)
-    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
-    assays(object)[[newassayname]] <- mat
+    newsvar <- sprintf('%s%dbins', svar, k)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newsvar)  # Align with Code `exprs2levels``
+    object[[newsvar]] <- svalues
     object
 }
 
-
-#' @rdname bin_assay
+#' @rdname bin
 #' @export
 factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
-# Bin (assertions done during binning)
-    object %<>% bin_assay(assay = assay, k = k, verbose = verbose)
-# Factorize
-    binnedassay <- sprintf('%s%dbins', assay, k)
-    mat <- assays(object)[[binnedassay]]
-    mode(mat) <- 'character'
-    mat %<>% paste0('bin', .)
-    dim(mat) <- dim(object)
-    dimnames(mat) <- dimnames(object)
-# Add
-    newassayname <- sprintf('%s%dlevels', assay, k)
-    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels`
-    assays(object)[[newassayname]] <- mat
-    object
+    .Deprecated('factorize') # factorize.SummarizedExperiment
+    factorize.SummerizedExperiment(object, assay = assay, k = k, verbose = verbose)
 }
+
+
+unmix_svar <- function(){
+    
+}
+
 
 
 # Fit survival
