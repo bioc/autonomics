@@ -22,26 +22,29 @@
 #'     fdt(object <- read_maxquant_proteingroups(file))
 #'     fdt(bin(object, 'pepcounts'))
 #' @export
-bin <- function(object, ...) UseMethod('bin')
+bin <- function(object, ...)  UseMethod('bin')
 
 
 #' @rdname bin
 #' @export
-bin.logical <- function(object, ...)  object
+bin.logical <- function(object, ...)   object
+
 
 #' @rdname bin
 #' @export
 bin.character <- function(object, ...) object
 
+
 #' @rdname bin
 #' @export
-bin.factor <- function(object, ...) object
+bin.factor <- function(object, ...)    object
+
 
 #' @rdname bin
 #' @export
 bin.numeric <- function(object, probs = c(0, 0.33, 0.66, 1), ...){
     breaks <- quantile(object, probs = probs)
-    breaks[1] %<>% subtract(1e-7)      # avoid smallest number from falling outside of bin
+    breaks[1] %<>% subtract(1e-7)           # avoid smallest number from falling outside of bin
     object %<>% cut(breaks)                 # explicit breaks avoid negative bin
     levels(object) %<>% substr(2, nchar(.)) #    https://stackoverflow.com/questions/47189232
     levels(object) %<>% split_extract_fixed(',', 1)
@@ -49,11 +52,10 @@ bin.numeric <- function(object, probs = c(0, 0.33, 0.66, 1), ...){
     object
 }
 
+
 #' @rdname bin
 #' @export
-bin.SummarizedExperiment <- function(
-    object, fvar, probs = c(0, 0.33, 0.66, 1), ...
-){
+bin.SummarizedExperiment <- function(object, fvar, probs = c(0, 0.33, 0.66, 1), ...){
     if (is.null(fvar))  return(object)
     fdt(object)[[fvar]] %<>% bin()
     object
