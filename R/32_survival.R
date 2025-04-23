@@ -174,15 +174,7 @@ survobj <- function(){
 }
 
 
-#' @rdname bin
-#' @export
-bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
-    .Deprecated('bin') # bin.SummarizedExperiment
-    bin.SummarizedExperiment(object, assay = assay, k = k, verbose = verbose)
-}
-
-
-#' @rdname bin
+#' @rdname factorize
 #' @export
 bin_svar <- function(
     object, svar, unmix = 'none', k = unmix_k(unmix), verbose = TRUE
@@ -205,14 +197,6 @@ bin_svar <- function(
     object[[newsvar]] <- svalues
     object
 }
-
-#' @rdname bin
-#' @export
-factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
-    .Deprecated('factorize') # factorize.SummarizedExperiment
-    factorize.SummerizedExperiment(object, assay = assay, k = k, verbose = verbose)
-}
-
 
 unmix_svar <- function(){
     
