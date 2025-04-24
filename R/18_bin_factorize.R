@@ -293,11 +293,15 @@ factorize.factor <- function(x, ...)  x
 bin.factor <- function(x, ...)    as.numeric(x)
 
 
+
 #' @rdname factorize
 #' @export
-factorize.numeric <- function(x, k = 3, probs = seq_len(k-1)/k, numericlevels = TRUE, ...){
+factorize.numeric <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
     assert_is_a_number(k)
-    breaks <- quantile(x, probs = probs, na.rm = TRUE)
+    assert_scalar_subset(mixmod, c('none', 'mclust', 'mixtools'))
+     probs <- if (mixmod == 'none')  seq_len(k-1)/k  else NULL
+    breaks <- if (mixmod == 'none'){  unname(quantile(x, probs = probs, na.rm = TRUE))
+              } else {          autonomics::mixbreaks(x, engine = {{mixmod}}, k = k)   }
     breaks %<>% c(  `0%` = min(x, na.rm = TRUE)-1e-7, .)
     breaks %<>% c(`100%` = max(x, na.rm = TRUE)+1e-7   )
     y <- cut(x, breaks)
@@ -312,16 +316,18 @@ factorize.numeric <- function(x, k = 3, probs = seq_len(k-1)/k, numericlevels = 
 
 #' @rdname factorize
 #' @export
-bin.numeric <- function(x, k = 3, probs = seq_len(k-1)/k, ...){
-    as.numeric(factorize.numeric(x, k = k, probs = probs, numericlevels = TRUE))
+bin.numeric <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
+    y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
+    y %<>% as.numeric()
+    y
 }
 
 
 #' @rdname factorize
 #' @export
-factorize.matrix <- function(x, k = 3, probs = seq_len(k-1)/k, numericlevels = TRUE, ...){
+factorize.matrix <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
     y <- x
-    y %<>% apply(1, factorize.numeric, k = k, probs = probs, numericlevels = numericlevels) %>% t()
+    y %<>% apply(1, factorize.numeric, k = k, numericlevels = numericlevels) %>% t()
     colnames(y) <- colnames(x)
     y
 }
@@ -329,9 +335,9 @@ factorize.matrix <- function(x, k = 3, probs = seq_len(k-1)/k, numericlevels = T
 
 #' @rdname factorize
 #' @export
-bin.matrix <- function(x, k = 3, probs = seq_len(k-1)/k, ...){
+bin.matrix <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
     y <- x
-    y %<>% apply(1, bin.numeric, k = k, probs = probs, numericlevels = numericlevels) %>% t()
+    y %<>% apply(1, bin.numeric, k = k, numericlevels = numericlevels) %>% t()
   # y %>% apply(1, dplyr::ntile, n = k) %>% t()    # differs a bit
     colnames(y) <- colnames(x)
     y
@@ -340,8 +346,8 @@ bin.matrix <- function(x, k = 3, probs = seq_len(k-1)/k, ...){
 
 #' @rdname factorize
 #' @export
-factorize.SummarizedExperiment <- function(
-    x, assay = assayNames(object)[1], k = 3, probs = seq_len(k-1)/k, numericlevels = TRUE, verbose = TRUE, ...
+factorize.SummarizedExperiment <- function(x, assay = assayNames(object)[1], 
+    mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, verbose = TRUE, ...
 ){
     # Assert
     assert_scalar_subset(assay, assayNames(x))
@@ -349,7 +355,7 @@ factorize.SummarizedExperiment <- function(
     
     # Bin
     mat <- assays(x)[[assay]]
-    mat %<>% factorize.matrix(k = k, probs = probs, numericlevels = numericlevels)
+    mat %<>% factorize.matrix(mixmod = mixmod, k = k, numericlevels = numericlevels)
     
     # Add
     newassayname <- sprintf('%s%dlevels', assay, k)
