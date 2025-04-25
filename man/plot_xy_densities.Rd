@@ -10,6 +10,8 @@
 plot_x_density(
   x,
   y = NULL,
+  xbreaks = mixbreaks(x),
+  xtitle = NULL,
   color = "#F8766D",
   xlab = NULL,
   ylab = NULL,
@@ -19,6 +21,8 @@ plot_x_density(
 plot_y_density(
   y,
   x = NULL,
+  ybreaks = mixbreaks(y),
+  ytitle = NULL,
   color = "#F8766D",
   xlab = NULL,
   ylab = NULL,
@@ -28,6 +32,10 @@ plot_y_density(
 plot_xy_scatter(
   x,
   y,
+  xbreaks = mixbreaks(x),
+  ybreaks = mixbreaks(y),
+  xtitle = NULL,
+  ytitle = NULL,
   colors = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE,
@@ -38,6 +46,8 @@ plot_xy_scatter(
 plot_xy_densities(
   x,
   y,
+  xbreaks = c(),
+  ybreaks = c(),
   colors = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE,
@@ -47,9 +57,15 @@ plot_xy_densities(
 \arguments{
 \item{x}{numeric vector}
 
-\item{color}{string}
+\item{y}{numeric vector}
 
-\item{ntile}{number}
+\item{color}{character vector}
+
+\item{densityaxiscolor}{string}
+
+\item{contour}{whether to plot density contours}
+
+\item{smooth}{whether to plot a smooth line}
 }
 \value{
 ggplot
@@ -58,6 +74,7 @@ ggplot
 Plot xy densities
 }
 \examples{
+set.seed(1)
 x <- c(rnorm(10, 3), rnorm(10,7))
 y <- c(rnorm(10, 3), rnorm(10,7))
 plot_x_density(x)
