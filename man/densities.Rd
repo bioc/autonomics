@@ -7,14 +7,7 @@
 \usage{
 .densities(x, xpred = x)
 
-densities(
-  x,
-  xpred = x,
-  plot = TRUE,
-  color = "#F8766D",
-  unmix = c("none", "mclust", "mixtools")[1],
-  k = switch(unmix, none = 0, mclust = NULL, mixtools = 2)
-)
+densities(x, xpred = x, plot = TRUE, color = "#F8766D")
 }
 \arguments{
 \item{x}{numeric vector: data points}
@@ -24,10 +17,6 @@ densities(
 \item{plot}{whether to plot}
 
 \item{color}{string}
-
-\item{unmix}{method to unmix density comonents: 'none', 'mclust', or 'mixtools'}
-
-\item{k}{number of components}
 }
 \value{
 numeric vector with same length as xpred
@@ -36,14 +25,9 @@ numeric vector with same length as xpred
 Densities
 }
 \examples{
-# Data
-    set.seed(1)
-    x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-    xpred <- seq(min(x), max(x), length.out = 100)
-# Innerfun
-    .densities(x, xpred)
-# Outerfun
-     densities(x, xpred)
-     densities(x, xpred, unmix = 'mclust')
-     densities(x, xpred, unmix = 'mixtools', k = 3)
+ set.seed(1)
+ x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+ xpred <- seq(min(x), max(x), length.out = 100)
+.densities(x, xpred)  # innerfun
+ densities(x, xpred)  # outerfun
 }

@@ -2261,35 +2261,25 @@ get_density <- function(x, y, ...) {
 #' @param xpred  numeric vector: prediction points
 #' @param plot   whether to plot
 #' @param color  string
-#' @param unmix  method to unmix density comonents: 'none', 'mclust', or 'mixtools'
-#' @param k      number of components
 #' @return numeric vector with same length as xpred
 #' @examples
-#' # Data
-#'     set.seed(1)
-#'     x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#'     xpred <- seq(min(x), max(x), length.out = 100)
-#' # Innerfun
-#'     .densities(x, xpred)
-#' # Outerfun
-#'      densities(x, xpred)
-#'      densities(x, xpred, unmix = 'mclust')
-#'      densities(x, xpred, unmix = 'mixtools', k = 3)
+#'  set.seed(1)
+#'  x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#'  xpred <- seq(min(x), max(x), length.out = 100)
+#' .densities(x, xpred)  # innerfun
+#'  densities(x, xpred)  # outerfun
 #' @export
 densities <- function(
-    x, 
+        x, 
     xpred = x, 
      plot = TRUE, 
-    color = '#F8766D', 
-    unmix = c('none', 'mclust', 'mixtools')[1],
-        k = switch(unmix, none = 0, mclust = NULL, mixtools = 2)
+    color = '#F8766D'
 ){
 # Assert
     assert_is_numeric(x)
     assert_is_numeric(xpred)
     assert_is_a_bool(plot)
     assertive::assert_all_are_hex_colors(color)
-    assert_scalar_subset(unmix, c('mclust', 'mixtools', 'none'))
 # Run
         y <- .densities(x)
     ypred <- .densities(x, xpred)
