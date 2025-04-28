@@ -46,8 +46,8 @@ plot_xy_scatter(
 plot_xy_densities(
   x,
   y,
-  xbreaks = c(),
-  ybreaks = c(),
+  xbreaks = mixbreaks(x),
+  ybreaks = mixbreaks(y),
   colors = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE,

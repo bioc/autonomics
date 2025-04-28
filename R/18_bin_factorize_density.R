@@ -5,19 +5,6 @@
 #========================================================================================
 
 
-#' Mixture k
-#' 
-#' Mixture modeling k 
-#' 
-#' Mixture modeling k (default number of components)
-#' 
-#' @param engine 
-#' @return NULL or number
-#' @examples
-#' mixk('none')
-#' mixk('mclust')
-#' mixk('mixtools')
-#' @export
 mixk <- function(engine){
     assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
     if (engine == 'none')      return(3)     # default for non-mixture binning
@@ -26,18 +13,8 @@ mixk <- function(engine){
 }
 
 
-#' Mclust mixture modeling 
-#' 
-#' @param x  numeric vector
-#' @param k  number of mixture components to look for  
-#' @return data.table: component, mean, sd, weight
-#' @examples
-#' set.seed(1)
-#' x <- c( rnorm(20,3) , rnorm(20,7) , rnorm(20,11))
-#' mixmod_mclust(x)
-#' @export
 mixmod_mclust <- function(x, k = mixk('mclust')){
-    if (!installed('mclust'))  return(NULL)
+    if (!installed('mclust'))    return( mixmod_none(x) )
     mclustBIC <- mclust::mclustBIC
     fit <- mclust::Mclust(x, verbose = FALSE, G = k)
     means <- fit$parameters$mean
@@ -49,19 +26,8 @@ mixmod_mclust <- function(x, k = mixk('mclust')){
 }
 
 
-#' Mixtools mixture modeling 
-#' 
-#' @param x  numeric vector
-#' @param k  number of mixture components to look for  
-#' @return data.table: component, mean, sd, weight
-#' @examples
-#' set.seed(1)
-#' x <- c( rnorm(20,3) , rnorm(20,7) , rnorm(20,11))
-#' mixmod_mixtools(x)
-#' mixmod_mixtools(x, k = 3)
-#' @export
 mixmod_mixtools <- function(x, k = mixk('mixtools')){
-    if (!installed('mixtools'))  return(NULL)
+    if (!installed('mixtools'))  return( mixmod('none') )
         fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
       means <- fit$mu
         sds <- fit$sigma
@@ -71,54 +37,49 @@ mixmod_mixtools <- function(x, k = mixk('mixtools')){
 
 
 
-#' Mixture modeling
-#' @param x       numeric vector
-#' @param engine 'mclust' or 'mixtools' 
-#' @param k       number of components
-#' @param plot    whether to plot
-#' @return data.table: component, mean, sd, weight
+mixmod_none <- function(x)   return( data.table(  component = 1, 
+                                                       mean = mean(x, na.rm = TRUE),
+                                                         sd = sd(  x, na.rm = TRUE), 
+                                                     weight = 1  ) )
+
+#' Mixture model
+#' @param x        numeric vector
+#' @param engine  'mclust', 'mixtools', 'none'
+#' @param k        number of components
+#' @param color    string
+#' @return  data.table (mixmod), ggplot (mixplot), vector (mixbreaks)
 #' @examples
 #' set.seed(1)
 #' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
 #' mixmod(x)
-#' mixmod(x, engine = 'mixtools')
+#' mixplot(x)
+#' mixbreaks(x)
 #' @export
-mixmod <- function(x, engine = 'mclust', k = mixk(engine), plot = FALSE, color = '#F8766D'){
-    assert_is_numeric(x)
-    assert_scalar_subset(engine, c('mclust', 'mixtools'))
-    mixdt <- if (engine == 'mclust'  ){  mixmod_mclust(  x, k = k)
-      } else if (engine == 'mixtools'){  mixmod_mixtools(x, k = k) }
-    if (plot)  print(mixplot(x, mean = mixdt$mean, 
-                                  sd = mixdt$sd, 
-                              weight = mixdt$weight, 
-                              engine = engine, 
-                               color = color))
-    mixdt
+mixmod <- function( x, engine = 'mclust', k = mixk(engine) ){
+    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
+    switch(engine, mclust = mixmod_mclust(x, k = k), 
+                 mixtools = mixmod_mixtools(x, k = k), 
+                   single = mixmod_none(x))
 }
 
 
 wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
 
 
-#' Mixture plot
-#' @param x      data points
-#' @param mean   component means
-#' @param sd     component sds
-#' @param weight component weights
-#' @param engine 'none', 'mclust' or 'mixtools'
-#' @param color string
-#' @examples
-#' set.seed(1)
-#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#' mixdt <- mixmod(x)
-#' mixplot(x, mixdt$mean, mixdt$sd, mixdt$weight)
+#' @rdname mixmod
 #' @export
-mixplot <- function(x, mean, sd, weight, engine = '', color = '#F8766D'){
+mixplot <- function(x, engine = 'mclust', k = mixk(engine), color = '#F8766D'){
+
+    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))    
+     mixdt <- mixmod(x, engine = engine, k = k)
+      mean <- mixdt$mean
+        sd <- mixdt$sd
+    weight <- mixdt$weight
+    
     xcurve <- seq(min(x), max(x), length.out = 100)
     ycurve <- mapply(wnorm, mean = mean, sd = sd, weight = weight, MoreArgs = list(x = xcurve), SIMPLIFY = FALSE)
-    ycurve %<>% Reduce(cbind, .)
-    ycurve %<>% rowSums()
-    
+    ycurve %<>% Reduce(`+`, .)
+
     pointdt <- data.table(x = x,     y = .densities(x))
     curvedt <- data.table(x = xcurve, y = .densities(x, xcurve))
     mixdt   <- data.table(x = xcurve, y = ycurve, engine = engine)
@@ -128,12 +89,13 @@ mixplot <- function(x, mean, sd, weight, engine = '', color = '#F8766D'){
     p <- p + geom_line( aes(x = x, y = y), curvedt, color = color)
     p <- p + geom_line( aes(x = x, y = y, linetype = engine), mixdt, color = color)
     p <- p + scale_linetype_manual(values = 'dotted')
-    
-    idx <- 1+which(diff(sign(diff(ycurve))) > 0)
-    segmentdt <- data.table( x = xcurve[idx], 
-                          xend = xcurve[idx],
+
+    mbreaks <- mixbreaks(x)    
+    if (length(mbreaks) == 0)   return(p)
+    segmentdt <- data.table( x = mbreaks, 
+                          xend = mbreaks,
                              y = min(ycurve), 
-                          yend = .densities(x, xcurve[idx]))
+                          yend = .densities(x, mbreaks))
     p <- p + geom_segment(aes(x = x, xend = xend, y = y, yend = yend), segmentdt, color = color)
     p <- p + geom_label(  aes(x = x, y = y+(yend-y)/2, label = formatC(x, 2)), segmentdt, color = color)
     p
@@ -160,7 +122,7 @@ mixplot <- function(x, mean, sd, weight, engine = '', color = '#F8766D'){
 #' quadrroots(a = 1, b =-4, c = 4)  # one real root
 #' quadrroots(a = 1, b = 1, c = 1)  # imaginary root
 #' @return vector
-#' @export
+#' @noRd
 quadroots <- function(a,b,c){
     D <- b^2 - 4*a*c
     if (a == 0) return(-c/b)
@@ -187,16 +149,11 @@ quadroots <- function(a,b,c){
 }
 
 
-#' Mixture modeling breaks
-#' @param x numeric vector
-#' @return vector 
-#' @examples
-#' set.seed(1)
-#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#' mixbreaks(x)
+#' @rdname mixmod
 #' @export
 mixbreaks <- function(x, engine = 'mclust', k = mixk(engine)){
     mixdt <- mixmod(x, engine = engine, k = k)
+    if (nrow(mixdt) == 1)  return(c())
     y <- lapply(  seq(1, nrow(mixdt)-1), 
                   function(i)  mixdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
     y %<>% Reduce(c, .)

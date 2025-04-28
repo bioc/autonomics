@@ -2465,10 +2465,10 @@ plot_xy_scatter <- function(
 #' plot_xy_densities(x,y)
 #' @export
 plot_xy_densities <- function(
-                  x, 
-                  y, 
-             xbreaks = c(),
-             ybreaks = c(),
+                  x,
+                  y,
+             xbreaks = mixbreaks(x),
+             ybreaks = mixbreaks(y),
               colors = c('#F8766D', '#00BFC4' ),
              contour = FALSE,
               smooth = FALSE,

@@ -2,28 +2,35 @@
 % Please edit documentation in R/18_bin_factorize_density.R
 \name{mixmod}
 \alias{mixmod}
-\title{Mixture modeling}
+\alias{mixplot}
+\alias{mixbreaks}
+\title{Mixture model}
 \usage{
-mixmod(x, engine = "mclust", k = mixk(engine), plot = FALSE, color = "#F8766D")
+mixmod(x, engine = "mclust", k = mixk(engine))
+
+mixplot(x, engine = "mclust", k = mixk(engine), color = "#F8766D")
+
+mixbreaks(x, engine = "mclust", k = mixk(engine))
 }
 \arguments{
 \item{x}{numeric vector}
 
-\item{engine}{'mclust' or 'mixtools'}
+\item{engine}{'mclust', 'mixtools', 'none'}
 
 \item{k}{number of components}
 
-\item{plot}{whether to plot}
+\item{color}{string}
 }
 \value{
-data.table: component, mean, sd, weight
+data.table (mixmod), ggplot (mixplot), vector (mixbreaks)
 }
 \description{
-Mixture modeling
+Mixture model
 }
 \examples{
 set.seed(1)
 x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
 mixmod(x)
-mixmod(x, engine = 'mixtools')
+mixplot(x)
+mixbreaks(x)
 }
