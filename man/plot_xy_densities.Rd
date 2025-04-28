@@ -74,11 +74,22 @@ ggplot
 Plot xy densities
 }
 \examples{
-set.seed(1)
-x <- c(rnorm(10, 3), rnorm(10,7))
-y <- c(rnorm(10, 3), rnorm(10,7))
-plot_x_density(x)
-plot_y_density(y)
-plot_xy_scatter(x,y)
-plot_xy_densities(x,y)
+# Bimodal
+    set.seed(1)
+    x <- c(rnorm(10, 3), rnorm(10,7))
+    y <- c(rnorm(10, 3), rnorm(10,7))
+    plot_xy_densities(x,y)
+    plot_xy_densities(x,y, contour = TRUE)
+    plot_xy_densities(x,y,  smooth = TRUE)
+    plot_xy_scatter(x,y)
+    plot_x_density(x)
+    plot_y_density(y)
+# Unimodal
+    set.seed(1)
+    x <- c(rnorm(20, 3))
+    y <- c(rnorm(20, 3))
+    plot_xy_densities(x,y)
+    plot_xy_scatter(x,y)
+    plot_x_density(x)
+    plot_y_density(y)
 }
