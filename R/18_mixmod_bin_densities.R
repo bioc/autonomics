@@ -462,7 +462,7 @@ plot_x_density <- function(
                    axis.ticks.y = element_line(color = transcolor), 
                    axis.text.y  = element_text(color = transcolor), 
                    axis.title.y = element_text(color = transcolor))
-    p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
+    p <- p + theme(plot.margin = unit(c(5.5,0,0,5.5), 'points'))
 # Align with xyplot
     if (!is.null(y)){
           digits <- max(nchar(scales::extended_breaks()(range(y)))) - 1
@@ -505,7 +505,7 @@ plot_y_density <- function(
     p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
     p <- p + theme(panel.grid = element_blank(), panel.border = element_blank())
     p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
-    p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
+    p <- p + theme(plot.margin = unit(c(0,5.5,5.5,0), 'points'))
     p <- p + theme(axis.line.y.left   = element_blank(), 
                    axis.line.y.right  = element_blank(),
                    axis.ticks.y.left  = element_blank(),
@@ -545,7 +545,7 @@ plot_xy_scatter <- function(
     p <- ggplot(data.table(x = x, y = y), aes(x = x, y = y)) + theme_bw()
     if (contour) p <- p + geom_density2d(color = 'gray80')
     if (smooth ) p <- p + geom_smooth(   color = 'gray80', se = FALSE, method = 'lm', formula = y ~ x)
-    p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
+    p <- p + theme(plot.margin = unit(c(0,0,5.5,5.5), 'points'))
     p <- p + geom_point()
     if (length(xbreaks)>0)  p <- p + geom_vline(aes(xintercept = xbreaks), color = colors[[1]], linetype = 'dashed')
     if (length(ybreaks)>0)  p <- p + geom_hline(aes(yintercept = ybreaks), color = colors[[2]], linetype = 'dashed')
