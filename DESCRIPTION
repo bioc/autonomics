@@ -103,7 +103,7 @@ Suggests:
   lme4, 
   lmerTest,
   MASS,
-  mclust
+  mclust,
   mixOmics,
   mixtools,
   mpm,
