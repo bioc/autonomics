@@ -4,29 +4,29 @@
 \alias{plot_x_density}
 \alias{plot_y_density}
 \alias{plot_xy_scatter}
-\alias{plot_xy_densities}
+\alias{plot_xy_density}
 \title{Plot xy densities}
 \usage{
 plot_x_density(
   x,
   y = NULL,
   xbreaks = mixbreaks(x),
-  xtitle = NULL,
+  title = NULL,
   color = "#F8766D",
   xlab = NULL,
   ylab = NULL,
-  densityaxiscolor = "00000000"
+  transcolor = "00000000"
 )
 
 plot_y_density(
   y,
   x = NULL,
   ybreaks = mixbreaks(y),
-  ytitle = NULL,
+  title = NULL,
   color = "#F8766D",
   xlab = NULL,
   ylab = NULL,
-  densityaxiscolor = "00000000"
+  transcolor = "00000000"
 )
 
 plot_xy_scatter(
@@ -34,8 +34,6 @@ plot_xy_scatter(
   y,
   xbreaks = mixbreaks(x),
   ybreaks = mixbreaks(y),
-  xtitle = NULL,
-  ytitle = NULL,
   colors = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE,
@@ -43,17 +41,16 @@ plot_xy_scatter(
   ylab = NULL
 )
 
-plot_xy_densities(
+plot_xy_density(
   x,
   y,
   xbreaks = mixbreaks(x),
   ybreaks = mixbreaks(y),
   xlab = "X",
-  ylab = NULL,
+  ylab = "Y",
   colors = c("#F8766D", "#00BFC4"),
   contour = FALSE,
-  smooth = FALSE,
-  densityaxiscolor = "00000000"
+  smooth = FALSE
 )
 }
 \arguments{
@@ -61,13 +58,23 @@ plot_xy_densities(
 
 \item{y}{numeric vector}
 
-\item{color}{character vector}
+\item{xbreaks}{numeric vector}
 
-\item{densityaxiscolor}{string}
+\item{title}{NULL or string}
 
-\item{contour}{whether to plot density contours}
+\item{color}{vector or string}
 
-\item{smooth}{whether to plot a smooth line}
+\item{xlab}{NULL or string}
+
+\item{ylab}{NULL or string}
+
+\item{transcolor}{string}
+
+\item{ybreaks}{numeric vector}
+
+\item{contour}{TRUE or FALSE: plot density contours ?}
+
+\item{smooth}{TRUE or FALSE: plot smooth line ?}
 }
 \value{
 ggplot
@@ -80,9 +87,9 @@ Plot xy densities
     set.seed(1)
     x <- c(rnorm(10, 3), rnorm(10,7))
     y <- c(rnorm(10, 3), rnorm(10,7))
-    plot_xy_densities(x,y)
-    plot_xy_densities(x,y, contour = TRUE)
-    plot_xy_densities(x,y,  smooth = TRUE)
+    plot_xy_density(x,y)
+    plot_xy_density(x,y, contour = TRUE)
+    plot_xy_density(x,y,  smooth = TRUE)
     plot_xy_scatter(x,y)
     plot_x_density(x)
     plot_y_density(y)
@@ -90,7 +97,7 @@ Plot xy densities
     set.seed(1)
     x <- c(rnorm(20, 3))
     y <- c(rnorm(20, 3))
-    plot_xy_densities(x,y)
+    plot_xy_density(x,y)
     plot_xy_scatter(x,y)
     plot_x_density(x)
     plot_y_density(y)

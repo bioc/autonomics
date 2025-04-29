@@ -421,17 +421,17 @@ densities <- function(
 
 
 
-#' @rdname plot_xy_densities
+#' @rdname plot_xy_density
 #' @export
 plot_x_density <- function(
                    x,
                    y = NULL,
-             xbreaks = mixbreaks(x),
-              xtitle = NULL,
+              xbreaks = mixbreaks(x),
+               title = NULL,
                color = '#F8766D',
                 xlab = NULL,
                 ylab = NULL,
-    densityaxiscolor = '00000000'
+          transcolor = '00000000'
 ){
 # Prep
     x %<>% sort()
@@ -449,23 +449,22 @@ plot_x_density <- function(
                                                      color = color, 
                                                   linetype = 'dashed')
 # Finishing
-    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(xtitle)
+    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
     p <- p + theme(panel.grid   = element_blank(), 
                    panel.border = element_blank())
-    p <- p + theme(axis.line.x  = element_line(color = color),
-                   axis.ticks.x = element_line(color = color),
-                   axis.text.x  = element_text(color = color),
-                   axis.title.x = element_text(color = color)) 
+    p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
+    p <- p + scale_x_continuous(position = 'top')
+    p <- p + theme(axis.line.x  = element_blank(),
+                   axis.ticks.x = element_blank(),
+                   axis.text.x  = element_blank(), 
+                   axis.title.x = element_text(color = color))
+    p <- p + theme(axis.line.y  = element_line(color = transcolor), 
+                   axis.ticks.y = element_line(color = transcolor), 
+                   axis.text.y  = element_text(color = transcolor), 
+                   axis.title.y = element_text(color = transcolor))
+    p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
 # Align with xyplot
     if (!is.null(y)){
-        p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
-        p <- p + theme(axis.line.x  = element_blank(),
-                       axis.ticks.x = element_blank(),
-                       axis.text.x  = element_blank(), 
-                       axis.title.x = element_blank()) 
-        p <- p + theme(axis.line.y  = element_line(color = densityaxiscolor), 
-                       axis.ticks.y = element_line(color = densityaxiscolor), 
-                       axis.text.y  = element_text(color = densityaxiscolor))
           digits <- max(nchar(scales::extended_breaks()(range(y)))) - 1
         labelfun <- function(br) round(br, digits = digits)
         p <- p + scale_y_continuous(labels = labelfun, sec.axis = sec_axis(~., labels = labelfun))
@@ -474,17 +473,17 @@ plot_x_density <- function(
 }
 
 
-#' @rdname plot_xy_densities
+#' @rdname plot_xy_density
 #' @export
 plot_y_density <- function(
                    y,
                    x = NULL,
-             ybreaks = mixbreaks(y),
-              ytitle = NULL,
+              ybreaks = mixbreaks(y),
+               title = NULL,
                color = '#F8766D',
                 xlab = NULL,
                 ylab = NULL,
-    densityaxiscolor = '00000000'
+          transcolor = '00000000'
 ){
 # Prep
     y %<>% sort()
@@ -502,23 +501,26 @@ plot_y_density <- function(
                                                       color = color, 
                                                    linetype = 'dashed')
 # Finishing
-    p <- p + scale_y_continuous(position = 'left')
-    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(ytitle)
+    p <- p + scale_y_continuous(position = 'right')
+    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
     p <- p + theme(panel.grid = element_blank(), panel.border = element_blank())
-    p <- p + theme(axis.line.y.left  = element_line(color = color), 
-                   axis.ticks.y.left = element_line(color = color), 
-                   axis.text.y.left  = element_text(color = color), 
-                   axis.title.y.left = element_text(color = color, angle = 0, vjust = 0.5))
+    p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
+    p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
+    p <- p + theme(axis.line.y.left   = element_blank(), 
+                   axis.line.y.right  = element_blank(),
+                   axis.ticks.y.left  = element_blank(),
+                   axis.ticks.y.right = element_blank(),
+                   axis.text.y.left   = element_blank(),
+                   axis.text.y.right  = element_blank(),
+                   axis.title.y.left  = element_text(color = color, angle = 0, vjust = 0.5),
+                   axis.title.y.right = element_text(color = color, angle = 0, vjust = 0.5)
+    )
+    p <- p + theme(axis.line.x  = element_line(color = transcolor), 
+                   axis.ticks.x = element_line(color = transcolor), 
+                   axis.text.x  = element_text(color = transcolor), 
+                   axis.title.x = element_text(color = transcolor))
 # Align with xy plot
     if (!is.null(x)){
-        p <- p + theme(plot.margin = unit(c(0,0,0,0), 'points'))
-        p <- p + theme(axis.line.y.left  = element_blank(), 
-                       axis.ticks.y.left = element_blank(), 
-                       axis.text.y.left  = element_blank(), 
-                       axis.title.y.left = element_blank())
-        p <- p + theme(axis.line.x  = element_line(color = densityaxiscolor), 
-                       axis.ticks.x = element_line(color = densityaxiscolor), 
-                       axis.text.x  = element_text(color = densityaxiscolor))
           digits <- max(nchar(scales::extended_breaks()(range(x)))) - 1
         labelfun <- function(br) round(br, digits = digits)
         p <- p + scale_x_continuous(labels = labelfun, sec.axis = sec_axis(~., labels = labelfun))
@@ -527,15 +529,13 @@ plot_y_density <- function(
 }
 
 
-#' @rdname plot_xy_densities
+#' @rdname plot_xy_density
 #' @export
 plot_xy_scatter <- function(
           x,
           y,
     xbreaks = mixbreaks(x),
     ybreaks = mixbreaks(y),
-     xtitle = NULL,
-     ytitle = NULL,
      colors = c('#F8766D', '#00BFC4'),
     contour = FALSE,
      smooth = FALSE,
@@ -568,21 +568,26 @@ plot_xy_scatter <- function(
 
 
 #' Plot xy densities
-#' @param x                 numeric vector
-#' @param y                 numeric vector
-#' @param color             character vector
-#' @param contour           whether to plot density contours
-#' @param smooth            whether to plot a smooth line
-#' @param densityaxiscolor  string
+#' @param x           numeric vector
+#' @param y           numeric vector
+#' @param xbreaks      numeric vector
+#' @param ybreaks      numeric vector
+#' @param title       NULL or string
+#' @param color       vector or string
+#' @param contour     TRUE or FALSE: plot density contours ?
+#' @param smooth      TRUE or FALSE: plot smooth line ?
+#' @param xlab        NULL or string
+#' @param ylab        NULL or string
+#' @param transcolor  string
 #' @return ggplot
 #' @examples
 #' # Bimodal
 #'     set.seed(1)
 #'     x <- c(rnorm(10, 3), rnorm(10,7))
 #'     y <- c(rnorm(10, 3), rnorm(10,7))
-#'     plot_xy_densities(x,y)
-#'     plot_xy_densities(x,y, contour = TRUE)
-#'     plot_xy_densities(x,y,  smooth = TRUE)
+#'     plot_xy_density(x,y)
+#'     plot_xy_density(x,y, contour = TRUE)
+#'     plot_xy_density(x,y,  smooth = TRUE)
 #'     plot_xy_scatter(x,y)
 #'     plot_x_density(x)
 #'     plot_y_density(y)
@@ -590,24 +595,25 @@ plot_xy_scatter <- function(
 #'     set.seed(1)
 #'     x <- c(rnorm(20, 3))
 #'     y <- c(rnorm(20, 3))
-#'     plot_xy_densities(x,y)
+#'     plot_xy_density(x,y)
 #'     plot_xy_scatter(x,y)
 #'     plot_x_density(x)
 #'     plot_y_density(y)
 #' @export
-plot_xy_densities <- function(
-                  x,
-                  y,
-             xbreaks = mixbreaks(x),
-             ybreaks = mixbreaks(y),
-              colors = c('#F8766D', '#00BFC4' ),
-             contour = FALSE,
-              smooth = FALSE,
-    densityaxiscolor = '00000000'
+plot_xy_density <- function(
+              x,
+              y,
+         xbreaks = mixbreaks(x),
+         ybreaks = mixbreaks(y),
+            xlab = 'X',
+            ylab = 'Y',
+          colors = c('#F8766D', '#00BFC4' ),
+         contour = FALSE,
+          smooth = FALSE
 ){
-    px  <- plot_x_density( x, y, color  = colors[[1]], xlab = NULL, ylab = NULL, densityaxiscolor = densityaxiscolor)
-    pxy <- plot_xy_scatter(x, y, colors = colors, contour = contour, smooth = smooth, xlab = NULL, ylab = NULL)
-    py  <- plot_y_density( y, x, color  = colors[[2]], ylab = NULL, xlab = NULL, densityaxiscolor = densityaxiscolor)
+    px  <- plot_x_density( x, y, color  = colors[[1]], xlab = xlab, ylab = ylab)
+    py  <- plot_y_density( y, x, color  = colors[[2]], xlab = xlab, ylab = ylab)
+    pxy <- plot_xy_scatter(x, y, colors = colors, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
     layout <- matrix(c(1,1,4,
                        2,2,3,
                        2,2,3), nrow = 3, byrow = TRUE)
