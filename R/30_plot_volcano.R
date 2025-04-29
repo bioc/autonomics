@@ -141,9 +141,9 @@ make_volcano_dt <- function(
     assert_any_are_matching_regex(fvars(object), paste0('^p', sep))
     assert_is_subset(fit, fits(object))
     assert_is_subset(coefs, autonomics::coefs(object, fit = fit, intercept = TRUE))
-    if (!is.null(shape)){ assert_is_subset(shape, fvars(object)); fdt(object)[[shape]] %<>% bin() }
-    if (!is.null(size) ){ assert_is_subset(size,  fvars(object)); fdt(object)[[size ]] %<>% bin() }
-    if (!is.null(alpha)){ assert_is_subset(alpha, fvars(object)); fdt(object)[[alpha]] %<>% bin() }
+    if (!is.null(shape)){ assert_is_subset(shape, fvars(object)); fdt(object)[[shape]] %<>% factorize() }
+    if (!is.null(size) ){ assert_is_subset(size,  fvars(object)); fdt(object)[[size ]] %<>% factorize() }
+    if (!is.null(alpha)){ assert_is_subset(alpha, fvars(object)); fdt(object)[[alpha]] %<>% factorize() }
     if (!is.null(label))  assert_is_subset(label, fvars(object))
     fdt(object) %<>% add_adjusted_pvalues('bonferroni', fit = fit, coefs = coefs)
 # Prepare
