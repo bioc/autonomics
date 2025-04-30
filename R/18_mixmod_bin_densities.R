@@ -367,7 +367,7 @@ factorize_assay <- function(
                ...
 ){
     .Deprecated('factorize') # factorize.SummarizedExperiment
-    factorize.SummerizedExperiment(object, assay = assay, k = k, verbose = verbose)
+    factorize.SummarizedExperiment(object, assay = assay, k = k, verbose = verbose)
 }
 
 
