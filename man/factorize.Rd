@@ -93,7 +93,8 @@ factorize_assay(
   mixmod = "none",
   k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   probs = seq_len(k - 1)/k,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 
 bin_assay(

@@ -380,7 +380,8 @@ bin.SummarizedExperiment <- function(
      mixmod = 'none',
           k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
       probs = seq_len(k-1)/k,
-    verbose = TRUE
+    verbose = TRUE, 
+           ...
 ){
     # Assert
     assert_scalar_subset(assay, assayNames(x))
