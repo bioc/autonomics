@@ -60,7 +60,7 @@ data.table::data.table
 #' @importFrom stats         aggregate         approxfun           as.formula      density
 #' @importFrom stats         as.dist           contrasts           contrasts<-
 #' @importFrom stats         cor               cutree
-#' @importFrom stats         contr.sum         contr.treatment     dist
+#' @importFrom stats         contr.sum         contr.treatment     dist            dnorm
 #' @importFrom stats         hclust            IQR                 lowess
 #' @importFrom stats         lm                median              model.matrix
 #' @importFrom stats         wilcox.test       na.exclude          p.adjust
