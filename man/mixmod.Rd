@@ -6,11 +6,24 @@
 \alias{mixbreaks}
 \title{Mixture model}
 \usage{
-mixmod(x, engine = "mclust", k = mixk(engine))
+mixmod(
+  x,
+  engine = "mclust",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3)
+)
 
-mixplot(x, engine = "mclust", k = mixk(engine), color = "#F8766D")
+mixplot(
+  x,
+  engine = "mclust",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  color = "#F8766D"
+)
 
-mixbreaks(x, engine = "mclust", k = mixk(engine))
+mixbreaks(
+  x,
+  engine = "mclust",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3)
+)
 }
 \arguments{
 \item{x}{numeric vector}

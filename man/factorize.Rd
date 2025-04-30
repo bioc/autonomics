@@ -36,35 +36,73 @@ bin(x, ...)
 
 \method{bin}{factor}(x, ...)
 
-\method{factorize}{numeric}(x, mixmod = "none", k = mixk(mixmod), numericlevels = TRUE, ...)
+\method{factorize}{numeric}(
+  x,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  numericlevels = TRUE,
+  ...
+)
 
-\method{bin}{numeric}(x, mixmod = "none", k = mixk(mixmod), numericlevels = TRUE, ...)
+\method{bin}{numeric}(
+  x,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  numericlevels = TRUE,
+  ...
+)
 
-\method{factorize}{matrix}(x, mixmod = "none", k = mixk(mixmod), numericlevels = TRUE, ...)
+\method{factorize}{matrix}(
+  x,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  numericlevels = TRUE,
+  ...
+)
 
-\method{bin}{matrix}(x, mixmod = "none", k = mixk(mixmod), numericlevels = TRUE, ...)
+\method{bin}{matrix}(
+  x,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  numericlevels = TRUE,
+  ...
+)
 
 \method{factorize}{SummarizedExperiment}(
   x,
   assay = assayNames(object)[1],
   mixmod = "none",
-  k = mixk(mixmod),
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   numericlevels = TRUE,
   verbose = TRUE,
   ...
 )
 
-factorize_assay(object, assay = assayNames(object)[1], k = 3, verbose = TRUE)
+factorize_assay(
+  object,
+  assay = assayNames(object)[1],
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  verbose = TRUE,
+  ...
+)
 
 \method{bin}{SummarizedExperiment}(
   x,
   assay = assayNames(x)[1],
-  k = 3,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   probs = seq_len(k - 1)/k,
   verbose = TRUE
 )
 
-bin_assay(object, assay = assayNames(object)[1], k = 3, verbose = TRUE)
+bin_assay(
+  object,
+  assay = assayNames(object)[1],
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  verbose = TRUE
+)
 
 bin_svar(object, svar, unmix = "none", k = unmix_k(unmix), verbose = TRUE)
 }

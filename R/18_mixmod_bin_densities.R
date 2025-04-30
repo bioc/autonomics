@@ -5,15 +5,7 @@
 #========================================================================================
 
 
-mixk <- function(engine){
-    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
-    if (engine == 'none')      return(3)     # default for non-mixture binning
-    if (engine == 'mclust')    return(NULL)  # default for mclust
-    if (engine == 'mixtools')  return(2)     # default for mixtools
-}
-
-
-mixmod_mclust <- function(x, k = mixk('mclust')){
+mixmod_mclust <- function(x, k = NULL){
     if (!installed('mclust'))    return( mixmod_none(x) )
     mclustBIC <- mclust::mclustBIC
     fit <- mclust::Mclust(x, verbose = FALSE, G = k)
@@ -26,7 +18,7 @@ mixmod_mclust <- function(x, k = mixk('mclust')){
 }
 
 
-mixmod_mixtools <- function(x, k = mixk('mixtools')){
+mixmod_mixtools <- function(x, k = 2){
     if (!installed('mixtools'))  return( mixmod('none') )
         fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
       means <- fit$mu
@@ -55,7 +47,11 @@ mixmod_none <- function(x)   return( data.table(  component = 1,
 #' mixplot(x)
 #' mixbreaks(x)
 #' @export
-mixmod <- function( x, engine = 'mclust', k = mixk(engine) ){
+mixmod <- function(
+         x, 
+    engine = 'mclust', 
+         k = switch(mixmod, none =3, mclust = NULL, mixtools = 3) 
+){
     assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
     switch(engine, mclust = mixmod_mclust(x, k = k), 
                  mixtools = mixmod_mixtools(x, k = k), 
@@ -68,7 +64,12 @@ wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
 
 #' @rdname mixmod
 #' @export
-mixplot <- function(x, engine = 'mclust', k = mixk(engine), color = '#F8766D'){
+mixplot <- function(
+         x, 
+    engine = 'mclust', 
+         k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+     color = '#F8766D'
+){
 
     assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))    
      mixdt <- mixmod(x, engine = engine, k = k)
@@ -151,7 +152,11 @@ quadroots <- function(a,b,c){
 
 #' @rdname mixmod
 #' @export
-mixbreaks <- function(x, engine = 'mclust', k = mixk(engine)){
+mixbreaks <- function(
+         x, 
+    engine = 'mclust', 
+         k = switch(mixmod, none =3, mclust = NULL, mixtools = 3) 
+){
     mixdt <- mixmod(x, engine = engine, k = k)
     if (nrow(mixdt) == 1)  return(c())
     y <- lapply(  seq(1, nrow(mixdt)-1), 
@@ -253,7 +258,12 @@ bin.factor <- function(x, ...)    as.numeric(x)
 
 #' @rdname factorize
 #' @export
-factorize.numeric <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
+factorize.numeric <- function(
+                x, 
+           mixmod = 'none', 
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, ...
+){
     assert_is_a_number(k)
     assert_scalar_subset(mixmod, c('none', 'mclust', 'mixtools'))
      probs <- if (mixmod == 'none')  seq_len(k-1)/k  else NULL
@@ -273,7 +283,13 @@ factorize.numeric <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevel
 
 #' @rdname factorize
 #' @export
-bin.numeric <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
+bin.numeric <- function(
+                x, 
+           mixmod = 'none',
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+    ...
+){
     y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
     y %<>% as.numeric()
     y
@@ -282,7 +298,13 @@ bin.numeric <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TR
 
 #' @rdname factorize
 #' @export
-factorize.matrix <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
+factorize.matrix <- function(
+                x, 
+           mixmod = 'none', 
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+                 ...
+){
     y <- x
     y %<>% apply(1, factorize.numeric, k = k, numericlevels = numericlevels) %>% t()
     colnames(y) <- colnames(x)
@@ -292,7 +314,13 @@ factorize.matrix <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels
 
 #' @rdname factorize
 #' @export
-bin.matrix <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, ...){
+bin.matrix <- function(
+                x, 
+           mixmod = 'none', 
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+                 ...
+){
     y <- x
     y %<>% apply(1, bin.numeric, k = k, numericlevels = numericlevels) %>% t()
   # y %>% apply(1, dplyr::ntile, n = k) %>% t()    # differs a bit
@@ -303,8 +331,14 @@ bin.matrix <- function(x, mixmod = 'none', k = mixk(mixmod), numericlevels = TRU
 
 #' @rdname factorize
 #' @export
-factorize.SummarizedExperiment <- function(x, assay = assayNames(object)[1], 
-    mixmod = 'none', k = mixk(mixmod), numericlevels = TRUE, verbose = TRUE, ...
+factorize.SummarizedExperiment <- function(
+                x, 
+            assay = assayNames(object)[1], 
+           mixmod = 'none', 
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+          verbose = TRUE, 
+                 ...
 ){
     # Assert
     assert_scalar_subset(assay, assayNames(x))
@@ -324,7 +358,14 @@ factorize.SummarizedExperiment <- function(x, assay = assayNames(object)[1],
 
 #' @rdname factorize
 #' @export
-factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
+factorize_assay <- function(
+         object, 
+          assay = assayNames(object)[1], 
+         mixmod = 'none',
+              k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+        verbose = TRUE, 
+               ...
+){
     .Deprecated('factorize') # factorize.SummarizedExperiment
     factorize.SummerizedExperiment(object, assay = assay, k = k, verbose = verbose)
 }
@@ -334,7 +375,12 @@ factorize_assay <- function(object, assay = assayNames(object)[1], k = 3, verbos
 #' @rdname factorize
 #' @export
 bin.SummarizedExperiment <- function(
-    x, assay = assayNames(x)[1], k = 3, probs = seq_len(k-1)/k, verbose = TRUE
+          x, 
+      assay = assayNames(x)[1],
+     mixmod = 'none',
+          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+      probs = seq_len(k-1)/k,
+    verbose = TRUE
 ){
     # Assert
     assert_scalar_subset(assay, assayNames(x))
@@ -353,7 +399,13 @@ bin.SummarizedExperiment <- function(
 
 #' @rdname factorize
 #' @export
-bin_assay <- function(object, assay = assayNames(object)[1], k = 3, verbose = TRUE){
+bin_assay <- function(
+     object, 
+      assay = assayNames(object)[1], 
+     mixmod = 'none',
+          k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    verbose = TRUE
+){
     .Deprecated('bin') # bin.SummarizedExperiment
     bin.SummarizedExperiment(object, assay = assay, k = k, verbose = verbose)
 }
