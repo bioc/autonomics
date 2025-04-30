@@ -333,7 +333,7 @@ bin.matrix <- function(
 #' @export
 factorize.SummarizedExperiment <- function(
                 x, 
-            assay = assayNames(object)[1], 
+            assay = assayNames(x)[1], 
            mixmod = 'none', 
                 k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
