@@ -482,7 +482,7 @@ densities <- function(
 plot_x_density <- function(
                    x,
                    y = NULL,
-              xbreaks = mixbreaks(x),
+             xbreaks = mixbreaks(x),
                title = NULL,
                color = '#F8766D',
                 xlab = NULL,
@@ -534,7 +534,7 @@ plot_x_density <- function(
 plot_y_density <- function(
                    y,
                    x = NULL,
-              ybreaks = mixbreaks(y),
+             ybreaks = mixbreaks(y),
                title = NULL,
                color = '#F8766D',
                 xlab = NULL,
@@ -592,7 +592,7 @@ plot_xy_scatter <- function(
           y,
     xbreaks = mixbreaks(x),
     ybreaks = mixbreaks(y),
-     colors = c('#F8766D', '#00BFC4'),
+      color = c('#F8766D', '#00BFC4'),
     contour = FALSE,
      smooth = FALSE,
        xlab = NULL,
@@ -603,19 +603,19 @@ plot_xy_scatter <- function(
     if (smooth ) p <- p + geom_smooth(   color = 'gray80', se = FALSE, method = 'lm', formula = y ~ x)
     p <- p + theme(plot.margin = unit(c(0,0,5.5,5.5), 'points'))
     p <- p + geom_point()
-    if (length(xbreaks)>0)  p <- p + geom_vline(aes(xintercept = xbreaks), color = colors[[1]], linetype = 'dashed')
-    if (length(ybreaks)>0)  p <- p + geom_hline(aes(yintercept = ybreaks), color = colors[[2]], linetype = 'dashed')
+    if (length(xbreaks)>0)  p <- p + geom_vline(aes(xintercept = xbreaks), color = color[[1]], linetype = 'dashed')
+    if (length(ybreaks)>0)  p <- p + geom_hline(aes(yintercept = ybreaks), color = color[[2]], linetype = 'dashed')
     p <- p + theme(panel.grid = element_blank())
     p <- p + scale_x_continuous(sec.axis = sec_axis(~.))
     p <- p + scale_y_continuous(sec.axis = sec_axis(~.))
-    p <- p + theme(axis.line.x  = element_line(color = colors[[1]]),
-                   axis.ticks.x = element_line(color = colors[[1]]),
-                   axis.text.x  = element_text(color = colors[[1]]), 
-                   axis.title.x = element_text(color = colors[[1]]))
-    p <- p + theme(axis.line.y  = element_line(color = colors[[2]]),
-                   axis.ticks.y = element_line(color = colors[[2]]),
-                   axis.text.y  = element_text(color = colors[[2]]), 
-                   axis.title.y = element_text(color = colors[[2]]))
+    p <- p + theme(axis.line.x  = element_line(color = color[[1]]),
+                   axis.ticks.x = element_line(color = color[[1]]),
+                   axis.text.x  = element_text(color = color[[1]]), 
+                   axis.title.x = element_text(color = color[[1]]))
+    p <- p + theme(axis.line.y  = element_line(color = color[[2]]),
+                   axis.ticks.y = element_line(color = color[[2]]),
+                   axis.text.y  = element_text(color = color[[2]]), 
+                   axis.title.y = element_text(color = color[[2]]))
     p <- p + theme(panel.border = element_blank())
     p <- p + xlab(xlab) + ylab(ylab)
     #p <- p + theme(plot.margin = margin(c(0,0,0,0), 'points'))
@@ -663,13 +663,13 @@ plot_xy_density <- function(
          ybreaks = mixbreaks(y),
             xlab = 'X',
             ylab = 'Y',
-          colors = c('#F8766D', '#00BFC4' ),
+           color = c('#F8766D', '#00BFC4' ),
          contour = FALSE,
           smooth = FALSE
 ){
-    px  <- plot_x_density( x, y, color  = colors[[1]], xlab = xlab, ylab = ylab)
-    py  <- plot_y_density( y, x, color  = colors[[2]], xlab = xlab, ylab = ylab)
-    pxy <- plot_xy_scatter(x, y, colors = colors, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
+    px  <- plot_x_density( x, y, color = color[[1]], xlab = xlab, ylab = ylab)
+    py  <- plot_y_density( y, x, color = color[[2]], xlab = xlab, ylab = ylab)
+    pxy <- plot_xy_scatter(x, y, color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
     layout <- matrix(c(1,1,4,
                        2,2,3,
                        2,2,3), nrow = 3, byrow = TRUE)
