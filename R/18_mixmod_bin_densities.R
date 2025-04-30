@@ -183,6 +183,8 @@ mixbreaks <- function(
 #' @param k       number of bins/levels
 #' @param assay   string
 #' @param verbose TRUE or FALSE
+#' @param mixmod  'none', 'mclust', or 'mixtools' (mixture modeling method to use)
+#' @param numericlevels TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)
 #' @param ... (S3 dispatch)
 #' @return  vector, matrix or SummarizedExperiment
 #' @examples 
@@ -360,15 +362,15 @@ factorize.SummarizedExperiment <- function(
 #' @rdname factorize
 #' @export
 factorize_assay <- function(
-         object, 
-          assay = assayNames(object)[1], 
+         x, 
+          assay = assayNames(x)[1], 
          mixmod = 'none',
               k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
         verbose = TRUE, 
                ...
 ){
     .Deprecated('factorize') # factorize.SummarizedExperiment
-    factorize.SummarizedExperiment(object, assay = assay, k = k, verbose = verbose)
+    factorize.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
 }
 
 
@@ -402,14 +404,14 @@ bin.SummarizedExperiment <- function(
 #' @rdname factorize
 #' @export
 bin_assay <- function(
-     object, 
-      assay = assayNames(object)[1], 
+     x, 
+      assay = assayNames(x)[1], 
      mixmod = 'none',
           k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
     verbose = TRUE
 ){
     .Deprecated('bin') # bin.SummarizedExperiment
-    bin.SummarizedExperiment(object, assay = assay, k = k, verbose = verbose)
+    bin.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
 }
 
 

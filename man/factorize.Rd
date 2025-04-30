@@ -78,8 +78,8 @@ bin(x, ...)
 )
 
 factorize_assay(
-  object,
-  assay = assayNames(object)[1],
+  x,
+  assay = assayNames(x)[1],
   mixmod = "none",
   k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   verbose = TRUE,
@@ -97,8 +97,8 @@ factorize_assay(
 )
 
 bin_assay(
-  object,
-  assay = assayNames(object)[1],
+  x,
+  assay = assayNames(x)[1],
   mixmod = "none",
   k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   verbose = TRUE
@@ -109,7 +109,11 @@ bin_assay(
 
 \item{...}{(S3 dispatch)}
 
+\item{mixmod}{'none', 'mclust', or 'mixtools' (mixture modeling method to use)}
+
 \item{k}{number of bins/levels}
+
+\item{numericlevels}{TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)}
 
 \item{assay}{string}
 
