@@ -451,7 +451,7 @@ densities <- function(
     assert_is_numeric(x)
     assert_is_numeric(xpred)
     assert_is_a_bool(plot)
-    assertive::assert_all_are_hex_colors(color)
+    assert_all_are_colors(color)
 # Run
         y <- .densities(x)
     ypred <- .densities(x, xpred)

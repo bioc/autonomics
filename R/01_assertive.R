@@ -430,6 +430,53 @@
         }
         
         
+        parenthesize <- function(
+            x, 
+            type = c("round_brackets", "square_brackets", "curly_brackets", "angle_brackets", "chevrons", "hyphens", "en_dashes", "em_dashes", "commas")
+        ){
+            type <- match.arg(type)
+            x <- coerce_to(x, "character", get_name_in_parent(x))
+            before <- switch(
+                type,
+                round_brackets  = "(",
+                square_brackets = "[",
+                curly_brackets  = "{",
+                angle_brackets  = "<",
+                chevrons        = "\u3008",
+                hyphens         = "- ",
+                en_dashes       = "\u2013 ",
+                em_dashes       = "\u2014",
+                commas          = ", "
+            )
+            after <- switch(
+                type,
+                round_brackets  = ")",
+                square_brackets = "]",
+                curly_brackets  = "}",
+                angle_brackets  = ">",
+                chevrons        = "\u3009",
+                hyphens         = " -",
+                en_dashes       = " \u2013",
+                em_dashes       = "\u2014",
+                commas          = ", "
+            )
+            paste0(before, x, after)
+        }
+        
+        
+        
+        parenthesise <- parenthesize        
+        
+        
+        merge_dots_with_list <- function(
+            ..., l = list(), warn_on_dupes = TRUE, allow_unnamed_elements = FALSE
+        ){
+            dots <- list(...)
+            l <- coerce_to(l, "list", get_name_in_parent(l))
+            merge(dots, l, warn_on_dupes = warn_on_dupes, allow_unnamed_elements = allow_unnamed_elements)
+        }
+        
+        
 #-------------------------------------------------------------------------------------------------------------
 #
 #   assertive.base    ->  ASSERTIVE.PROPERTIES  ->  assertive.types  ->  assertive.strings  -> assertive.data
@@ -888,6 +935,31 @@
 #                         assertive.reflection
 #
 #-------------------------------------------------------------------------------------------------------------
+
+        
+# internal-string.R
+        
+        create_regex <- function (..., l = list(), sep = "[- ]?"){
+            x <- merge_dots_with_list(..., l = l)
+            rx <- vapply( x, function(x)  parenthesise(paste0(parenthesise(x), collapse = sep)), character(1) )
+            paste0("^", rx, "$", collapse = "|")
+        }        
+        
+        matches_regex <- function(x, rx, ignore.case = TRUE, ...){
+            call_and_name(
+                function(x){
+                    if(!nzchar(rx[1])){
+                        warning("Regular expression is the empty string, and matches everything.")
+                        return(rep.int(TRUE, length(x)))
+                    }
+                    # call to ifelse needed because grepl always returns TRUE or FALSE
+                    # need to unname, because ifelse preserves x's names, when we want to
+                    # name result with values of x, and merge.list throws a warning about
+                    # duplicate names attr.
+                    ifelse(is.na(unname(x)), NA, grepl(rx, x, ignore.case = ignore.case, ...))
+                }, 
+                x )
+        }
         
 
 # is-empty-character.R
@@ -970,8 +1042,68 @@
         }
         
         
+#-------------------------------------------------------------------------------------------------------------
+#
+#   assertive.base    ->  assertive.properties  ->  assertive.types  ->  assertive.strings  -> ASSERTIVE.DATA
+#                         assertive.numbers     ->  assertive.files
+#                         assertive.sets
+#                         assertive.matrices
+#                         assertive.reflection
+#
+#-------------------------------------------------------------------------------------------------------------
+
         
+# is-data.R
+        
+        is_hex_color <- function(x){
+            x <- coerce_to(x, "character", get_name_in_parent(x))
+            rx <- create_regex("#[0-9a-f]{6}")
+            ok <- matches_regex(x, rx)
+            set_cause(ok, "bad format")
+        }
+        
+        # new addition - not in assertive !
+        is_named_color <- function(x){
+            x <- coerce_to(x, "character", get_name_in_parent(x))
+            ok <- x %in% grDevices::colors()
+            set_cause(ok, 'unknown color')
+        }
+        
+        # new addition - not in assertive !
+        is_color <- function(x){
+            x <- coerce_to(x, "character", get_name_in_parent(x))
+            ok <- is_hex_color(x) | is_named_color(x)
+            set_cause(ok, 'unknown color')
+        }
+        
+        
+# assert-is-data.R
+        
+        assert_all_are_hex_colors <- function(
+            x, na_ignore = FALSE, severity = getOption("assertive.severity", "stop")
+        ){
+            msg <- gettextf("%s are not all hex colors.", get_name_in_parent(x))
+            assert_engine(is_hex_color, x, msg = msg, na_ignore = na_ignore, severity = severity)
+        }
                 
+
+        # new addition - not in assertive !
+        assert_all_are_named_colors <- function(
+            x, na_ignore = FALSE, severity = getOption("assertive.severity", "stop")
+        ){
+            msg <- gettextf("%s are not all named colors.", get_name_in_parent(x))
+            assert_engine(is_named_color, x, msg = msg, na_ignore = na_ignore, severity = severity)
+        }
+
+        
+        # new addition - not in assertive !
+        assert_all_are_colors <- function(
+            x, na_ignore = FALSE, severity = getOption("assertive.severity", "stop")
+        ){
+            msg <- gettextf("%s are not all colors.", get_name_in_parent(x))
+            assert_engine(is_color, x, msg = msg, na_ignore = na_ignore, severity = severity)
+        }
+
 #-------------------------------------------------------------------------------------------------------------
 #
 #   assertive.base    ->  assertive.properties  ->  assertive.types  ->  assertive.strings  -> assertive.data
