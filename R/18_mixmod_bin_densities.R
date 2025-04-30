@@ -449,7 +449,7 @@ densities <- function(
         x, 
     xpred = x, 
      plot = TRUE, 
-    color = '#F8766D'
+    color = "#F8766D"
 ){
 # Assert
     assert_is_numeric(x)

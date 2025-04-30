@@ -468,6 +468,50 @@
         parenthesise <- parenthesize        
         
         
+        merge.list <- function(x, y, warn_on_dupes = TRUE, allow_unnamed_elements = FALSE, ...)
+        {
+            if(length(y) == 0) return(x)
+            y <- coerce_to(y, "list", get_name_in_parent(y))
+            
+            # Get elements without names
+            x_is_unnamed <- names_never_null(x) == ""
+            y_is_unnamed <- names_never_null(y) == ""
+            if(allow_unnamed_elements)
+            {
+                unnamed_values <- c(x[x_is_unnamed], y[y_is_unnamed])
+                x <- x[!x_is_unnamed]
+                y <- y[!y_is_unnamed]
+            } else # !allow_unnamed_elements
+            {
+                if(any(x_is_unnamed) || any(y_is_unnamed))
+                {
+                    stop("There are unnamed elements in x or y, but allow_unnamed_elements = FALSE.")
+                }
+            }
+            
+            # Now deal with named elements
+            all_names <- c(names(x), names(y))
+            all_values <- c(x, y)
+            if(anyDuplicated(all_names) > 0)
+            {
+                if(warn_on_dupes)
+                {
+                    warning(
+                        "Duplicated arguments: ", 
+                        toString(all_names[duplicated(all_names)])
+                    )
+                }
+                all_values <- all_values[!duplicated(all_names)]
+            }
+            if(allow_unnamed_elements)
+            {
+                all_values <- c(all_values, unnamed_values)
+            }
+            all_values
+        }
+        
+        
+        
         merge_dots_with_list <- function(
             ..., l = list(), warn_on_dupes = TRUE, allow_unnamed_elements = FALSE
         ){
