@@ -174,35 +174,6 @@ survobj <- function(){
 }
 
 
-#' @rdname factorize
-#' @export
-bin_svar <- function(
-    object, svar, unmix = 'none', k = unmix_k(unmix), verbose = TRUE
-){
-# Assert
-    assert_is_valid_sumexp(object)
-    assert_scalar_subset(svar, svars(object))
-    assert_is_numeric(object[[svar]])
-    assert_scalar_subset(unmix, c('none', 'mclust', 'mixtools'))
-    assert_is_a_number(k)
-    assert_is_a_bool(verbose)
-# Bin
-    svalues <- object[[svar]]
-    if (unmix == 'none')   svalues %<>% dplyr::ntile(n = k)
-    if (unmix == 'mclust') svalues %<>% bin_unmix
-    
-# Add
-    newsvar <- sprintf('%s%dbins', svar, k)
-    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newsvar)  # Align with Code `exprs2levels``
-    object[[newsvar]] <- svalues
-    object
-}
-
-unmix_svar <- function(){
-    
-}
-
-
 
 # Fit survival
 # 
