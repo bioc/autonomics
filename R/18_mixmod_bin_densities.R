@@ -71,12 +71,14 @@ mixplot <- function(
      color = '#F8766D'
 ){
 
-    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))    
+# Model
+    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
+    y <- xend <- yend <- NULL
      mixdt <- mixmod(x, engine = engine, k = k)
       mean <- mixdt$mean
         sd <- mixdt$sd
     weight <- mixdt$weight
-    
+# Prep
     xcurve <- seq(min(x), max(x), length.out = 100)
     ycurve <- mapply(wnorm, mean = mean, sd = sd, weight = weight, MoreArgs = list(x = xcurve), SIMPLIFY = FALSE)
     ycurve %<>% Reduce(`+`, .)
@@ -84,13 +86,12 @@ mixplot <- function(
     pointdt <- data.table(x = x,     y = .densities(x))
     curvedt <- data.table(x = xcurve, y = .densities(x, xcurve))
     mixdt   <- data.table(x = xcurve, y = ycurve, engine = engine)
-    
+# Plot
     p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
     p <- p + geom_point(aes(x = x, y = y), pointdt, color = color)
     p <- p + geom_line( aes(x = x, y = y), curvedt, color = color)
     p <- p + geom_line( aes(x = x, y = y, linetype = engine), mixdt, color = color)
     p <- p + scale_linetype_manual(values = 'dotted')
-
     mbreaks <- mixbreaks(x)    
     if (length(mbreaks) == 0)   return(p)
     segmentdt <- data.table( x = mbreaks, 
