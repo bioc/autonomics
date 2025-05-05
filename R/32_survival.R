@@ -6,65 +6,21 @@
 #' survobj()
 #' @export 
 survobj <- function(){
-    
-    set.seed(1)
-    mat <- rbind( GENA = c( rnorm(10,3),
-                            rnorm(10,4),  
-                            rnorm(10,5), 
-                            rnorm(10,6)),   # age + sex increase expression
-                  GENB = c( rnorm(10,6),    # age + sex decrease expression
-                            rnorm(10,4),  
-                            rnorm(10,3), 
-                            rnorm(10,2)),
-                  GENC = c( rnorm(10,3),
-                            rnorm(10,3),  
-                            rnorm(10,6), 
-                            rnorm(10,6)),   # age increases expression
-                  GEND = c( rnorm(10,6),    # age decreases expression
-                            rnorm(10,6),
-                            rnorm(10,3),
-                            rnorm(10,3)),
-                  GENE = c( rnorm(10,3),
-                            rnorm(10,6),
-                            rnorm(10,3),
-                            rnorm(10,6)),   # female sex increases expression
-                  GENF = c( rnorm(10,6),    # female sex decreases expression
-                            rnorm(10,3),
-                            rnorm(10,6),
-                            rnorm(10,3)), 
-                  GENG = c( rnorm(10,3),
-                            rnorm(10,3),
-                            rnorm(10,6),
-                            rnorm(10,3)),   # m:age increases expression
-                  GENH = c( rnorm(10,3),    # f:age increases expression
-                            rnorm(10,3),
-                            rnorm(10,3),
-                            rnorm(10,6)),
-                  GENI = c( rnorm(10,3),
-                            rnorm(10,3),
-                            rnorm(10,3),
-                            rnorm(10,6)),   # junior:f increases expression
-                  GENJ = c( rnorm(10,3),    # senior:f increases expression
-                            rnorm(10,6),
-                            rnorm(10,3),
-                            rnorm(10,3)), 
-                  GENK = c( rnorm(10,3),    # flat around three
-                            rnorm(10,3),
-                            rnorm(10,3),
-                            rnorm(10,3)), 
-                  GENL = c( rnorm(10,4),    # flat around four
-                            rnorm(10,4),
-                            rnorm(10,4),
-                            rnorm(10,4)), 
-                  GENM = c( rnorm(10,5),    # flat around five
-                            rnorm(10,5),
-                            rnorm(10,5),
-                            rnorm(10,5)), 
-                  GENN = c( rnorm(10,6),    # flat around six
-                            rnorm(10,6),
-                            rnorm(10,6),
-                            rnorm(10,6))
-    )
+    set.seed(1) 
+    mat <- rbind(   GENA = c( rnorm(10,3), rnorm(10,4), rnorm(10,5), rnorm(10,6)), # age + sex increase expression
+                    GENB = c( rnorm(10,6), rnorm(10,4), rnorm(10,3), rnorm(10,2)), # age + sex decrease expression
+                    GENC = c( rnorm(10,3), rnorm(10,3), rnorm(10,6), rnorm(10,6)), # age increases expression
+                    GEND = c( rnorm(10,6), rnorm(10,6), rnorm(10,3), rnorm(10,3)), # age decreases expression
+                    GENE = c( rnorm(10,3), rnorm(10,6), rnorm(10,3), rnorm(10,6)), # female sex increases expression
+                    GENF = c( rnorm(10,6), rnorm(10,3), rnorm(10,6), rnorm(10,3)), # female sex decreases expression
+                    GENG = c( rnorm(10,3), rnorm(10,3), rnorm(10,6), rnorm(10,3)), # m:age increases expression
+                    GENH = c( rnorm(10,3), rnorm(10,3), rnorm(10,3), rnorm(10,6)), # f:age increases expression
+                    GENI = c( rnorm(10,3), rnorm(10,3), rnorm(10,3), rnorm(10,6)), # junior:f increases expression
+                    GENJ = c( rnorm(10,3), rnorm(10,6), rnorm(10,3), rnorm(10,3)), # senior:f increases expression
+                    GENK = c( rnorm(10,3), rnorm(10,3), rnorm(10,3), rnorm(10,3)), # flat around three
+                    GENL = c( rnorm(10,4), rnorm(10,4), rnorm(10,4), rnorm(10,4)), # flat around four
+                    GENM = c( rnorm(10,5), rnorm(10,5), rnorm(10,5), rnorm(10,5)), # flat around five
+                    GENN = c( rnorm(10,6), rnorm(10,6), rnorm(10,6), rnorm(10,6))) # flat around six
     object <- SummarizedExperiment(list(exprs = mat))
     fdt(object)$feature_id <- fnames(object)
     object$sample_id <- snames(object)  <- c(sprintf('senior.m.%d', 0:9),  
