@@ -284,11 +284,12 @@ factorize.matrix <- function(
 #' @export
 factorize.SummarizedExperiment <- function(
                 x, 
-            assay = assayNames(x)[1], 
-           mixmod = 'none', 
+            assay = assayNames(x)[1],
+           mixmod = 'none',
                 k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, 
-          verbose = TRUE, 
+    numericlevels = TRUE,
+             drop = TRUE,
+          verbose = TRUE,
                  ...
 ){
     # Assert
@@ -298,6 +299,7 @@ factorize.SummarizedExperiment <- function(
     # Bin
     mat <- assays(x)[[assay]]
     mat %<>% factorize.matrix(mixmod = mixmod, k = k, numericlevels = numericlevels)
+    if (!drop)  mat[] %<>% paste0(assay, .)
     
     # Add
     newassayname <- sprintf('%s%dlevels', assay, k)
