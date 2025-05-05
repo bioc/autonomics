@@ -6,7 +6,7 @@
 #' survobj()
 #' @export 
 survobj <- function(){
-    set.seed(1) 
+    set.seed(1)
     mat <- rbind(   GENA = c( rnorm(10,3), rnorm(10,4), rnorm(10,5), rnorm(10,6)), # age + sex increase expression
                     GENB = c( rnorm(10,6), rnorm(10,4), rnorm(10,3), rnorm(10,2)), # age + sex decrease expression
                     GENC = c( rnorm(10,3), rnorm(10,3), rnorm(10,6), rnorm(10,6)), # age increases expression
@@ -44,6 +44,7 @@ survobj <- function(){
     object$timetoevent <- c( time.senior.m,  time.senior.f,  time.junior.m,  time.junior.f )
     object$event       <- c(event.senior.m, event.senior.f, event.junior.m, event.junior.f )
     object %<>% factorize(k = 2)
+    object %<>%       bin(k = 2)
     object
 }
 
