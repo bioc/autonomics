@@ -307,7 +307,7 @@ all_non_numeric <- function(object, formula){
 #'           fit_survival(survobj(), ~ exprs2levels, engine = 'survdiff')   # survdiff
 #' 
 #'     # drop: drop varname in coefnames -> dont
-#'           fit_survival(survobj(), ~ exprs2levels)                # bin2-bin1
+#'           fit_survival(survobj(), ~ exprs2levels)                # 2-1
 #'           fit_survival(survobj(), ~ exprs2levels, drop = FALSE)  # exprs2levelsbin2-bin1
 #' 
 #'     # codingfun: code_control -> contr.treatment
