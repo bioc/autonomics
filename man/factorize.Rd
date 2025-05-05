@@ -2,38 +2,30 @@
 % Please edit documentation in R/18_mixmod_bin_densities.R
 \name{factorize}
 \alias{factorize}
-\alias{bin}
 \alias{factorize.logical}
-\alias{bin.logical}
 \alias{factorize.character}
-\alias{bin.character}
 \alias{factorize.factor}
-\alias{bin.factor}
 \alias{factorize.numeric}
-\alias{bin.numeric}
 \alias{factorize.matrix}
-\alias{bin.matrix}
 \alias{factorize.SummarizedExperiment}
 \alias{factorize_assay}
+\alias{bin}
+\alias{bin.logical}
+\alias{bin.character}
+\alias{bin.factor}
+\alias{bin.numeric}
+\alias{bin.matrix}
 \alias{bin.SummarizedExperiment}
 \alias{bin_assay}
 \title{Factorize/Bin}
 \usage{
 factorize(x, ...)
 
-bin(x, ...)
-
 \method{factorize}{logical}(x, ...)
-
-\method{bin}{logical}(x, ...)
 
 \method{factorize}{character}(x, ...)
 
-\method{bin}{character}(x, ...)
-
 \method{factorize}{factor}(x, ...)
-
-\method{bin}{factor}(x, ...)
 
 \method{factorize}{numeric}(
   x,
@@ -43,23 +35,7 @@ bin(x, ...)
   ...
 )
 
-\method{bin}{numeric}(
-  x,
-  mixmod = "none",
-  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-  numericlevels = TRUE,
-  ...
-)
-
 \method{factorize}{matrix}(
-  x,
-  mixmod = "none",
-  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-  numericlevels = TRUE,
-  ...
-)
-
-\method{bin}{matrix}(
   x,
   mixmod = "none",
   k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
@@ -83,6 +59,30 @@ factorize_assay(
   mixmod = "none",
   k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   verbose = TRUE,
+  ...
+)
+
+bin(x, ...)
+
+\method{bin}{logical}(x, ...)
+
+\method{bin}{character}(x, ...)
+
+\method{bin}{factor}(x, ...)
+
+\method{bin}{numeric}(
+  x,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  numericlevels = TRUE,
+  ...
+)
+
+\method{bin}{matrix}(
+  x,
+  mixmod = "none",
+  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  numericlevels = TRUE,
   ...
 )
 

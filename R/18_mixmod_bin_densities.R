@@ -225,17 +225,7 @@ factorize <- function(x, ...)  UseMethod('factorize')
 
 #' @rdname factorize
 #' @export
-bin <- function(x, ...)  UseMethod('bin')
-
-
-#' @rdname factorize
-#' @export
 factorize.logical <- function(x, ...) as.factor(x)
-
-
-#' @rdname factorize
-#' @export
-bin.logical <- function(x, ...)    as.numeric(x)
 
 
 #' @rdname factorize
@@ -245,18 +235,7 @@ factorize.character <- function(x, ...)  as.factor(x)
 
 #' @rdname factorize
 #' @export
-bin.character <- function(x, ...)  as.numeric(as.factor(x))
-
-
-#' @rdname factorize
-#' @export
 factorize.factor <- function(x, ...)  x
-
-
-#' @rdname factorize
-#' @export
-bin.factor <- function(x, ...)    as.numeric(x)
-
 
 
 #' @rdname factorize
@@ -286,21 +265,6 @@ factorize.numeric <- function(
 
 #' @rdname factorize
 #' @export
-bin.numeric <- function(
-                x, 
-           mixmod = 'none',
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, 
-    ...
-){
-    y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
-    y %<>% as.numeric()
-    y
-}
-
-
-#' @rdname factorize
-#' @export
 factorize.matrix <- function(
                 x, 
            mixmod = 'none', 
@@ -314,22 +278,6 @@ factorize.matrix <- function(
     y
 }
 
-
-#' @rdname factorize
-#' @export
-bin.matrix <- function(
-                x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, 
-                 ...
-){
-    y <- x
-    y %<>% apply(1, bin.numeric, k = k, numericlevels = numericlevels) %>% t()
-  # y %>% apply(1, dplyr::ntile, n = k) %>% t()    # differs a bit
-    colnames(y) <- colnames(x)
-    y
-}
 
 
 #' @rdname factorize
@@ -371,6 +319,60 @@ factorize_assay <- function(
 ){
     .Deprecated('factorize') # factorize.SummarizedExperiment
     factorize.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
+}
+
+
+
+#' @rdname factorize
+#' @export
+bin <- function(x, ...)  UseMethod('bin')
+
+
+#' @rdname factorize
+#' @export
+bin.logical <- function(x, ...)    as.numeric(x)
+
+
+#' @rdname factorize
+#' @export
+bin.character <- function(x, ...)  as.numeric(as.factor(x))
+
+
+#' @rdname factorize
+#' @export
+bin.factor <- function(x, ...)    as.numeric(x)
+
+
+
+#' @rdname factorize
+#' @export
+bin.numeric <- function(
+                x, 
+           mixmod = 'none',
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+    ...
+){
+    y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
+    y %<>% as.numeric()
+    y
+}
+
+
+#' @rdname factorize
+#' @export
+bin.matrix <- function(
+                x, 
+           mixmod = 'none', 
+                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+                 ...
+){
+    y <- x
+    y %<>% apply(1, bin.numeric, k = k, numericlevels = numericlevels) %>% t()
+  # y %>% apply(1, dplyr::ntile, n = k) %>% t()    # differs a bit
+    colnames(y) <- colnames(x)
+    y
 }
 
 
