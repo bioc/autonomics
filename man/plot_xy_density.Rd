@@ -46,8 +46,8 @@ plot_xy_density(
   y,
   xbreaks = mixbreaks(x),
   ybreaks = mixbreaks(y),
-  xlab = "X",
-  ylab = "Y",
+  xlab = get_name_in_parent(x),
+  ylab = get_name_in_parent(y),
   color = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE
