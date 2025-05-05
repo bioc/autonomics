@@ -324,8 +324,8 @@ all_non_numeric <- function(object, formula){
 #'           fit_survival(survobj(), ~ exprs2levels, plot = FALSE)  # dont
 #' 
 #'     # order: order on first coef -> order on custom coef
-#'           fit_survival(survobj(), ~ age+exprs2levels)                        # order on 'senior-junior'
-#'           fit_survival(survobj(), ~ age+exprs2levels, order = 'bin2-bin1')   # order on 'bin2-bin1'
+#'           fit_survival(survobj(), ~ age+exprs2levels)                  # order on 'senior-junior'
+#'           fit_survival(survobj(), ~ age+exprs2levels, order = '2-1')   # order on '2-1'
 #' 
 #'     # stats: show stats for all coefs -> show stats for custom coefs
 #'           fit_survival(survobj(), ~ age+exprs2levels)                          # show stats for 'senior-junior' and 'bin2-bin1'
