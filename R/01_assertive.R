@@ -244,7 +244,19 @@
           amsg
         }
         
+
+# internal.R        
+        names_never_null <- function(x)
+        {
+            nms <- names(x)
+            if(is.null(nms))
+            {
+                nms <- character(length(x))
+            }  
+            nms
+        }
         
+
 # engine.R
         
 

@@ -185,6 +185,7 @@ mixbreaks <- function(
 #' @param verbose TRUE or FALSE
 #' @param mixmod  'none', 'mclust', or 'mixtools' (mixture modeling method to use)
 #' @param numericlevels TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)
+#' @param drop  whether to drop assayname in levels ('1','2') or not ('exprs1', 'exprs2') when factorizing
 #' @param ... (S3 dispatch)
 #' @return  vector, matrix or SummarizedExperiment
 #' @examples 

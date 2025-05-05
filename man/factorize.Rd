@@ -118,6 +118,8 @@ bin_assay(
 
 \item{assay}{string}
 
+\item{drop}{whether to drop assayname in levels ('1','2') or not ('exprs1', 'exprs2') when factorizing}
+
 \item{verbose}{TRUE or FALSE}
 
 \item{probs}{numeric}
