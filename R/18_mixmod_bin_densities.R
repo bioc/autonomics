@@ -247,7 +247,6 @@ factorize.numeric <- function(
                 k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, ...
 ){
-    assert_is_a_number(k)
     assert_scalar_subset(mixmod, c('none', 'mclust', 'mixtools'))
      probs <- if (mixmod == 'none')  seq_len(k-1)/k  else NULL
     breaks <- if (mixmod == 'none'){  unname(quantile(x, probs = probs, na.rm = TRUE))
