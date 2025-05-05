@@ -297,9 +297,9 @@ all_non_numeric <- function(object, formula){
 #'
 #'     # Samplevar/Assayvar-based
 #'           fit_survival(survobj(), ~age+exprs2levels, order = 'senior-junior'          ) #  age effect across exprlevels
-#'           fit_survival(survobj(), ~age+exprs2levels, order = 'bin2-bin1'              ) # expr effect across agelevels
-#'           fit_survival(survobj(), ~age/exprs2levels, order = 'senior:bin2-bin1'       ) # expr effect within agelevel
-#'           fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:bin2-bin1') # expr effect differences between agelevels (or vice versa)
+#'           fit_survival(survobj(), ~age+exprs2levels, order = '2-1'                    ) # expr effect across agelevels
+#'           fit_survival(survobj(), ~age/exprs2levels, order = 'senior:2-1'             ) # expr effect within agelevel
+#'           fit_survival(survobj(), ~age*exprs2levels, order = 'senior-junior:2-1'      ) # expr effect differences between agelevels (or vice versa)
 #'   
 #' # Other arguments
 #'     # engine: 'coxph' -> 'survdiff'

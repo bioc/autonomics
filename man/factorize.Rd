@@ -49,7 +49,6 @@ factorize(x, ...)
   mixmod = "none",
   k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
   numericlevels = TRUE,
-  drop = TRUE,
   verbose = TRUE,
   ...
 )
