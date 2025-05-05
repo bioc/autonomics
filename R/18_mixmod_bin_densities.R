@@ -50,7 +50,7 @@ mixmod_none <- function(x)   return( data.table(  component = 1,
 mixmod <- function(
          x, 
     engine = 'mclust', 
-         k = switch(mixmod, none =3, mclust = NULL, mixtools = 3) 
+         k = switch(engine, none = 3, mclust = NULL, mixtools = 3) 
 ){
     assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
     switch(engine, mclust = mixmod_mclust(x, k = k), 
@@ -67,7 +67,7 @@ wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
 mixplot <- function(
          x, 
     engine = 'mclust', 
-         k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+         k = switch(engine, none = 3, mclust = NULL, mixtools = 3),
      color = '#F8766D'
 ){
 
@@ -156,7 +156,7 @@ quadroots <- function(a,b,c){
 mixbreaks <- function(
          x, 
     engine = 'mclust', 
-         k = switch(mixmod, none =3, mclust = NULL, mixtools = 3) 
+         k = switch(engine, none = 3, mclust = NULL, mixtools = 3) 
 ){
     mixdt <- mixmod(x, engine = engine, k = k)
     if (nrow(mixdt) == 1)  return(c())
@@ -243,7 +243,7 @@ factorize.factor <- function(x, ...)  x
 factorize.numeric <- function(
                 x, 
            mixmod = 'none', 
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, ...
 ){
     assert_is_a_number(k)
@@ -268,7 +268,7 @@ factorize.numeric <- function(
 factorize.matrix <- function(
                 x, 
            mixmod = 'none', 
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
                  ...
 ){
@@ -286,7 +286,7 @@ factorize.SummarizedExperiment <- function(
                 x, 
             assay = assayNames(x)[1],
            mixmod = 'none',
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE,
              drop = TRUE,
           verbose = TRUE,
@@ -315,7 +315,7 @@ factorize_assay <- function(
          x, 
           assay = assayNames(x)[1], 
          mixmod = 'none',
-              k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+              k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
         verbose = TRUE, 
                ...
 ){
@@ -351,7 +351,7 @@ bin.factor <- function(x, ...)    as.numeric(x)
 bin.numeric <- function(
                 x, 
            mixmod = 'none',
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
     ...
 ){
@@ -366,7 +366,7 @@ bin.numeric <- function(
 bin.matrix <- function(
                 x, 
            mixmod = 'none', 
-                k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
                  ...
 ){
@@ -411,7 +411,7 @@ bin_assay <- function(
      x, 
       assay = assayNames(x)[1], 
      mixmod = 'none',
-          k = switch(mixmod, none =3, mclust = NULL, mixtools = 3),
+          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
     verbose = TRUE
 ){
     .Deprecated('bin') # bin.SummarizedExperiment
