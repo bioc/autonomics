@@ -14,8 +14,16 @@ plot_x_density(
   title = NULL,
   color = "#F8766D",
   xlab = NULL,
-  ylab = NULL,
-  transcolor = "00000000"
+  ylab = "Density",
+  transcolor = "00000000",
+  panel.border = element_rect(color = color),
+  plot.margin = unit(c(5.5, 5.5, 5.5, 5.5), "points"),
+  scale_x_position = "bottom",
+  axis.ticks.x = element_line(color = color),
+  axis.ticks.y = element_line(color = color),
+  axis.text.x = element_text(color = color),
+  axis.text.y = element_text(color = color),
+  axis.title.y = element_text(color = color)
 )
 
 plot_y_density(

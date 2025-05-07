@@ -484,14 +484,22 @@ densities <- function(
 #' @rdname plot_xy_density
 #' @export
 plot_x_density <- function(
-                   x,
-                   y = NULL,
-             xbreaks = mixbreaks(x),
-               title = NULL,
-               color = '#F8766D',
-                xlab = NULL,
-                ylab = NULL,
-          transcolor = '00000000'
+           x,
+           y = NULL,
+     xbreaks = mixbreaks(x),
+       title = NULL,
+       color = '#F8766D',
+        xlab = NULL,       # `get_name_in_parent` fails: it prints contents rather than name
+        ylab = 'Density',       # (oddly enough it does work in debug mode)
+  transcolor = '00000000', 
+  panel.border = element_rect(color = color), 
+   plot.margin = unit(c(5.5,5.5,5.5,5.5), 'points'), 
+       scale_x_position = 'bottom', 
+  axis.ticks.x = element_line(color = color), 
+  axis.ticks.y = element_line(color = color), 
+   axis.text.x = element_text(color = color), 
+   axis.text.y = element_text(color = color), 
+  axis.title.y = element_text(color = color)
 ){
 # Prep
     x %<>% sort()
@@ -502,27 +510,30 @@ plot_x_density <- function(
     p <- p + annotate('point', x = x,     y = densityfun(x),     color = color)
     p <- p + annotate('path',  x = xpath, y = densityfun(xpath), color = color)
 # Breaks
-    if (length(xbreaks)>0)  p <- p + annotate('segment', x = xbreaks, 
-                                                      xend = xbreaks, 
-                                                         y = 0.95*min(densityfun(xpath)),
-                                                      yend = densityfun(xbreaks), 
-                                                     color = color, 
-                                                  linetype = 'dashed')
+    if (length(xbreaks)>0){
+        p <- p + annotate( 'segment', x = xbreaks, 
+                                   xend = xbreaks, 
+                                      y = 0.95*min(densityfun(xpath)),
+                                   yend = densityfun(xbreaks), 
+                                  color = color, 
+                               linetype = 'dashed' )
+        p <- p + annotate('label', x = xbreaks, y = min(densityfun(xpath)), color = color, label = round(xbreaks,1), label.size = NA)
+    }
 # Finishing
     p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
-    p <- p + theme(panel.grid   = element_blank(), 
-                   panel.border = element_blank())
+    p <- p + theme(panel.grid   = element_blank())
+    p <- p + theme(panel.border = panel.border)
     p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
-    p <- p + scale_x_continuous(position = 'top')
-    p <- p + theme(axis.line.x  = element_blank(),
-                   axis.ticks.x = element_blank(),
-                   axis.text.x  = element_blank(), 
-                   axis.title.x = element_text(color = color))
-    p <- p + theme(axis.line.y  = element_line(color = transcolor), 
-                   axis.ticks.y = element_line(color = transcolor), 
-                   axis.text.y  = element_text(color = transcolor), 
-                   axis.title.y = element_text(color = transcolor))
-    p <- p + theme(plot.margin = unit(c(5.5,0,0,5.5), 'points'))
+    p <- p + scale_x_continuous(position = 'bottom')
+    p <- p + theme(axis.line.x  = element_blank())
+    p <- p + theme(axis.line.y  = element_line(color = transcolor))
+    p <- p + theme(axis.ticks.x = axis.ticks.x)
+    p <- p + theme(axis.ticks.y = axis.ticks.y)
+    p <- p + theme(axis.text.x  = axis.text.x )
+    p <- p + theme(axis.text.y  = axis.text.y)
+    p <- p + theme(axis.title.x = element_text(color = color))
+    p <- p + theme(axis.title.y = axis.title.y)
+    p <- p + theme(plot.margin = plot.margin)
 # Align with xyplot
     if (!is.null(y)){
           digits <- max(nchar(scales::extended_breaks()(range(y)))) - 1
@@ -661,19 +672,34 @@ plot_xy_scatter <- function(
 #'     plot_y_density(y)
 #' @export
 plot_xy_density <- function(
-              x,
-              y,
-         xbreaks = mixbreaks(x),
-         ybreaks = mixbreaks(y),
-            xlab = get_name_in_parent(x),
-            ylab = get_name_in_parent(y),
-           color = c('#F8766D', '#00BFC4' ),
-         contour = FALSE,
-          smooth = FALSE
+          x,
+          y,
+     xbreaks = mixbreaks(x),
+     ybreaks = mixbreaks(y),
+        xlab = get_name_in_parent(x),
+        ylab = get_name_in_parent(y),
+       color = c('#F8766D', '#00BFC4' ),
+     contour = FALSE,
+      smooth = FALSE
 ){
-    px  <- plot_x_density( x, y, color = color[[1]], xlab = xlab, ylab = ylab)
-    py  <- plot_y_density( y, x, color = color[[2]], xlab = xlab, ylab = ylab)
-    pxy <- plot_xy_scatter(x, y, color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
+    px  <- plot_x_density(    x, 
+                              y,  
+                           color = color[[1]], 
+                            xlab = xlab, 
+                            ylab = ylab, 
+                    panel.border = element_blank(), 
+                     plot.margin = unit(c(5.5,0,0,5.5), 'points'), 
+                scale_x_position = 'top', 
+                    axis.ticks.x = element_blank(), 
+                    axis.ticks.y = element_blank(),
+                     axis.text.x = element_blank(), 
+                     axis.text.y = element_text(color = '00000000'),
+                    axis.title.y = element_text(color = '00000000') )
+    
+    py  <- plot_y_density( y, x,  color = color[[2]], xlab = xlab, ylab = ylab )
+    
+    pxy <- plot_xy_scatter(x, y,  color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
+    
     layout <- matrix(c(1,1,4,
                        2,2,3,
                        2,2,3), nrow = 3, byrow = TRUE)
