@@ -34,7 +34,9 @@ mclust_moments <- function(x, k = NULL){
 }
 
 
-mixmod_mixtools <- function(x, k = 2){
+#' @rdname mclust_moments
+#' @export
+mixtools_moments <- function(x, k = 2){
     if (!installed('mixtools'))  return( mixmod('none') )
         fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
       means <- fit$mu
