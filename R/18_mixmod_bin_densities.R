@@ -46,12 +46,6 @@ mixtools_moments <- function(x, k = 2){
 }
 
 
-
-mixmod_none <- function(x)   return( data.table(  component = 1, 
-                                                       mean = mean(x, na.rm = TRUE),
-                                                         sd = sd(  x, na.rm = TRUE), 
-                                                     weight = 1  ) )
-
 #' Mixture model
 #' @param x        numeric vector
 #' @param engine  'mclust', 'mixtools', 'none'
@@ -75,6 +69,10 @@ mixmod <- function(
                  mixtools = mixmod_mixtools(x, k = k), 
                    single = mixmod_none(x))
 }
+overall_moments <- function(x)   data.table(  component = 1, 
+                                                   mean = mean(x, na.rm = TRUE),
+                                                     sd = sd(  x, na.rm = TRUE), 
+                                                 weight = 1  )
 
 
 wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
