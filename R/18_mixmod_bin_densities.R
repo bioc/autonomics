@@ -5,7 +5,23 @@
 #========================================================================================
 
 
-mixmod_mclust <- function(x, k = NULL){
+#' Moments
+#' 
+#' Overall/Component moments (mean, sd) and weights
+#' 
+#' Gaussian components are identified using either mclust or mixtools.
+#' 
+#' @param x        numeric vector
+#' @param k        number of components
+#' @return  data.table (mean, sd, weight)
+#' @examples
+#' set.seed(1)
+#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#'   mclust_moments(x)
+#' mixtools_moments(x)
+#'  overall_moments(x)
+#' @export
+mclust_moments <- function(x, k = NULL){
     if (!installed('mclust'))    return( mixmod_none(x) )
     mclustBIC <- mclust::mclustBIC
     fit <- mclust::Mclust(x, verbose = FALSE, G = k)
