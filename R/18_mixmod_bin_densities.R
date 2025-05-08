@@ -46,29 +46,8 @@ mixtools_moments <- function(x, k = 2){
 }
 
 
-#' Mixture model
-#' @param x        numeric vector
-#' @param engine  'mclust', 'mixtools', 'none'
-#' @param k        number of components
-#' @param color    string
-#' @return  data.table (mixmod), ggplot (mixplot), vector (mixbreaks)
-#' @examples
-#' set.seed(1)
-#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#' mixmod(x)
-#' mixplot(x)
-#' mixbreaks(x)
+#' @rdname mclust_moments
 #' @export
-mixmod <- function(
-         x, 
-    engine = 'mclust', 
-         k = switch(engine, none = 3, mclust = NULL, mixtools = 3) 
-){
-    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
-    switch(engine, mclust = mixmod_mclust(x, k = k), 
-                 mixtools = mixmod_mixtools(x, k = k), 
-                   single = mixmod_none(x))
-}
 overall_moments <- function(x)   data.table(  component = 1, 
                                                    mean = mean(x, na.rm = TRUE),
                                                      sd = sd(  x, na.rm = TRUE), 
