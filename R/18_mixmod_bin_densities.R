@@ -115,9 +115,9 @@ mixplot <- function(
 #' @param b coefficient of x^1
 #' @param c coefficient of x^0
 #' @examples
-#' quadrroots(a = 1, b =-5, c = 6)  # two real roots
-#' quadrroots(a = 1, b =-4, c = 4)  # one real root
-#' quadrroots(a = 1, b = 1, c = 1)  # imaginary root
+#' quadroots(a = 1, b =-5, c = 6)  # two real roots
+#' quadroots(a = 1, b =-4, c = 4)  # one real root
+#' quadroots(a = 1, b = 1, c = 1)  # imaginary root
 #' @return vector
 #' @noRd
 quadroots <- function(a,b,c){
@@ -146,20 +146,45 @@ quadroots <- function(a,b,c){
 }
 
 
-#' @rdname mixmod
+#' Mixture/Quantile breaks
+#' @param x  numeric
+#' @param k  number
+#' @examples
+#' set.seed(1)
+#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#'   mclust_breaks(x)
+#' mixtools_breaks(x, k = 3)
+#' quantile_breaks(x)
 #' @export
-mixbreaks <- function(
-         x, 
-    engine = 'mclust', 
-         k = switch(engine, none = 3, mclust = NULL, mixtools = 3) 
-){
-    mixdt <- mixmod(x, engine = engine, k = k)
-    if (nrow(mixdt) == 1)  return(c())
-    y <- lapply(  seq(1, nrow(mixdt)-1), 
-                  function(i)  mixdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
+mclust_breaks <- function(x, k = NULL){
+    momentsdt <- mclust_moments(x, k = k)
+    if (nrow(momentsdt) == 1)  return(c())
+    y <- lapply(  seq(1, nrow(momentsdt)-1), 
+                  function(i)  momentsdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
     y %<>% Reduce(c, .)
     y
-} 
+}
+
+
+#' @rdname mclust_breaks
+#' @export
+mixtools_breaks <- function(x, k = 2){
+    momentsdt <- mixtools_moments(x, k = k)
+    if (nrow(momentsdt) == 1)  return(c())
+    y <- lapply(  seq(1, nrow(momentsdt)-1), 
+                  function(i)  momentsdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
+    y %<>% Reduce(c, .)
+    y
+}
+    
+
+#' @rdname mclust_breaks
+#' @export
+quantile_breaks <- function(x, k = 3, probs = seq_len(k-1)/k){
+    unname(quantile(x, probs = probs, na.rm = TRUE))
+}
+
+    
 
 
 #========================================================================================
