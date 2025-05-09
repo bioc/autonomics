@@ -54,48 +54,6 @@ mixtools_parameters <- function(x, k = 2){
 wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
 
 
-#' @rdname mixmod
-#' @export
-mixplot <- function(
-         x, 
-    engine = 'mclust', 
-         k = switch(engine, none = 3, mclust = NULL, mixtools = 3),
-     color = '#F8766D'
-){
-
-# Model
-    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
-    y <- xend <- yend <- NULL
-     mixdt <- mixmod(x, engine = engine, k = k)
-      mean <- mixdt$mean
-        sd <- mixdt$sd
-    weight <- mixdt$weight
-# Prep
-    xcurve <- seq(min(x), max(x), length.out = 100)
-    ycurve <- mapply(wnorm, mean = mean, sd = sd, weight = weight, MoreArgs = list(x = xcurve), SIMPLIFY = FALSE)
-    ycurve %<>% Reduce(`+`, .)
-
-    pointdt <- data.table(x = x,     y = .densities(x))
-    curvedt <- data.table(x = xcurve, y = .densities(x, xcurve))
-    mixdt   <- data.table(x = xcurve, y = ycurve, engine = engine)
-# Plot
-    p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
-    p <- p + geom_point(aes(x = x, y = y), pointdt, color = color)
-    p <- p + geom_line( aes(x = x, y = y), curvedt, color = color)
-    p <- p + geom_line( aes(x = x, y = y, linetype = engine), mixdt, color = color)
-    p <- p + scale_linetype_manual(values = 'dotted')
-    mbreaks <- mixbreaks(x)    
-    if (length(mbreaks) == 0)   return(p)
-    segmentdt <- data.table( x = mbreaks, 
-                          xend = mbreaks,
-                             y = min(ycurve), 
-                          yend = .densities(x, mbreaks))
-    p <- p + geom_segment(aes(x = x, xend = xend, y = y, yend = yend), segmentdt, color = color)
-    p <- p + geom_label(  aes(x = x, y = y+(yend-y)/2, label = formatC(x, 2)), segmentdt, color = color)
-    p
-}
-
-
 #' Quadratic roots
 #' 
 #' Solves ax^2+bx+c = 0
@@ -182,6 +140,56 @@ quantile_breaks <- function(x, k = 3, probs = seq_len(k-1)/k){
 }
 
     
+#' Mixture breaks/plot
+#' @examples
+#' set.seed(1)
+#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#' mixplot(x)     # mixture  plot
+#' @export
+mixplot <- function(
+         x, 
+    engine = c('mclust', 'mixtools')[1], 
+         k = switch(engine, mono = 3, mclust = NULL, mixtools = 3), 
+     color = '#F8766D'
+){
+
+# Model
+    assert_scalar_subset(engine, c('overall', 'mclust', 'mixtools'))
+    y <- xend <- yend <- NULL
+    parametersdt <- switch(engine, overall = overall_parameters(x), 
+                                    mclust = mclust_parameters(x, k = k), 
+                                  mixtools = mixtools_parameters(x, k = k))
+      mean <- parametersdt$mean
+        sd <- parametersdt$sd
+    weight <- parametersdt$weight
+# Kernel Density Estimate
+    xline <- seq(min(x), max(x), length.out = 100)
+    p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
+    p <- p + annotate('point', x = x,     y = .densities(x),        color = color)
+    p <- p + annotate('line',  x = xline, y = .densities(x, xline), color = color)
+# Mixture
+    componentdt <- mapply(wnorm, mean = mean, sd = sd, weight = weight, MoreArgs = list(x = xline), SIMPLIFY = FALSE)
+    componentdt <- lapply(seq_along(componentdt), function(i) data.table(i = as.character(i), x = xline, y = componentdt[[i]]))
+    componentdt %<>% rbindlist()
+    p <- p + geom_line(aes(x = x, y = y, group = i), linetype = 'dotted', data = componentdt, color = color)
+# Breaks
+    xbreaks <- switch(engine, mclust = mclust_breaks(x, k = k), mixtools = mixtools_breaks(x, k = k))
+    ybreaks <- wnorm(xbreaks[-1], mean[-1], sd[-1], weight[-1])
+    p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend = .densities(x, xbreaks), color = color)
+# Finishing
+    p <- p + theme(axis.line.x  = element_line(color = color))
+    p <- p + theme(axis.line.y  = element_line(color = color))
+    p <- p + theme(axis.ticks.x = element_line(color = color))
+    p <- p + theme(axis.ticks.y = element_line(color = color))
+    p <- p + theme(axis.text.x  = element_text(color = color))
+    p <- p + theme(axis.text.y  = element_text(color = color))
+    p <- p + theme(panel.border = element_rect(color = color))
+    p <- p + theme(axis.title.x = element_text(color = color))
+    p <- p + theme(axis.title.y = element_text(color = color))
+    p
+}
+
+
 
 
 #========================================================================================
