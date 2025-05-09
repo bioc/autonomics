@@ -112,7 +112,7 @@ quadroots <- function(a,b,c){
 #' quantile_breaks(x)
 #' @export
 mclust_breaks <- function(x, k = NULL){
-    momentsdt <- mclust_moments(x, k = k)
+    momentsdt <- mclust_parameters(x, k = k)
     if (nrow(momentsdt) == 1)  return(c())
     y <- lapply(  seq(1, nrow(momentsdt)-1), 
                   function(i)  momentsdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
@@ -124,7 +124,7 @@ mclust_breaks <- function(x, k = NULL){
 #' @rdname mclust_breaks
 #' @export
 mixtools_breaks <- function(x, k = 2){
-    momentsdt <- mixtools_moments(x, k = k)
+    momentsdt <- mixtools_parameters(x, k = k)
     if (nrow(momentsdt) == 1)  return(c())
     y <- lapply(  seq(1, nrow(momentsdt)-1), 
                   function(i)  momentsdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
@@ -140,57 +140,6 @@ quantile_breaks <- function(x, k = 3, probs = seq_len(k-1)/k){
 }
 
     
-#' Mixture breaks/plot
-#' @examples
-#' set.seed(1)
-#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#' mixplot(x)     # mixture  plot
-#' @export
-mixplot <- function(
-         x, 
-    engine = c('mclust', 'mixtools')[1], 
-         k = switch(engine, mono = 3, mclust = NULL, mixtools = 3), 
-     color = '#F8766D'
-){
-
-# Model
-    assert_scalar_subset(engine, c('overall', 'mclust', 'mixtools'))
-    y <- xend <- yend <- NULL
-    parametersdt <- switch(engine, overall = overall_parameters(x), 
-                                    mclust = mclust_parameters(x, k = k), 
-                                  mixtools = mixtools_parameters(x, k = k))
-      mean <- parametersdt$mean
-        sd <- parametersdt$sd
-    weight <- parametersdt$weight
-# Kernel Density Estimate
-    xline <- seq(min(x), max(x), length.out = 100)
-    p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
-    p <- p + annotate('point', x = x,     y = .densities(x),        color = color)
-    p <- p + annotate('line',  x = xline, y = .densities(x, xline), color = color)
-# Mixture
-    componentdt <- mapply(wnorm, mean = mean, sd = sd, weight = weight, MoreArgs = list(x = xline), SIMPLIFY = FALSE)
-    componentdt <- lapply(seq_along(componentdt), function(i) data.table(i = as.character(i), x = xline, y = componentdt[[i]]))
-    componentdt %<>% rbindlist()
-    p <- p + geom_line(aes(x = x, y = y, group = i), linetype = 'dotted', data = componentdt, color = color)
-# Breaks
-    xbreaks <- switch(engine, mclust = mclust_breaks(x, k = k), mixtools = mixtools_breaks(x, k = k))
-    ybreaks <- wnorm(xbreaks[-1], mean[-1], sd[-1], weight[-1])
-    p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend = .densities(x, xbreaks), color = color)
-# Finishing
-    p <- p + theme(axis.line.x  = element_line(color = color))
-    p <- p + theme(axis.line.y  = element_line(color = color))
-    p <- p + theme(axis.ticks.x = element_line(color = color))
-    p <- p + theme(axis.ticks.y = element_line(color = color))
-    p <- p + theme(axis.text.x  = element_text(color = color))
-    p <- p + theme(axis.text.y  = element_text(color = color))
-    p <- p + theme(panel.border = element_rect(color = color))
-    p <- p + theme(axis.title.x = element_text(color = color))
-    p <- p + theme(axis.title.y = element_text(color = color))
-    p
-}
-
-
-
 
 #========================================================================================
 #
@@ -511,7 +460,8 @@ densities <- function(
 plot_x_density <- function(
            x,
            y = NULL,
-     xbreaks = mixbreaks(x),
+     xbreaks = mclust_breaks(x),
+  components = TRUE,
        title = NULL,
        color = '#F8766D',
         xlab = NULL,       # `get_name_in_parent` fails: it prints contents rather than name
@@ -535,21 +485,25 @@ plot_x_density <- function(
     p <- p + annotate('point', x = x,     y = densityfun(x),     color = color)
     p <- p + annotate('path',  x = xpath, y = densityfun(xpath), color = color)
 # Breaks
-    if (length(xbreaks)>0){
-        p <- p + annotate( 'segment', x = xbreaks, 
-                                   xend = xbreaks, 
-                                      y = 0.95*min(densityfun(xpath)),
-                                   yend = densityfun(xbreaks), 
-                                  color = color, 
-                               linetype = 'dashed' )
-        p <- p + annotate('label', x = xbreaks, y = min(densityfun(xpath)), color = color, label = round(xbreaks,1), label.size = NA)
+    #y0 <- if (components) 0 else 0.95*min(densityfun(xpath))
+    p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend =  densityfun(xbreaks),   color = color,  linetype = 'solid' )    
+# Components
+    if (components){
+        pardt <- mclust_parameters(x, k = k)
+        mixdt <- mapply(wnorm, mean = pardt$mean, sd = pardt$sd, weight = pardt$weight, SIMPLIFY = FALSE, MoreArgs = list(x = xpath))
+        mixdt <- lapply(seq_along(mixdt), function(i) data.table(i = as.character(i), x = xpath, y = mixdt[[i]]))
+        mixdt %<>% rbindlist()
+        p <- p + geom_line(aes(x = x, y = y, group = i), linetype = 'dotted', data = mixdt, color = color)
+        #ybreaks <- wnorm(xbreaks, pardt$mean[-1], pardt$sd[-1], pardt$weight[-1])
+        #p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend = .densities(x, xbreaks), color = color)
     }
+    # 
 # Finishing
     p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
     p <- p + theme(panel.grid   = element_blank())
     p <- p + theme(panel.border = panel.border)
     p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
-    p <- p + scale_x_continuous(position = 'bottom')
+    p <- p + scale_x_continuous(position = 'bottom', breaks = xbreaks, labels = formatC(xbreaks))
     p <- p + theme(axis.line.x  = element_blank())
     p <- p + theme(axis.line.y  = element_line(color = transcolor))
     p <- p + theme(axis.ticks.x = axis.ticks.x)

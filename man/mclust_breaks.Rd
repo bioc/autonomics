@@ -24,6 +24,6 @@ Mixture/Quantile breaks
 set.seed(1)
 x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
   mclust_breaks(x)
-mixtools_breaks(x)
+mixtools_breaks(x, k = 3)
 quantile_breaks(x)
 }

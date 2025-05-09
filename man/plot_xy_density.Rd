@@ -10,7 +10,8 @@
 plot_x_density(
   x,
   y = NULL,
-  xbreaks = mixbreaks(x),
+  xbreaks = mclust_breaks(x),
+  components = TRUE,
   title = NULL,
   color = "#F8766D",
   xlab = NULL,

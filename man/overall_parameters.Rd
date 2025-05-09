@@ -4,7 +4,7 @@
 \alias{overall_parameters}
 \alias{mclust_parameters}
 \alias{mixtools_parameters}
-\title{Distributin parameters}
+\title{Distribution parameters}
 \usage{
 overall_parameters(x)
 
