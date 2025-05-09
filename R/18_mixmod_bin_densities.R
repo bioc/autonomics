@@ -5,11 +5,9 @@
 #========================================================================================
 
 
-#' Moments
+#' Distribution parameters
 #' 
-#' Overall/Component moments (mean, sd) and weights
-#' 
-#' Gaussian components are identified using either mclust or mixtools.
+#' Mean, sd, weight of overall/mixture distribution
 #' 
 #' @param x        numeric vector
 #' @param k        number of components
@@ -17,11 +15,17 @@
 #' @examples
 #' set.seed(1)
 #' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#'   mclust_moments(x)
-#' mixtools_moments(x)
-#'  overall_moments(x)
+#' overall_parameters(x)
+#' mclust_parameters(x)
+#' mixtools_parameters(x)
 #' @export
-mclust_moments <- function(x, k = NULL){
+overall_parameters <- function(x)   data.table(  component = 1, 
+                                                      mean = mean(x, na.rm = TRUE),
+                                                        sd = sd(  x, na.rm = TRUE), 
+                                                    weight = 1  )
+#' @rdname overall_parameters
+#' @export
+mclust_parameters <- function(x, k = NULL){
     if (!installed('mclust'))    return( mixmod_none(x) )
     mclustBIC <- mclust::mclustBIC
     fit <- mclust::Mclust(x, verbose = FALSE, G = k)
@@ -34,9 +38,9 @@ mclust_moments <- function(x, k = NULL){
 }
 
 
-#' @rdname mclust_moments
+#' @rdname overall_parameters
 #' @export
-mixtools_moments <- function(x, k = 2){
+mixtools_parameters <- function(x, k = 2){
     if (!installed('mixtools'))  return( mixmod('none') )
         fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
       means <- fit$mu
@@ -45,13 +49,6 @@ mixtools_moments <- function(x, k = 2){
     data.table( component = seq_along(means), mean = means,  sd = sds, weight = weights )
 }
 
-
-#' @rdname mclust_moments
-#' @export
-overall_moments <- function(x)   data.table(  component = 1, 
-                                                   mean = mean(x, na.rm = TRUE),
-                                                     sd = sd(  x, na.rm = TRUE), 
-                                                 weight = 1  )
 
 
 wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
