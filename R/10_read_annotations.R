@@ -460,9 +460,12 @@ save_contaminant_hdrs <- function(confile = CONTAMINANTSURL, verbose = TRUE){
 #' @export
 read_contaminantdt <- function(force = FALSE, verbose = TRUE){
     file <- system.file('extdata/contaminants.tsv', package = 'autonomics')
-    if (verbose)  cmessage('%scontamin fastahdrs%s%s', spaces(14), spaces(35-nchar('contamin fastahdrs')), file)
-    fread(file)
-}
+    if (verbose)  cmessage('%scontamin fastahdrs%s%s', 
+                           spaces(14), 
+                           spaces(45-nchar('contamin fastahdrs')), 
+                           file)
+    fread(file)    # Note: spaces(35) was too small. It gives negative values for 
+}                  # correctedreporterintensities in .read_maxquant_proteingroups.
 
 
 
