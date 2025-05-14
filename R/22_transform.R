@@ -644,7 +644,7 @@ plot_violins_transforms <- function(
         sumexp_to_longdt(object, assay = assay, svars = subgroupvar)
       } else {
         tmpobject <- object
-        assays(tmpobject) %<>% magrittr::extract(assay)
+        assays(tmpobject) %<>% extract(assay)
         sumexp_to_longdt(
           get(tf)(tmpobject, verbose = verbose),
           assay = assay, svars = subgroupvar)
