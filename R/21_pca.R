@@ -737,7 +737,7 @@ biplot <- function(
                by = biplot_by(object, method)[1], 
              dims = biplot_dims(object, method, by)[1:2],
             color = if (method %in% DIMREDSUPER) by else 'subgroup', 
-      colorlabels = switch(method, pca = FALSE, TRUE),
+      colorlabels = TRUE,
             shape = NULL, 
              size = NULL, 
             alpha = NULL,
