@@ -10,6 +10,7 @@ biplot(
   by = biplot_by(object, method)[1],
   dims = biplot_dims(object, method, by)[1:2],
   color = if (method \%in\% DIMREDSUPER) by else "subgroup",
+  colorlabels = switch(method, pca = FALSE, TRUE),
   shape = NULL,
   size = NULL,
   alpha = NULL,
@@ -37,6 +38,8 @@ biplot(
 \item{dims}{numeric vector: e.g. 1:2}
 
 \item{color}{svar}
+
+\item{colorlabels}{TRUE or FALSE}
 
 \item{shape}{svar}
 

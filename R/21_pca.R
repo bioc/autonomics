@@ -518,6 +518,7 @@ add_scores <- function(
            x = 'pca1',
            y = 'pca2',
        color = 'subgroup', 
+ colorlabels = TRUE,
        shape = if ('replicate' %in% svars(object)) 'replicate' else NULL,
         size = NULL, 
        alpha = NULL, 
@@ -552,6 +553,13 @@ add_scores <- function(
                     data     = sdt(object), 
                     params   = fixed,
                     position = 'identity' )
+
+    if (colorlabels){   # robust::covMcd more robust (outlier proof) but fails on duplicates
+        labeldt <- sdt(object)[, .(x = get(x), y = get(y), label = get(color))]
+        labeldt <- labeldt[, .(x = mean(x), y =mean(y)), by = 'label']
+        p <- p + geom_text_repel(data = labeldt, aes(x = x, y = y, label = label, color = label))
+        p <- p + guides(color = 'none')
+    }
 # Paths
     if (!is.null(group))  p <- p + layer(   geom     = 'path',
                                             mapping  = aes(x = !!xsym, 
@@ -696,6 +704,7 @@ biplot_dims <- function(
 #' @param dims           numeric vector: e.g. 1:2
 #' @param alpha          svar
 #' @param color          svar
+#' @param colorlabels    TRUE or FALSE
 #' @param shape          svar
 #' @param size           svar
 #' @param label          svar
@@ -728,6 +737,7 @@ biplot <- function(
                by = biplot_by(object, method)[1], 
              dims = biplot_dims(object, method, by)[1:2],
             color = if (method %in% DIMREDSUPER) by else 'subgroup', 
+      colorlabels = switch(method, pca = FALSE, TRUE),
             shape = NULL, 
              size = NULL, 
             alpha = NULL,
@@ -771,7 +781,8 @@ biplot <- function(
     p <- p + ggtitle(title)
     p %<>% add_loadings(object, x = x, y = y, label = feature_label, nx = nx, ny = ny)
     p %<>% add_scores(object, x = x, y = y, color = color, shape = shape, 
-                      size = size, alpha = alpha, group = group, linetype = linetype, fixed = fixed)
+                      size = size, alpha = alpha, group = group, linetype = linetype, fixed = fixed, colorlabels = colorlabels)
+
     if (!is.null(colorpalette))  p <- p + scale_color_manual(values = colorpalette, na.value = 'gray80')
     if (!is.null(alphapalette))  p <- p + scale_alpha_manual(values = alphapalette)
     if (!is.null(label  ))  p <- p + geom_text_repel(
