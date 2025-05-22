@@ -518,7 +518,7 @@ add_scores <- function(
            x = 'pca1',
            y = 'pca2',
        color = 'subgroup', 
- colorlabels = TRUE,
+ labelcolors = TRUE,
        shape = if ('replicate' %in% svars(object)) 'replicate' else NULL,
         size = NULL, 
        alpha = NULL, 
@@ -554,10 +554,12 @@ add_scores <- function(
                     params   = fixed,
                     position = 'identity' )
 
-    if (colorlabels){   # robust::covMcd more robust (outlier proof) but fails on duplicates
+    
+    
+    if (labelcolors){   # robust::covMcd more robust (outlier proof) but fails on duplicates
         labeldt <- sdt(object)[, .(x = get(x), y = get(y), label = get(color))]
-        labeldt <- labeldt[, .(x = mean(x), y =mean(y)), by = 'label']
-        p <- p + geom_text_repel(data = labeldt, aes(x = x, y = y, label = label, color = label))
+        labeldt <- labeldt[, as.list(ICSNP::spatial.median(.SD)), .SDcols = c('x', 'y'), by = 'label']
+        p <- p + geom_label_repel(data = labeldt, aes(x = x, y = y, label = label, color = label), label.size = NA)
         p <- p + guides(color = 'none')
     }
 # Paths
@@ -737,7 +739,7 @@ biplot <- function(
                by = biplot_by(object, method)[1], 
              dims = biplot_dims(object, method, by)[1:2],
             color = if (method %in% DIMREDSUPER) by else 'subgroup', 
-      colorlabels = TRUE,
+      labelcolors = TRUE,
             shape = NULL, 
              size = NULL, 
             alpha = NULL,
@@ -781,7 +783,7 @@ biplot <- function(
     p <- p + ggtitle(title)
     p %<>% add_loadings(object, x = x, y = y, label = feature_label, nx = nx, ny = ny)
     p %<>% add_scores(object, x = x, y = y, color = color, shape = shape, 
-                      size = size, alpha = alpha, group = group, linetype = linetype, fixed = fixed, colorlabels = colorlabels)
+                      size = size, alpha = alpha, group = group, linetype = linetype, fixed = fixed, labelcolors = labelcolors)
 
     if (!is.null(colorpalette))  p <- p + scale_color_manual(values = colorpalette, na.value = 'gray80')
     if (!is.null(alphapalette))  p <- p + scale_alpha_manual(values = alphapalette)
