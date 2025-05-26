@@ -10,18 +10,27 @@
 plot_x_density(
   x,
   y = NULL,
-  xbreaks = mixbreaks(x),
+  xbreaks = mclust_breaks(x),
+  components = TRUE,
   title = NULL,
   color = "#F8766D",
   xlab = NULL,
-  ylab = NULL,
-  transcolor = "00000000"
+  ylab = "Density",
+  transcolor = "00000000",
+  panel.border = element_rect(color = color),
+  plot.margin = unit(c(5.5, 5.5, 5.5, 5.5), "points"),
+  scale_x_position = "bottom",
+  axis.ticks.x = element_line(color = color),
+  axis.ticks.y = element_line(color = color),
+  axis.text.x = element_text(color = color),
+  axis.text.y = element_text(color = color),
+  axis.title.y = element_text(color = color)
 )
 
 plot_y_density(
   y,
   x = NULL,
-  ybreaks = mixbreaks(y),
+  ybreaks = mclust_breaks(y),
   title = NULL,
   color = "#F8766D",
   xlab = NULL,
@@ -32,8 +41,8 @@ plot_y_density(
 plot_xy_scatter(
   x,
   y,
-  xbreaks = mixbreaks(x),
-  ybreaks = mixbreaks(y),
+  xbreaks = mclust_breaks(x),
+  ybreaks = mclust_breaks(y),
   color = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE,
@@ -44,8 +53,8 @@ plot_xy_scatter(
 plot_xy_density(
   x,
   y,
-  xbreaks = mixbreaks(x),
-  ybreaks = mixbreaks(y),
+  xbreaks = mclust_breaks(x),
+  ybreaks = mclust_breaks(y),
   xlab = get_name_in_parent(x),
   ylab = get_name_in_parent(y),
   color = c("#F8766D", "#00BFC4"),

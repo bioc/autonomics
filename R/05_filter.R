@@ -288,22 +288,23 @@ tag_features <- function(
 #' @param condition filter condition
 #' @param verbose   TRUE/FALSE 
 #' @param record    TRUE/FALSE 
+#' @param drop      TRUE/FALSE : whether to drop levels
 #' @return filtered SummarizedExperiment
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' filter_samples(object, subgroup != 't0', verbose = TRUE)
 #' @export
-filter_samples <- function(object, condition, verbose = TRUE, record = TRUE){
+filter_samples <- function(object, condition, verbose = TRUE, record = TRUE, drop = TRUE){
     . <- NULL
     condition <- enquo(condition)
-    idx <- eval_tidy(condition, sdata(object))
+    idx <- eval_tidy(condition, sdt(object))
     idx <- idx & !is.na(idx)
     if (verbose & sum(idx)<length(idx)){
         cmessage('%sRetain %d/%d samples: %s', spaces(14), sum(idx), length(idx), 
                 expr_text(condition) %>% substr(1, min(120, nchar(.))))}
     object %<>% extract(, idx)
-    sdata(object) %<>% droplevels()
+    if (drop)  sdt(object) %<>% droplevels()
     if (record && !is.null(analysis(object))) {
         analysis(object)$nsamples %<>%  
             c(structure(sum(idx), names = expr_text(condition)))

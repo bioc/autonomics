@@ -4,7 +4,7 @@
 \alias{filter_samples}
 \title{Filter samples on condition}
 \usage{
-filter_samples(object, condition, verbose = TRUE, record = TRUE)
+filter_samples(object, condition, verbose = TRUE, record = TRUE, drop = TRUE)
 }
 \arguments{
 \item{object}{SummarizedExperiment}
@@ -14,6 +14,8 @@ filter_samples(object, condition, verbose = TRUE, record = TRUE)
 \item{verbose}{TRUE/FALSE}
 
 \item{record}{TRUE/FALSE}
+
+\item{drop}{TRUE/FALSE : whether to drop levels}
 }
 \value{
 filtered SummarizedExperiment

@@ -96,7 +96,14 @@ un_int64 <- function(x) {
     assert_maxquant_proteingroups(file)
     assert_is_subset(quantity, names(MAXQUANT_PATTERNS))
 # Read
-    if (verbose)  cmessage('%sRead%sproteingroups %s%s%s', spaces(8), spaces(2), quantity, spaces(35-nchar(quantity)-nchar('proteingroups ')), file)
+    if (verbose)  cmessage('%sRead%sproteingroups %s%s%s', 
+                           spaces(8), 
+                           spaces(2), 
+                           quantity, 
+                           spaces(45-nchar(quantity)-nchar('proteingroups ')), 
+                           file)
+                # Note: spaces(35) was too small.
+                # It gives negative values for 'correctedreporterintensity'
     prodt <- fread(file, colClasses = c(id = 'character'), integer64 = 'numeric')
     prodt %<>% un_int64()
   # prodt[Reverse == '+', `Majority protein IDs` := split_extract_fixed(`Majority protein IDs`, ';', 1)]
@@ -134,7 +141,13 @@ un_int64 <- function(x) {
     assert_maxquant_phosphosites(file)
     `Protein group IDs` <- Reverse <- Proteins <- Protein <- NULL
 # Read    
-    if (verbose)  cmessage('%sphosphosites  %s%s%s', spaces(14), quantity, spaces(35-nchar('phosphosites  ')-nchar(quantity)), file)
+    if (verbose)  cmessage('%sphosphosites  %s%s%s', 
+                           spaces(14), 
+                           quantity, 
+                           spaces(45-nchar('phosphosites  ')-nchar(quantity)), 
+                           file)
+                # Note: spaces(35) was too small. It gives negative values for
+                # correctedreporterintensities in .read_maxquant_proteingroups
     colclasses <- c(id = 'character', `Protein group IDs` = 'character')
     fosdt <- fread(file, colClasses = colclasses, integer64 = 'numeric')
     fosdt %<>% un_int64()

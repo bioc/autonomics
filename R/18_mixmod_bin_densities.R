@@ -5,7 +5,27 @@
 #========================================================================================
 
 
-mixmod_mclust <- function(x, k = NULL){
+#' Distribution parameters
+#' 
+#' Mean, sd, weight of overall/mixture distribution
+#' 
+#' @param x        numeric vector
+#' @param k        number of components
+#' @return  data.table (mean, sd, weight)
+#' @examples
+#' set.seed(1)
+#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#' overall_parameters(x)
+#' mclust_parameters(x)
+#' mixtools_parameters(x)
+#' @export
+overall_parameters <- function(x)   data.table(  component = 1, 
+                                                      mean = mean(x, na.rm = TRUE),
+                                                        sd = sd(  x, na.rm = TRUE), 
+                                                    weight = 1  )
+#' @rdname overall_parameters
+#' @export
+mclust_parameters <- function(x, k = NULL){
     if (!installed('mclust'))    return( mixmod_none(x) )
     mclustBIC <- mclust::mclustBIC
     fit <- mclust::Mclust(x, verbose = FALSE, G = k)
@@ -18,7 +38,9 @@ mixmod_mclust <- function(x, k = NULL){
 }
 
 
-mixmod_mixtools <- function(x, k = 2){
+#' @rdname overall_parameters
+#' @export
+mixtools_parameters <- function(x, k = 2){
     if (!installed('mixtools'))  return( mixmod('none') )
         fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
       means <- fit$mu
@@ -29,79 +51,7 @@ mixmod_mixtools <- function(x, k = 2){
 
 
 
-mixmod_none <- function(x)   return( data.table(  component = 1, 
-                                                       mean = mean(x, na.rm = TRUE),
-                                                         sd = sd(  x, na.rm = TRUE), 
-                                                     weight = 1  ) )
-
-#' Mixture model
-#' @param x        numeric vector
-#' @param engine  'mclust', 'mixtools', 'none'
-#' @param k        number of components
-#' @param color    string
-#' @return  data.table (mixmod), ggplot (mixplot), vector (mixbreaks)
-#' @examples
-#' set.seed(1)
-#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#' mixmod(x)
-#' mixplot(x)
-#' mixbreaks(x)
-#' @export
-mixmod <- function(
-         x, 
-    engine = 'mclust', 
-         k = switch(engine, none = 3, mclust = NULL, mixtools = 3) 
-){
-    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
-    switch(engine, mclust = mixmod_mclust(x, k = k), 
-                 mixtools = mixmod_mixtools(x, k = k), 
-                   single = mixmod_none(x))
-}
-
-
 wnorm <- function(x, mean, sd, weight)   weight*dnorm(x, mean = mean, sd = sd)
-
-
-#' @rdname mixmod
-#' @export
-mixplot <- function(
-         x, 
-    engine = 'mclust', 
-         k = switch(engine, none = 3, mclust = NULL, mixtools = 3),
-     color = '#F8766D'
-){
-
-# Model
-    assert_scalar_subset(engine, c('none', 'mclust', 'mixtools'))
-    y <- xend <- yend <- NULL
-     mixdt <- mixmod(x, engine = engine, k = k)
-      mean <- mixdt$mean
-        sd <- mixdt$sd
-    weight <- mixdt$weight
-# Prep
-    xcurve <- seq(min(x), max(x), length.out = 100)
-    ycurve <- mapply(wnorm, mean = mean, sd = sd, weight = weight, MoreArgs = list(x = xcurve), SIMPLIFY = FALSE)
-    ycurve %<>% Reduce(`+`, .)
-
-    pointdt <- data.table(x = x,     y = .densities(x))
-    curvedt <- data.table(x = xcurve, y = .densities(x, xcurve))
-    mixdt   <- data.table(x = xcurve, y = ycurve, engine = engine)
-# Plot
-    p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
-    p <- p + geom_point(aes(x = x, y = y), pointdt, color = color)
-    p <- p + geom_line( aes(x = x, y = y), curvedt, color = color)
-    p <- p + geom_line( aes(x = x, y = y, linetype = engine), mixdt, color = color)
-    p <- p + scale_linetype_manual(values = 'dotted')
-    mbreaks <- mixbreaks(x)    
-    if (length(mbreaks) == 0)   return(p)
-    segmentdt <- data.table( x = mbreaks, 
-                          xend = mbreaks,
-                             y = min(ycurve), 
-                          yend = .densities(x, mbreaks))
-    p <- p + geom_segment(aes(x = x, xend = xend, y = y, yend = yend), segmentdt, color = color)
-    p <- p + geom_label(  aes(x = x, y = y+(yend-y)/2, label = formatC(x, 2)), segmentdt, color = color)
-    p
-}
 
 
 #' Quadratic roots
@@ -120,9 +70,9 @@ mixplot <- function(
 #' @param b coefficient of x^1
 #' @param c coefficient of x^0
 #' @examples
-#' quadrroots(a = 1, b =-5, c = 6)  # two real roots
-#' quadrroots(a = 1, b =-4, c = 4)  # one real root
-#' quadrroots(a = 1, b = 1, c = 1)  # imaginary root
+#' quadroots(a = 1, b =-5, c = 6)  # two real roots
+#' quadroots(a = 1, b =-4, c = 4)  # one real root
+#' quadroots(a = 1, b = 1, c = 1)  # imaginary root
 #' @return vector
 #' @noRd
 quadroots <- function(a,b,c){
@@ -151,20 +101,339 @@ quadroots <- function(a,b,c){
 }
 
 
-#' @rdname mixmod
+#' Mixture/Quantile breaks
+#' @param x  numeric
+#' @param k  number
+#' @examples
+#' set.seed(1)
+#' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#'   mclust_breaks(x)
+#' mixtools_breaks(x, k = 3)
+#' quantile_breaks(x)
 #' @export
-mixbreaks <- function(
-         x, 
-    engine = 'mclust', 
-         k = switch(engine, none = 3, mclust = NULL, mixtools = 3) 
-){
-    mixdt <- mixmod(x, engine = engine, k = k)
-    if (nrow(mixdt) == 1)  return(c())
-    y <- lapply(  seq(1, nrow(mixdt)-1), 
-                  function(i)  mixdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
+mclust_breaks <- function(x, k = NULL){
+    momentsdt <- mclust_parameters(x, k = k)
+    if (nrow(momentsdt) == 1)  return(c())
+    y <- lapply(  seq(1, nrow(momentsdt)-1), 
+                  function(i)  momentsdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
     y %<>% Reduce(c, .)
     y
-} 
+}
+
+
+#' @rdname mclust_breaks
+#' @export
+mixtools_breaks <- function(x, k = 2){
+    momentsdt <- mixtools_parameters(x, k = k)
+    if (nrow(momentsdt) == 1)  return(c())
+    y <- lapply(  seq(1, nrow(momentsdt)-1), 
+                  function(i)  momentsdt[ , .mixbreaks(mean[i], mean[i+1], sd[i], sd[i+1] ) ]  )
+    y %<>% Reduce(c, .)
+    y
+}
+    
+
+#' @rdname mclust_breaks
+#' @export
+quantile_breaks <- function(x, k = 3, probs = seq_len(k-1)/k){
+    unname(quantile(x, probs = probs, na.rm = TRUE))
+}
+
+
+#========================================================================================
+#
+#    Densities
+#
+#========================================================================================
+    
+
+get_density <- function(x, y, ...) {
+    # Kamil Slowikowski
+    # https://slowkow.com/notes/ggplot2-color-by-density/
+    dens <- MASS::kde2d(x, y, ...)
+    ix <- findInterval(x, dens$x)
+    iy <- findInterval(y, dens$y)
+    ii <- cbind(ix, iy)
+    return(dens$z[ii])
+}
+
+
+#' @rdname densities
+#' @export
+.densities <- function(x, xpred = x)  approxfun(density(x, na.rm = TRUE))(xpred)
+
+
+
+#' Densities
+#' @param x      numeric vector: data points
+#' @param xpred  numeric vector: prediction points
+#' @param plot   whether to plot
+#' @param color  string
+#' @return numeric vector with same length as xpred
+#' @examples
+#'  set.seed(1)
+#'  x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
+#'  xpred <- seq(min(x), max(x), length.out = 100)
+#' .densities(x, xpred)  # innerfun
+#'  densities(x, xpred)  # outerfun
+#' @export
+densities <- function(
+        x, 
+    xpred = x, 
+     plot = TRUE, 
+    color = "#F8766D"
+){
+# Assert
+    assert_is_numeric(x)
+    assert_is_numeric(xpred)
+    assert_is_a_bool(plot)
+    assert_all_are_colors(color)
+# Run
+        y <- .densities(x)
+    ypred <- .densities(x, xpred)
+# Plot/Return
+    if (plot){
+        pointdt <- data.table(x = x, y = y)
+        linedt  <- data.table(x = xpred, y = ypred, method = '')
+        p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
+        p <- p + geom_point(aes(x = x, y = y), pointdt, color = color)
+        p <- p + geom_line( aes(x = x, y = y), linedt,  color = color)
+        print(p)
+    }
+    ypred
+}
+
+
+#' @rdname plot_xy_density
+#' @export
+plot_x_density <- function(
+           x,
+           y = NULL,
+     xbreaks = mclust_breaks(x),
+  components = TRUE,
+       title = NULL,
+       color = '#F8766D',
+        xlab = NULL,       # `get_name_in_parent` fails: it prints contents rather than name
+        ylab = 'Density',       # (oddly enough it does work in debug mode)
+  transcolor = '00000000', 
+  panel.border = element_rect(color = color), 
+   plot.margin = unit(c(5.5,5.5,5.5,5.5), 'points'), 
+       scale_x_position = 'bottom', 
+  axis.ticks.x = element_line(color = color), 
+  axis.ticks.y = element_line(color = color), 
+   axis.text.x = element_text(color = color), 
+   axis.text.y = element_text(color = color), 
+  axis.title.y = element_text(color = color)
+){
+# Kde
+    x %<>% sort()
+    densityfun <- approxfun(density(x, na.rm = TRUE))
+    xpath <- seq(min(x), max(x), length.out = 100)
+    p <- ggplot() + theme_bw()
+    p <- p + annotate('point', x = x,     y = densityfun(x),     color = color)
+    p <- p + annotate('path',  x = xpath, y = densityfun(xpath), color = color)
+# Breaks
+    #y0 <- if (components) 0 else 0.95*min(densityfun(xpath))
+    p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend =  densityfun(xbreaks),   color = color,  linetype = 'solid' )    
+# Components
+    if (components){
+        pardt <- mclust_parameters(x)
+        mixdt <- mapply(wnorm, mean = pardt$mean, sd = pardt$sd, weight = pardt$weight, SIMPLIFY = FALSE, MoreArgs = list(x = xpath))
+        mixdt <- lapply(seq_along(mixdt), function(i) data.table(i = as.character(i), x = xpath, y = mixdt[[i]]))
+        mixdt %<>% rbindlist()
+        p <- p + geom_line(aes(x = x, y = y, group = i), linetype = 'dotted', data = mixdt, color = color)
+        #ybreaks <- wnorm(xbreaks, pardt$mean[-1], pardt$sd[-1], pardt$weight[-1])
+        #p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend = .densities(x, xbreaks), color = color)
+    }
+    # 
+# Finishing
+    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
+    p <- p + theme(panel.grid   = element_blank())
+    p <- p + theme(panel.border = panel.border)
+    p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
+    p <- p + scale_x_continuous(position = 'bottom', breaks = xbreaks, labels = formatC(xbreaks))
+    p <- p + theme(axis.line.x  = element_blank())
+    p <- p + theme(axis.line.y  = element_line(color = transcolor))
+    p <- p + theme(axis.ticks.x = axis.ticks.x)
+    p <- p + theme(axis.ticks.y = axis.ticks.y)
+    p <- p + theme(axis.text.x  = axis.text.x )
+    p <- p + theme(axis.text.y  = axis.text.y)
+    p <- p + theme(axis.title.x = element_text(color = color))
+    p <- p + theme(axis.title.y = axis.title.y)
+    p <- p + theme(plot.margin = plot.margin)
+# Align with xyplot
+    if (!is.null(y)){
+          digits <- max(nchar(scales::extended_breaks()(range(y)))) - 1
+        labelfun <- function(br) round(br, digits = digits)
+        p <- p + scale_y_continuous(labels = labelfun, sec.axis = sec_axis(~., labels = labelfun))
+    }
+    p
+}
+
+
+#' @rdname plot_xy_density
+#' @export
+plot_y_density <- function(
+                   y,
+                   x = NULL,
+             ybreaks = mclust_breaks(y),
+               title = NULL,
+               color = '#F8766D',
+                xlab = NULL,
+                ylab = NULL,
+          transcolor = '00000000'
+){
+# Prep
+    y %<>% sort()
+    densityfun <- approxfun(density(y, na.rm = TRUE))
+    ypath <- seq(min(y), max(y), length.out = 100)
+# Plot    
+    p <- ggplot() + theme_bw()
+    p <- p + annotate('point',   y = y,     x = densityfun(y),     color = color)
+    p <- p + annotate('path',    y = ypath, x = densityfun(ypath), color = color)
+# Breaks
+    if (length(ybreaks)>0)   p <- p + annotate('segment', y = ybreaks, 
+                                                       yend = ybreaks, 
+                                                          x = 0.95*min(densityfun(ypath)), 
+                                                       xend = densityfun(ybreaks), 
+                                                      color = color, 
+                                                   linetype = 'dashed')
+# Finishing
+    p <- p + scale_y_continuous(position = 'right')
+    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
+    p <- p + theme(panel.grid = element_blank(), panel.border = element_blank())
+    p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
+    p <- p + theme(plot.margin = unit(c(0,5.5,5.5,0), 'points'))
+    p <- p + theme(axis.line.y.left   = element_blank(), 
+                   axis.line.y.right  = element_blank(),
+                   axis.ticks.y.left  = element_blank(),
+                   axis.ticks.y.right = element_blank(),
+                   axis.text.y.left   = element_blank(),
+                   axis.text.y.right  = element_blank(),
+                   axis.title.y.left  = element_text(color = color, angle = 0, vjust = 0.5),
+                   axis.title.y.right = element_text(color = color, angle = 0, vjust = 0.5)
+    )
+    p <- p + theme(axis.line.x  = element_line(color = transcolor), 
+                   axis.ticks.x = element_line(color = transcolor), 
+                   axis.text.x  = element_text(color = transcolor), 
+                   axis.title.x = element_text(color = transcolor))
+# Align with xy plot
+    if (!is.null(x)){
+          digits <- max(nchar(scales::extended_breaks()(range(x)))) - 1
+        labelfun <- function(br) round(br, digits = digits)
+        p <- p + scale_x_continuous(labels = labelfun, sec.axis = sec_axis(~., labels = labelfun))
+    }
+    p
+}
+
+
+#' @rdname plot_xy_density
+#' @export
+plot_xy_scatter <- function(
+          x,
+          y,
+    xbreaks = mclust_breaks(x),
+    ybreaks = mclust_breaks(y),
+      color = c('#F8766D', '#00BFC4'),
+    contour = FALSE,
+     smooth = FALSE,
+       xlab = NULL,
+       ylab = NULL
+){
+    p <- ggplot(data.table(x = x, y = y), aes(x = x, y = y)) + theme_bw()
+    if (contour) p <- p + geom_density2d(color = 'gray80')
+    if (smooth ) p <- p + geom_smooth(   color = 'gray80', se = FALSE, method = 'lm', formula = y ~ x)
+    p <- p + theme(plot.margin = unit(c(0,0,5.5,5.5), 'points'))
+    p <- p + geom_point()
+    if (length(xbreaks)>0)  p <- p + geom_vline(xintercept = xbreaks, color = color[[1]], linetype = 'dashed')
+    if (length(ybreaks)>0)  p <- p + geom_hline(yintercept = ybreaks, color = color[[2]], linetype = 'dashed')
+    p <- p + theme(panel.grid = element_blank())
+    p <- p + scale_x_continuous(sec.axis = sec_axis(~.))
+    p <- p + scale_y_continuous(sec.axis = sec_axis(~.))
+    p <- p + theme(axis.line.x  = element_line(color = color[[1]]),
+                   axis.ticks.x = element_line(color = color[[1]]),
+                   axis.text.x  = element_text(color = color[[1]]), 
+                   axis.title.x = element_text(color = color[[1]]))
+    p <- p + theme(axis.line.y  = element_line(color = color[[2]]),
+                   axis.ticks.y = element_line(color = color[[2]]),
+                   axis.text.y  = element_text(color = color[[2]]), 
+                   axis.title.y = element_text(color = color[[2]]))
+    p <- p + theme(panel.border = element_blank())
+    p <- p + xlab(xlab) + ylab(ylab)
+    #p <- p + theme(plot.margin = margin(c(0,0,0,0), 'points'))
+    p
+}
+
+
+#' Plot xy densities
+#' @param x           numeric vector
+#' @param y           numeric vector
+#' @param xbreaks      numeric vector
+#' @param ybreaks      numeric vector
+#' @param title       NULL or string
+#' @param color       vector or string
+#' @param contour     TRUE or FALSE: plot density contours ?
+#' @param smooth      TRUE or FALSE: plot smooth line ?
+#' @param xlab        NULL or string
+#' @param ylab        NULL or string
+#' @param transcolor  string
+#' @return ggplot
+#' @examples
+#' # Bimodal
+#'     set.seed(1)
+#'     x <- c(rnorm(10, 3), rnorm(10,7))
+#'     y <- c(rnorm(10, 3), rnorm(10,7))
+#'     plot_xy_density(x,y)
+#'     plot_xy_density(x,y, contour = TRUE)
+#'     plot_xy_density(x,y,  smooth = TRUE)
+#'     plot_xy_scatter(x,y)
+#'     plot_x_density(x)
+#'     plot_y_density(y)
+#' # Unimodal
+#'     set.seed(1)
+#'     x <- c(rnorm(20, 3))
+#'     y <- c(rnorm(20, 3))
+#'     plot_xy_density(x,y)
+#'     plot_xy_scatter(x,y)
+#'     plot_x_density(x)
+#'     plot_y_density(y)
+#' @export
+plot_xy_density <- function(
+          x,
+          y,
+     xbreaks = mclust_breaks(x),
+     ybreaks = mclust_breaks(y),
+        xlab = get_name_in_parent(x),
+        ylab = get_name_in_parent(y),
+       color = c('#F8766D', '#00BFC4' ),
+     contour = FALSE,
+      smooth = FALSE
+){
+    px  <- plot_x_density(    x, 
+                              y,  
+                           color = color[[1]], 
+                            xlab = xlab, 
+                            ylab = ylab, 
+                    panel.border = element_blank(), 
+                     plot.margin = unit(c(5.5,0,0,5.5), 'points'), 
+                scale_x_position = 'top', 
+                    axis.ticks.x = element_blank(), 
+                    axis.ticks.y = element_blank(),
+                     axis.text.x = element_blank(), 
+                     axis.text.y = element_text(color = '00000000'),
+                    axis.title.y = element_text(color = '00000000') )
+    
+    py  <- plot_y_density( y, x,  color = color[[2]], xlab = xlab, ylab = ylab )
+    
+    pxy <- plot_xy_scatter(x, y,  color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab, xbreaks = xbreaks, ybreaks = ybreaks)
+    
+    layout <- matrix(c(1,1,4,
+                       2,2,3,
+                       2,2,3), nrow = 3, byrow = TRUE)
+    grid.arrange(px, pxy,py, layout_matrix = layout)
+}
+
+
 
 
 #========================================================================================
@@ -238,22 +507,23 @@ factorize.character <- function(x, ...)  as.factor(x)
 #' @export
 factorize.factor <- function(x, ...)  x
 
+minn <- function(x)  min(x, na.rm = TRUE)
+
+maxx <- function(x)  max(x, na.rm = TRUE)
 
 #' @rdname factorize
 #' @export
 factorize.numeric <- function(
                 x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+           method = 'quantile', 
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, ...
 ){
-    assert_scalar_subset(mixmod, c('none', 'mclust', 'mixtools'))
-     probs <- if (mixmod == 'none')  seq_len(k-1)/k  else NULL
-    breaks <- if (mixmod == 'none'){  unname(quantile(x, probs = probs, na.rm = TRUE))
-              } else {          autonomics::mixbreaks(x, engine = {{mixmod}}, k = k)   }
-    breaks %<>% c(  `0%` = min(x, na.rm = TRUE)-1e-7, .)
-    breaks %<>% c(`100%` = max(x, na.rm = TRUE)+1e-7   )
-    y <- cut(x, breaks)
+    assert_scalar_subset(method, c('quantile', 'mclust', 'mixtools'))
+    breaks <- switch(method, quantile = quantile_breaks(x, k = k), 
+                                 mclust = mclust_breaks(x, k = k), 
+                             mixtools = mixtools_breaks(x, k = k))
+    y <- cut(x, c(minn(x)-1e-7, breaks, maxx(x)+1e7) )
     if (numericlevels){  levels(y) %<>% seq_along()
     } else {             levels(y) %<>% substr(2, nchar(.))
                          levels(y) %<>% split_extract_fixed(',', 1)
@@ -267,13 +537,14 @@ factorize.numeric <- function(
 #' @export
 factorize.matrix <- function(
                 x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+           method = 'quantile', 
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
                  ...
 ){
     y <- x
-    y %<>% apply(1, factorize.numeric, k = k, numericlevels = numericlevels) %>% t()
+    y %<>% apply(1, factorize.numeric, method = method, k = k, numericlevels = numericlevels)
+    y %<>% t()
     colnames(y) <- colnames(x)
     y
 }
@@ -285,8 +556,8 @@ factorize.matrix <- function(
 factorize.SummarizedExperiment <- function(
                 x, 
             assay = assayNames(x)[1],
-           mixmod = 'none',
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+           method = 'quantile',
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE,
              drop = TRUE,
           verbose = TRUE,
@@ -298,7 +569,7 @@ factorize.SummarizedExperiment <- function(
     
     # Bin
     mat <- assays(x)[[assay]]
-    mat %<>% factorize.matrix(mixmod = mixmod, k = k, numericlevels = numericlevels)
+    mat %<>% factorize.matrix(method = method, k = k, numericlevels = numericlevels)
     if (!drop)  mat[] %<>% paste0(assay, .)
 
     # Add
@@ -314,13 +585,13 @@ factorize.SummarizedExperiment <- function(
 factorize_assay <- function(
          x, 
           assay = assayNames(x)[1], 
-         mixmod = 'none',
-              k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+         method = 'quantile',
+              k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
         verbose = TRUE, 
                ...
 ){
     .Deprecated('factorize') # factorize.SummarizedExperiment
-    factorize.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
+    factorize.SummarizedExperiment(x, assay = assay, method = method, k = k, verbose = verbose, ...)
 }
 
 
@@ -416,268 +687,6 @@ bin_assay <- function(
 ){
     .Deprecated('bin') # bin.SummarizedExperiment
     bin.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
-}
-
-
-get_density <- function(x, y, ...) {
-    # Kamil Slowikowski
-    # https://slowkow.com/notes/ggplot2-color-by-density/
-    dens <- MASS::kde2d(x, y, ...)
-    ix <- findInterval(x, dens$x)
-    iy <- findInterval(y, dens$y)
-    ii <- cbind(ix, iy)
-    return(dens$z[ii])
-}
-
-
-#' @rdname densities
-#' @export
-.densities <- function(x, xpred = x)  approxfun(density(x, na.rm = TRUE))(xpred)
-
-
-
-#' Densities
-#' @param x      numeric vector: data points
-#' @param xpred  numeric vector: prediction points
-#' @param plot   whether to plot
-#' @param color  string
-#' @return numeric vector with same length as xpred
-#' @examples
-#'  set.seed(1)
-#'  x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
-#'  xpred <- seq(min(x), max(x), length.out = 100)
-#' .densities(x, xpred)  # innerfun
-#'  densities(x, xpred)  # outerfun
-#' @export
-densities <- function(
-        x, 
-    xpred = x, 
-     plot = TRUE, 
-    color = "#F8766D"
-){
-# Assert
-    assert_is_numeric(x)
-    assert_is_numeric(xpred)
-    assert_is_a_bool(plot)
-    assert_all_are_colors(color)
-# Run
-        y <- .densities(x)
-    ypred <- .densities(x, xpred)
-# Plot/Return
-    if (plot){
-        pointdt <- data.table(x = x, y = y)
-        linedt  <- data.table(x = xpred, y = ypred, method = '')
-        p <- ggplot() + theme_bw() + theme(panel.grid = element_blank())
-        p <- p + geom_point(aes(x = x, y = y), pointdt, color = color)
-        p <- p + geom_line( aes(x = x, y = y), linedt,  color = color)
-        print(p)
-    }
-    ypred
-}
-
-
-
-
-
-
-
-#' @rdname plot_xy_density
-#' @export
-plot_x_density <- function(
-                   x,
-                   y = NULL,
-             xbreaks = mixbreaks(x),
-               title = NULL,
-               color = '#F8766D',
-                xlab = NULL,
-                ylab = NULL,
-          transcolor = '00000000'
-){
-# Prep
-    x %<>% sort()
-    densityfun <- approxfun(density(x, na.rm = TRUE))
-    xpath <- seq(min(x), max(x), length.out = 100)
-# Plot
-    p <- ggplot() + theme_bw()
-    p <- p + annotate('point', x = x,     y = densityfun(x),     color = color)
-    p <- p + annotate('path',  x = xpath, y = densityfun(xpath), color = color)
-# Breaks
-    if (length(xbreaks)>0)  p <- p + annotate('segment', x = xbreaks, 
-                                                      xend = xbreaks, 
-                                                         y = 0.95*min(densityfun(xpath)),
-                                                      yend = densityfun(xbreaks), 
-                                                     color = color, 
-                                                  linetype = 'dashed')
-# Finishing
-    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
-    p <- p + theme(panel.grid   = element_blank(), 
-                   panel.border = element_blank())
-    p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
-    p <- p + scale_x_continuous(position = 'top')
-    p <- p + theme(axis.line.x  = element_blank(),
-                   axis.ticks.x = element_blank(),
-                   axis.text.x  = element_blank(), 
-                   axis.title.x = element_text(color = color))
-    p <- p + theme(axis.line.y  = element_line(color = transcolor), 
-                   axis.ticks.y = element_line(color = transcolor), 
-                   axis.text.y  = element_text(color = transcolor), 
-                   axis.title.y = element_text(color = transcolor))
-    p <- p + theme(plot.margin = unit(c(5.5,0,0,5.5), 'points'))
-# Align with xyplot
-    if (!is.null(y)){
-          digits <- max(nchar(scales::extended_breaks()(range(y)))) - 1
-        labelfun <- function(br) round(br, digits = digits)
-        p <- p + scale_y_continuous(labels = labelfun, sec.axis = sec_axis(~., labels = labelfun))
-    }
-    p
-}
-
-
-#' @rdname plot_xy_density
-#' @export
-plot_y_density <- function(
-                   y,
-                   x = NULL,
-             ybreaks = mixbreaks(y),
-               title = NULL,
-               color = '#F8766D',
-                xlab = NULL,
-                ylab = NULL,
-          transcolor = '00000000'
-){
-# Prep
-    y %<>% sort()
-    densityfun <- approxfun(density(y, na.rm = TRUE))
-    ypath <- seq(min(y), max(y), length.out = 100)
-# Plot    
-    p <- ggplot() + theme_bw()
-    p <- p + annotate('point',   y = y,     x = densityfun(y),     color = color)
-    p <- p + annotate('path',    y = ypath, x = densityfun(ypath), color = color)
-# Breaks
-    if (length(ybreaks)>0)   p <- p + annotate('segment', y = ybreaks, 
-                                                       yend = ybreaks, 
-                                                          x = 0.95*min(densityfun(ypath)), 
-                                                       xend = densityfun(ybreaks), 
-                                                      color = color, 
-                                                   linetype = 'dashed')
-# Finishing
-    p <- p + scale_y_continuous(position = 'right')
-    p <- p + xlab(xlab) + ylab(ylab) + ggtitle(title)
-    p <- p + theme(panel.grid = element_blank(), panel.border = element_blank())
-    p <- p + theme(plot.title = element_text(color = color, hjust = 0.5))
-    p <- p + theme(plot.margin = unit(c(0,5.5,5.5,0), 'points'))
-    p <- p + theme(axis.line.y.left   = element_blank(), 
-                   axis.line.y.right  = element_blank(),
-                   axis.ticks.y.left  = element_blank(),
-                   axis.ticks.y.right = element_blank(),
-                   axis.text.y.left   = element_blank(),
-                   axis.text.y.right  = element_blank(),
-                   axis.title.y.left  = element_text(color = color, angle = 0, vjust = 0.5),
-                   axis.title.y.right = element_text(color = color, angle = 0, vjust = 0.5)
-    )
-    p <- p + theme(axis.line.x  = element_line(color = transcolor), 
-                   axis.ticks.x = element_line(color = transcolor), 
-                   axis.text.x  = element_text(color = transcolor), 
-                   axis.title.x = element_text(color = transcolor))
-# Align with xy plot
-    if (!is.null(x)){
-          digits <- max(nchar(scales::extended_breaks()(range(x)))) - 1
-        labelfun <- function(br) round(br, digits = digits)
-        p <- p + scale_x_continuous(labels = labelfun, sec.axis = sec_axis(~., labels = labelfun))
-    }
-    p
-}
-
-
-#' @rdname plot_xy_density
-#' @export
-plot_xy_scatter <- function(
-          x,
-          y,
-    xbreaks = mixbreaks(x),
-    ybreaks = mixbreaks(y),
-      color = c('#F8766D', '#00BFC4'),
-    contour = FALSE,
-     smooth = FALSE,
-       xlab = NULL,
-       ylab = NULL
-){
-    p <- ggplot(data.table(x = x, y = y), aes(x = x, y = y)) + theme_bw()
-    if (contour) p <- p + geom_density2d(color = 'gray80')
-    if (smooth ) p <- p + geom_smooth(   color = 'gray80', se = FALSE, method = 'lm', formula = y ~ x)
-    p <- p + theme(plot.margin = unit(c(0,0,5.5,5.5), 'points'))
-    p <- p + geom_point()
-    if (length(xbreaks)>0)  p <- p + geom_vline(xintercept = xbreaks, color = color[[1]], linetype = 'dashed')
-    if (length(ybreaks)>0)  p <- p + geom_hline(yintercept = ybreaks, color = color[[2]], linetype = 'dashed')
-    p <- p + theme(panel.grid = element_blank())
-    p <- p + scale_x_continuous(sec.axis = sec_axis(~.))
-    p <- p + scale_y_continuous(sec.axis = sec_axis(~.))
-    p <- p + theme(axis.line.x  = element_line(color = color[[1]]),
-                   axis.ticks.x = element_line(color = color[[1]]),
-                   axis.text.x  = element_text(color = color[[1]]), 
-                   axis.title.x = element_text(color = color[[1]]))
-    p <- p + theme(axis.line.y  = element_line(color = color[[2]]),
-                   axis.ticks.y = element_line(color = color[[2]]),
-                   axis.text.y  = element_text(color = color[[2]]), 
-                   axis.title.y = element_text(color = color[[2]]))
-    p <- p + theme(panel.border = element_blank())
-    p <- p + xlab(xlab) + ylab(ylab)
-    #p <- p + theme(plot.margin = margin(c(0,0,0,0), 'points'))
-    p
-}
-
-
-#' Plot xy densities
-#' @param x           numeric vector
-#' @param y           numeric vector
-#' @param xbreaks      numeric vector
-#' @param ybreaks      numeric vector
-#' @param title       NULL or string
-#' @param color       vector or string
-#' @param contour     TRUE or FALSE: plot density contours ?
-#' @param smooth      TRUE or FALSE: plot smooth line ?
-#' @param xlab        NULL or string
-#' @param ylab        NULL or string
-#' @param transcolor  string
-#' @return ggplot
-#' @examples
-#' # Bimodal
-#'     set.seed(1)
-#'     x <- c(rnorm(10, 3), rnorm(10,7))
-#'     y <- c(rnorm(10, 3), rnorm(10,7))
-#'     plot_xy_density(x,y)
-#'     plot_xy_density(x,y, contour = TRUE)
-#'     plot_xy_density(x,y,  smooth = TRUE)
-#'     plot_xy_scatter(x,y)
-#'     plot_x_density(x)
-#'     plot_y_density(y)
-#' # Unimodal
-#'     set.seed(1)
-#'     x <- c(rnorm(20, 3))
-#'     y <- c(rnorm(20, 3))
-#'     plot_xy_density(x,y)
-#'     plot_xy_scatter(x,y)
-#'     plot_x_density(x)
-#'     plot_y_density(y)
-#' @export
-plot_xy_density <- function(
-              x,
-              y,
-         xbreaks = mixbreaks(x),
-         ybreaks = mixbreaks(y),
-            xlab = get_name_in_parent(x),
-            ylab = get_name_in_parent(y),
-           color = c('#F8766D', '#00BFC4' ),
-         contour = FALSE,
-          smooth = FALSE
-){
-    px  <- plot_x_density( x, y, color = color[[1]], xlab = xlab, ylab = ylab)
-    py  <- plot_y_density( y, x, color = color[[2]], xlab = xlab, ylab = ylab)
-    pxy <- plot_xy_scatter(x, y, color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
-    layout <- matrix(c(1,1,4,
-                       2,2,3,
-                       2,2,3), nrow = 3, byrow = TRUE)
-    grid.arrange(px, pxy,py, layout_matrix = layout)
 }
 
 
