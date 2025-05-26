@@ -225,11 +225,10 @@ plot_x_density <- function(
    axis.text.y = element_text(color = color), 
   axis.title.y = element_text(color = color)
 ){
-# Prep
+# Kde
     x %<>% sort()
     densityfun <- approxfun(density(x, na.rm = TRUE))
     xpath <- seq(min(x), max(x), length.out = 100)
-# Plot
     p <- ggplot() + theme_bw()
     p <- p + annotate('point', x = x,     y = densityfun(x),     color = color)
     p <- p + annotate('path',  x = xpath, y = densityfun(xpath), color = color)
@@ -238,7 +237,7 @@ plot_x_density <- function(
     p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend =  densityfun(xbreaks),   color = color,  linetype = 'solid' )    
 # Components
     if (components){
-        pardt <- mclust_parameters(x, k = k)
+        pardt <- mclust_parameters(x)
         mixdt <- mapply(wnorm, mean = pardt$mean, sd = pardt$sd, weight = pardt$weight, SIMPLIFY = FALSE, MoreArgs = list(x = xpath))
         mixdt <- lapply(seq_along(mixdt), function(i) data.table(i = as.character(i), x = xpath, y = mixdt[[i]]))
         mixdt %<>% rbindlist()
@@ -277,7 +276,7 @@ plot_x_density <- function(
 plot_y_density <- function(
                    y,
                    x = NULL,
-             ybreaks = mixbreaks(y),
+             ybreaks = mclust_breaks(y),
                title = NULL,
                color = '#F8766D',
                 xlab = NULL,
@@ -333,8 +332,8 @@ plot_y_density <- function(
 plot_xy_scatter <- function(
           x,
           y,
-    xbreaks = mixbreaks(x),
-    ybreaks = mixbreaks(y),
+    xbreaks = mclust_breaks(x),
+    ybreaks = mclust_breaks(y),
       color = c('#F8766D', '#00BFC4'),
     contour = FALSE,
      smooth = FALSE,
@@ -402,8 +401,8 @@ plot_xy_scatter <- function(
 plot_xy_density <- function(
           x,
           y,
-     xbreaks = mixbreaks(x),
-     ybreaks = mixbreaks(y),
+     xbreaks = mclust_breaks(x),
+     ybreaks = mclust_breaks(y),
         xlab = get_name_in_parent(x),
         ylab = get_name_in_parent(y),
        color = c('#F8766D', '#00BFC4' ),
@@ -426,7 +425,7 @@ plot_xy_density <- function(
     
     py  <- plot_y_density( y, x,  color = color[[2]], xlab = xlab, ylab = ylab )
     
-    pxy <- plot_xy_scatter(x, y,  color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab)
+    pxy <- plot_xy_scatter(x, y,  color = color, contour = contour, smooth = smooth, xlab = xlab, ylab = ylab, xbreaks = xbreaks, ybreaks = ybreaks)
     
     layout <- matrix(c(1,1,4,
                        2,2,3,

@@ -30,7 +30,7 @@ plot_x_density(
 plot_y_density(
   y,
   x = NULL,
-  ybreaks = mixbreaks(y),
+  ybreaks = mclust_breaks(y),
   title = NULL,
   color = "#F8766D",
   xlab = NULL,
@@ -41,8 +41,8 @@ plot_y_density(
 plot_xy_scatter(
   x,
   y,
-  xbreaks = mixbreaks(x),
-  ybreaks = mixbreaks(y),
+  xbreaks = mclust_breaks(x),
+  ybreaks = mclust_breaks(y),
   color = c("#F8766D", "#00BFC4"),
   contour = FALSE,
   smooth = FALSE,
@@ -53,8 +53,8 @@ plot_xy_scatter(
 plot_xy_density(
   x,
   y,
-  xbreaks = mixbreaks(x),
-  ybreaks = mixbreaks(y),
+  xbreaks = mclust_breaks(x),
+  ybreaks = mclust_breaks(y),
   xlab = get_name_in_parent(x),
   ylab = get_name_in_parent(y),
   color = c("#F8766D", "#00BFC4"),
