@@ -65,6 +65,7 @@ survobj <- function(){
 #' @export
 .coxph <- function(sd, formula){
     fitres <- survival::coxph(formula = formula, data = sd)
+    zphres <- survival::cox.zph(fit = fitres, transform = "identity") # @Aditya, Vanessa (VB) (Schönfeld Residuals Test)
     #Fres <- suppressWarnings(stats::anova(fitres))
     #Fres <- Fres %>% extract(-1, , drop = FALSE)
     #pF <- Fres[, 'Pr(>|Chi|)' ] %>% set_names(paste0('PF~', rownames(Fres)))
@@ -76,6 +77,11 @@ survobj <- function(){
     colnames(fitres) %<>% stri_replace_first_fixed('Pr(>|z|)', 'p')  # dont reverse order of these two lines
     colnames(fitres) %<>% stri_replace_first_fixed('z', 't')
     fitres %<>% extract(, c('effect', 't', 'p'), drop = FALSE)
+    capture.output(zphres %<>% print()) # VB -> add test results
+    zphres %<>% extract(,c("chisq", "p"), drop = FALSE) # VB
+    colnames(zphres) <- paste0(colnames(zphres), "~zph")# VB
+    zphres <- head(zphres, -1) # VB
+    fitres %<>% cbind(zphres) # VB
     fitmat <- matrix(fitres, nrow = 1)
     colnames(fitmat) <- paste(rep(colnames(fitres),  each = nrow(fitres)), 
                               rep(rownames(fitres), times = ncol(fitres)), sep = '~')
