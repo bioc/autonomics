@@ -521,7 +521,9 @@ factorize.numeric <- function(
     numericlevels = TRUE, ...
 ){
     assert_scalar_subset(method, c('quantile', 'mclust', 'mixtools'))
-    breaks <- switch(method, none = quantbreaks(x, k = k), otherwise = mixbreaks(x, engine = method, k = k))
+    breaks <- switch(method, quantile = quantile_breaks(x, k = k), 
+                                 mclust = mclust_breaks(x, k = k), 
+                             mixtools = mixtools_breaks(x, k = k))
     y <- cut(x, c(minn(x)-1e-7, breaks, maxx(x)+1e7) )
     if (numericlevels){  levels(y) %<>% seq_along()
     } else {             levels(y) %<>% substr(2, nchar(.))
