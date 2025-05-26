@@ -559,7 +559,7 @@ add_scores <- function(
     if (labelcolors){   # robust::covMcd more robust (outlier proof) but fails on duplicates
         labeldt <- sdt(object)[, .(x = get(x), y = get(y), label = get(color))]
         labeldt <- labeldt[, as.list(ICSNP::spatial.median(.SD)), .SDcols = c('x', 'y'), by = 'label']
-        p <- p + geom_label_repel(data = labeldt, aes(x = x, y = y, label = label, color = label), label.size = NA)
+        p <- p + geom_label_repel(data = labeldt, aes(x = x, y = y, label = label, color = label), label.size = NA, fill = '#FFFFFF00')
         p <- p + guides(color = 'none')
     }
 # Paths
