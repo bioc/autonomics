@@ -139,259 +139,13 @@ quantile_breaks <- function(x, k = 3, probs = seq_len(k-1)/k){
     unname(quantile(x, probs = probs, na.rm = TRUE))
 }
 
-    
 
 #========================================================================================
 #
-#    Factorize/Bin
+#    Densities
 #
 #========================================================================================
-
-
-#' Factorize/Bin
-#' @details 
-#'          `bin` transform into numeric bins : c(1,2,3,4,5,6) -> c( 1,  1,  2,  2,  3,  3 )
-#'    `factorize` transform into factor levels: c(1,2,3,4,5,6) -> c('1','1','2','2','3','3')
-#' @param x       vector, matrix or SummarizedExperiment
-#' @param probs   numeric
-#' @param k       number of bins/levels
-#' @param assay   string
-#' @param verbose TRUE or FALSE
-#' @param mixmod  'none', 'mclust', or 'mixtools' (mixture modeling method to use)
-#' @param numericlevels TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)
-#' @param drop  whether to drop assayname in levels ('1','2') or not ('exprs1', 'exprs2') when factorizing
-#' @param ... (S3 dispatch)
-#' @return  vector, matrix or SummarizedExperiment
-#' @examples 
-#' # data 
-#'     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
-#'     object <- read_maxquant_proteingroups(file, impute = TRUE)
-#'     fdt(object)
-#' 
-#' # logical
-#'     fdt(object)$imputed
-#'     fdt(object)$imputed %>% factorize()
-#'     fdt(object)$imputed %>% bin()
-#'     
-#' # character
-#'     as.character(fdt(object)$imputed)
-#'     as.character(fdt(object)$imputed) %>% factorize()
-#'     as.character(fdt(object)$imputed) %>% bin()
-#' 
-#' # factor
-#'     factor(fdt(object)$imputed)
-#'     factor(fdt(object)$imputed) %>% factorize()
-#'     factor(fdt(object)$imputed) %>% bin()
-#'     
-#' # numeric
-#'     fdt(object)$pepcounts
-#'     fdt(object)$pepcounts %>% factorize()
-#'     fdt(object)$pepcounts %>% bin()
-#' 
-#' # Matrix/SummarizedExperiment
-#'     values(object)
-#'     values(object) %>% factorize()
-#'            object  %>% factorize()
-#'     values(object) %>% bin()
-#'            object  %>% bin()
-#' @export
-factorize <- function(x, ...)  UseMethod('factorize')
-
-
-#' @rdname factorize
-#' @export
-factorize.logical <- function(x, ...) as.factor(x)
-
-
-#' @rdname factorize
-#' @export
-factorize.character <- function(x, ...)  as.factor(x)
-
-
-#' @rdname factorize
-#' @export
-factorize.factor <- function(x, ...)  x
-
-
-#' @rdname factorize
-#' @export
-factorize.numeric <- function(
-                x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, ...
-){
-    assert_scalar_subset(mixmod, c('none', 'mclust', 'mixtools'))
-     probs <- if (mixmod == 'none')  seq_len(k-1)/k  else NULL
-    breaks <- if (mixmod == 'none'){  unname(quantile(x, probs = probs, na.rm = TRUE))
-              } else {          autonomics::mixbreaks(x, engine = {{mixmod}}, k = k)   }
-    breaks %<>% c(  `0%` = min(x, na.rm = TRUE)-1e-7, .)
-    breaks %<>% c(`100%` = max(x, na.rm = TRUE)+1e-7   )
-    y <- cut(x, breaks)
-    if (numericlevels){  levels(y) %<>% seq_along()
-    } else {             levels(y) %<>% substr(2, nchar(.))
-                         levels(y) %<>% split_extract_fixed(',', 1)
-                         levels(y) %<>% paste0('>', .)
-    }
-    y
-}
-
-
-#' @rdname factorize
-#' @export
-factorize.matrix <- function(
-                x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, 
-                 ...
-){
-    y <- x
-    y %<>% apply(1, factorize.numeric, k = k, numericlevels = numericlevels) %>% t()
-    colnames(y) <- colnames(x)
-    y
-}
-
-
-
-#' @rdname factorize
-#' @export
-factorize.SummarizedExperiment <- function(
-                x, 
-            assay = assayNames(x)[1],
-           mixmod = 'none',
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE,
-             drop = TRUE,
-          verbose = TRUE,
-                 ...
-){
-    # Assert
-    assert_scalar_subset(assay, assayNames(x))
-    assert_is_a_bool(verbose)
     
-    # Bin
-    mat <- assays(x)[[assay]]
-    mat %<>% factorize.matrix(mixmod = mixmod, k = k, numericlevels = numericlevels)
-    if (!drop)  mat[] %<>% paste0(assay, .)
-
-    # Add
-    newassayname <- sprintf('%s%dlevels', assay, k)
-    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
-    assays(x)[[newassayname]] <- mat
-    x
-}
-
-
-#' @rdname factorize
-#' @export
-factorize_assay <- function(
-         x, 
-          assay = assayNames(x)[1], 
-         mixmod = 'none',
-              k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-        verbose = TRUE, 
-               ...
-){
-    .Deprecated('factorize') # factorize.SummarizedExperiment
-    factorize.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
-}
-
-
-
-#' @rdname factorize
-#' @export
-bin <- function(x, ...)  UseMethod('bin')
-
-
-#' @rdname factorize
-#' @export
-bin.logical <- function(x, ...)    as.numeric(x)
-
-
-#' @rdname factorize
-#' @export
-bin.character <- function(x, ...)  as.numeric(as.factor(x))
-
-
-#' @rdname factorize
-#' @export
-bin.factor <- function(x, ...)    as.numeric(x)
-
-
-
-#' @rdname factorize
-#' @export
-bin.numeric <- function(
-                x, 
-           mixmod = 'none',
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, 
-    ...
-){
-    y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
-    y %<>% as.numeric()
-    y
-}
-
-
-#' @rdname factorize
-#' @export
-bin.matrix <- function(
-                x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-    numericlevels = TRUE, 
-                 ...
-){
-    y <- x
-    y %<>% apply(1, bin.numeric, k = k, numericlevels = numericlevels) %>% t()
-  # y %>% apply(1, dplyr::ntile, n = k) %>% t()    # differs a bit
-    colnames(y) <- colnames(x)
-    y
-}
-
-
-
-#' @rdname factorize
-#' @export
-bin.SummarizedExperiment <- function(
-          x, 
-      assay = assayNames(x)[1],
-     mixmod = 'none',
-          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-      probs = seq_len(k-1)/k,
-    verbose = TRUE, 
-           ...
-){
-    # Assert
-    assert_scalar_subset(assay, assayNames(x))
-    assert_is_a_bool(verbose)
-    
-    # Bin
-    mat <- assays(x)[[assay]]
-    mat %<>% bin.matrix(k = k, probs = probs)
-    
-    # Add
-    newassayname <- sprintf('%s%dbins', assay, k)
-    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
-    assays(x)[[newassayname]] <- mat
-    x
-}
-
-#' @rdname factorize
-#' @export
-bin_assay <- function(
-     x, 
-      assay = assayNames(x)[1], 
-     mixmod = 'none',
-          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
-    verbose = TRUE
-){
-    .Deprecated('bin') # bin.SummarizedExperiment
-    bin.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
-}
-
 
 get_density <- function(x, y, ...) {
     # Kamil Slowikowski
@@ -448,11 +202,6 @@ densities <- function(
     }
     ypred
 }
-
-
-
-
-
 
 
 #' @rdname plot_xy_density
@@ -683,6 +432,260 @@ plot_xy_density <- function(
                        2,2,3,
                        2,2,3), nrow = 3, byrow = TRUE)
     grid.arrange(px, pxy,py, layout_matrix = layout)
+}
+
+
+
+
+#========================================================================================
+#
+#    Factorize/Bin
+#
+#========================================================================================
+
+
+#' Factorize/Bin
+#' @details 
+#'          `bin` transform into numeric bins : c(1,2,3,4,5,6) -> c( 1,  1,  2,  2,  3,  3 )
+#'    `factorize` transform into factor levels: c(1,2,3,4,5,6) -> c('1','1','2','2','3','3')
+#' @param x       vector, matrix or SummarizedExperiment
+#' @param probs   numeric
+#' @param k       number of bins/levels
+#' @param assay   string
+#' @param verbose TRUE or FALSE
+#' @param mixmod  'none', 'mclust', or 'mixtools' (mixture modeling method to use)
+#' @param numericlevels TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)
+#' @param drop  whether to drop assayname in levels ('1','2') or not ('exprs1', 'exprs2') when factorizing
+#' @param ... (S3 dispatch)
+#' @return  vector, matrix or SummarizedExperiment
+#' @examples 
+#' # data 
+#'     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
+#'     object <- read_maxquant_proteingroups(file, impute = TRUE)
+#'     fdt(object)
+#' 
+#' # logical
+#'     fdt(object)$imputed
+#'     fdt(object)$imputed %>% factorize()
+#'     fdt(object)$imputed %>% bin()
+#'     
+#' # character
+#'     as.character(fdt(object)$imputed)
+#'     as.character(fdt(object)$imputed) %>% factorize()
+#'     as.character(fdt(object)$imputed) %>% bin()
+#' 
+#' # factor
+#'     factor(fdt(object)$imputed)
+#'     factor(fdt(object)$imputed) %>% factorize()
+#'     factor(fdt(object)$imputed) %>% bin()
+#'     
+#' # numeric
+#'     fdt(object)$pepcounts
+#'     fdt(object)$pepcounts %>% factorize()
+#'     fdt(object)$pepcounts %>% bin()
+#' 
+#' # Matrix/SummarizedExperiment
+#'     values(object)
+#'     values(object) %>% factorize()
+#'            object  %>% factorize()
+#'     values(object) %>% bin()
+#'            object  %>% bin()
+#' @export
+factorize <- function(x, ...)  UseMethod('factorize')
+
+
+#' @rdname factorize
+#' @export
+factorize.logical <- function(x, ...) as.factor(x)
+
+
+#' @rdname factorize
+#' @export
+factorize.character <- function(x, ...)  as.factor(x)
+
+
+#' @rdname factorize
+#' @export
+factorize.factor <- function(x, ...)  x
+
+minn <- function(x)  min(x, na.rm = TRUE)
+
+maxx <- function(x)  max(x, na.rm = TRUE)
+
+#' @rdname factorize
+#' @export
+factorize.numeric <- function(
+                x, 
+           method = 'quantile', 
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, ...
+){
+    assert_scalar_subset(method, c('quantile', 'mclust', 'mixtools'))
+    breaks <- switch(method, none = quantbreaks(x, k = k), otherwise = mixbreaks(x, engine = method, k = k))
+    y <- cut(x, c(minn(x)-1e-7, breaks, maxx(x)+1e7) )
+    if (numericlevels){  levels(y) %<>% seq_along()
+    } else {             levels(y) %<>% substr(2, nchar(.))
+                         levels(y) %<>% split_extract_fixed(',', 1)
+                         levels(y) %<>% paste0('>', .)
+    }
+    y
+}
+
+
+#' @rdname factorize
+#' @export
+factorize.matrix <- function(
+                x, 
+           method = 'quantile', 
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+                 ...
+){
+    y <- x
+    y %<>% apply(1, factorize.numeric, method = method, k = k, numericlevels = numericlevels)
+    y %<>% t()
+    colnames(y) <- colnames(x)
+    y
+}
+
+
+
+#' @rdname factorize
+#' @export
+factorize.SummarizedExperiment <- function(
+                x, 
+            assay = assayNames(x)[1],
+           method = 'quantile',
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE,
+             drop = TRUE,
+          verbose = TRUE,
+                 ...
+){
+    # Assert
+    assert_scalar_subset(assay, assayNames(x))
+    assert_is_a_bool(verbose)
+    
+    # Bin
+    mat <- assays(x)[[assay]]
+    mat %<>% factorize.matrix(method = method, k = k, numericlevels = numericlevels)
+    if (!drop)  mat[] %<>% paste0(assay, .)
+
+    # Add
+    newassayname <- sprintf('%s%dlevels', assay, k)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
+    assays(x)[[newassayname]] <- mat
+    x
+}
+
+
+#' @rdname factorize
+#' @export
+factorize_assay <- function(
+         x, 
+          assay = assayNames(x)[1], 
+         method = 'quantile',
+              k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
+        verbose = TRUE, 
+               ...
+){
+    .Deprecated('factorize') # factorize.SummarizedExperiment
+    factorize.SummarizedExperiment(x, assay = assay, method = method, k = k, verbose = verbose, ...)
+}
+
+
+
+#' @rdname factorize
+#' @export
+bin <- function(x, ...)  UseMethod('bin')
+
+
+#' @rdname factorize
+#' @export
+bin.logical <- function(x, ...)    as.numeric(x)
+
+
+#' @rdname factorize
+#' @export
+bin.character <- function(x, ...)  as.numeric(as.factor(x))
+
+
+#' @rdname factorize
+#' @export
+bin.factor <- function(x, ...)    as.numeric(x)
+
+
+
+#' @rdname factorize
+#' @export
+bin.numeric <- function(
+                x, 
+           mixmod = 'none',
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+    ...
+){
+    y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
+    y %<>% as.numeric()
+    y
+}
+
+
+#' @rdname factorize
+#' @export
+bin.matrix <- function(
+                x, 
+           mixmod = 'none', 
+                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+    numericlevels = TRUE, 
+                 ...
+){
+    y <- x
+    y %<>% apply(1, bin.numeric, k = k, numericlevels = numericlevels) %>% t()
+  # y %>% apply(1, dplyr::ntile, n = k) %>% t()    # differs a bit
+    colnames(y) <- colnames(x)
+    y
+}
+
+
+
+#' @rdname factorize
+#' @export
+bin.SummarizedExperiment <- function(
+          x, 
+      assay = assayNames(x)[1],
+     mixmod = 'none',
+          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+      probs = seq_len(k-1)/k,
+    verbose = TRUE, 
+           ...
+){
+    # Assert
+    assert_scalar_subset(assay, assayNames(x))
+    assert_is_a_bool(verbose)
+    
+    # Bin
+    mat <- assays(x)[[assay]]
+    mat %<>% bin.matrix(k = k, probs = probs)
+    
+    # Add
+    newassayname <- sprintf('%s%dbins', assay, k)
+    if (verbose)   cmessage('%sAdd  `%s`', spaces(14), newassayname)  # Align with Code `exprs2levels``
+    assays(x)[[newassayname]] <- mat
+    x
+}
+
+#' @rdname factorize
+#' @export
+bin_assay <- function(
+     x, 
+      assay = assayNames(x)[1], 
+     mixmod = 'none',
+          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+    verbose = TRUE
+){
+    .Deprecated('bin') # bin.SummarizedExperiment
+    bin.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
 }
 
 
