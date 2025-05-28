@@ -3,11 +3,14 @@
 \name{sbind}
 \alias{sbind}
 \alias{fbind}
+\alias{abind}
 \title{Sample/Feature/Assay bind}
 \usage{
 sbind(object1, object2)
 
 fbind(object1, object2)
+
+abind(object1, object2)
 }
 \arguments{
 \item{object1}{SummarizedExperiment:       nrow1 x ncol1}
@@ -21,16 +24,12 @@ SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 Sample/Feature/Assay bind
 }
 \examples{
-# sbind
-    ob1 <- obj1()
-    ob2 <- obj2()
-    biplot(pca(ob1), color = 'age')
-    biplot(pca(ob2), color = 'age')
-    biplot(pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
-# fbind
-    ob1 <- obj1()
-    ob2 <- obj2()
-    biplot(pca(ob1), color = 'age', nx = 1)
-    biplot(pca(ob2), color = 'age', nx = 1)
-    biplot(pca(fbind(ob1,ob2)), color = 'age', nx = 2)
+ob1 <- obj1()
+ob2 <- obj2()
+biplot( pca(ob1), color = 'age')
+biplot( pca(ob2), color = 'age')
+biplot( pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
+biplot( pca(fbind(ob1, ob2)), color = 'age', nx = 2)
+plot( assays(abind(ob1, ob2))$SET1.exprs, 
+      assays(abind(ob1, ob2))$SET2.exprs)
 }

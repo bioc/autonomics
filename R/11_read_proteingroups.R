@@ -966,18 +966,14 @@ function(object, value){
 #' @param object2  SummarizedExperiment:       nrow2 x ncol2
 #' @return         SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 #' @examples
-#' # sbind
-#'     ob1 <- obj1()
-#'     ob2 <- obj2()
-#'     biplot(pca(ob1), color = 'age')
-#'     biplot(pca(ob2), color = 'age')
-#'     biplot(pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
-#' # fbind
-#'     ob1 <- obj1()
-#'     ob2 <- obj2()
-#'     biplot(pca(ob1), color = 'age', nx = 1)
-#'     biplot(pca(ob2), color = 'age', nx = 1)
-#'     biplot(pca(fbind(ob1,ob2)), color = 'age', nx = 2)
+#' ob1 <- obj1()
+#' ob2 <- obj2()
+#' biplot( pca(ob1), color = 'age')
+#' biplot( pca(ob2), color = 'age')
+#' biplot( pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
+#' biplot( pca(fbind(ob1, ob2)), color = 'age', nx = 2)
+#' plot( assays(abind(ob1, ob2))$SET1.exprs, 
+#'       assays(abind(ob1, ob2))$SET2.exprs)
 sbind <- function(object1, object2){
 # Assert
     assert_is_valid_sumexp(object1)
@@ -989,20 +985,22 @@ sbind <- function(object1, object2){
     assert_are_intersecting_sets(assayNames(object1), assayNames(object2))
     assert_are_intersecting_sets(     svars(object1),      svars(object2))
     assert_are_intersecting_sets(     fvars(object1),      fvars(object2))
-# Cbind
-    ob1 <- object1[intersect(fnames(object1), fnames(object2)), ]
-    ob2 <- object2[intersect(fnames(object1), fnames(object2)), ]
-       sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-       sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-       fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-       fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-    assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
-    assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+# Common
+       ob1 <- object1
+       ob2 <- object2
+       ob1  %<>% extract(  intersect(  fnames(object1),     fnames(object2)), )
+       ob2  %<>% extract(  intersect(  fnames(object1),     fnames(object2)), )
+   sdt(ob1) %<>% extract(, intersect(   svars(object1),      svars(object2)), with = FALSE)
+   sdt(ob2) %<>% extract(, intersect(   svars(object1),      svars(object2)), with = FALSE)
+   fdt(ob1) %<>% extract(, intersect(   fvars(object1),      fvars(object2)), with = FALSE)
+   fdt(ob2) %<>% extract(, intersect(   fvars(object1),      fvars(object2)), with = FALSE)
+assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
     cols <- mapply(identical,    fdt(ob1),    fdt(ob2))
-    fdt(ob1) %<>% extract(, ..cols)
-    fdt(ob2) %<>% extract(, ..cols)
-    object <- SummarizedExperiment::cbind(ob1, ob2)
-# Return
+   fdt(ob1) %<>% extract(, ..cols)
+   fdt(ob2) %<>% extract(, ..cols)
+# Cbind
+   object <- SummarizedExperiment::cbind(ob1, ob2)
    object 
 }
 
@@ -1020,20 +1018,55 @@ fbind <- function(object1, object2){
     assert_are_intersecting_sets(assayNames(object1), assayNames(object2))
     assert_are_intersecting_sets(svars(object1), svars(object2))
     assert_are_intersecting_sets(fvars(object1), fvars(object2))
-# Rbind
-    ob1 <- object1[, intersect(snames(object1), snames(object2))]
-    ob2 <- object2[, intersect(snames(object1), snames(object2))]
-       sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-       sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-       fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-       fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-    assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
-    assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+# Common
+       ob1 <- object1
+       ob2 <- object2
+       ob1  %<>% extract(, intersect(    snames(object1),     snames(object2)) )
+       ob2  %<>% extract(, intersect(    snames(object1),     snames(object2)) )
+   sdt(ob1) %<>% extract(, intersect(     svars(object1),      svars(object2)), with = FALSE)
+   sdt(ob2) %<>% extract(, intersect(     svars(object1),      svars(object2)), with = FALSE)
+   fdt(ob1) %<>% extract(, intersect(     fvars(object1),      fvars(object2)), with = FALSE)
+   fdt(ob2) %<>% extract(, intersect(     fvars(object1),      fvars(object2)), with = FALSE)
+assays(ob1) %<>% extract(  intersect(assayNames(object1), assayNames(object2)))
+assays(ob2) %<>% extract(  intersect(assayNames(object1), assayNames(object2)))
     cols <- mapply(identical, sdt(ob1), sdt(ob2))
-    sdt(ob1) %<>% extract(, ..cols)
-    sdt(ob2) %<>% extract(, ..cols)
+  sdt(ob1) %<>% extract(, ..cols)
+  sdt(ob2) %<>% extract(, ..cols)
+# Rbind
     object <- SummarizedExperiment::rbind(ob1, ob2)
-# Return
+    object
+}
+
+
+#' @rdname sbind
+#' @export
+abind <- function(object1, object2){
+# Assert
+    assert_is_valid_sumexp(object1)
+    assert_is_valid_sumexp(object2)
+    assert_are_intersecting_sets(fnames(object1), fnames(object2))
+    assert_are_intersecting_sets(snames(object1), snames(object2))
+    assert_are_intersecting_sets(fvars(object1), fvars(object2))
+    assert_are_intersecting_sets(svars(object1), svars(object2))
+# Common
+        ob1 <- object1
+        ob2 <- object2
+       ob1  %<>% extract(  intersect(fnames(object1), fnames(object2)), )
+       ob2  %<>% extract(  intersect(fnames(object1), fnames(object2)), )
+       ob1  %<>% extract(, intersect(snames(object1), snames(object2))  )
+       ob2  %<>% extract(, intersect(snames(object1), snames(object2))  )
+   fdt(ob1) %<>% extract(, intersect( fvars(object1),  fvars(object2)), with = FALSE)
+   fdt(ob2) %<>% extract(, intersect( fvars(object1),  fvars(object2)), with = FALSE)
+   sdt(ob1) %<>% extract(, intersect( svars(object1),  svars(object2)), with = FALSE)
+   sdt(ob2) %<>% extract(, intersect( svars(object1),  svars(object2)), with = FALSE)
+    cols <- mapply(identical, fdt(ob1), fdt(ob2)); fdt(ob1) %<>% extract(, ..cols); fdt(ob2) %<>% extract(, ..cols)
+    cols <- mapply(identical, sdt(ob1), sdt(ob2)); sdt(ob1) %<>% extract(, ..cols); sdt(ob2) %<>% extract(, ..cols)
+# abind
+    if (are_intersecting_sets(assayNames(ob1), assayNames(ob2))){
+        assayNames(ob1) %<>% paste0('SET1.', .)
+        assayNames(ob2) %<>% paste0('SET2.', .) }
+    object <- ob1
+    assays(object) %<>% c(assays(ob2))
     object
 }
 
