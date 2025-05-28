@@ -992,16 +992,15 @@ sbind <- function(object1, object2){
 # Cbind
     ob1 <- object1[intersect(fnames(object1), fnames(object2)), ]
     ob2 <- object2[intersect(fnames(object1), fnames(object2)), ]
-    
-    sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-    sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-    fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-    fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-    cols <- mapply(identical, fdt(ob1), fdt(ob2))
-    fdt(ob1) %<>% extract(, ..cols)
-    fdt(ob2) %<>% extract(, ..cols)
+       sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
+       sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
+       fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
+       fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
     assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
     assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+    cols <- mapply(identical,    fdt(ob1),    fdt(ob2))
+    fdt(ob1) %<>% extract(, ..cols)
+    fdt(ob2) %<>% extract(, ..cols)
     object <- SummarizedExperiment::cbind(ob1, ob2)
 # Return
    object 
@@ -1024,15 +1023,15 @@ fbind <- function(object1, object2){
 # Rbind
     ob1 <- object1[, intersect(snames(object1), snames(object2))]
     ob2 <- object2[, intersect(snames(object1), snames(object2))]
-    sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-    sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
-    fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
-    fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
+       sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
+       sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
+       fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
+       fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
+    assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+    assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
     cols <- mapply(identical, sdt(ob1), sdt(ob2))
     sdt(ob1) %<>% extract(, ..cols)
     sdt(ob2) %<>% extract(, ..cols)
-    assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
-    assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
     object <- SummarizedExperiment::rbind(ob1, ob2)
 # Return
     object
