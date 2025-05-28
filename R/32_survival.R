@@ -1,5 +1,47 @@
 
 
+#' Example objects
+#' @return SummarizedExperiment
+#' @examples
+#' obj1()
+#' obj2()
+#' @export
+obj1 <- function(){
+    
+    obj <- survobj()
+    
+    sdt(obj)$sampleid  <- seq_len(ncol(obj))  # add svar (not in obj2)
+    fdt(obj)$featureid <- seq_len(nrow(obj))  # add fvar (not in obj2)
+        
+    obj %<>% extract(,-1)                     # drop sample1  (in obj2)
+    obj %<>% extract(-1,)                     # drop feature1 (in obj2)
+    
+    assays(obj)$exprs2levels <- NULL         # drop assay (in obj2)
+    
+    obj
+
+}
+
+
+#' @rdname obj1
+#' @export
+obj2 <- function(){
+    
+    obj <- survobj()
+    
+    sdt(obj)$sid <- seq_len(ncol(obj))   # add svar (not in obj1)
+    fdt(obj)$fid <- seq_len(nrow(obj))   # add fvar (not in obj1)
+    
+    obj %<>% extract(,-ncol(.))          # drop last sample  (in obj1)
+    obj %<>% extract(-nrow(.),)          # drop last feature (in obj1)
+    
+    assays(obj)$exprs2bins <- NULL      # drop assay (in obj1)
+    
+    obj
+    
+}
+
+
 #' Survival analysis example
 #' @return SummarizedExperiment
 #' @examples
@@ -65,7 +107,7 @@ survobj <- function(){
 #' @export
 .coxph <- function(sd, formula){
     fitres <- survival::coxph(formula = formula, data = sd)
-    zphres <- survival::cox.zph(fit = fitres, transform = "identity") # @Aditya, Vanessa (VB) (Schönfeld Residuals Test)
+    zphres <- survival::cox.zph(fit = fitres, transform = "identity") # VB: Schönfeld Residuals Test
     #Fres <- suppressWarnings(stats::anova(fitres))
     #Fres <- Fres %>% extract(-1, , drop = FALSE)
     #pF <- Fres[, 'Pr(>|Chi|)' ] %>% set_names(paste0('PF~', rownames(Fres)))
