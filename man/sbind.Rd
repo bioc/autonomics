@@ -2,9 +2,12 @@
 % Please edit documentation in R/11_read_proteingroups.R
 \name{sbind}
 \alias{sbind}
+\alias{fbind}
 \title{Sample/Feature/Assay bind}
 \usage{
 sbind(object1, object2)
+
+fbind(object1, object2)
 }
 \arguments{
 \item{object1}{SummarizedExperiment:       nrow1 x ncol1}
@@ -18,7 +21,16 @@ SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 Sample/Feature/Assay bind
 }
 \examples{
-biplot(pca(obj1()), color = 'age')
-biplot(pca(obj2()), color = 'age')
-biplot(pca(sbind(obj1(), obj2())), color = 'age')
+# sbind
+    ob1 <- obj1(); snames(ob1) <- ob1$sample_id <- paste0('SET1.', ob1$sample_id); ob1$set <- 'SET1'
+    ob2 <- obj2(); snames(ob2) <- ob2$sample_id <- paste0('SET2.', ob2$sample_id); ob2$set <- 'SET2'
+    biplot(pca(ob1), color = 'age')
+    biplot(pca(ob2), color = 'age')
+    biplot(pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
+# fbind
+    ob1 <- obj1(); fnames(ob1) <- fdt(ob1)$feature_id <- paste0('SET1.', fdt(ob1)$feature_id); fdt(ob1)$set <- 'SET1'
+    ob2 <- obj2(); fnames(ob2) <- fdt(ob2)$feature_id <- paste0('SET2.', fdt(ob2)$feature_id); fdt(ob2)$set <- 'SET2'
+    biplot(pca(ob1), color = 'age', nx = 1)
+    biplot(pca(ob2), color = 'age', nx = 1)
+    biplot(pca(fbind(ob1,ob2)), color = 'age', nx = 2)
 }
