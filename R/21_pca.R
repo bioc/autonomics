@@ -518,7 +518,7 @@ add_scores <- function(
            x = 'pca1',
            y = 'pca2',
        color = 'subgroup', 
- labelcolors = TRUE,
+ labelcolors = FALSE,
        shape = if ('replicate' %in% svars(object)) 'replicate' else NULL,
         size = NULL, 
        alpha = NULL, 
@@ -556,7 +556,9 @@ add_scores <- function(
 
     
     
-    if (labelcolors){   # robust::covMcd more robust (outlier proof) but fails on duplicates
+    if (labelcolors & installed('ICSNP')){   
+        # robust::covMcd more robust (outlier proof) but fails on duplicates
+        # seems to fail in some cases - delve deeper
         labeldt <- sdt(object)[, .(x = get(x), y = get(y), label = get(color))]
         labeldt <- labeldt[, as.list(ICSNP::spatial.median(.SD)), .SDcols = c('x', 'y'), by = 'label']
         p <- p + geom_label_repel(data = labeldt, aes(x = x, y = y, label = label, color = label), label.size = NA, fill = '#FFFFFF00')
@@ -706,7 +708,7 @@ biplot_dims <- function(
 #' @param dims           numeric vector: e.g. 1:2
 #' @param alpha          svar
 #' @param color          svar
-#' @param colorlabels    TRUE or FALSE
+#' @param labelcolors    TRUE or FALSE
 #' @param shape          svar
 #' @param size           svar
 #' @param label          svar
@@ -739,7 +741,7 @@ biplot <- function(
                by = biplot_by(object, method)[1], 
              dims = biplot_dims(object, method, by)[1:2],
             color = if (method %in% DIMREDSUPER) by else 'subgroup', 
-      labelcolors = TRUE,
+      labelcolors = FALSE,
             shape = NULL, 
              size = NULL, 
             alpha = NULL,

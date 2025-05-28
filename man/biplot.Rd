@@ -10,7 +10,7 @@ biplot(
   by = biplot_by(object, method)[1],
   dims = biplot_dims(object, method, by)[1:2],
   color = if (method \%in\% DIMREDSUPER) by else "subgroup",
-  labelcolors = TRUE,
+  labelcolors = FALSE,
   shape = NULL,
   size = NULL,
   alpha = NULL,
@@ -39,6 +39,8 @@ biplot(
 
 \item{color}{svar}
 
+\item{labelcolors}{TRUE or FALSE}
+
 \item{shape}{svar}
 
 \item{size}{svar}
@@ -66,8 +68,6 @@ biplot(
 \item{title}{string}
 
 \item{theme}{ggplot2::theme output}
-
-\item{colorlabels}{TRUE or FALSE}
 }
 \value{
 ggplot object
