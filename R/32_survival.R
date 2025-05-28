@@ -9,17 +9,13 @@
 obj1 <- function(){
     
     obj <- survobj(verbose = FALSE)
-    
     sdt(obj)$sampleid  <- seq_len(ncol(obj))  # add svar (not in obj2)
     fdt(obj)$featureid <- seq_len(nrow(obj))  # add fvar (not in obj2)
-        
     obj %<>% extract(,-1)                     # drop sample1  (in obj2)
     obj %<>% extract(-1,)                     # drop feature1 (in obj2)
-    
     assays(obj)$exprs2levels <- NULL         # drop assay (in obj2)
-    
+    snames(obj) %<>% paste0('SET1.', .)
     obj
-
 }
 
 
@@ -28,16 +24,14 @@ obj1 <- function(){
 obj2 <- function(){
     
     obj <- survobj(verbose = FALSE)
-    
     sdt(obj)$sid <- seq_len(ncol(obj))   # add svar (not in obj1)
     fdt(obj)$fid <- seq_len(nrow(obj))   # add fvar (not in obj1)
-    
     obj %<>% extract(,-ncol(.))          # drop last sample  (in obj1)
     obj %<>% extract(-nrow(.),)          # drop last feature (in obj1)
-    
     assays(obj)$exprs2bins <- NULL      # drop assay (in obj1)
-    
+    snames(obj) %<>% paste0('SET2.', .)
     obj
+    
     
 }
 

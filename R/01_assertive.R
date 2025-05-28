@@ -1435,6 +1435,26 @@
             }
             TRUE
         }
+
+                
+        are_intersecting_sets <- function(
+            x, y, .xname = get_name_in_parent(x), .yname = get_name_in_parent(y)
+        ){
+            intersectionxy <- intersect(x, y)
+            if(length(intersectionxy) == 0)
+            {
+                return(
+                    false(
+                        gettext(
+                            "%s and %s have no common elements."
+                        ), 
+                        .xname, 
+                        .yname
+                    )
+                )
+            }
+            TRUE
+        }
         
         
         are_set_equal <- function(
@@ -1477,3 +1497,14 @@
                                        .yname = get_name_in_parent(y),
                                      severity = severity  )
         }
+
+        assert_are_intersecting_sets <- function(
+            x, y, severity = getOption("assertive.severity", "stop")
+        ){
+            assert_engine(  are_intersecting_sets, 
+                            x, 
+                            y = y, 
+                            .xname = get_name_in_parent(x), 
+                            .yname = get_name_in_parent(y),
+                            severity = severity  )
+        }        

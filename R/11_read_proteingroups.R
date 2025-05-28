@@ -959,3 +959,40 @@ setReplaceMethod("log2diffs", signature("SummarizedExperiment", "numeric"),
 function(object, value){
     assays(object)$log2diffs[] <- value
     object })
+
+
+#' Sample/Feature/Assay bind
+#' @param object1  SummarizedExperiment:       nrow1 x ncol1
+#' @param object2  SummarizedExperiment:       nrow2 x ncol2
+#' @return         SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
+#' @examples
+#' biplot(pca(obj1()), color = 'age')
+#' biplot(pca(obj2()), color = 'age')
+#' biplot(pca(sbind(obj1(), obj2())), color = 'age')
+sbind <- function(object1, object2){
+# Assert
+    assert_is_valid_sumexp(object1)
+    assert_is_valid_sumexp(object2)
+    assert_are_disjoint_sets(snames(object1), snames(object2))
+    assert_are_intersecting_sets(    fnames(object1),     fnames(object2))
+    assert_are_intersecting_sets(assayNames(object1), assayNames(object2))
+    assert_are_intersecting_sets(assayNames(object1), assayNames(object2))
+    assert_are_intersecting_sets(     svars(object1),      svars(object2))
+    assert_are_intersecting_sets(     fvars(object1),      fvars(object2))
+    assert_are_identical(
+        fdt(object1[ intersect(fnames(object1), fnames(object2)) , ])[, intersect(fvars(object1), fvars(object2)), with = FALSE],
+        fdt(object2[ intersect(fnames(object1), fnames(object2)) , ])[, intersect(fvars(object1), fvars(object2)), with = FALSE])
+# Cbind
+    ob1 <- object1[intersect(fnames(object1), fnames(object2)), ]
+    ob2 <- object2[intersect(fnames(object1), fnames(object2)), ]
+    sdt(ob1) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
+    sdt(ob2) %<>% extract(, intersect(svars(object1), svars(object2)), with = FALSE)
+    fdt(ob1) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
+    fdt(ob2) %<>% extract(, intersect(fvars(object1), fvars(object2)), with = FALSE)
+    assays(ob1) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+    assays(ob2) %<>% extract(intersect(assayNames(object1), assayNames(object2)))
+    object <- SummarizedExperiment::cbind(ob1, ob2)
+# Return
+   object 
+}
+
