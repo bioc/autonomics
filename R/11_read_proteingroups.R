@@ -967,14 +967,14 @@ function(object, value){
 #' @return         SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 #' @examples
 #' # sbind
-#'     ob1 <- obj1(); snames(ob1) <- ob1$sample_id <- paste0('SET1.', ob1$sample_id); ob1$set <- 'SET1'
-#'     ob2 <- obj2(); snames(ob2) <- ob2$sample_id <- paste0('SET2.', ob2$sample_id); ob2$set <- 'SET2'
+#'     ob1 <- obj1()
+#'     ob2 <- obj2()
 #'     biplot(pca(ob1), color = 'age')
 #'     biplot(pca(ob2), color = 'age')
 #'     biplot(pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
 #' # fbind
-#'     ob1 <- obj1(); fnames(ob1) <- fdt(ob1)$feature_id <- paste0('SET1.', fdt(ob1)$feature_id); fdt(ob1)$set <- 'SET1'
-#'     ob2 <- obj2(); fnames(ob2) <- fdt(ob2)$feature_id <- paste0('SET2.', fdt(ob2)$feature_id); fdt(ob2)$set <- 'SET2'
+#'     ob1 <- obj1()
+#'     ob2 <- obj2()
 #'     biplot(pca(ob1), color = 'age', nx = 1)
 #'     biplot(pca(ob2), color = 'age', nx = 1)
 #'     biplot(pca(fbind(ob1,ob2)), color = 'age', nx = 2)
@@ -982,7 +982,10 @@ sbind <- function(object1, object2){
 # Assert
     assert_is_valid_sumexp(object1)
     assert_is_valid_sumexp(object2)
-    assert_are_disjoint_sets(snames(object1), snames(object2))
+    if (are_intersecting_sets(snames(object1), snames(object2))){
+        snames(object1) %<>% paste0('SET1.', .); object1$set <- 'SET1'
+        snames(object2) %<>% paste0('SET2.', .); object2$set <- 'SET2'
+    }
     assert_are_intersecting_sets(    fnames(object1),     fnames(object2))
     assert_are_intersecting_sets(assayNames(object1), assayNames(object2))
     assert_are_intersecting_sets(     svars(object1),      svars(object2))
@@ -1011,7 +1014,10 @@ fbind <- function(object1, object2){
 # Assert
     assert_is_valid_sumexp(object1)
     assert_is_valid_sumexp(object2)
-    assert_are_disjoint_sets(fnames(object1), fnames(object2))
+    if (are_intersecting_sets(fnames(object1), fnames(object2))){
+        fnames(object1) %<>% paste0('SET1.', .); fdt(object1)$set <- 'SET1'
+        fnames(object2) %<>% paste0('SET2.', .); fdt(object2)$set <- 'SET2'
+    }
     assert_are_intersecting_sets(snames(object1), snames(object2))
     assert_are_intersecting_sets(assayNames(object1), assayNames(object2))
     assert_are_intersecting_sets(svars(object1), svars(object2))
@@ -1032,8 +1038,5 @@ fbind <- function(object1, object2){
 # Return
     object
 }
-
-
-
 
 
