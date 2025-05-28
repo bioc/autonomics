@@ -9,11 +9,13 @@
 obj1 <- function(){
     
     obj <- survobj(verbose = FALSE)
-    sdt(obj)$sampleid  <- seq_len(ncol(obj))  # add svar (not in obj2)
-    fdt(obj)$featureid <- seq_len(nrow(obj))  # add fvar (not in obj2)
-    obj %<>% extract(,-1)                     # drop sample1  (in obj2)
-    obj %<>% extract(-1,)                     # drop feature1 (in obj2)
-    assays(obj)$exprs2levels <- NULL         # drop assay (in obj2)
+    sdt(obj)$sampleid  <- seq_len(ncol(obj))          # differify svars
+    fdt(obj)$featureid <- seq_len(nrow(obj))          # differify fvars
+    sdt(obj)$sex %<>% toupper()                       # differify svalues
+    fdt(obj)$gene <- paste0('GENE ', LETTERS[1:14])   # differify fvalues
+    obj %<>% extract(,-1)                             # differify samples
+    obj %<>% extract(-1,)                             # differify features
+    assays(obj)$exprs2levels <- NULL                  # differify assays
     obj
 }
 
@@ -23,11 +25,13 @@ obj1 <- function(){
 obj2 <- function(){
     
     obj <- survobj(verbose = FALSE)
-    sdt(obj)$sid <- seq_len(ncol(obj))   # add svar (not in obj1)
-    fdt(obj)$fid <- seq_len(nrow(obj))   # add fvar (not in obj1)
-    obj %<>% extract(,-ncol(.))          # drop last sample  (in obj1)
-    obj %<>% extract(-nrow(.),)          # drop last feature (in obj1)
-    assays(obj)$exprs2bins <- NULL      # drop assay (in obj1)
+    sdt(obj)$sid <- seq_len(ncol(obj))                # differify svars
+    fdt(obj)$fid <- seq_len(nrow(obj))                # differify fvars
+    sdt(obj)$sex %<>% tolower()                       # differify svalues
+    fdt(obj)$gene <- paste0('gene ', letters[1:14])   # differify fvalues
+    obj %<>% extract(,-ncol(.))                       # differify samples
+    obj %<>% extract(-nrow(.),)                       # differify features
+    assays(obj)$exprs2bins <- NULL                    # differify assays
     obj
     
     
