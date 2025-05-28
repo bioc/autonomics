@@ -8,7 +8,7 @@
 #' @export
 obj1 <- function(){
     
-    obj <- survobj()
+    obj <- survobj(verbose = FALSE)
     
     sdt(obj)$sampleid  <- seq_len(ncol(obj))  # add svar (not in obj2)
     fdt(obj)$featureid <- seq_len(nrow(obj))  # add fvar (not in obj2)
@@ -27,7 +27,7 @@ obj1 <- function(){
 #' @export
 obj2 <- function(){
     
-    obj <- survobj()
+    obj <- survobj(verbose = FALSE)
     
     sdt(obj)$sid <- seq_len(ncol(obj))   # add svar (not in obj1)
     fdt(obj)$fid <- seq_len(nrow(obj))   # add fvar (not in obj1)
@@ -47,7 +47,7 @@ obj2 <- function(){
 #' @examples
 #' survobj()
 #' @export 
-survobj <- function(){
+survobj <- function(verbose = TRUE){
     set.seed(1)
     mat <- rbind(   GENA = c( rnorm(10,3), rnorm(10,4), rnorm(10,5), rnorm(10,6)), # age + sex increase expression
                     GENB = c( rnorm(10,6), rnorm(10,4), rnorm(10,3), rnorm(10,2)), # age + sex decrease expression
@@ -85,8 +85,8 @@ survobj <- function(){
     
     object$timetoevent <- c( time.senior.m,  time.senior.f,  time.junior.m,  time.junior.f )
     object$event       <- c(event.senior.m, event.senior.f, event.junior.m, event.junior.f )
-    object %<>% factorize(k = 2)
-    object %<>%       bin(k = 2)
+    object %<>% factorize(k = 2, verbose = verbose)
+    object %<>%       bin(k = 2, verbose = verbose)
     object
 }
 

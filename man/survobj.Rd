@@ -4,7 +4,7 @@
 \alias{survobj}
 \title{Survival analysis example}
 \usage{
-survobj()
+survobj(verbose = TRUE)
 }
 \value{
 SummarizedExperiment
