@@ -87,6 +87,30 @@ survobj <- function(verbose = TRUE){
 }
 
 
+#' Get left/right variables
+#' @param formula formula
+#' @return character vector
+#' @examples
+#'   all.vars(~age/value)
+#'  left.vars(~age/value)
+#' right.vars(~age/value)
+#' 
+#'   all.vars(survival::Surv(timetoevent, event) ~ age/value)
+#'  left.vars(survival::Surv(timetoevent, event) ~ age/value)
+#' right.vars(survival::Surv(timetoevent, event) ~ age/value)
+#' @export
+left.vars <- function(formula){
+    assert_is_formula(formula)
+    if (length(formula) == 2) character(0) else all.vars(formula[[2]])
+}
+
+#' @rdname left.vars
+#' @export
+right.vars <- function(formula){
+    assert_is_formula(formula)
+    all.vars(formula[[length(formula)]])
+}
+
 
 #' Fit onefeature survival 
 #' @param sd       data.table
