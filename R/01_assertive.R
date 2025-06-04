@@ -480,6 +480,8 @@
         parenthesise <- parenthesize        
         
         
+        #' @method merge list
+        #' @noRd
         merge.list <- function(x, y, warn_on_dupes = TRUE, allow_unnamed_elements = FALSE, ...)
         {
             if(length(y) == 0) return(x)
