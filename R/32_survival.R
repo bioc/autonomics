@@ -87,24 +87,15 @@ survobj <- function(verbose = TRUE){
 }
 
 
-#' Get left/right variables
-#' @param formula formula
-#' @return character vector
-#' @examples
-#'   all.vars(~age/value)
-#'  left.vars(~age/value)
-#' right.vars(~age/value)
-#' 
-#'   all.vars(survival::Surv(timetoevent, event) ~ age/value)
-#'  left.vars(survival::Surv(timetoevent, event) ~ age/value)
-#' right.vars(survival::Surv(timetoevent, event) ~ age/value)
+#' @rdname factor.vars
 #' @export
 left.vars <- function(formula){
     assert_is_formula(formula)
     if (length(formula) == 2) character(0) else all.vars(formula[[2]])
 }
 
-#' @rdname left.vars
+
+#' @rdname factor.vars
 #' @export
 right.vars <- function(formula){
     assert_is_formula(formula)
@@ -112,8 +103,45 @@ right.vars <- function(formula){
 }
 
 
-#' Fit onefeature survival 
-#' @param sd       data.table
+#' Get factor variables
+#' @param formula formula
+#' @return character vector
+#' @examples
+#' object <- survobj()
+#' formula <- survival::Surv(timetoevent, event) ~ age/exprs2levels
+#'    all.vars(formula)
+#'   left.vars(formula)
+#'  right.vars(formula)
+#' factor.vars(formula, object)
+#' @export
+setGeneric('factor.vars',   function(formula, object)  standardGeneric('factor.vars'))
+
+#' @rdname factor.vars
+#' @exportMethod factor.vars
+setMethod( 'factor.vars', signature(formula = 'formula', object = 'SummarizedExperiment'), 
+                            function(formula, object){
+                                samplevars <- intersect( right.vars(formula),      svars(object) ) 
+                                assayvars  <- intersect( right.vars(formula), assayNames(object) )
+                                modeldt <- sumexp_to_longdt(object, svars = samplevars, assay = assayvars, value.name = assayvars)
+                                factor.vars(formula, modeldt)
+                            }
+)
+
+#' @rdname factor.vars
+#' @exportMethod factor.vars
+setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'), 
+                            function(formula, object){
+                                object %<>% extract(, right.vars(formula), with = FALSE)
+                                factorvars <- vapply(object, function(x) is.character(x) | is.factor(x), logical(1))
+                                factorvars %<>% extract(.)
+                                factorvars %<>% names()
+                                factorvars
+                            }
+)
+
+
+#' Default contrast codings
+#' @param object   SummarizedExperiment
 #' @param formula  model formula
 #' @examples
 #' # Prepare
