@@ -92,7 +92,6 @@ bin(x, ...)
   assay = assayNames(x)[1],
   method = "quantile",
   k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
-  probs = seq_len(k - 1)/k,
   verbose = TRUE,
   ...
 )

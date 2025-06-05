@@ -667,7 +667,6 @@ bin.SummarizedExperiment <- function(
       assay = assayNames(x)[1],
      method = 'quantile',
           k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
-      probs = seq_len(k-1)/k,
     verbose = TRUE, 
            ...
 ){
@@ -677,7 +676,7 @@ bin.SummarizedExperiment <- function(
     
     # Bin
     mat <- assays(x)[[assay]]
-    mat %<>% bin.matrix(k = k, probs = probs)
+    mat %<>% bin.matrix(k = k)
     
     # Add
     newassayname <- sprintf('%s%dbins', assay, k)
