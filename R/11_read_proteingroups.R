@@ -974,6 +974,7 @@ function(object, value){
 #' biplot( pca(fbind(ob1, ob2)), color = 'age', nx = 2)
 #' plot( assays(abind(ob1, ob2))$SET1.exprs, 
 #'       assays(abind(ob1, ob2))$SET2.exprs)
+#' @export
 sbind <- function(object1, object2){
 # Assert
     assert_is_valid_sumexp(object1)

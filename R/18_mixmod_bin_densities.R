@@ -26,7 +26,7 @@ overall_parameters <- function(x)   data.table(  component = 1,
 #' @rdname overall_parameters
 #' @export
 mclust_parameters <- function(x, k = NULL){
-    if (!installed('mclust'))    return( mixmod_none(x) )
+    if (!installed('mclust'))    return( overall_parameters(x) )
     mclustBIC <- mclust::mclustBIC
     fit <- mclust::Mclust(x, verbose = FALSE, G = k)
     means <- fit$parameters$mean
@@ -41,7 +41,7 @@ mclust_parameters <- function(x, k = NULL){
 #' @rdname overall_parameters
 #' @export
 mixtools_parameters <- function(x, k = 2){
-    if (!installed('mixtools'))  return( mixmod('none') )
+    if (!installed('mixtools'))  return( overall_parameters(X) )
         fit <- mixtools::normalmixEM(x, k = k)  # verbose parameter seems to be not working
       means <- fit$mu
         sds <- fit$sigma
@@ -102,8 +102,9 @@ quadroots <- function(a,b,c){
 
 
 #' Mixture/Quantile breaks
-#' @param x  numeric
-#' @param k  number
+#' @param x      numeric
+#' @param k      number
+#' @param probs  probabilities
 #' @examples
 #' set.seed(1)
 #' x <- c(rnorm(20, 3), rnorm(20,7), rnorm(20, 11))
@@ -236,6 +237,7 @@ plot_x_density <- function(
     #y0 <- if (components) 0 else 0.95*min(densityfun(xpath))
     p <- p + annotate('segment', x = xbreaks, xend = xbreaks, y = 0, yend =  densityfun(xbreaks),   color = color,  linetype = 'solid' )    
 # Components
+    i <- NULL  # prevent check note
     if (components){
         pardt <- mclust_parameters(x)
         mixdt <- mapply(wnorm, mean = pardt$mean, sd = pardt$sd, weight = pardt$weight, SIMPLIFY = FALSE, MoreArgs = list(x = xpath))
@@ -366,17 +368,26 @@ plot_xy_scatter <- function(
 
 
 #' Plot xy densities
-#' @param x           numeric vector
-#' @param y           numeric vector
-#' @param xbreaks      numeric vector
-#' @param ybreaks      numeric vector
-#' @param title       NULL or string
-#' @param color       vector or string
-#' @param contour     TRUE or FALSE: plot density contours ?
-#' @param smooth      TRUE or FALSE: plot smooth line ?
-#' @param xlab        NULL or string
-#' @param ylab        NULL or string
-#' @param transcolor  string
+#' @param x                 numeric vector
+#' @param y                 numeric vector
+#' @param xbreaks           numeric vector
+#' @param ybreaks           numeric vector
+#' @param title             NULL or string
+#' @param color             vector or string
+#' @param contour           TRUE or FALSE: plot density contours ?
+#' @param smooth            TRUE or FALSE: plot smooth line ?
+#' @param xlab              NULL or string
+#' @param ylab              NULL or string
+#' @param transcolor        string
+#' @param components        TRUE or FALSE: whether to plot distributions of mixture components
+#' @param panel.border      element_rect(color = color)  etc.
+#' @param plot.margin       unit(c(5.5,5.5,5.5,5.5), 'points')  etc.
+#' @param scale_x_position  'bottom' etc.
+#' @param axis.ticks.x      element_line(color = color) etc.
+#' @param axis.ticks.y      element_line(color = color) etc.
+#' @param axis.text.x       element_text(color = color) etc.
+#' @param axis.text.y       element_text(color = color) etc.
+#' @param axis.title.y      element_text(color = color) etc.
 #' @return ggplot
 #' @examples
 #' # Bimodal
@@ -448,12 +459,11 @@ plot_xy_density <- function(
 #'          `bin` transform into numeric bins : c(1,2,3,4,5,6) -> c( 1,  1,  2,  2,  3,  3 )
 #'    `factorize` transform into factor levels: c(1,2,3,4,5,6) -> c('1','1','2','2','3','3')
 #' @param x       vector, matrix or SummarizedExperiment
-#' @param probs   numeric
-#' @param k       number of bins/levels
 #' @param assay   string
-#' @param verbose TRUE or FALSE
-#' @param mixmod  'none', 'mclust', or 'mixtools' (mixture modeling method to use)
+#' @param method  'quantile', 'mclust', or 'mixtools'
+#' @param k       number of bins/levels
 #' @param numericlevels TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)
+#' @param verbose TRUE or FALSE
 #' @param drop  whether to drop assayname in levels ('1','2') or not ('exprs1', 'exprs2') when factorizing
 #' @param ... (S3 dispatch)
 #' @return  vector, matrix or SummarizedExperiment

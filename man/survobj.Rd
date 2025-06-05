@@ -6,6 +6,9 @@
 \usage{
 survobj(verbose = TRUE)
 }
+\arguments{
+\item{verbose}{TRUE or FALSE}
+}
 \value{
 SummarizedExperiment
 }

@@ -80,6 +80,5 @@ data.table::data.table
 NULL
 
 
-utils::globalVariables('patterns')  # data.table constructs
-utils::globalVariables('.')         # magrittr   constructs
-utils::globalVariables('N')         # data.table constructs
+utils::globalVariables('.')                                  # magrittr   constructs
+utils::globalVariables(c('N', '..cols', 'patterns'))         # data.table constructs

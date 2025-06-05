@@ -39,6 +39,7 @@ obj2 <- function(){
 
 
 #' Survival analysis example
+#' @param verbose TRUE or FALSE
 #' @return SummarizedExperiment
 #' @examples
 #' survobj()
@@ -105,6 +106,7 @@ right.vars <- function(formula){
 
 #' Get factor variables
 #' @param formula formula
+#' @param object SummarizedExperiment or data.table
 #' @return character vector
 #' @examples
 #' object <- survobj()

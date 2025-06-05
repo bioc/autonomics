@@ -20,6 +20,8 @@ factor.vars(formula, object)
 }
 \arguments{
 \item{formula}{formula}
+
+\item{object}{SummarizedExperiment or data.table}
 }
 \value{
 character vector

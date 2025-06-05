@@ -16,6 +16,8 @@ quantile_breaks(x, k = 3, probs = seq_len(k - 1)/k)
 \item{x}{numeric}
 
 \item{k}{number}
+
+\item{probs}{probabilities}
 }
 \description{
 Mixture/Quantile breaks

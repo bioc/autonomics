@@ -110,6 +110,8 @@ bin_assay(
 
 \item{...}{(S3 dispatch)}
 
+\item{method}{'quantile', 'mclust', or 'mixtools'}
+
 \item{k}{number of bins/levels}
 
 \item{numericlevels}{TRUE (levels: 1,2, ...) or FALSE (levels: 2.1+, 3.2+, ...)}
@@ -119,10 +121,6 @@ bin_assay(
 \item{drop}{whether to drop assayname in levels ('1','2') or not ('exprs1', 'exprs2') when factorizing}
 
 \item{verbose}{TRUE or FALSE}
-
-\item{mixmod}{'none', 'mclust', or 'mixtools' (mixture modeling method to use)}
-
-\item{probs}{numeric}
 }
 \value{
 vector, matrix or SummarizedExperiment

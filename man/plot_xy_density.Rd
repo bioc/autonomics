@@ -69,6 +69,8 @@ plot_xy_density(
 
 \item{xbreaks}{numeric vector}
 
+\item{components}{TRUE or FALSE: whether to plot distributions of mixture components}
+
 \item{title}{NULL or string}
 
 \item{color}{vector or string}
@@ -78,6 +80,22 @@ plot_xy_density(
 \item{ylab}{NULL or string}
 
 \item{transcolor}{string}
+
+\item{panel.border}{element_rect(color = color)  etc.}
+
+\item{plot.margin}{unit(c(5.5,5.5,5.5,5.5), 'points')  etc.}
+
+\item{scale_x_position}{'bottom' etc.}
+
+\item{axis.ticks.x}{element_line(color = color) etc.}
+
+\item{axis.ticks.y}{element_line(color = color) etc.}
+
+\item{axis.text.x}{element_text(color = color) etc.}
+
+\item{axis.text.y}{element_text(color = color) etc.}
+
+\item{axis.title.y}{element_text(color = color) etc.}
 
 \item{ybreaks}{numeric vector}
 
