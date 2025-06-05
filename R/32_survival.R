@@ -140,31 +140,27 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
 )
 
 
-#' Default contrast codings
-#' @param object   SummarizedExperiment
-#' @param formula  model formula
-#' @return named character vector
+#' Fit onefeature survival 
+#' @param sd               data.table
+#' @param formula          model formula
 #' @examples
-#' object <- survobj()
-#' default_codings(object, ~ age/exprs2levels)
-#' @export
-default_codings <- function(object, formula){
-    factorvars <- factor.vars(formula, object)
-    codings <- rep('code_control', length(factorvars))
-    names(codings) <- factorvars
-    codings %<>% as.list()
-    codings
-}
-
-
-#'        .coxph(sd, survival::Surv(timetoevent, event) ~ value)
+#' # Dataset
+#'      sd <- survobj()
+#'      sd %<>% sumexp_to_longdt( svars = c('timetoevent', 'event', 'age', 'sex'), assay = 'exprs2levels')
+#'      sd[, value := code(factor(value), code_control)]
+#'      sd[,   age := code(factor(age  ), code_control)]
+#'      sd[,   sex := code(factor(sex  ), code_control)]
+#'      
+#' # Singlefactor - coxph, survdiff, logrank
 #'     .survdiff(sd, survival::Surv(timetoevent, event) ~ value)
 #'      .logrank(sd, survival::Surv(timetoevent, event) ~ value)
+#'        .coxph(sd, survival::Surv(timetoevent, event) ~ value)
+#'        .coxph(sd, survival::Surv(timetoevent, event) ~ age/value)
 #' @rdname dot-coxph
 #' @export
 .coxph <- function(sd, formula){
+# coxph
     fitres <- survival::coxph(formula = formula, data = sd)
-    zphres <- survival::cox.zph(fit = fitres, transform = "identity") # VB: Schönfeld Residuals Test
     #Fres <- suppressWarnings(stats::anova(fitres))
     #Fres <- Fres %>% extract(-1, , drop = FALSE)
     #pF <- Fres[, 'Pr(>|Chi|)' ] %>% set_names(paste0('PF~', rownames(Fres)))
@@ -176,11 +172,6 @@ default_codings <- function(object, formula){
     colnames(fitres) %<>% stri_replace_first_fixed('Pr(>|z|)', 'p')  # dont reverse order of these two lines
     colnames(fitres) %<>% stri_replace_first_fixed('z', 't')
     fitres %<>% extract(, c('effect', 't', 'p'), drop = FALSE)
-    capture.output(zphres %<>% print()) # VB -> add test results
-    zphres %<>% extract(,c("chisq", "p"), drop = FALSE) # VB
-    colnames(zphres) <- paste0(colnames(zphres), "~zph")# VB
-    zphres <- head(zphres, -1) # VB
-    fitres %<>% cbind(zphres) # VB
     fitmat <- matrix(fitres, nrow = 1)
     colnames(fitmat) <- paste(rep(colnames(fitres),  each = nrow(fitres)), 
                               rep(rownames(fitres), times = ncol(fitres)), sep = '~')
