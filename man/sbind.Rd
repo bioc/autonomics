@@ -30,6 +30,6 @@ biplot( pca(ob1), color = 'age')
 biplot( pca(ob2), color = 'age')
 biplot( pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
 biplot( pca(fbind(ob1, ob2)), color = 'age', nx = 2)
-plot( assays(abind(ob1, ob2))$SET1.exprs, 
-      assays(abind(ob1, ob2))$SET2.exprs)
+plot( SummarizedExperiment::assays(abind(ob1, ob2))$SET1.exprs, 
+      SummarizedExperiment::assays(abind(ob1, ob2))$SET2.exprs)
 }

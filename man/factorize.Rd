@@ -73,16 +73,16 @@ bin(x, ...)
 
 \method{bin}{numeric}(
   x,
-  mixmod = "none",
-  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  method = "quantile",
+  k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
   numericlevels = TRUE,
   ...
 )
 
 \method{bin}{matrix}(
   x,
-  mixmod = "none",
-  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  method = "quantile",
+  k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
   numericlevels = TRUE,
   ...
 )
@@ -90,8 +90,8 @@ bin(x, ...)
 \method{bin}{SummarizedExperiment}(
   x,
   assay = assayNames(x)[1],
-  mixmod = "none",
-  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  method = "quantile",
+  k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
   probs = seq_len(k - 1)/k,
   verbose = TRUE,
   ...
@@ -100,8 +100,8 @@ bin(x, ...)
 bin_assay(
   x,
   assay = assayNames(x)[1],
-  mixmod = "none",
-  k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+  method = "quantile",
+  k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
   verbose = TRUE
 )
 }

@@ -631,12 +631,12 @@ bin.factor <- function(x, ...)    as.numeric(x)
 #' @export
 bin.numeric <- function(
                 x, 
-           mixmod = 'none',
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+           method = 'quantile',
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
     ...
 ){
-    y <- factorize.numeric(x, mixmod = mixmod, k = k, numericlevels = TRUE)
+    y <- factorize.numeric(x, method = method, k = k, numericlevels = TRUE)
     y %<>% as.numeric()
     y
 }
@@ -646,8 +646,8 @@ bin.numeric <- function(
 #' @export
 bin.matrix <- function(
                 x, 
-           mixmod = 'none', 
-                k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+           method = 'quantile', 
+                k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
     numericlevels = TRUE, 
                  ...
 ){
@@ -665,8 +665,8 @@ bin.matrix <- function(
 bin.SummarizedExperiment <- function(
           x, 
       assay = assayNames(x)[1],
-     mixmod = 'none',
-          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+     method = 'quantile',
+          k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
       probs = seq_len(k-1)/k,
     verbose = TRUE, 
            ...
@@ -691,12 +691,12 @@ bin.SummarizedExperiment <- function(
 bin_assay <- function(
      x, 
       assay = assayNames(x)[1], 
-     mixmod = 'none',
-          k = switch(mixmod, none = 3, mclust = NULL, mixtools = 3),
+     method = 'quantile',
+          k = switch(method, quantile = 3, mclust = NULL, mixtools = 3),
     verbose = TRUE
 ){
     .Deprecated('bin') # bin.SummarizedExperiment
-    bin.SummarizedExperiment(x, assay = assay, k = k, verbose = verbose)
+    bin.SummarizedExperiment(x, assay = assay, method = method, k = k, verbose = verbose)
 }
 
 
