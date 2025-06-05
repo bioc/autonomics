@@ -143,11 +143,20 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
 #' Default contrast codings
 #' @param object   SummarizedExperiment
 #' @param formula  model formula
+#' @return named character vector
 #' @examples
-#' # Prepare
-#'      sd <- sumexp_to_longdt(survobj()[1,], svars = c('timetoevent', 'event'), assay = 'exprs2levels')
-#'      sd[ , value := factor(value)]
-#' # Survival
+#' object <- survobj()
+#' default_codings(object, ~ age/exprs2levels)
+#' @export
+default_codings <- function(object, formula){
+    factorvars <- factor.vars(formula, object)
+    codings <- rep('code_control', length(factorvars))
+    names(codings) <- factorvars
+    codings %<>% as.list()
+    codings
+}
+
+
 #'        .coxph(sd, survival::Surv(timetoevent, event) ~ value)
 #'     .survdiff(sd, survival::Surv(timetoevent, event) ~ value)
 #'      .logrank(sd, survival::Surv(timetoevent, event) ~ value)
