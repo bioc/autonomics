@@ -588,30 +588,28 @@ detect_order_features <- function(object, by){
 #
 #==============================================================================
 
-#' @rdname plot_sample_nas
+#' @rdname plot_detections
 #' @export
-plot_detections <- function(...){
-    .Deprecated('plot_sample_nas')
-    plot_sample_nas(...)
+plot_sample_nas <- function(...){
+    .Deprecated('plot_detections')
+    plot_detections(...)
 }
 
-#' @rdname plot_sample_nas
+#' @rdname plot_detections
 #' @export
-plot_summarized_detections <- function(...){
-    .Deprecated('plot_subgroup_nas')
-    plot_subgroup_nas(...)
+plot_subgroup_nas <- function(...){
+    .Deprecated('plot_summarized_detections')
+    plot_summarized_detections(...)
 }
 
 
-#' Plot missingness per sample / subgroup
+#' Plot (summarized) detections
 #'
-#' \code{plot_sample_nas} shows systematic and random missingness 
-#' (white), and full detection (bright color) at sample resolution.
-#' Imputations are also shown (light color).
+#' \code{plot_detections} plots the detection structure at feature/sample resolution.
+#' It shows systematic/random NAs (white), full detection (bright color) and imputations (light color).
 #'
-#' \code{plot_subgroup_nas} shows systematic missingness at subgroup resolution.
-#' Random missingness and full detection are shown together (bright color).
-#' Imputations are also shown (light color).
+#' \code{plot_summarized_detections} plots the detection structure at featuregroup/samplegroup resolution.
+#' It shows full detection and random NAs (bright color) and imputations (light color).
 #' @param object       SummarizedExperiment
 #' @param by           svar (string)
 #' @param fill         svar (string)
@@ -623,20 +621,20 @@ plot_summarized_detections <- function(...){
 #' @examples
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
-#' plot_sample_nas(object)
-#' plot_sample_nas(impute(object))
-#' plot_subgroup_nas(object)
-#' plot_subgroup_nas(impute(object))
+#' plot_detections(object)
+#' plot_detections(impute(object))
+#' plot_summarized_detections(object)
+#' plot_summarized_detections(impute(object))
 #'
 #' subgroups <- sprintf('%s_STD', c('E00','E01','E02','E05','E15','E30','M00'))
 #' file <- system.file('extdata/billing19.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file, subgroups = subgroups)
-#' plot_subgroup_nas(object)
-#' plot_subgroup_nas(object, 'subgroup')
-#' plot_sample_nas(object)
-#' plot_sample_nas(object, 'subgroup')
+#' plot_summarized_detections(object)
+#' plot_summarized_detections(object, 'subgroup')
+#' plot_detections(object)
+#' plot_detections(object, 'subgroup')
 #' @export
-plot_sample_nas <- function(
+plot_detections <- function(
     object, 
     by = 'subgroup', 
     fill = by, 
@@ -723,9 +721,9 @@ get_subgroup_combinations <- function(object, by = 'subgroup'){
 }
 
 
-#' @rdname plot_sample_nas
+#' @rdname plot_individual_detections
 #' @export
-plot_subgroup_nas <- function(
+plot_summarized_detections <- function(
     object, by = 'subgroup', fill = by, palette = NULL, na_imputes = TRUE
 ){
 # Assert
@@ -745,7 +743,7 @@ plot_subgroup_nas <- function(
     featuretypes <- get_subgroup_combinations(object, by)
     dt <- sumexp_to_longdt(object, svars = c(by, fill))
     if (na_imputes) if ('is_imputed' %in% names(dt))  dt[is_imputed==TRUE, value := NA]
-    dt %<>% extract(, .(quantified   = as.numeric(any(!is.na(value)))), by = c(by, 'feature_id'))
+    dt %<>% extract(, .(quantified = as.numeric(any(!is.na(value)))), by = c(by, 'feature_id'))
     dt %<>% dcast.data.table(as.formula(paste0('feature_id ~ ', by)), value.var = 'quantified')
     dt %<>% merge(featuretypes, by = setdiff(names(featuretypes), 'type'))
     dt %<>% extract(,.(nfeature=.N), by = 'type')
@@ -760,6 +758,12 @@ plot_subgroup_nas <- function(
     setorderv(nsampledt, by)
     nsampledt[, xmax := cumsum(xmax)]; nsampledt[, xmin := c(0, xmax[-.N])]
     dt %<>% merge(nsampledt, by = by)
+    if (by != fill){
+        filldt <- sdt(object)[]
+        filldt %<>% extract(, c(by, fill), with = FALSE)
+        filldt %<>% unique()
+        dt %<>% merge( filldt, by = by)
+    }
 # Plot
     npersubgroup <- table(object[[by]])
     xbreaks <- c(cumsum(npersubgroup)- npersubgroup/2)
@@ -769,8 +773,9 @@ plot_subgroup_nas <- function(
         ggplot(dt) + 
         geom_rect(aes( xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax,
                         fill = !!sym(fill), alpha = quantified)) +
-        scale_y_continuous(expand = c(0, 0)) + #, limits = c(0, nrow(object)))  +
-        scale_x_continuous(breaks = xbreaks, position = 'top', expand = c(0,0)) + #, limits = c(0, ncol(object)))  + 
+        scale_y_continuous(expand = c(0, 0), sec.axis = dup_axis()) + #, limits = c(0, nrow(object)))  +
+        scale_x_continuous(breaks = xbreaks, sec.axis = dup_axis(), expand = c(0,0)) + #, limits = c(0, ncol(object)))  + 
+        theme(axis.title.y.right = element_text(angle = 90)) + 
         geom_segment(aes(x = xmin, xend = xmax, y = ymax, yend = ymax)) +
         geom_segment(aes(x = xmin, xend = xmax, y = ymin, yend = ymin)) +
         geom_segment(aes(x = xmax, xend = xmax, y = ymin, yend = ymax)) +
@@ -781,15 +786,13 @@ plot_subgroup_nas <- function(
         theme(panel.grid      = element_blank(), 
               legend.position = 'top', 
               legend.title    = element_blank(), 
-              axis.text.x     = element_text(angle = 90), 
-              axis.text.y     = element_blank()) + 
-        guides(alpha = 'none', fill = 'none') +
-        #guides(alpha = 'none', fill = guide_legend(label.position = 'top', nrow = 1, title.hjust = 0.5)) +
-        scale_fill_manual(values = palette) +
-        scale_alpha_manual(values=c(`0`=0, `1`=1))
+              axis.text.x     = element_text(angle = 90)) + 
+        guides(alpha = 'none', fill = 'none')
+    if (is.null(palette))   p <- p + #guides(alpha = 'none', fill = guide_legend(label.position = 'top', nrow = 1, title.hjust = 0.5)) +
+                                 scale_fill_manual(values = palette) +
+                                 scale_alpha_manual(values=c(`0`=0, `1`=1))
     p
 }
-
 
 #==============================================================================
 
