@@ -207,13 +207,17 @@ write_xl <- function(
     assert_is_valid_sumexp(object)
     assert_all_are_dirs(dirname(xlfile))
 # Write
-    fdt(object) %<>% add_adjusted_pvalues('fdr')
     if (verbose)  cmessage('%s%s', spaces(21), xlfile)
-    list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
-    list0 <- c(list(summary = summarize_fit(object)), list0)
+    if (length(fitcoefs) == 0) {
+      list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
+    } else {
+      fdt(object) %<>% add_adjusted_pvalues('fdr')
+      list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
+      list0 <- c(list(summary = summarize_fit(object)), list0)
+    }
     writexl::write_xlsx(list0, path = xlfile)
 # Return
-    return(xlfile)
+    invisible(xlfile)
 }
 
 
@@ -228,11 +232,15 @@ write_ods <- function(
     assert_all_are_dirs(dirname(odsfile))
 # Prepare    
     if (verbose)  cmessage('%s%s', spaces(20), odsfile)
-    fdt(object) %<>% add_adjusted_pvalues('fdr')                             # add fdr
-    list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs,                # extract contrastfdt
-                                         MoreArgs = list(object = object, verbose = FALSE), 
-                                         SIMPLIFY = FALSE)
-    list0 <- c(list(summary = summarize_fit(object)), list0)
+    if (length(fitcoefs) == 0) {
+      list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
+    } else {
+      fdt(object) %<>% add_adjusted_pvalues('fdr')                             # add fdr
+      list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs,                # extract contrastfdt
+                                            MoreArgs = list(object = object, verbose = FALSE), 
+                                            SIMPLIFY = FALSE)
+      list0 <- c(list(summary = summarize_fit(object)), list0)
+    }
     if (file.exists(odsfile))  unlink(odsfile)                               # rm old file
 # Write
     readODS::write_ods(list0[[1]], sheet = names(list0)[[1]],                # write first sheet (has to be done first)
@@ -243,7 +251,7 @@ write_ods <- function(
                         MoreArgs = list(path = odsfile, 
                                       append = TRUE), 
                         SIMPLIFY = FALSE)
-    return(odsfile)
+    invisible(odsfile)
 }
 
 
