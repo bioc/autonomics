@@ -4,6 +4,7 @@
 \alias{plot_sample_nas}
 \alias{plot_subgroup_nas}
 \alias{plot_detections}
+\alias{plot_summarized_detections}
 \title{Plot (summarized) detections}
 \usage{
 plot_sample_nas(...)
@@ -16,6 +17,14 @@ plot_detections(
   fill = by,
   palette = make_svar_palette(object, fill),
   axis.text.y = element_blank()
+)
+
+plot_summarized_detections(
+  object,
+  by = "subgroup",
+  fill = by,
+  palette = NULL,
+  na_imputes = TRUE
 )
 }
 \arguments{

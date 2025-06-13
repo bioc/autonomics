@@ -721,7 +721,7 @@ get_subgroup_combinations <- function(object, by = 'subgroup'){
 }
 
 
-#' @rdname plot_individual_detections
+#' @rdname plot_detections
 #' @export
 plot_summarized_detections <- function(
     object, by = 'subgroup', fill = by, palette = NULL, na_imputes = TRUE
@@ -788,7 +788,7 @@ plot_summarized_detections <- function(
               legend.title    = element_blank(), 
               axis.text.x     = element_text(angle = 90)) + 
         guides(alpha = 'none', fill = 'none')
-    if (is.null(palette))   p <- p + #guides(alpha = 'none', fill = guide_legend(label.position = 'top', nrow = 1, title.hjust = 0.5)) +
+    if (!is.null(palette))  p <- p + #guides(alpha = 'none', fill = guide_legend(label.position = 'top', nrow = 1, title.hjust = 0.5)) +
                                  scale_fill_manual(values = palette) +
                                  scale_alpha_manual(values=c(`0`=0, `1`=1))
     p
