@@ -133,7 +133,7 @@ make_volcano_dt <- function(
      shape = 'imputed', 
      size  = NULL, 
      alpha = NULL,
-     label = 'feature_id'
+     label = if ('gene' %in% fvars(object)) 'gene' else 'feature_id'
 ){
 # Assert    
     assert_is_all_of(object, "SummarizedExperiment")
@@ -238,7 +238,8 @@ plot_volcano <- function(
            shape = if ('imputed' %in% fvars(object)) 'imputed' else NULL, 
             size = NULL,
            alpha = NULL,
-           label = 'feature_id', #if ('gene' %in% fvars(object)) 'gene' else 'feature_id', 
+           label = if ('gene' %in% fvars(object)) 'gene' else 'feature_id', 
+          colors = c(down = '#ff5050', unchanged = 'grey', up = '#009933'),
     max.overlaps = 10,
         features = NULL,
             nrow = length(fit),
@@ -272,13 +273,12 @@ plot_volcano <- function(
     shapesym <- if (is.null(shape))  quo(NULL) else sym(shape)
     sizesym  <- if (is.null(size))   quo(NULL) else sym(size)
     alphasym <- if (is.null(alpha))  quo(NULL) else sym(alpha)
-    colorvalues <- c(down = '#ff5050', unchanged = 'grey', up = '#009933')
     g <- g + geom_point(data = plotdt, 
                         mapping = aes(x = effect, y = mlp, color = direction, 
                                       shape = !!shapesym, alpha = !!alphasym, 
                                       size = !!sizesym), 
                         na.rm = TRUE) + 
-             scale_color_manual(values = colorvalues)
+             scale_color_manual(values = colors)
     if (!is.null(size))   g <- g + scale_size_manual( values = 1:3)
     if (!is.null(alpha))  g <- g + scale_alpha_manual(values = c(0.3, 0.5, 1))
 # Significance lines

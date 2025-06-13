@@ -11,7 +11,7 @@ make_volcano_dt(
   shape = "imputed",
   size = NULL,
   alpha = NULL,
-  label = "feature_id"
+  label = if ("gene" \%in\% fvars(object)) "gene" else "feature_id"
 )
 }
 \arguments{
