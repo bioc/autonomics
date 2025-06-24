@@ -6,16 +6,18 @@
 \alias{abind}
 \title{Sample/Feature/Assay bind}
 \usage{
-sbind(object1, object2)
+sbind(obj1, obj2, verbose = TRUE)
 
-fbind(object1, object2)
+fbind(obj1, obj2, verbose = TRUE)
 
-abind(object1, object2)
+abind(obj1, obj2, verbose = TRUE)
 }
 \arguments{
-\item{object1}{SummarizedExperiment:       nrow1 x ncol1}
+\item{obj1}{SummarizedExperiment:       nrow1 x ncol1}
 
-\item{object2}{SummarizedExperiment:       nrow2 x ncol2}
+\item{obj2}{SummarizedExperiment:       nrow2 x ncol2}
+
+\item{verbose}{TRUE or FALSE}
 }
 \value{
 SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
