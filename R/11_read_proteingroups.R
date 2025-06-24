@@ -961,6 +961,48 @@ function(object, value){
     object })
 
 
+common_samples <- function(obj1, obj2, verbose = TRUE){
+    x <- snames(obj1)
+    y <- snames(obj2)
+    z <- intersect(x, y)
+    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common features', spaces(4), length(z), length(x), length(y))
+    z
+}
+
+common_features <- function(obj1, obj2, verbose = TRUE){
+    x <- fnames(obj1)
+    y <- fnames(obj2)
+    z <- intersect(x, y)
+    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common features', spaces(4), length(z), length(x), length(y))
+    z
+}
+
+common_svars <- function(obj1, obj2, verbose = TRUE){
+    x <- svars(obj1)
+    y <- svars(obj2)
+    z <- intersect(x, y)
+    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common svars',    spaces(4), length(z), length(x), length(y))
+    z
+}
+
+
+common_fvars <- function(obj1, obj2, verbose = TRUE){
+    x <- fvars(obj1)
+    y <- fvars(obj2)
+    z <- intersect(x,y )
+    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common fvars',    spaces(4), length(z), length(x), length(y))
+    z
+}
+
+common_assays <- function(obj1, obj2, verbose = TRUE){
+    x <- assayNames(obj1)
+    y <- assayNames(obj2)
+    z <- intersect(x, y)
+    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common assays',   spaces(4), length(z), length(x), length(y))
+    z
+}
+
+
 #' Sample/Feature/Assay bind
 #' @param object1  SummarizedExperiment:       nrow1 x ncol1
 #' @param object2  SummarizedExperiment:       nrow2 x ncol2
