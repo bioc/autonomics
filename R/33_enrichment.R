@@ -69,6 +69,43 @@ list_files <- function(dir, full.names){
     if (length(y)==0)  return(NULL)  else  return(y)
 }
 
+msigyear <- function(file){
+    year <- basename(file)
+    year %<>% split_extract_fixed('_', 2)
+    year %<>% split_extract_fixed('.', 1)
+    year %<>% substr(2, nchar(.))
+    year %<>% as.numeric()
+    year
+}
+
+currentyear <- function()   as.numeric(format(Sys.Date(), "%Y"))
+
+msigoutdated <- function(file) if (is.null(file)) FALSE else msigyear(file) < currentyear()
+
+msigmsg <- function(file){
+    if (     is.null(file))                   cmessage('\tmsigdb unavailable') else cmessage("\tReading %s", file)
+    if (msigoutdated(file))                   cmessage("\tSeems outdated")
+    if (is.null(file) | msigoutdated(file)){  cmessage('\t\tVisit https://www.gsea-msigdb.org/gsea/downloads.jsp')
+                                              cmessage("\t\tScrolldown to SQLite - NOT json/xml")
+                                              cmessage("\t\tDownload Human/Mouse SQLite")
+                                              cmessage("\t\tCreate %s", MSIGDIR)
+                                              cmessage("\t\tUnzip here")  
+                                              cmessage("\t\tRerun `read_msigdt()`") }
+}
+
+
+#' Default msigdb file
+#' @return file
+#' @export
+defaultmsigfile <- function(){
+    file <- list_files(MSIGDIR, full.names = TRUE)
+    if (is.null(file))  return(NULL)
+    dt <- data.table(file = file) 
+    dt[ , organism := split_extract_fixed(basename(file), '.', 3) %>% factor(c('Hs', 'Mm'))        ]
+    dt[ ,     year := split_extract_fixed(basename(file), '.', 1) %>% substr(nchar(.)-3, nchar(.)) ]
+    dt[order(organism, -year)][1]$file
+}
+
 
 #' Read msigdb datatable
 #' @param file         msigdb file: one of the files in dir(MSIGDB).
@@ -77,25 +114,19 @@ list_files <- function(dir, full.names){
 #' read_msigdt()
 #' @export
 read_msigdt <- function(
-           file = list_files(MSIGDIR, full.names = TRUE)[1], 
+           file = defaultmsigfile(), 
     collections = if (is.null(file))  NULL else 
                   switch( basename(file) %>% substr(nchar(.)-4, nchar(.)-3) , 
                           Hs = c( 'C2:CP:REACTOME', 'C5:GO:BP', 'C5:GO:MF', 'C5:GO:CC' ), 
                           Mm = c( 'M2:CP:REACTOME', 'M5:GO:BP', 'M5:GO:MF', 'M5:GO:CC' ))
 ){
 # Assert
-    if (is.null(file)){
-        cmessage("\t\tVisit https://www.gsea-msigdb.org/gsea/downloads.jsp")
-        cmessage("\t\tScrolldown. Locate SQLite database (not json or xml!)")
-        cmessage("\t\tDownload Human or Mouse SQLite database")
-        cmessage("\t\tCreate %s", MSIGDIR)
-        cmessage("\t\tUnzip into this dir")  
-        cmessage("\t\tNow rerun `read_msigdt()`")
-        return(NULL)
-    }
-    if (!installed('DBI'))      return(NULL)
-    if (!installed('RSQLite'))  return(NULL)
+    msigmsg(file)
+    if (is.null(file))          return(invisible(NULL))
+    if (!installed('DBI'))      return(invisible(NULL))
+    if (!installed('RSQLite'))  return(invisible(NULL))
     assert_all_are_existing_files(file)
+    
     assert_is_subset(collections, c(MSIGCOLLECTIONSHUMAN, MSIGCOLLECTIONSMOUSE))
     gene_set_id <- gene_symbol_id <- id <- symbol <- NULL
     standard_name <- collection_name <- collection <- NULL

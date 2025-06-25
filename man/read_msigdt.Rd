@@ -5,7 +5,7 @@
 \title{Read msigdb datatable}
 \usage{
 read_msigdt(
-  file = list_files(MSIGDIR, full.names = TRUE)[1],
+  file = defaultmsigfile(),
   collections = if (is.null(file)) NULL else switch(basename(file) \%>\% substr(nchar(.)
     - 4, nchar(.) - 3), Hs = c("C2:CP:REACTOME", "C5:GO:BP", "C5:GO:MF", "C5:GO:CC"), Mm
     = c("M2:CP:REACTOME", "M5:GO:BP", "M5:GO:MF", "M5:GO:CC"))
