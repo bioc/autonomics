@@ -2,9 +2,12 @@
 % Please edit documentation in R/32_survival.R
 \name{object1}
 \alias{object1}
+\alias{object2}
 \title{Example objects for binding}
 \usage{
 object1()
+
+object2()
 }
 \value{
 SummarizedExperiment

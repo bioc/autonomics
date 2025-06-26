@@ -26,12 +26,12 @@ SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 Sample/Feature/Assay bind
 }
 \examples{
-ob1 <- obj1()
-ob2 <- obj2()
-biplot( pca(ob1), color = 'age')
-biplot( pca(ob2), color = 'age')
-biplot( pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
-biplot( pca(fbind(ob1, ob2)), color = 'age', nx = 2)
-plot( SummarizedExperiment::assays(abind(ob1, ob2))$SET1.exprs, 
-      SummarizedExperiment::assays(abind(ob1, ob2))$SET2.exprs)
+obj1 <- object1()
+obj2 <- object2()
+biplot( pca(obj1), color = 'age')
+biplot( pca(obj2), color = 'age')
+biplot( pca(sbind(obj1, obj2)), color = 'age', shape = 'set')
+biplot( pca(fbind(obj1, obj2)), color = 'age', nx = 2)
+plot( SummarizedExperiment::assays(abind(obj1, obj2))$SET1.exprs, 
+      SummarizedExperiment::assays(abind(obj1, obj2))$SET2.exprs)
 }

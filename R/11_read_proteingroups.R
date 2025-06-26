@@ -1009,14 +1009,14 @@ common_assays <- function(obj1, obj2, verbose = TRUE){
 #' @param verbose  TRUE or FALSE
 #' @return         SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 #' @examples
-#' ob1 <- obj1()
-#' ob2 <- obj2()
-#' biplot( pca(ob1), color = 'age')
-#' biplot( pca(ob2), color = 'age')
-#' biplot( pca(sbind(ob1, ob2)), color = 'age', shape = 'set')
-#' biplot( pca(fbind(ob1, ob2)), color = 'age', nx = 2)
-#' plot( SummarizedExperiment::assays(abind(ob1, ob2))$SET1.exprs, 
-#'       SummarizedExperiment::assays(abind(ob1, ob2))$SET2.exprs)
+#' obj1 <- object1()
+#' obj2 <- object2()
+#' biplot( pca(obj1), color = 'age')
+#' biplot( pca(obj2), color = 'age')
+#' biplot( pca(sbind(obj1, obj2)), color = 'age', shape = 'set')
+#' biplot( pca(fbind(obj1, obj2)), color = 'age', nx = 2)
+#' plot( SummarizedExperiment::assays(abind(obj1, obj2))$SET1.exprs, 
+#'       SummarizedExperiment::assays(abind(obj1, obj2))$SET2.exprs)
 #' @export
 sbind <- function(obj1, obj2, verbose = TRUE){
     
@@ -1048,14 +1048,20 @@ sbind <- function(obj1, obj2, verbose = TRUE){
     assays(ob2) %<>% extract(  commonassays)
                                                                       
 # Resolve: duplicate fvars with differing content
-    cols <- mapply(identical,    fdt(ob1),    fdt(ob2))
-    fdt(ob1) %<>% extract(, ..cols)
-    fdt(ob2) %<>% extract(, ..cols)
-   
+    cols <- !mapply(identical,    fdt(ob1),    fdt(ob2))
+    cols <- names(cols)[cols]
+    for (col in cols){
+        tmpdt <- data.table(i = 1:nrow(ob1), x = fdt(ob1)[[col]], y = fdt(ob2)[[col]])
+        tmpdt[ , z := commonify_strings(c(tolower(x), tolower(y))) , by = 'i' ]
+        fdt(ob1)[[col]] <- tmpdt$z
+        fdt(ob2)[[col]] <- tmpdt$z
+    }
+
 # Sbind
    object <- SummarizedExperiment::cbind(ob1, ob2)
    object 
 }
+
 
 #' @rdname sbind
 #' @export

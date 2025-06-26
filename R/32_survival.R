@@ -20,7 +20,7 @@ object1 <- function(){
 }
 
 
-#' @rdname obj1
+#' @rdname object1
 #' @export
 object2 <- function(){
     
