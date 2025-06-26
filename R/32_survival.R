@@ -1,12 +1,12 @@
 
 
-#' Example objects
+#' Example objects for binding
 #' @return SummarizedExperiment
 #' @examples
-#' obj1()
-#' obj2()
+#' object1()
+#' object2()
 #' @export
-obj1 <- function(){
+object1 <- function(){
     
     obj <- survobj(verbose = FALSE)                   # Differentiate
     sdt(obj)$sampleid  <- seq_len(ncol(obj))          #     svars
@@ -22,7 +22,7 @@ obj1 <- function(){
 
 #' @rdname obj1
 #' @export
-obj2 <- function(){
+object2 <- function(){
     
     obj <- survobj(verbose = FALSE)                   # Differentiate
     sdt(obj)$sid <- seq_len(ncol(obj))                #     svars

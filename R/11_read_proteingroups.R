@@ -1032,10 +1032,10 @@ sbind <- function(obj1, obj2, verbose = TRUE){
     assert_are_intersecting_sets(     fvars(obj1),      fvars(obj2))
     
 # Intersect: features, sf]vars, assays
-    commonfeatures <- common_features(obj1, obj2)
-    commonsvars    <- common_svars(   obj1, obj2)
-    commonfvars    <- common_fvars(   obj1, obj2)
-    commonassays   <- common_assays(  obj1, obj2)
+    commonfeatures <- common_features(obj1, obj2, verbose = verbose)
+    commonsvars    <- common_svars(   obj1, obj2, verbose = verbose)
+    commonfvars    <- common_fvars(   obj1, obj2, verbose = verbose)
+    commonassays   <- common_assays(  obj1, obj2, verbose = verbose)
            ob1 <- obj1
            ob2 <- obj2
            ob1  %<>% extract(  commonfeatures, )
@@ -1071,10 +1071,10 @@ fbind <- function(obj1, obj2, verbose = TRUE){
     assert_are_intersecting_sets(svars(obj1), svars(obj2))
     assert_are_intersecting_sets(fvars(obj1), fvars(obj2))
 # Intersect: samples, sfvars, assays
-    commonsamples <- common_samples( obj1, obj2)
-    commonsvars   <- common_svars(   obj1, obj2)
-    commonfvars   <- common_fvars(   obj1, obj2)
-    commonassays  <- common_assays(  obj1, obj2)
+    commonsamples <- common_samples( obj1, obj2, verbose = verbose)
+    commonsvars   <- common_svars(   obj1, obj2, verbose = verbose)
+    commonfvars   <- common_fvars(   obj1, obj2, verbose = verbose)
+    commonassays  <- common_assays(  obj1, obj2, verbose = verbose)
        ob1 <- obj1
        ob2 <- obj2
        ob1  %<>% extract(, commonsamples )
@@ -1106,10 +1106,10 @@ abind <- function(obj1, obj2, verbose = TRUE){
     assert_are_intersecting_sets( fvars(obj1),  fvars(obj2))
     assert_are_intersecting_sets( svars(obj1),  svars(obj2))
 # Common
-    commonsamples  <- common_samples( obj1, obj2)
-    commonfeatures <- common_features(obj1, obj2)
-    commonsvars    <- common_svars(   obj1, obj2)
-    commonfvars    <- common_fvars(   obj1, obj2)
+    commonsamples  <- common_samples( obj1, obj2, verbose = verbose )
+    commonfeatures <- common_features(obj1, obj2, verbose = verbose )
+    commonsvars    <- common_svars(   obj1, obj2, verbose = verbose )
+    commonfvars    <- common_fvars(   obj1, obj2, verbose = verbose )
        ob1 <- obj1
        ob2 <- obj2
        ob1  %<>% extract(  commonfeatures, )
