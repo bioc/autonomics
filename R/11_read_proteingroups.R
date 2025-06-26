@@ -1051,10 +1051,11 @@ sbind <- function(obj1, obj2, verbose = TRUE){
     cols <- !mapply(identical,    fdt(ob1),    fdt(ob2))
     cols <- names(cols)[cols]
     for (col in cols){
-        tmpdt <- data.table(i = 1:nrow(ob1), x = fdt(ob1)[[col]], y = fdt(ob2)[[col]])
-        tmpdt[ , z := commonify_strings(c(tolower(x), tolower(y))) , by = 'i' ]
-        fdt(ob1)[[col]] <- tmpdt$z
-        fdt(ob2)[[col]] <- tmpdt$z
+        if (is_numeric_character(fdt(ob1)[[col]]))   fdt(ob1)[[col]] %<>% as.numeric %>% formatC()
+        if (is_numeric_character(fdt(ob2)[[col]]))   fdt(ob2)[[col]] %<>% as.numeric %>% formatC()
+        z <- paste0(fdt(ob1)[[col]], '|', fdt(ob2)[[col]])
+        fdt(ob1)[[col]] <- z
+        fdt(ob2)[[col]] <- z
     }
 
 # Sbind
