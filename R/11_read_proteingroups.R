@@ -1003,20 +1003,37 @@ common_assays <- function(obj1, obj2, verbose = TRUE){
 }
 
 
+format_if_numeric <- function(x)   if (is_numeric_character(x))   formatC(as.numeric(x)) else x
+ paste_non_unique <- function(x, y)  ifelse(x==y, x, paste(x, y, sep = '|'))
+
+
 #' Sample/Feature/Assay bind
 #' @param obj1  SummarizedExperiment:       nrow1 x ncol1
 #' @param obj2  SummarizedExperiment:       nrow2 x ncol2
 #' @param verbose  TRUE or FALSE
 #' @return         SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 #' @examples
-#' obj1 <- object1()
-#' obj2 <- object2()
-#' biplot( pca(obj1), color = 'age')
-#' biplot( pca(obj2), color = 'age')
-#' biplot( pca(sbind(obj1, obj2)), color = 'age', shape = 'set')
-#' biplot( pca(fbind(obj1, obj2)), color = 'age', nx = 2)
-#' plot( SummarizedExperiment::assays(abind(obj1, obj2))$SET1.exprs, 
-#'       SummarizedExperiment::assays(abind(obj1, obj2))$SET2.exprs)
+#' # Data
+#'     obj1 <- object1()
+#'     obj2 <- object2()
+#'     biplot( pca(obj1), color = 'age')
+#'     biplot( pca(obj2), color = 'age')
+#'
+#' # Sample bind
+#'     obj <- sbind(obj1, obj2)
+#'     biplot( pca(obj), color = 'age', shape = 'set')
+#'     sdt(obj)  # SET added
+#'     fdt(obj)  # common fvars with differing content pasted together
+#'
+#' # Feature bind
+#'     obj <- fbind(obj1, obj2)
+#'     biplot( pca(obj), color = 'age', nx = 2)
+#'     fdt(obj)  # SET added
+#'     sdt(obj)  # common svars with differing content pasted together
+#'
+#' # Assay bind
+#'     plot( SummarizedExperiment::assays(abind(obj1, obj2))$SET1.exprs, 
+#'           SummarizedExperiment::assays(abind(obj1, obj2))$SET2.exprs)
 #' @export
 sbind <- function(obj1, obj2, verbose = TRUE){
     
@@ -1050,16 +1067,12 @@ sbind <- function(obj1, obj2, verbose = TRUE){
 # Resolve: duplicate fvars with differing content
     cols <- !mapply(identical,    fdt(ob1),    fdt(ob2))
     cols <- names(cols)[cols]
-    for (col in cols){
-        if (is_numeric_character(fdt(ob1)[[col]]))   fdt(ob1)[[col]] %<>% as.numeric %>% formatC()
-        if (is_numeric_character(fdt(ob2)[[col]]))   fdt(ob2)[[col]] %<>% as.numeric %>% formatC()
-        tmpdt <- data.table(x = fdt(ob1)[[col]], y = fdt(ob2)[[col]])
-        tmpdt[ , z := ifelse(x==y, x, paste(x,y,sep = '|'))]
-        fdt(ob1)[[col]] <- tmpdt$z
-        fdt(ob2)[[col]] <- tmpdt$z
-    }
-
-# Sbind
+    for (col in cols){    fdt(ob1)[[col]] %<>% format_if_numeric()
+                          fdt(ob2)[[col]] %<>% format_if_numeric()
+                          z <- paste_non_unique(fdt(ob1)[[col]], fdt(ob2)[[col]])
+                          fdt(ob1)[[col]] <- z
+                          fdt(ob2)[[col]] <- z   }
+# Bind
    object <- SummarizedExperiment::cbind(ob1, ob2)
    object 
 }
@@ -1094,10 +1107,14 @@ fbind <- function(obj1, obj2, verbose = TRUE){
 assays(ob1) %<>% extract(  commonassays )
 assays(ob2) %<>% extract(  commonassays )
 # Resolve: duplicate svars with differing content
-  cols <- mapply(identical, sdt(ob1), sdt(ob2))
-  sdt(ob1) %<>% extract(, ..cols)
-  sdt(ob2) %<>% extract(, ..cols)
-# Fbind
+    cols <- !mapply(identical, sdt(ob1), sdt(ob2))
+    cols <- names(cols)[cols]
+    for (col in cols){    sdt(ob1)[[col]] %<>% format_if_numeric()
+                          sdt(ob2)[[col]] %<>% format_if_numeric()
+                          z <- paste_non_unique(sdt(ob1)[[col]], sdt(ob2)[[col]])
+                          sdt(ob1)[[col]] <- z
+                          sdt(ob2)[[col]] <- z   }
+# Bind
     object <- SummarizedExperiment::rbind(ob1, ob2)
     object
 }
