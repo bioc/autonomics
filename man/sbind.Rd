@@ -45,6 +45,9 @@ Sample/Feature/Assay bind
     sdt(obj)  # common svars with differing content pasted together
 
 # Assay bind
+    obj <- abind(obj1, obj2)
     plot( SummarizedExperiment::assays(abind(obj1, obj2))$SET1.exprs, 
           SummarizedExperiment::assays(abind(obj1, obj2))$SET2.exprs)
+    fdt(obj)  # common fvars with differing content pasted together
+    sdt(obj)  # common svars with differing content pasted together
 }

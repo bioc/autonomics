@@ -1032,8 +1032,11 @@ format_if_numeric <- function(x)   if (is_numeric_character(x))   formatC(as.num
 #'     sdt(obj)  # common svars with differing content pasted together
 #'
 #' # Assay bind
+#'     obj <- abind(obj1, obj2)
 #'     plot( SummarizedExperiment::assays(abind(obj1, obj2))$SET1.exprs, 
 #'           SummarizedExperiment::assays(abind(obj1, obj2))$SET2.exprs)
+#'     fdt(obj)  # common fvars with differing content pasted together
+#'     sdt(obj)  # common svars with differing content pasted together
 #' @export
 sbind <- function(obj1, obj2, verbose = TRUE){
     
@@ -1146,12 +1149,20 @@ abind <- function(obj1, obj2, verbose = TRUE){
    sdt(ob1) %<>% extract(, commonsvars, with = FALSE)
    sdt(ob2) %<>% extract(, commonsvars, with = FALSE)
 # Resolve: duplicate sfvars with differing content
-    fcols <- mapply(identical, fdt(ob1), fdt(ob2))
-    scols <- mapply(identical, sdt(ob1), sdt(ob2))
-    fdt(ob1) %<>% extract(, ..fcols)
-    fdt(ob2) %<>% extract(, ..fcols)
-    sdt(ob1) %<>% extract(, ..scols)
-    sdt(ob2) %<>% extract(, ..scols)
+    fcols <- !mapply(identical, fdt(ob1), fdt(ob2))
+    scols <- !mapply(identical, sdt(ob1), sdt(ob2))
+    fcols <- names(fcols)[fcols]
+    scols <- names(scols)[scols]
+    for (col in fcols){   fdt(ob1)[[col]] %<>% format_if_numeric()
+                          fdt(ob2)[[col]] %<>% format_if_numeric()
+                          z <- paste_non_unique(fdt(ob1)[[col]], fdt(ob2)[[col]])
+                          fdt(ob1)[[col]] <- z
+                          fdt(ob2)[[col]] <- z   }
+    for (col in scols){   sdt(ob1)[[col]] %<>% format_if_numeric()
+                          sdt(ob2)[[col]] %<>% format_if_numeric()
+                          z <- paste_non_unique(sdt(ob1)[[col]], sdt(ob2)[[col]])
+                          sdt(ob1)[[col]] <- z
+                          sdt(ob2)[[col]] <- z   }
 # abind
     if (are_intersecting_sets(assayNames(ob1), assayNames(ob2))){
         assayNames(ob1) %<>% paste0('SET1.', .)
