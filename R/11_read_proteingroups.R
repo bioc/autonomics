@@ -1053,9 +1053,10 @@ sbind <- function(obj1, obj2, verbose = TRUE){
     for (col in cols){
         if (is_numeric_character(fdt(ob1)[[col]]))   fdt(ob1)[[col]] %<>% as.numeric %>% formatC()
         if (is_numeric_character(fdt(ob2)[[col]]))   fdt(ob2)[[col]] %<>% as.numeric %>% formatC()
-        z <- paste0(fdt(ob1)[[col]], '|', fdt(ob2)[[col]])
-        fdt(ob1)[[col]] <- z
-        fdt(ob2)[[col]] <- z
+        tmpdt <- data.table(x = fdt(ob1)[[col]], y = fdt(ob2)[[col]])
+        tmpdt[ , z := ifelse(x==y, x, paste(x,y,sep = '|'))]
+        fdt(ob1)[[col]] <- tmpdt$z
+        fdt(ob2)[[col]] <- tmpdt$z
     }
 
 # Sbind
