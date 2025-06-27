@@ -6,11 +6,11 @@
 \alias{abind}
 \title{Sample/Feature/Assay bind}
 \usage{
-sbind(obj1, obj2, verbose = TRUE)
+sbind(obj1, obj2)
 
-fbind(obj1, obj2, verbose = TRUE)
+fbind(obj1, obj2)
 
-abind(obj1, obj2, verbose = TRUE)
+abind(obj1, obj2)
 }
 \arguments{
 \item{obj1}{SummarizedExperiment:       nrow1 x ncol1}

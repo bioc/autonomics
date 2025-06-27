@@ -961,46 +961,21 @@ function(object, value){
     object })
 
 
-common_samples <- function(obj1, obj2, verbose = TRUE){
-    x <- snames(obj1)
-    y <- snames(obj2)
-    z <- intersect(x, y)
-    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common features', spaces(4), length(z), length(x), length(y))
-    z
-}
-
-common_features <- function(obj1, obj2, verbose = TRUE){
-    x <- fnames(obj1)
-    y <- fnames(obj2)
-    z <- intersect(x, y)
-    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common features', spaces(4), length(z), length(x), length(y))
-    z
-}
-
-common_svars <- function(obj1, obj2, verbose = TRUE){
-    x <- svars(obj1)
-    y <- svars(obj2)
-    z <- intersect(x, y)
-    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common svars',    spaces(4), length(z), length(x), length(y))
-    z
-}
-
-
-common_fvars <- function(obj1, obj2, verbose = TRUE){
-    x <- fvars(obj1)
-    y <- fvars(obj2)
-    z <- intersect(x,y )
-    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common fvars',    spaces(4), length(z), length(x), length(y))
-    z
-}
-
-common_assays <- function(obj1, obj2, verbose = TRUE){
-    x <- assayNames(obj1)
-    y <- assayNames(obj2)
-    z <- intersect(x, y)
-    if (verbose & length(x)!= length(y))    cmessage('%sRetain %d/(%d,%d) common assays',   spaces(4), length(z), length(x), length(y))
-    z
-}
+ samples12 <- function(obj1, obj2)  intersect(    snames(obj1),     snames(obj2))
+ samples1  <- function(obj1, obj2)    setdiff(    snames(obj1),     snames(obj2))
+ samples2  <- function(obj1, obj2)    setdiff(    snames(obj2),     snames(obj1))
+features12 <- function(obj1, obj2)  intersect(    fnames(obj1),     fnames(obj2))
+features1  <- function(obj1, obj2)  setdiff(      fnames(obj1),     fnames(obj2))
+features2  <- function(obj1, obj2)  setdiff(      fnames(obj2),     fnames(obj1))
+   svars12 <- function(obj1, obj2)  intersect(     svars(obj1),      svars(obj2))
+   svars1  <- function(obj1, obj2)  setdiff(       svars(obj1),      svars(obj2))
+   svars2  <- function(obj1, obj2)  setdiff(       svars(obj2),      svars(obj1))
+   fvars12 <- function(obj1, obj2)  intersect(     fvars(obj1),      fvars(obj2))
+   fvars1  <- function(obj1, obj2)  intersect(     fvars(obj1),      fvars(obj2))
+   fvars2  <- function(obj1, obj2)  intersect(     fvars(obj2),      fvars(obj1))
+  assays12 <- function(obj1, obj2)  intersect(assayNames(obj1), assayNames(obj2))
+   assays1 <- function(obj1, obj2)  setdiff(  assayNames(obj1), assayNames(obj2))
+   assays2 <- function(obj1, obj2)  setdiff(  assayNames(obj2), assayNames(obj1))
 
 
 format_if_numeric <- function(x)   if (is_numeric_character(x))   formatC(as.numeric(x)) else x
@@ -1038,7 +1013,7 @@ format_if_numeric <- function(x)   if (is_numeric_character(x))   formatC(as.num
 #'     fdt(obj)  # common fvars with differing content pasted together
 #'     sdt(obj)  # common svars with differing content pasted together
 #' @export
-sbind <- function(obj1, obj2, verbose = TRUE){
+sbind <- function(obj1, obj2){
     
 # Assert
     assert_is_valid_sumexp(obj1)
@@ -1052,20 +1027,20 @@ sbind <- function(obj1, obj2, verbose = TRUE){
     assert_are_intersecting_sets(     fvars(obj1),      fvars(obj2))
     
 # Intersect: features, sf]vars, assays
-    features12 <- common_features(obj1, obj2, verbose = verbose)
-    svars12    <- common_svars(   obj1, obj2, verbose = verbose)
-    fvars12    <- common_fvars(   obj1, obj2, verbose = verbose)
-    assays12   <- common_assays(  obj1, obj2, verbose = verbose)
+    f12 <- features12(obj1, obj2)
+    sva12 <- svars12( obj1, obj2)
+    fva12 <- fvars12( obj1, obj2)
+    a12   <- assays12(obj1, obj2)
            ob1 <- obj1
            ob2 <- obj2
-           ob1  %<>% extract(  features12, )
-           ob2  %<>% extract(  features12, )
-       sdt(ob1) %<>% extract(, svars12, with = FALSE)
-       sdt(ob2) %<>% extract(, svars12, with = FALSE)
-       fdt(ob1) %<>% extract(, fvars12, with = FALSE)
-       fdt(ob2) %<>% extract(, fvars12, with = FALSE)
-    assays(ob1) %<>% extract(  assays12)
-    assays(ob2) %<>% extract(  assays12)
+           ob1  %<>% extract(  f12, )
+           ob2  %<>% extract(  f12, )
+       sdt(ob1) %<>% extract(, sva12, with = FALSE)
+       sdt(ob2) %<>% extract(, sva12, with = FALSE)
+       fdt(ob1) %<>% extract(, fva12, with = FALSE)
+       fdt(ob2) %<>% extract(, fva12, with = FALSE)
+    assays(ob1) %<>% extract(  a12)
+    assays(ob2) %<>% extract(  a12)
                                                                       
 # Resolve: duplicate fvars with differing content
     cols <- !mapply(identical,    fdt(ob1),    fdt(ob2))
@@ -1083,7 +1058,7 @@ sbind <- function(obj1, obj2, verbose = TRUE){
 
 #' @rdname sbind
 #' @export
-fbind <- function(obj1, obj2, verbose = TRUE){
+fbind <- function(obj1, obj2){
 # Assert
     assert_is_valid_sumexp(obj1)
     assert_is_valid_sumexp(obj2)
@@ -1095,20 +1070,20 @@ fbind <- function(obj1, obj2, verbose = TRUE){
     assert_are_intersecting_sets(svars(obj1), svars(obj2))
     assert_are_intersecting_sets(fvars(obj1), fvars(obj2))
 # Intersect: samples, sfvars, assays
-    samples12 <- common_samples( obj1, obj2, verbose = verbose)
-    svars12   <- common_svars(   obj1, obj2, verbose = verbose)
-    fvars12   <- common_fvars(   obj1, obj2, verbose = verbose)
-    assays12  <- common_assays(  obj1, obj2, verbose = verbose)
+    s12 <- samples12(obj1, obj2)
+    sva12 <- svars12(obj1, obj2)
+    fva12 <- fvars12(obj1, obj2)
+    a12  <- assays12(obj1, obj2)
        ob1 <- obj1
        ob2 <- obj2
-       ob1  %<>% extract(, samples12 )
-       ob2  %<>% extract(, samples12 )
-   sdt(ob1) %<>% extract(, svars12, with = FALSE )
-   sdt(ob2) %<>% extract(, svars12, with = FALSE )
-   fdt(ob1) %<>% extract(, fvars12, with = FALSE )
-   fdt(ob2) %<>% extract(, fvars12, with = FALSE )
-assays(ob1) %<>% extract(  assays12 )
-assays(ob2) %<>% extract(  assays12 )
+       ob1  %<>% extract(, s12 )
+       ob2  %<>% extract(, s12 )
+   sdt(ob1) %<>% extract(, sva12, with = FALSE )
+   sdt(ob2) %<>% extract(, sva12, with = FALSE )
+   fdt(ob1) %<>% extract(, fva12, with = FALSE )
+   fdt(ob2) %<>% extract(, fva12, with = FALSE )
+assays(ob1) %<>% extract(  a12 )
+assays(ob2) %<>% extract(  a12 )
 # Resolve: duplicate svars with differing content
     cols <- !mapply(identical, sdt(ob1), sdt(ob2))
     cols <- names(cols)[cols]
@@ -1125,7 +1100,7 @@ assays(ob2) %<>% extract(  assays12 )
 
 #' @rdname sbind
 #' @export
-abind <- function(obj1, obj2, verbose = TRUE){
+abind <- function(obj1, obj2){
 # Assert
     assert_is_valid_sumexp(obj1)
     assert_is_valid_sumexp(obj2)
@@ -1134,20 +1109,20 @@ abind <- function(obj1, obj2, verbose = TRUE){
     assert_are_intersecting_sets( fvars(obj1),  fvars(obj2))
     assert_are_intersecting_sets( svars(obj1),  svars(obj2))
 # Common
-    samples12  <- common_samples( obj1, obj2, verbose = verbose )
-    features12 <- common_features(obj1, obj2, verbose = verbose )
-    svars12    <- common_svars(   obj1, obj2, verbose = verbose )
-    fvars12    <- common_fvars(   obj1, obj2, verbose = verbose )
+    s12 <- samples12( obj1, obj2)
+    f12 <- features12(obj1, obj2)
+    sva12  <- svars12(obj1, obj2)
+    fva12  <- fvars12(obj1, obj2)
        ob1 <- obj1
        ob2 <- obj2
-       ob1  %<>% extract(  features12, )
-       ob2  %<>% extract(  features12, )
-       ob1  %<>% extract(, samples12   )
-       ob2  %<>% extract(, samples12  )
-   fdt(ob1) %<>% extract(, fvars12, with = FALSE)
-   fdt(ob2) %<>% extract(, fvars12, with = FALSE)
-   sdt(ob1) %<>% extract(, svars12, with = FALSE)
-   sdt(ob2) %<>% extract(, svars12, with = FALSE)
+       ob1  %<>% extract(  f12, )
+       ob2  %<>% extract(  f12, )
+       ob1  %<>% extract(, s12   )
+       ob2  %<>% extract(, s12  )
+   fdt(ob1) %<>% extract(, fva12, with = FALSE)
+   fdt(ob2) %<>% extract(, fva12, with = FALSE)
+   sdt(ob1) %<>% extract(, sva12, with = FALSE)
+   sdt(ob2) %<>% extract(, sva12, with = FALSE)
 # Resolve: duplicate sfvars with differing content
     fcols <- !mapply(identical, fdt(ob1), fdt(ob2))
     scols <- !mapply(identical, sdt(ob1), sdt(ob2))
