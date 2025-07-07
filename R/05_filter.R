@@ -4,28 +4,6 @@
 #=================
 
 
-#' Select fvars
-#' @param object SummarizedExperiment
-#' @param cols character vector
-#' @param verbose TRUE or FALSE
-#' @return SummarizedExperiment
-#' @examples
-#' object <- survobj()
-#' select_fvars(object)
-#' @export
-select_fvars <- function(object, cols = character(0), verbose = TRUE){
-    cols %<>% c('feature_id', .)
-    cols %<>% unique()
-    fdt(object) %<>% extract(, cols, with = FALSE)
-    if (verbose){
-        cols %<>% paste0(spaces(18), ., '\n')
-        cmessage('%sSelect fvars', spaces(14))
-        cmessage(cols)
-    }
-    object
-}
-    
-
 #' Filter features on condition
 #' @param object SummarizedExperiment
 #' @param condition filter condition

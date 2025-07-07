@@ -300,6 +300,74 @@ subgroup_matrix <- function(object, subgroupvar){
     #subgroupmat %>% extract(rev(order(rownames(.))), order(colnames(.)))
 }
 
+
+#------------------------------------------------------------------------------
+#
+#   contrastvars / annotationvars / select_fvars
+# 
+#   There are currently two systems to select modeling fvars
+#   The contrastvars/anotationvars system is contrast-centric
+#   The modelvar/pvar/... is quantity-centric
+#
+#   At some point the idea is to store modeling results in metadata rather than fdt.
+#   And represent it as a 3d matrix.
+#   At that point the implementation of these functions will need to be rewritten.
+#
+#------------------------------------------------------------------------------
+
+
+#' @rdname select_fvars
+#' @export
+annotationvars <- function(object){
+    cols <- fvars(object) %>% extract(!stri_detect_fixed(.,'~'))
+    cols
+}
+
+
+#' @rdname select_fvars
+#' @export
+contrastvars <- function(
+      object, 
+         fit = fits(object)[1],
+    contrast = coefs(object, fit = fit)[1]
+){
+    cols <- fvars(object)
+    cols %<>% extract(stri_endswith_fixed(., fit))
+    cols %<>% extract(split_extract_fixed(., '~', 2) %in% contrast)
+    cols
+}
+
+
+#' Select fvars
+#' @param object SummarizedExperiment
+#' @param cols character vector
+#' @param verbose TRUE or FALSE
+#' @return SummarizedExperiment
+#' @examples
+#' object <- survobj()
+#' object %<>% fit_limma(~sex+age)
+#' annotationvars(object)
+#'   contrastvars(object)
+#'   select_fvars(object)
+#' @export
+select_fvars <- function(
+      object, 
+         fit = fits(object)[1],
+    contrast = coefs(object, fit = fit)[1],
+       fvars = c(annotationvars(object), 
+                   contrastvars(object, fit, contrast)),
+     verbose = TRUE
+){
+    fdt(object) %<>% extract(, fvars, with = FALSE)
+    if (verbose){
+        fvars %<>% paste0(spaces(18), ., '\n')
+        cmessage('%sSelect fvars', spaces(14))
+        cmessage(fvars)
+    }
+    object
+}
+
+
 #------------------------------------------------------------------------------
 #
 #                   modelvar
