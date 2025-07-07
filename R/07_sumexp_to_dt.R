@@ -166,7 +166,23 @@ fitcoefs <- function(object){
 }
 
 
-extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed because not all fit have same coefs
+#' Get contrastdt
+#' @param object SummarizedExperiment
+#' @param fitcoef e.g. 't2-t1~limma'
+#' @param annocols annotation fvars
+#' @param verbose TRUE or FALSE
+#' @return data.table
+#' @examples
+#' object <- survobj()
+#' object %<>% fit_limma(~sex + age)
+#' contrastdt(object, 'm-f~limma')
+#' @export
+contrastdt <- function(
+    object, 
+    fitcoef, 
+    annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')), 
+     verbose = TRUE
+){ # fitcoef is needed because not all fit have same coefs
 # Order
     sep <- guess_fitsep(fdt(object))
     coef <- split_extract_fixed(fitcoef, sep, 1)
@@ -176,8 +192,8 @@ extract_contrast_fdt <- function(object, fitcoef, verbose){ # fitcoef is needed 
     allfitcols <- fvars(object) %>% extract(stri_detect_fixed(., sep))
     curfitcols <- allfitcols 
     curfitcols %<>% extract(split_extract_fixed(., sep, 2:3) == fitcoef)
-    annocols <- fvars(object) %>% setdiff('feature_id') %>% setdiff(allfitcols)
-    cols <- c('feature_id', annocols, curfitcols)
+    #annocols <- fvars(object) %>% setdiff('feature_id') %>% setdiff(allfitcols)
+    cols <- c(annocols, curfitcols)
     fdt0 <- fdt(object)[, cols, with = FALSE]
     names(fdt0) %<>% stri_replace_first_fixed(paste0(sep, coef, sep, fit), '')
     fdt0
@@ -212,7 +228,7 @@ write_xl <- function(
       list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
     } else {
       fdt(object) %<>% add_adjusted_pvalues('fdr')
-      list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
+      list0 <- mapply(contrastdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
       list0 <- c(list(summary = summarize_fit(object)), list0)
     }
     names(list0) %<>% stri_replace_all_fixed(':', '.')   # error: Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
@@ -237,7 +253,7 @@ write_ods <- function(
       list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
     } else {
       fdt(object) %<>% add_adjusted_pvalues('fdr')                             # add fdr
-      list0 <- mapply(extract_contrast_fdt, fitcoef = fitcoefs,                # extract contrastfdt
+      list0 <- mapply(contrastdt, fitcoef = fitcoefs,                # extract contrastfdt
                                             MoreArgs = list(object = object, verbose = FALSE), 
                                             SIMPLIFY = FALSE)
       list0 <- c(list(summary = summarize_fit(object)), list0)
