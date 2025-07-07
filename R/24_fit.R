@@ -303,6 +303,238 @@ subgroup_matrix <- function(object, subgroupvar){
 
 #------------------------------------------------------------------------------
 #
+#           fits: 'limma'
+#'         coefs: 'm-f'
+#       fitcoefs: 'm-f~limma'
+#
+#------------------------------------------------------------------------------
+
+
+# dont rm - its the lower-level function used by fits() and coefs() !
+.tvars <- function(featuredt){
+    . <- NULL
+    sep <- guess_fitsep(featuredt)
+    names(featuredt) %>% extract(stri_startswith_fixed(., paste0('t', sep)))
+}
+
+
+#' Get fit models
+#' 
+#' @param object SummarizedExperiment or data.table
+#' @param fit       'limma', 'lm', 'lme', 'lmer', 'wilcoxon'
+#' @param intercept  TRUE or FALSE : whether to include the intercept
+#' @param ...    S3 dispatch
+#' @return  character vector
+#' @examples 
+#' object <- survobj()
+#' object %<>% fit_limma(~sex+age)
+#' 
+#' fits(object)
+#'
+#' coefs(object)                                   # sumexp
+#' coefs(object, intercept = TRUE)
+#' coefs(fdt(object))                              # data.table
+#' coefs(code(factor(object$age), code_control))   # factor
+#' 
+#' fitcoefs(object)
+#' @export
+fits <- function(object, ...)  UseMethod('fits')
+
+
+#' @rdname fits
+#' @export
+fits.data.table <- function(object, ...){
+    sep <- guess_fitsep(object)
+    if (is.null(sep))  return(NULL)
+    x <- .tvars(object)
+    x %<>% split_extract_fixed(sep, 3)
+    x %<>% unique()
+    x
+}
+
+#' @rdname fits
+#' @export
+fits.SummarizedExperiment <- function(object, ...){
+    c(fits.data.table(fdt(object)),
+      fits(metadata(object)$survival))  # fits.data.table if stats available
+}                                       # fits.NULL if stats unavailable
+
+#' @rdname fits
+#' @export
+fits.NULL <- function(object, ...)  NULL
+
+
+#' @rdname fits
+#' @export
+coefs <- function(object, ...)  UseMethod('coefs')
+
+#' @rdname fits
+#' @export
+coefs.factor <- function(object, intercept = FALSE, ...) {
+    coefs0 <- colnames(contrasts(object))
+    if (!intercept)  coefs0 %<>% setdiff('Intercept')
+    coefs0
+}
+
+#' @rdname fits
+#' @export
+coefs.data.table <- function(object, fit = fits(object), intercept = FALSE, ...){
+    sep <- guess_fitsep(object)
+    if (is.null(sep))  return(NULL)
+    if (is.null(fit))  return(NULL)
+    . <- NULL
+    coefs0 <- split_extract_fixed(.tvars(object), sep, 2)
+    fits0  <- split_extract_fixed(.tvars(object), sep, 3)
+    coefs0 %<>% extract(fits0 %in% fit)
+    coefs0 %<>% unique()
+    #if (!is.null(svars))  coefs0 %<>% extract(Reduce('|', lapply(svars, grepl, .)))
+    if (!intercept)  coefs0 %<>% setdiff('Intercept')
+    coefs0
+}
+
+#' @rdname fits
+#' @export
+coefs.SummarizedExperiment <- function(object, fit = fits(object), intercept = FALSE, ...){
+    c(coefs.data.table(fdt(object), fit = fit, intercept = intercept),
+      coefs(metadata(object)$survival, fit = fit)) # coefs.data.table if metadata contains stats
+}                                                  # coefs.NULL if metadata has no stats
+
+#' @rdname fits
+#' @export
+coefs.NULL <- function(object, ...)  NULL
+
+
+#' @rdname fits
+#' @export
+fitcoefs <- function(object){
+    sep <- guess_fitsep(fdt(object))
+    if (is.null(sep))  return(NULL)
+    split_extract_fixed(tvar(object), sep, 2:3)
+}
+
+
+
+#------------------------------------------------------------------------------
+#
+#              contrastdt > write_(xl|ods)
+# 
+#                   This is contrast-centric functionality
+#                   Metric-specific functionality follows in the next block.
+#
+#------------------------------------------------------------------------------
+
+
+#' Get contrastdt
+#' @param object SummarizedExperiment
+#' @param fitcoef e.g. 't2-t1~limma'
+#' @param annocols annotation fvars
+#' @param verbose TRUE or FALSE
+#' @return data.table
+#' @examples
+#' object <- survobj()
+#' object %<>% fit_limma(~sex + age)
+#' contrastdt(object, 'm-f~limma')
+#' @export
+contrastdt <- function(
+    object, 
+    fitcoef, 
+    annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')), 
+     verbose = TRUE
+){ # fitcoef is needed because not all fit have same coefs
+# Order
+    sep <- guess_fitsep(fdt(object))
+    coef <- split_extract_fixed(fitcoef, sep, 1)
+    fit  <- split_extract_fixed(fitcoef, sep, 2)
+    object %<>% order_on_t(coefs = coef, fit = fit, verbose = verbose) # order_on_p
+# Extract
+    allfitcols <- fvars(object) %>% extract(stri_detect_fixed(., sep))
+    curfitcols <- allfitcols 
+    curfitcols %<>% extract(split_extract_fixed(., sep, 2:3) == fitcoef)
+    #annocols <- fvars(object) %>% setdiff('feature_id') %>% setdiff(allfitcols)
+    cols <- c(annocols, curfitcols)
+    fdt0 <- fdt(object)[, cols, with = FALSE]
+    names(fdt0) %<>% stri_replace_first_fixed(paste0(sep, coef, sep, fit), '')
+    fdt0
+}
+
+
+#' Write xl/ods
+#' @param object   SummarizedExperiment
+#' @param xlfile   file
+#' @param odsfile  file
+#' @param fitcoefs character vector
+#' @param verbose  TRUE or FALSE
+#' @return filepath
+#' @examples 
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file, fit = 'limma')
+#' xlfile  <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.xlsx')
+#' odsfile <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.ods')
+#' # write_xl( object,  xlfile)
+#' # write_ods(object, odsfile)
+#' @export
+write_xl <- function(
+    object, xlfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
+){
+# Assert
+    if (!installed('writexl'))  return(NULL)
+    assert_is_valid_sumexp(object)
+    assert_all_are_dirs(dirname(xlfile))
+# Write
+    if (verbose)  cmessage('%s%s', spaces(21), xlfile)
+    if (length(fitcoefs) == 0) {
+      list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
+    } else {
+      fdt(object) %<>% add_adjusted_pvalues('fdr')
+      list0 <- mapply(contrastdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
+      list0 <- c(list(summary = summarize_fit(object)), list0)
+    }
+    names(list0) %<>% stri_replace_all_fixed(':', '.')   # error: Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
+    writexl::write_xlsx(list0, path = xlfile)
+# Return
+    invisible(xlfile)
+}
+
+
+#' @rdname write_xl
+#' @export
+write_ods <- function(
+    object, odsfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
+){
+# Assert
+    if (!installed('readODS'))   return(NULL)
+    assert_is_valid_sumexp(object)
+    assert_all_are_dirs(dirname(odsfile))
+# Prepare    
+    if (verbose)  cmessage('%s%s', spaces(20), odsfile)
+    if (length(fitcoefs) == 0) {
+      list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
+    } else {
+      fdt(object) %<>% add_adjusted_pvalues('fdr')                             # add fdr
+      list0 <- mapply(contrastdt, fitcoef = fitcoefs,                # extract contrastfdt
+                                            MoreArgs = list(object = object, verbose = FALSE), 
+                                            SIMPLIFY = FALSE)
+      list0 <- c(list(summary = summarize_fit(object)), list0)
+    }
+    if (file.exists(odsfile))  unlink(odsfile)                               # rm old file
+# Write
+    names(list0) %<>% stri_replace_all_fixed(':', '.')   # error: Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
+    readODS::write_ods(list0[[1]], sheet = names(list0)[[1]],                # write first sheet (has to be done first)
+                                    path = odsfile)
+    if (length(list0)==1)  return(odsfile)
+    mapply(readODS::write_ods, x = list0[-1],                                # then append other sheets
+                           sheet = names(list0[-1]), 
+                        MoreArgs = list(path = odsfile, 
+                                      append = TRUE), 
+                        SIMPLIFY = FALSE)
+    invisible(odsfile)
+}
+
+
+
+
+#------------------------------------------------------------------------------
+#
 #                   modelvar
 #
 #------------------------------------------------------------------------------
@@ -743,106 +975,6 @@ downfeatures <- function(
 
 #----------------------------------------------------------------------------------------
 
-
-# dont rm - its the lower-level function used by fits() and coefs() !
-.tvars <- function(featuredt){
-    . <- NULL
-    sep <- guess_fitsep(featuredt)
-    names(featuredt) %>% extract(stri_startswith_fixed(., paste0('t', sep)))
-}
-
-
-#' Get fit models
-#' 
-#' @param object SummarizedExperiment or data.table
-#' @param ...    S3 dispatch
-#' @return  character vector
-#' @examples 
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file, fit = 'limma')
-#' fits(object)
-#' @export
-fits <- function(object, ...)  UseMethod('fits')
-
-
-#' @rdname fits
-#' @export
-fits.data.table <- function(object, ...){
-    sep <- guess_fitsep(object)
-    if (is.null(sep))  return(NULL)
-    x <- .tvars(object)
-    x %<>% split_extract_fixed(sep, 3)
-    x %<>% unique()
-    x
-}
-
-#' @rdname fits
-#' @export
-fits.SummarizedExperiment <- function(object, ...){
-    c(fits.data.table(fdt(object)),
-      fits(metadata(object)$survival))  # fits.data.table if stats available
-}                                       # fits.NULL if stats unavailable
-
-#' @rdname fits
-#' @export
-fits.NULL <- function(object, ...)  NULL
-
-#' Get coefs
-#' 
-#' @param object     factor, data.table, SummarizedExperiment
-#' @param fit       'limma', 'lm', 'lme', 'lmer', 'wilcoxon'
-#' @param intercept  TRUE or FALSE : whether to include the intercept
-#' @param ...        required for s3 dispatch
-#' @return  character vector
-#' @examples
-#' # Factor
-#'     x <- factor(c('A', 'B', 'C'))
-#'     coefs(x)
-#'     coefs(code(x, code_control))
-#'     coefs(code(x, contr.treatment.explicit))
-#'     
-#' # SummarizedExperiment
-#'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#'     object <- read_metabolon(file, fit = 'limma')
-#'     coefs(object)
-#'     coefs(object, intercept = TRUE)
-#' @export
-coefs <- function(object, ...)  UseMethod('coefs')
-
-#' @rdname coefs
-#' @export
-coefs.factor <- function(object, intercept = FALSE, ...) {
-    coefs0 <- colnames(contrasts(object))
-    if (!intercept)  coefs0 %<>% setdiff('Intercept')
-    coefs0
-}
-
-#' @rdname coefs
-#' @export
-coefs.data.table <- function(object, fit = fits(object), intercept = FALSE, ...){
-    sep <- guess_fitsep(object)
-    if (is.null(sep))  return(NULL)
-    if (is.null(fit))  return(NULL)
-    . <- NULL
-    coefs0 <- split_extract_fixed(.tvars(object), sep, 2)
-    fits0  <- split_extract_fixed(.tvars(object), sep, 3)
-    coefs0 %<>% extract(fits0 %in% fit)
-    coefs0 %<>% unique()
-    #if (!is.null(svars))  coefs0 %<>% extract(Reduce('|', lapply(svars, grepl, .)))
-    if (!intercept)  coefs0 %<>% setdiff('Intercept')
-    coefs0
-}
-
-#' @rdname coefs
-#' @export
-coefs.SummarizedExperiment <- function(object, fit = fits(object), intercept = FALSE, ...){
-    c(coefs.data.table(fdt(object), fit = fit, intercept = intercept),
-      coefs(metadata(object)$survival, fit = fit)) # coefs.data.table if metadata contains stats
-}                                                  # coefs.NULL if metadata has no stats
-
-#' @rdname coefs
-#' @export
-coefs.NULL <- function(object, ...)  NULL
 
 #============================================================================
 #

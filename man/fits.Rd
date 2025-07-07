@@ -5,6 +5,12 @@
 \alias{fits.data.table}
 \alias{fits.SummarizedExperiment}
 \alias{fits.NULL}
+\alias{coefs}
+\alias{coefs.factor}
+\alias{coefs.data.table}
+\alias{coefs.SummarizedExperiment}
+\alias{coefs.NULL}
+\alias{fitcoefs}
 \title{Get fit models}
 \usage{
 fits(object, ...)
@@ -14,11 +20,27 @@ fits(object, ...)
 \method{fits}{SummarizedExperiment}(object, ...)
 
 \method{fits}{`NULL`}(object, ...)
+
+coefs(object, ...)
+
+\method{coefs}{factor}(object, intercept = FALSE, ...)
+
+\method{coefs}{data.table}(object, fit = fits(object), intercept = FALSE, ...)
+
+\method{coefs}{SummarizedExperiment}(object, fit = fits(object), intercept = FALSE, ...)
+
+\method{coefs}{`NULL`}(object, ...)
+
+fitcoefs(object)
 }
 \arguments{
 \item{object}{SummarizedExperiment or data.table}
 
 \item{...}{S3 dispatch}
+
+\item{intercept}{TRUE or FALSE : whether to include the intercept}
+
+\item{fit}{'limma', 'lm', 'lme', 'lmer', 'wilcoxon'}
 }
 \value{
 character vector
@@ -27,7 +49,15 @@ character vector
 Get fit models
 }
 \examples{
-file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-object <- read_metabolon(file, fit = 'limma')
+object <- survobj()
+object \%<>\% fit_limma(~sex+age)
+
 fits(object)
+
+coefs(object)                                   # sumexp
+coefs(object, intercept = TRUE)
+coefs(fdt(object))                              # data.table
+coefs(code(factor(object$age), code_control))   # factor
+
+fitcoefs(object)
 }
