@@ -98,6 +98,7 @@ msigmsg <- function(file){
 #' @return file
 #' @export
 defaultmsigfile <- function(){
+    organism <- year <- NULL
     file <- list_files(MSIGDIR, full.names = TRUE)
     if (is.null(file))  return(NULL)
     dt <- data.table(file = file) 
