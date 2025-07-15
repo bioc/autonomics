@@ -16,8 +16,6 @@ abind(obj1, obj2)
 \item{obj1}{SummarizedExperiment:       nrow1 x ncol1}
 
 \item{obj2}{SummarizedExperiment:       nrow2 x ncol2}
-
-\item{verbose}{TRUE or FALSE}
 }
 \value{
 SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2

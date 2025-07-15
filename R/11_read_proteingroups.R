@@ -985,7 +985,6 @@ format_if_numeric <- function(x)   if (is_numeric_character(x))   formatC(as.num
 #' Sample/Feature/Assay bind
 #' @param obj1  SummarizedExperiment:       nrow1 x ncol1
 #' @param obj2  SummarizedExperiment:       nrow2 x ncol2
-#' @param verbose  TRUE or FALSE
 #' @return         SummarizedExperiment: nrow1+nrow2 x ncol1+ncol2
 #' @examples
 #' # Data
