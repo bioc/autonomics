@@ -922,10 +922,10 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect',  sep, ., suffix); limmadt %<>% cbind(dt0)
     dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',       sep, ., suffix); limmadt %<>% cbind(dt0)
     dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',       sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(total = limmafit$df.total);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(prior = limmafit$df.prior);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(resid = limmafit$df.residual);                     names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
-   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
+   #dt0 <- data.table(total = limmafit$df.total);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
+   #dt0 <- data.table(prior = limmafit$df.prior);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
+   #dt0 <- data.table(resid = limmafit$df.residual);                     names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
+   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',      sep, ., suffix); limmadt %<>% cbind(dt0)
 # F statistics                                        # Suprising shorthand for intercept-free fstats !
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
     limmadt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
