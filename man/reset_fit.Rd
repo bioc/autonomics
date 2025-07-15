@@ -12,17 +12,16 @@ reset_fit(object, fit = fits(object), verbose = TRUE)
 \item{fit}{character vector}
 
 \item{verbose}{TRUE or FALSE}
-
-\item{coefs}{character vector}
 }
 \description{
 Reset fit
 }
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-(object <- read_metabolon(file))
-object \%<>\% reset_fit()
-object \%<>\% fit_limma() \%>\% reset_fit()
-object \%<>\% fit_limma() \%>\% fit_lm() \%>\% reset_fit()
-object \%<>\% fit_limma() \%>\% fit_lm() \%>\% reset_fit('limma')
+object <- read_metabolon(file)
+object \%>\% fdt()
+object \%>\% fit_limma() \%>\% fdt()
+object \%>\% fit_limma() \%>\% reset_fit() \%>\% fdt()
+object \%>\% fit_limma() \%>\% fit_lm() \%>\% reset_fit('limma') \%>\% fdt()
+object \%>\% fit_limma() \%>\% fit_lm() \%>\% reset_fit() \%>\% fdt()
 }

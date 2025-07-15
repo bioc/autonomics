@@ -579,15 +579,15 @@ vectorize_contrasts <- function(contrasts){
 #' Reset fit
 #' @param object  SummarizedExperiment
 #' @param fit     character vector
-#' @param coefs   character vector
 #' @param verbose TRUE or FALSE
 #' @examples 
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' (object <- read_metabolon(file))
-#' object %<>% reset_fit()
-#' object %<>% fit_limma() %>% reset_fit()
-#' object %<>% fit_limma() %>% fit_lm() %>% reset_fit()
-#' object %<>% fit_limma() %>% fit_lm() %>% reset_fit('limma')
+#' object <- read_metabolon(file)
+#' object %>% fdt()
+#' object %>% fit_limma() %>% fdt()
+#' object %>% fit_limma() %>% reset_fit() %>% fdt()
+#' object %>% fit_limma() %>% fit_lm() %>% reset_fit('limma') %>% fdt()
+#' object %>% fit_limma() %>% fit_lm() %>% reset_fit() %>% fdt()
 #' @export
 reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
 # Assert
@@ -596,7 +596,8 @@ reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
     if (is.null(fits(object)))  return(object)
     assert_is_a_bool(verbose)
 # Reset
-    cols <- grep(sprintf('~%s$', fit), fvars(object), value = TRUE)
+    pattern <- sprintf('~(%s)$', paste0(fit, collapse = '|'))
+    cols <- grep(pattern, fvars(object), value = TRUE)
     for (col in cols)  fdt(object)[[col]] <- NULL
     if (length(cols)>0)  if (verbose)  cmessage('%sRm %s', spaces(22), pattern)
 # Return
