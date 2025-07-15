@@ -589,30 +589,16 @@ vectorize_contrasts <- function(contrasts){
 #' object %<>% fit_limma() %>% fit_lm() %>% reset_fit()
 #' object %<>% fit_limma() %>% fit_lm() %>% reset_fit('limma')
 #' @export
-reset_fit <- function(
-     object, 
-        fit = fits(object), 
-      coefs = autonomics::coefs(object, fit = fit), 
-    verbose = TRUE
-){
+reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
 # Assert
     . <- NULL
     assert_is_valid_sumexp(object)
     if (is.null(fits(object)))  return(object)
     assert_is_a_bool(verbose)
 # Reset
-    vars <- c('effect', 'p', 'fdr', 't')
-    varpat  <- paste0(vars,  collapse = '|')
-    coefpat <- paste0(coefs, collapse = '|')
-    fitpat  <- paste0(fit,   collapse = '|')
-    
-    sep <- guess_fitsep(fdt(object))
-    pattern <- sprintf('^(%s)%s(%s)%s(%s)$', varpat, sep, coefpat, sep, fitpat)
-    cols <- grep(pattern, fvars(object), value = TRUE)
-    if (length(cols)>0){
-        if (verbose)  cmessage('%sRm %s',    spaces(22), pattern)
-        for (col in cols)  fdt(object)[[col]] <- NULL
-    }
+    cols <- grep(sprintf('~%s$', fit), fvars(object), value = TRUE)
+    for (col in cols)  fdt(object)[[col]] <- NULL
+    if (length(cols)>0)  if (verbose)  cmessage('%sRm %s', spaces(22), pattern)
 # Return
     object
 }
@@ -932,9 +918,12 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     
 # p/t/fdr
     limmadt <- data.table(feature_id = rownames(limmafit))
-    dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect', sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',      sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',      sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect',  sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',       sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',       sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(total = limmafit$df.total);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(prior = limmafit$df.prior);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
+    dt0 <- data.table(resid = limmafit$df.residual);                     names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
    #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',     sep, ., suffix); limmadt %<>% cbind(dt0)
 # F statistics                                        # Suprising shorthand for intercept-free fstats !
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268

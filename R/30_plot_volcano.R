@@ -260,12 +260,17 @@ plot_volcano <- function(
     assert_is_a_number(nrow)
     bon <- effect <- direction <- mlp <- ndown <- nup <- significance <- NULL
     singlefeature <- yintercept <- NULL
+    facetvars <- facet
     facet %<>% lapply(sym)
     facet <- vars(!!!facet)
 # Volcano 
-    plotdt <- make_volcano_dt(object, fit = fit, coefs = coefs, 
-                  label = label, shape = shape, size = size, alpha = alpha)
-    g <- ggplot(plotdt) + facet_wrap(facet, nrow = nrow, scales = scales)
+    plotdt <- make_volcano_dt(object, fit = fit, coefs = coefs, label = label, shape = shape, size = size, alpha = alpha)
+    facet1 <- facetvars[[1]]
+    facet1levels <- levels(plotdt[[facet1]])
+    if (nrow > length(facet1levels)){                                                       # Sometimes we want some facets empty for downstream `grid.arrange`
+        dummylevels <- vapply( seq_len(nrow - length(facetlevels)) , spaces, character(1))  # we could have two coefs, but still ask for three rows (last being empty)
+        plotdt[ , (facet1) := factor( get(facet1), c(facet1levels, dummylevels)) ] }        # This can be achieved by adding a dummy level
+    g <- ggplot(plotdt) + facet_wrap(facet, nrow = nrow, scales = scales, drop = FALSE)     # And then making sure it doesnt get dropped
     g <- g + theme_bw() + 
              theme(panel.grid = element_blank(), 
                    plot.title = element_text(hjust = 0.5))

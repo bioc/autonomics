@@ -4,21 +4,16 @@
 \alias{reset_fit}
 \title{Reset fit}
 \usage{
-reset_fit(
-  object,
-  fit = fits(object),
-  coefs = autonomics::coefs(object, fit = fit),
-  verbose = TRUE
-)
+reset_fit(object, fit = fits(object), verbose = TRUE)
 }
 \arguments{
 \item{object}{SummarizedExperiment}
 
 \item{fit}{character vector}
 
-\item{coefs}{character vector}
-
 \item{verbose}{TRUE or FALSE}
+
+\item{coefs}{character vector}
 }
 \description{
 Reset fit
