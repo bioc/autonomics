@@ -49,6 +49,8 @@ plot_volcano(
 
 \item{label}{fvar  (string)}
 
+\item{colors}{character vector}
+
 \item{max.overlaps}{number: passed to ggrepel}
 
 \item{features}{feature ids (character vector): features to encircle}

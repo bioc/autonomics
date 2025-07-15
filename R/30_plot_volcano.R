@@ -188,6 +188,7 @@ make_volcano_dt <- function(
 #' @param size           fvar  (string)
 #' @param alpha          fvar  (string)
 #' @param label          fvar  (string)
+#' @param colors         character vector
 #' @param max.overlaps   number: passed to ggrepel
 #' @param features       feature ids (character vector): features to encircle 
 #' @param nrow           number: no of rows in plot
