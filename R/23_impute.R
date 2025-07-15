@@ -280,8 +280,8 @@ impute.SummarizedExperiment <- function(
         # p1 <- ggplot(dt) + ggridges::geom_density_ridges(aes(
         #         x = value, y = sample_id, fill = subgroup, group = sample_id)) + 
         #         theme_bw() + ggtitle('Sample densities')
-        p1 <- if (ncol(object)<=9){ plot_sample_nas(object) + guides(fill = 'none')
-              } else {   plot_subgroup_nas(object) }
+        p1 <- if (ncol(object)<=9){ plot_detections(object) + guides(fill = 'none')
+              } else {   plot_summarized_detections(object) }
         p2 <- plot_sample_violins(object, fill = by) + guides(fill = 'none') + ggtitle(NULL)
         gridExtra::grid.arrange(p1, p2, nrow = 2)
     }
@@ -584,7 +584,8 @@ detect_order_features <- function(object, by){
 
 #==============================================================================
 #
-#                           plot_sample_nas
+#                           plot_detections
+#                plot_summarized_detections
 #
 #==============================================================================
 
