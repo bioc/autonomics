@@ -545,7 +545,7 @@ prep_survival <- function(
     curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
     alive <- coef <- p <- NULL
 # Prepare
-    object %<>% extract_coef_features(fit = engine, coefs = order, n = n)
+    object %<>% extract_contrast_features(fit = engine, coefs = order, n = n)
     assayvar <- all.vars(formula) %>% intersect(assayNames(object))
   samplevars <- all.vars(formula) %>% intersect(svars(object))
     if (length(assayvar)==0){

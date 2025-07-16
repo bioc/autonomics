@@ -686,7 +686,7 @@ plot_subgroup_violins <- function(
 
 #==============================================================================
 #
-#               extract_coef_features
+#               extract_contrast_features
 #                   .extract_p_features
 #                   .extract_fdr_features
 #                   .extract_effectsize_features
@@ -743,7 +743,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
     object[idx, ]
 }
 
-#' @rdname extract_coef_features
+#' @rdname extract_contrast_features
 #' @export
 .extract_p_features <- function(
        object, 
@@ -768,7 +768,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
                                    verbose = verbose )
 }
 
-#' @rdname extract_coef_features
+#' @rdname extract_contrast_features
 #' @export
 .extract_fdr_features <- function(
        object, 
@@ -794,7 +794,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
 }
 
 
-#' @rdname extract_coef_features
+#' @rdname extract_contrast_features
 #' @export
 .extract_effectsize_features <- function( 
        object, 
@@ -930,7 +930,7 @@ order_on_effect <- function(
 }
 
 
-#' @rdname extract_coef_features
+#' @rdname extract_contrast_features
 #' @export
 .extract_n_features <- function(
       object, 
@@ -994,7 +994,7 @@ order_on_effect <- function(
 #'     object %<>% .extract_effectsize_features(coefs = 't1-t0', effectsize = 1)
 #'     object %<>% .extract_n_features(         coefs = 't1-t0', n = 1)
 #'     object <- object0
-#'     object %<>%  extract_coef_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
+#'     object %<>%  extract_contrast_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
 #' # Multiple coefs
 #'     object <- object0
 #'     object %<>% .extract_p_features(         coefs = c('t1-t0', 't2-t0'), p = 0.05)
@@ -1002,9 +1002,9 @@ order_on_effect <- function(
 #'     object %<>% .extract_effectsize_features(coefs = c('t1-t0', 't2-t0'), effectsize = 1)
 #'     object %<>% .extract_n_features(         coefs = c('t1-t0', 't2-t0'), n = 1)
 #'     object <- object0
-#'     object %<>%  extract_coef_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
+#'     object %<>%  extract_contrast_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
 #' @export
-extract_coef_features <- function(  
+extract_contrast_features <- function(  
         object,
            fit = fits(object)[1], 
          coefs = autonomics::coefs(object, fit = fit),
@@ -1321,7 +1321,7 @@ plot_exprs <- function(
     } else if (dim == 'features'){   n %<>% min(nrow(object));  object %<>% extract_features_evenly(n)
     } else if (dim == 'both'){       n %<>% min(nrow(object))
         if (is.null(coefs)){         object %<>% extract_features_evenly(n) 
-        } else {                     object %<>% extract_coef_features(
+        } else {                     object %<>% extract_contrast_features(
                                                     fit = fit, coefs = coefs, combiner = combiner, 
                                                     decreasing = FALSE, p = p, fdr = fdr, n = n, 
                                                     features = features, verbose = FALSE)
@@ -2154,7 +2154,7 @@ plot_heatmap <- function(
 # Filter: significant features
     object0 <- object
     if (is.null(coef)){   object %<>% extract_features_evenly(n)
-    } else {              object %<>% extract_coef_features(fit = fit, coefs = coef, effectsize = effectsize, p = p, fdr = fdr, n = n, verbose = verbose) }
+    } else {              object %<>% extract_contrast_features(fit = fit, coefs = coef, effectsize = effectsize, p = p, fdr = fdr, n = n, verbose = verbose) }
 # Zscore
     assays(object)[[assay]] %<>% t() %>% scale(center = TRUE, scale = TRUE) %>% t()
     assays(object)[[assay]] %<>% na_to_zero()

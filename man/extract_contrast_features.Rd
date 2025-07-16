@@ -5,7 +5,7 @@
 \alias{.extract_fdr_features}
 \alias{.extract_effectsize_features}
 \alias{.extract_n_features}
-\alias{extract_coef_features}
+\alias{extract_contrast_features}
 \title{Extract coefficient features}
 \usage{
 .extract_p_features(
@@ -48,7 +48,7 @@
   verbose = TRUE
 )
 
-extract_coef_features(
+extract_contrast_features(
   object,
   fit = fits(object)[1],
   coefs = autonomics::coefs(object, fit = fit),
@@ -107,7 +107,7 @@ Extract coefficient features
     object \%<>\% .extract_effectsize_features(coefs = 't1-t0', effectsize = 1)
     object \%<>\% .extract_n_features(         coefs = 't1-t0', n = 1)
     object <- object0
-    object \%<>\%  extract_coef_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
+    object \%<>\%  extract_contrast_features(coefs = 't1-t0', p = 0.05, fdr = 0.05, effectsize = 1, sign = -1, n = 1)
 # Multiple coefs
     object <- object0
     object \%<>\% .extract_p_features(         coefs = c('t1-t0', 't2-t0'), p = 0.05)
@@ -115,5 +115,5 @@ Extract coefficient features
     object \%<>\% .extract_effectsize_features(coefs = c('t1-t0', 't2-t0'), effectsize = 1)
     object \%<>\% .extract_n_features(         coefs = c('t1-t0', 't2-t0'), n = 1)
     object <- object0
-    object \%<>\%  extract_coef_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
+    object \%<>\%  extract_contrast_features(coefs = c('t1-t0', 't2-t0'), p = 0.05, fdr = 0.01, effectsize = 1, sign = -1, n = 1)
 }
