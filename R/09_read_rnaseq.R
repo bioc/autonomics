@@ -1074,7 +1074,7 @@ read_salmon <- function(
 
 
 
-xlgenesdt <- set_names ( data.table( rbind( 
+xlgenesdt <- magrittr::set_names( data.table::data.table( rbind( 
                 c( '2-Mar', 'MTARC2'  ), c('MARC2',   'MTARC2'  ),  #  1
                 c( '3-Mar', 'MARCHF3' ), c('MARCH3',  'MARCHF3' ),  #  2 
                 c( '4-Mar', 'MARCHF4' ), c('MARCH4',  'MARCHF4' ),  #  3

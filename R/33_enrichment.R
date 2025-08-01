@@ -52,7 +52,7 @@ MSIGCOLLECTIONSMOUSE <- c(
 
 #' local msigdb dir
 #' @export
-MSIGDIR <- file.path(R_user_dir('autonomics', 'cache'), 'msigdb')
+MSIGDIR <- file.path(tools::R_user_dir('autonomics', 'cache'), 'msigdb')
 
 
 #' @title       list files

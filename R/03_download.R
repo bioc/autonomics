@@ -25,7 +25,7 @@ AUTONOMICS_DATASETS <- c('atkin.somascan.adat',    # new versions
 
 #' @rdname download_data
 #' @export
-DATADIR <- file.path(R_user_dir('autonomics', 'cache'), 'datasets')
+DATADIR <- file.path(tools::R_user_dir('autonomics', 'cache'), 'datasets')
 
 #' Download autonomics example data
 #' 
