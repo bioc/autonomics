@@ -635,6 +635,40 @@ mat2fdt <- function(mat)  mat2dt(mat, 'feature_id')
 mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 
 
+#' Formulate 
+#'
+#' Formulate model
+#' @param modelvars vector
+#' @param across    TRUE or FALSE
+#' @param within    TRUE or FALSE
+#' @param between   TRUE or FALSE
+#' @return string
+#' @examples
+#' formulate(   'subgroup' )
+#' formulate( c('Time', 'Diabetes'), across  = TRUE)
+#' formulate( c('Time', 'Diabetes'), within  = TRUE)
+#' formulate( c('Time', 'Diabetes'), between = TRUE)
+#' formulate( c('Time', 'Diabetes'), across = TRUE, within  = TRUE, between = TRUE)
+#' @export
+formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE){
+    
+    assert_is_character(modelvars)
+    assert_is_a_bool(across)
+    assert_is_a_bool(within)
+    assert_is_a_bool(between)
+    if (length(modelvars)>1)  assert_any_are_true(c(across, within, between))
+    
+    formula <- character(0)
+    if (length(modelvars) == 1          ){  formula %<>% c(sprintf('~ %s', modelvars)                             ); names(formula)[length(formula)] <- 'default'                                     }
+    if (length(modelvars) == 2 & across ){  formula %<>% c(sprintf('~ %s', paste0(    modelvars,  collapse = '+'))); names(formula)[length(formula)] <- 'across'                                      }
+    if (length(modelvars) == 2 & within ){  formula %<>% c(sprintf('~ %s', paste0(    modelvars,  collapse = '/'))); names(formula)[length(formula)] <- paste0(rev(modelvars), collapse = '.within.') }
+    if (length(modelvars) == 2 & within ){  formula %<>% c(sprintf('~ %s', paste0(rev(modelvars), collapse = '/'))); names(formula)[length(formula)] <- paste0(    modelvars,  collapse = '.within.') }
+    if (length(modelvars) == 2 & between){  formula %<>% c(sprintf('~ %s', paste0(    modelvars,  collapse = '*'))); names(formula)[length(formula)] <- 'between'                                     }
+    if (length(modelvars) >  2          ){  message('`modelvars` limited to two variables - use `formula` instead')}
+    return(formula)
+}
+
+
 #' Fit General Linear Model
 #'
 #' @param object    SummarizedExperiment
