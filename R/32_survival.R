@@ -361,6 +361,7 @@ all_non_numeric <- function(object, formula){
 #' 
 #' @param object        SummarizedExperiment
 #' @param formula       model formula: contains svars/assayNames
+#' @param assaylevels   NULL or vector: assaylevels to be used (for plotting)
 #' @param engine       'coxph', 'survdiff' or 'logrank'
 #' @param drop          TRUE or FALSE : whether to drop var in coefname
 #' @param codingfun     coding function
@@ -522,6 +523,7 @@ installed <- function(pkg){
 prep_survival <- function(
       object, 
      formula = as.formula(sprintf('~%s', assayNames(object)[1])),
+ assaylevels = NULL, 
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
        order = autonomics::coefs(object, fit = engine)[1],
        stats = autonomics::coefs(object, fit = engine),
@@ -556,6 +558,7 @@ prep_survival <- function(
         assert_is_a_string(assayvar)
         assert_character_matrix(assays(object)[[assayvar]], .xname = sprintf('assays(object)$%s', assayvar))
         plotdt <- sumexp_to_longdt(object, assay = assayvar, svars = c(samplevars, 'timetoevent', 'event'), value.name = assayvar)
+        if (!is.null(assaylevels))  plotdt <- plotdt[ get(assayvar) %in% assaylevels ]
     }
     plotdt[, alive := 1-event]
     setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent', 'alive'))
@@ -597,11 +600,13 @@ prep_survival <- function(
     plotdt[]
 }
 
+
 #' @rdname fit_survival
 #' @export
 plot_survival <- function(
       object,
      formula = as.formula(sprintf('~%s', assayNames(object)[1])), 
+ assaylevels = NULL,
       engine = c('coxph', 'survdiff', 'logrank') %>% intersect(fits(object)) %>% extract(1),
        order = autonomics::coefs(object, fit = engine)[1],
        stats = autonomics::coefs(object, fit = engine),
@@ -621,7 +626,8 @@ plot_survival <- function(
     totObs <- totDead <- nalive <- nout <- label <- color <- facet <- NULL
     timetoevent <- survival <- NULL
 # Plot
-    plotdt <- prep_survival(object = object, formula = formula, engine = engine, order = order, stats = stats, n = n)
+    plotdt <- prep_survival(object = object, formula = formula, assaylevels = assaylevels, 
+                            engine = engine, order = order, stats = stats, n = n)
     maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
     maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("†")   # \u2020
     maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("•")   # \u2022

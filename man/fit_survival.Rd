@@ -39,6 +39,7 @@ fit_survival(
 prep_survival(
   object,
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
+  assaylevels = NULL,
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   order = autonomics::coefs(object, fit = engine)[1],
@@ -49,6 +50,7 @@ prep_survival(
 plot_survival(
   object,
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
+  assaylevels = NULL,
   engine = c("coxph", "survdiff", "logrank") \%>\% intersect(fits(object)) \%>\%
     extract(1),
   order = autonomics::coefs(object, fit = engine)[1],
@@ -97,6 +99,8 @@ plot_survival(
 \item{height}{number}
 
 \item{writefunname}{'write_xl' or 'write_ods'}
+
+\item{assaylevels}{NULL or vector: assaylevels to be used (for plotting)}
 
 \item{title}{string}
 
