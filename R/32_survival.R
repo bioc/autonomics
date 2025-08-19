@@ -685,15 +685,28 @@ plot_survival <- function(
              #                      hjust = 1, vjust = 1, show.legend = FALSE, label.color = 'NA') +
                 # Place text before lines to give the latter more prominence
         groupsyms <- syms(all.vars(formula))
+         colorvar <-      all.vars(formula)[[1]]
          colorsym <- sym( all.vars(formula)[[1]])
-      linetypesym <- if (length(all.vars(formula))<2) quo(NULL) else sym( all.vars(formula)[[2]])
+         alphavar <- if (length(all.vars(formula))<2)     NULL  else      all.vars(formula)[[2]]
+         alphasym <- if (length(all.vars(formula))<2) quo(NULL) else sym( all.vars(formula)[[2]])
+      alphalevels <- if (length(all.vars(formula))<2)     NULL  else seq( from = 0.3, to = 1, length.out = length(unique(plotdt[[all.vars(formula)[[2]]]])) )
         p <- p + geom_step( mapping = aes(  x = timetoevent, 
                                             y = survival,              
                                         group = interaction(!!!groupsyms),  # !!! for syms
                                         color = !!colorsym,                 #  !! for sym
-                                     linetype = !!linetypesym ) ,           # position_identity speedsup code 2.5 times
+                                        alpha = !!alphasym ) ,           # position_identity speedsup code 2.5 times
                                      position = if (dodge == 0) position_identity() else ggstance::position_dodgev(dodge))
-                            #+ 
+        p <- p + scale_alpha_manual(values = alphalevels)
+        labeldt <- plotdt[ , .( x = max(timetoevent), 
+                                y = max(survival), 
+                              auc = stepauc(timetoevent,survival),
+                            label = paste0(get(colorvar), '.', get(alphavar), '(', totObs[1]-totDead[1], ')')) , by = c('facet', colorvar, alphavar)]
+        labeldt[, x := max(x)]
+        labeldt <- labeldt[, .SD[rev(order(auc))], by = 'facet']
+        labeldt[, i := seq(0,.N-1) , by = 'facet']
+        labeldt[, y := (1-i*0.12)*y ]
+        
+        p <- p + geom_text(data = labeldt, mapping = aes(x = x, y = y, label = label, color = !!colorsym, alpha = !!alphasym), hjust = 1, vjust = 1)
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
                 # Note that here the dropout is placed after the stepdown.
