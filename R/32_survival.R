@@ -601,6 +601,34 @@ prep_survival <- function(
 }
 
 
+#' Compute step auc
+#' @param x    numeric vector
+#' @param y    numeric vector
+#' @param plot TRUE or FALSE
+#' @return number
+#' @examples
+#' x <- c(  0, 4,   8, 27)
+#' y <- c(100, 67, 33,  0)
+#' stepauc(x, y, plot = TRUE)
+#' @export
+stepauc <- function(x, y, color = 'group1', plot = FALSE){
+        ord <- order(x)
+          x <- x[ord]
+          y <- y[ord]
+         dx <- diff(x)
+    heights <- tail(y, -1)
+    auc <- sum(dx*heights)
+    if (plot){   p <- ggplot(data = data.table(x = x, y = y, color = color))
+                 p <- p + theme_bw() + theme(panel.grid = element_blank())
+                 p <- p + geom_step(   aes(x = x, y = y, color = color))
+                 p <- p + geom_rect(aes(xmin = x, xmax = dplyr::lead(x), ymin = 0, ymax = y,  fill = color), alpha = 0.2)
+                 p <- p + geom_text(aes(x = min(x), y = min(y), label = auc, color = color), hjust = -3, vjust = -3)
+                 print(p)  }
+    auc
+}
+
+
+
 #' @rdname fit_survival
 #' @export
 plot_survival <- function(
