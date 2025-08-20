@@ -689,7 +689,7 @@ plot_survival <- function(
          colorsym <- sym( all.vars(formula)[[1]])
          alphavar <- if (length(all.vars(formula))<2)     NULL  else      all.vars(formula)[[2]]
          alphasym <- if (length(all.vars(formula))<2) quo(NULL) else sym( all.vars(formula)[[2]])
-      alphalevels <- if (length(all.vars(formula))<2)     NULL  else seq( from = 0.4, to = 1, length.out = length(unique(plotdt[[all.vars(formula)[[2]]]])) )
+      alphalevels <- if (length(all.vars(formula))<2)     NULL  else seq( from = 0.3, to = 1, length.out = length(unique(plotdt[[all.vars(formula)[[2]]]])) )
         p <- p + geom_step( mapping = aes(  x = timetoevent, 
                                             y = survival,              
                                         group = interaction(!!!groupsyms),  # !!! for syms
@@ -700,7 +700,10 @@ plot_survival <- function(
         labeldt <- plotdt[ , .( x = max(timetoevent), 
                                 y = max(survival), 
                               auc = stepauc(timetoevent,survival),
-                            label = paste0(get(colorvar), '.', get(alphavar), ': ', totObs[1]-totDead[1], '>', totObs[.N]-totDead[.N])) , by = c('facet', colorvar, alphavar)]
+                            label = sprintf('%s%s:%s>%s', get(colorvar), 
+                                                          if (is.null(alphavar)) '' else  paste0('.', get(alphavar)), 
+                                                          totObs[1]-totDead[1], 
+                                                          totObs[.N]-totDead[.N])) , by = c('facet', colorvar, alphavar)]
         labeldt[, x := max(x)]
         labeldt <- labeldt[, .SD[rev(order(auc))], by = 'facet']
         labeldt[, i := seq(0,.N-1) , by = 'facet']
