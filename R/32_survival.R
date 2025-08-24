@@ -565,18 +565,32 @@ prep_survival <- function(
     
     plotdt[ , totObs   := .N - cumsum(1-event),     by = c('feature_id', all.vars(formula))   ]
     plotdt[ , totDead := cumsum(event),             by = c('feature_id', all.vars(formula))   ]
+    
+# Aggregate per timepoint
     plotdt <- plotdt[ , .(totObs  = max(totObs), 
                           totDead = max(totDead), 
                           curOut  = sum(event==0)), by = c('feature_id', all.vars(formula), 'timetoevent')]
+    
+# Survival = delayed(alive/(alive+dead))
     plotdt[, survival := 100*(totObs-totDead)/totObs]
+    plotdt[curOut!=0, survival := NA_real_]
+    plotdt[, survival := data.table::nafill(survival, type = 'locf'), by = c('feature_id', all.vars(formula)) ]
+    
+# Start with 100% survival
     setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent'))
-    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', all.vars(formula))][, timetoevent := 0 ][, totDead := 0 ][, survival := 100 ][, curOut := 0]
+    plotdt0 <- plotdt[ , .SD[ 1] , by = c('feature_id', all.vars(formula))][, timetoevent := 0 ][, totDead := 0 ][, survival := 100][, curOut := 0]
+    plotdt <- rbind(plotdt0, plotdt)
+    setorderv(plotdt, c('feature_id', all.vars(formula), 'timetoevent'))
+    plotdt
+    
+# Vertically end curve when all dead
     plotdtn <- plotdt[ , .SD[.N] , by = c('feature_id', all.vars(formula))][, timetoevent := max(timetoevent)+1][, curOut := 0]
-    plotdtn <- plotdtn[totDead!=totObs]                  # Vertically end survival curve when all dead
+    plotdtn <- plotdtn[totDead!=totObs]
     features <- plotdt[, levels(feature_id)]
-    plotdt <- rbind(plotdt0, plotdt, plotdtn)            # Preserve tvar order
+    plotdt <- rbind(plotdt, plotdtn)            # Preserve tvar order
     plotdt[, feature_id := factor(feature_id, features)] # Note that for svar-formula feature_id is the formula!
     plotdt <- plotdt[order(feature_id)]
+    
 # Statistics
     plongdt <- pdt(object, fit = engine, coef = stats)
     tlongdt <- tdt(object, fit = engine, coef = stats)
