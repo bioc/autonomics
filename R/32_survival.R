@@ -714,17 +714,16 @@ plot_survival <- function(
             p <- p + scale_alpha_manual(values = alphalevels)
         
         # Pluses (censorings)
-            p <- p + geom_point(data = plotdt[curOut==1], mapping = aes(x = timetoevent, y = survival, color = !!colorsym, alpha = !!alphasym))
-            p <- p + geom_point(data = plotdt[curOut >1], mapping = aes(x = timetoevent, y = survival), shape = 8)
+            p <- p + geom_point(data = plotdt[curOut==1], mapping = aes(x = timetoevent, y = survival, color = !!colorsym, alpha = !!alphasym), size = 1.5)
+            p <- p + geom_point(data = plotdt[curOut >1], mapping = aes(x = timetoevent, y = survival), size = 2)
             
         # Labels
             labeldt <- plotdt[ , .( x = max(timetoevent), 
                                     y = max(survival), 
                                   auc = stepauc(timetoevent,survival),
-                                label = sprintf('%s%s : %s : %sa  %sd  %sc', 
+                                label = sprintf('%s%s: %s*  %s†  %s•', 
                                                               get(colorvar), 
                                                               if (is.null(alphavar)) '' else  paste0('.', get(alphavar)), 
-                                                              totObs[1],
                                                               totObs[.N]-totDead[.N], 
                                                               totDead[.N],
                                                               totObs[1] - totObs[.N]
