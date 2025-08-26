@@ -452,7 +452,7 @@ fit_survival <- function(
          coefs = NULL,
        verbose = TRUE,
         outdir = NULL,
-          plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
+          plot = FALSE,
          order = coefs(object, fit = engine)[1],
          stats = coefs(object, fit = engine),
          dodge = 0,
