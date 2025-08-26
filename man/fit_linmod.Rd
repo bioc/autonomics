@@ -19,9 +19,9 @@ fit_linmod(
   codingfun = code_control,
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
     verbose = FALSE),
-  contrasts = NULL,
-  coefs = if (is.null(contrasts)) autonomics::coefs(object) else NULL,
   block = NULL,
+  coefs = NULL,
+  contrasts = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   sep = FITSEP,
   suffix = paste0(sep, engine),
@@ -41,9 +41,9 @@ fit_limma(
   drop = varlevels_dont_clash(object, all.vars(formula)),
   codingfun = code_control,
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+  block = NULL,
   coefs = NULL,
   contrasts = NULL,
-  block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   sep = FITSEP,
   suffix = paste0(sep, "limma"),
@@ -56,6 +56,7 @@ fit_limma(
   drop = varlevels_dont_clash(object, all.vars(formula)),
   codingfun = code_control,
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+  coefs = NULL,
   contrasts = NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
@@ -71,6 +72,7 @@ fit_lm(
   codingfun = code_control,
   design = NULL,
   block = NULL,
+  coefs = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   sep = FITSEP,
   suffix = paste0(sep, "lm"),
@@ -85,6 +87,7 @@ fit_lme(
   codingfun = code_control,
   design = NULL,
   block = NULL,
+  coefs = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   opt = "optim",
   sep = FITSEP,
@@ -100,6 +103,7 @@ fit_lmer(
   codingfun = code_control,
   design = NULL,
   block = NULL,
+  coefs = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   sep = FITSEP,
   suffix = paste0(sep, "lmer"),
@@ -113,8 +117,9 @@ fit_wilcoxon(
   drop = NULL,
   codingfun = code_control,
   design = NULL,
-  contrasts = NULL,
   block = NULL,
+  coefs = NULL,
+  contrasts = NULL,
   weightvar = NULL,
   sep = FITSEP,
   suffix = paste0(sep, "wilcoxon"),
@@ -146,11 +151,11 @@ fit_wilcoxon(
 
 \item{design}{design matrix}
 
-\item{contrasts}{NULL or character vector: coefficient contrasts to test}
+\item{block}{block svar (or NULL)}
 
 \item{coefs}{NULL or character vector: model coefs to test}
 
-\item{block}{block svar (or NULL)}
+\item{contrasts}{NULL or character vector: coefficient contrasts to test}
 
 \item{weightvar}{NULL or name of weight matrix in assays(object)}
 

@@ -88,8 +88,9 @@ fit_wilcoxon <- function(
          drop = NULL,
     codingfun = code_control, # wilcox is the only one where `contr.treatment` doesnt work
        design = NULL, # only so that fit_linmod(.) works
-    contrasts = NULL,
         block = NULL, 
+        coefs = NULL,
+    contrasts = NULL,
     weightvar = NULL, 
           sep = FITSEP,
        suffix = paste0(sep, 'wilcoxon'),
@@ -120,6 +121,9 @@ fit_wilcoxon <- function(
     #fitdt <- fitdt[, .SD, .SDcols = patterns(pattern) ]
     names(fitdt)[-1] %<>% paste0(suffix)
     if (verbose)  message_df('\t\t\t%s', summarize_fit(fitdt, fit = 'wilcoxon'))
+# Select/Merge
+    if (!is.null(coefs)){  idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
+                           fitdt %<>% extract(, idx, with = FALSE)  }
     object %<>% merge_fit(fitdt)
 # extract
     extract_quantity <- function(quantity, fitdt){

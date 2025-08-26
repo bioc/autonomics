@@ -230,6 +230,7 @@ fit_lmx <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
         block = NULL, 
+        coefs = NULL,
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           sep = FITSEP,
@@ -280,6 +281,8 @@ fit_lmx <- function(
 # Extract
     names(fitdt)[-1] %<>% paste0(suffix)
     if (verbose)  message_df('                      %s', summarize_fit(fitdt, fit = fit))
+    if (!is.null(coefs)){  idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
+                           fitdt %<>% extract(, idx, with = FALSE)  }
 # Merge back
     object %<>% merge_fit(fitdt)
     formula %<>% droplhs() %<>% formula2str()
@@ -298,6 +301,7 @@ fit_lm <- function(
     codingfun = code_control,
        design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
+        coefs = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           sep = FITSEP,
        suffix = paste0(sep, 'lm'),
@@ -312,6 +316,7 @@ fit_lm <- function(
                   drop = drop,
              codingfun = codingfun,
                  block = block,
+                 coefs = coefs,
              weightvar = weightvar,
                    sep = sep,
                 suffix = suffix,
@@ -328,6 +333,7 @@ fit_lme <- function(
     codingfun = code_control,
        design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
+        coefs = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           opt = 'optim',
           sep = FITSEP,
@@ -346,6 +352,7 @@ fit_lme <- function(
                   drop = drop,
              codingfun = codingfun,
                  block = block, 
+                 coefs = coefs,
              weightvar = weightvar,
                    sep = sep,
                 suffix = suffix,
@@ -363,6 +370,7 @@ fit_lmer <- function(
     codingfun = code_control,
        design = NULL,  # only to make fit_linmod(.) work!
         block = NULL, 
+        coefs = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           sep = FITSEP,
        suffix = paste0(sep, 'lmer'),
@@ -381,6 +389,7 @@ fit_lmer <- function(
                   drop = drop,
              codingfun = codingfun,
                  block = block, 
+                 coefs = coefs,
              weightvar = weightvar,
                    sep = sep,
                 suffix = suffix,

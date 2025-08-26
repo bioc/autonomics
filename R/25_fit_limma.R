@@ -759,9 +759,9 @@ fit_linmod <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control, # if (engine == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment , 
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE),
-    contrasts = NULL,
-        coefs = if (is.null(contrasts))  autonomics::coefs(object)  else NULL,
         block = NULL,
+        coefs = NULL,
+    contrasts = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights'    else NULL,
           sep = FITSEP,
        suffix = paste0(sep, engine),
@@ -836,9 +836,9 @@ fit_limma <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+        block = NULL,
         coefs = NULL,
     contrasts = NULL,
-        block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
@@ -850,9 +850,10 @@ fit_limma <- function(
                            formula = formula,
                               drop = drop,
                          codingfun = codingfun,
-                            design = design,        
-                         contrasts = contrasts, 
+                            design = design,
                              block = block,
+                             coefs = coefs,
+                         contrasts = contrasts, 
                          weightvar = weightvar,
                                sep = sep,
                             suffix = suffix,
@@ -950,6 +951,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+        coefs = NULL,
     contrasts = NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -1006,7 +1008,9 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
     fitdt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
     fitdt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
-# Return
+# Select/Return
+    if (!is.null(coefs)){  idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
+                           fitdt %<>% extract(, idx, with = FALSE)  }
     sumdt <- summarize_fit(fitdt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
     fitdt

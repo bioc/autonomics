@@ -323,10 +323,8 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
             names(fitdt) %<>% stri_replace_first_regex(pat, '$1')  
     }}
 # Select/Return
-    if (!is.null(coefs)){
-        idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
-        fitdt %<>% extract(, idx, with = FALSE)
-    }
+    if (!is.null(coefs)){  idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
+                           fitdt %<>% extract(, idx, with = FALSE)  }
     if (verbose)  message_df('                      %s', summarize_fit(fitdt))
     fitdt
 }
