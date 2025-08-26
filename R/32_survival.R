@@ -365,7 +365,7 @@ all_non_numeric <- function(object, formula){
 #' @param engine       'coxph', 'survdiff' or 'logrank'
 #' @param drop          TRUE or FALSE : whether to drop var in coefname
 #' @param codingfun     coding function
-#' @param coefficients  NULL or character (subset coefficients to store in object)
+#' @param coefs         NULL or character (coefs to be stored in object)
 #' @param verbose       TRUE or FALSE
 #' @param outdir        output directory
 #' @param plot          TRUE or FALSE
@@ -449,7 +449,7 @@ fit_survival <- function(
         engine = c('coxph', 'survdiff', 'logrank')[1],
           drop = TRUE,
      codingfun = code_control,
-  coefficients = NULL,
+         coefs = NULL,
        verbose = TRUE,
         outdir = NULL,
           plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
@@ -472,8 +472,8 @@ fit_survival <- function(
                                    drop = drop,
                               codingfun = codingfun,
                                 verbose = verbose )
-        if (!is.null(coefficients)){
-            idx <- which(split_extract_fixed(names(outdt), '~', 2) %in% coefficients)
+        if (!is.null(coefs)){
+            idx <- which(split_extract_fixed(names(outdt), '~', 2) %in% coefs)
             idx %<>% c(1, .)
             outdt %<>% extract(, idx, with = FALSE)
         }
