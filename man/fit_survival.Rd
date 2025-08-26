@@ -10,6 +10,7 @@
 .fit_survival(
   object,
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
+  coefs = NULL,
   engine = c("coxph", "survdiff", "logrank")[1],
   drop = TRUE,
   codingfun = code_control,
@@ -71,6 +72,8 @@ plot_survival(
 
 \item{formula}{model formula: contains svars/assayNames}
 
+\item{coefs}{NULL or character (coefs to be stored in object)}
+
 \item{engine}{'coxph', 'survdiff' or 'logrank'}
 
 \item{drop}{TRUE or FALSE : whether to drop var in coefname}
@@ -78,8 +81,6 @@ plot_survival(
 \item{codingfun}{coding function}
 
 \item{verbose}{TRUE or FALSE}
-
-\item{coefs}{NULL or character (coefs to be stored in object)}
 
 \item{outdir}{output directory}
 

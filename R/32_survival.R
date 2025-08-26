@@ -264,6 +264,7 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
 .fit_survival <- function( 
        object,
        formula = as.formula(sprintf('~%s', assayNames(object)[1])),
+         coefs = NULL, 
         engine = c('coxph', 'survdiff', 'logrank')[1],
           drop = TRUE,
      codingfun = code_control,
@@ -304,9 +305,9 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
     twosideformula %<>% paste0('Surv(timetoevent, event)', .)
     if (verbose)  cmessage('%sModel %s(%s)', spaces(14), engine, twosideformula) # Align with Code `exprs2levels`
     twosideformula %<>% as.formula()
-    if (engine == 'coxph')     fitres <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
-    if (engine == 'survdiff')  fitres <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
-    if (engine == 'logrank')   fitres <- dt[,  .logrank(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'coxph')     outdt <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'survdiff')  outdt <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'logrank')   outdt <- dt[,  .logrank(.SD, twosideformula), by = 'feature_id']
 
     if (drop){ # drop varname from non-numeric vars
         anum <- assays(object)
@@ -319,14 +320,15 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
         snum %<>% intersect(samplevars)
         for (var in c(anum, snum)){  
             pat <- sprintf('%s(.+)', var)
-            names(fitres) %<>% stri_replace_first_regex(pat, '$1')  
+            names(outdt) %<>% stri_replace_first_regex(pat, '$1')  
     }}
-# Merge    
-    if (verbose)  message_df('                      %s', summarize_fit(fitres))
-    #if ('expr' %in% all.vars(formula)){  object %<>% merge_fit(fitres)
-    #} else {                              metadata(object)$survival <- fitres[, -1] }
-    #object
-    fitres
+# Select/Return
+    if (!is.null(coefs)){
+        idx <- c(1, which(split_extract_fixed(names(outdt), '~', 2) %in% coefs))
+        outdt %<>% extract(, idx, with = FALSE)
+    }
+    if (verbose)  message_df('                      %s', summarize_fit(outdt))
+    outdt
 }
 
 
@@ -468,15 +470,11 @@ fit_survival <- function(
     for (eng in engine){
         outdt <- .fit_survival(  object = object, 
                                 formula = formula,
+                                  coefs = coefs,
                                  engine = engine,
                                    drop = drop,
                               codingfun = codingfun,
                                 verbose = verbose )
-        if (!is.null(coefs)){
-            idx <- which(split_extract_fixed(names(outdt), '~', 2) %in% coefs)
-            idx %<>% c(1, .)
-            outdt %<>% extract(, idx, with = FALSE)
-        }
         if (all(all.vars(formula) %in% svars(object))){  metadata(object)$survival <-  outdt
         } else {                                         object %<>% merge_fdt(outdt)  }
     }
