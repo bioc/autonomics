@@ -305,9 +305,9 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
     twosideformula %<>% paste0('Surv(timetoevent, event)', .)
     if (verbose)  cmessage('%sModel %s(%s)', spaces(14), engine, twosideformula) # Align with Code `exprs2levels`
     twosideformula %<>% as.formula()
-    if (engine == 'coxph')     outdt <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
-    if (engine == 'survdiff')  outdt <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
-    if (engine == 'logrank')   outdt <- dt[,  .logrank(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'coxph')     fitdt <- dt[,    .coxph(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'survdiff')  fitdt <- dt[, .survdiff(.SD, twosideformula), by = 'feature_id']
+    if (engine == 'logrank')   fitdt <- dt[,  .logrank(.SD, twosideformula), by = 'feature_id']
 
     if (drop){ # drop varname from non-numeric vars
         anum <- assays(object)
@@ -320,15 +320,15 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
         snum %<>% intersect(samplevars)
         for (var in c(anum, snum)){  
             pat <- sprintf('%s(.+)', var)
-            names(outdt) %<>% stri_replace_first_regex(pat, '$1')  
+            names(fitdt) %<>% stri_replace_first_regex(pat, '$1')  
     }}
 # Select/Return
     if (!is.null(coefs)){
-        idx <- c(1, which(split_extract_fixed(names(outdt), '~', 2) %in% coefs))
-        outdt %<>% extract(, idx, with = FALSE)
+        idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
+        fitdt %<>% extract(, idx, with = FALSE)
     }
-    if (verbose)  message_df('                      %s', summarize_fit(outdt))
-    outdt
+    if (verbose)  message_df('                      %s', summarize_fit(fitdt))
+    fitdt
 }
 
 
@@ -468,15 +468,15 @@ fit_survival <- function(
     if (verbose)  cmessage('%sSurvival', spaces(4))
 # Compute
     for (eng in engine){
-        outdt <- .fit_survival(  object = object, 
+        fitdt <- .fit_survival(  object = object, 
                                 formula = formula,
                                   coefs = coefs,
                                  engine = engine,
                                    drop = drop,
                               codingfun = codingfun,
                                 verbose = verbose )
-        if (all(all.vars(formula) %in% svars(object))){  metadata(object)$survival <-  outdt
-        } else {                                         object %<>% merge_fdt(outdt)  }
+        if (all(all.vars(formula) %in% svars(object))){  metadata(object)$survival <-  fitdt
+        } else {                                         object %<>% merge_fdt(fitdt)  }
     }
 # Write
     if (!is.null(outdir)){

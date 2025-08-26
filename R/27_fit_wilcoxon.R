@@ -113,21 +113,21 @@ fit_wilcoxon <- function(
     . <- NULL
     dt <- sumexp_to_longdt(obj, svars = c(subgroupvar, block))
     if (verbose)  cmessage('%sWilcoxon', spaces(14))
-    fitres <- lapply(vectorize_contrasts(contrasts), .wilcoxon, 
+    fitdt <- lapply(vectorize_contrasts(contrasts), .wilcoxon, 
                      dt, subgroupvar = subgroupvar, block = block, sep = sep, verbose = verbose)
-    fitres %<>% Reduce(function(x, y)  merge(x, y, by = 'feature_id', all = TRUE), .)
+    fitdt %<>% Reduce(function(x, y)  merge(x, y, by = 'feature_id', all = TRUE), .)
     #pattern <- sprintf('^(feature_id|%s)',  paste0(statvars, collapse = '|'))   # select statvars
-    #fitres <- fitres[, .SD, .SDcols = patterns(pattern) ]
-    names(fitres)[-1] %<>% paste0(suffix)
-    if (verbose)  message_df('\t\t\t%s', summarize_fit(fitres, fit = 'wilcoxon'))
-    object %<>% merge_fit(fitres)
+    #fitdt <- fitdt[, .SD, .SDcols = patterns(pattern) ]
+    names(fitdt)[-1] %<>% paste0(suffix)
+    if (verbose)  message_df('\t\t\t%s', summarize_fit(fitdt, fit = 'wilcoxon'))
+    object %<>% merge_fit(fitdt)
 # extract
-    extract_quantity <- function(quantity, fitres){
+    extract_quantity <- function(quantity, fitdt){
         quantitydot <- paste0(quantity, FITSEP)
-        quantitymat <- fitres[, stri_startswith_fixed(
-                        names(fitres), quantitydot), with = FALSE]
+        quantitymat <- fitdt[, stri_startswith_fixed(
+                        names(fitdt), quantitydot), with = FALSE]
         quantitymat %<>% as.matrix()
-        rownames(quantitymat) <- fitres$feature_id
+        rownames(quantitymat) <- fitdt$feature_id
         colnames(quantitymat) %<>% stri_replace_first_fixed(quantitydot, '')
         quantitymat }
 # Return

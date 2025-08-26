@@ -595,11 +595,13 @@ reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
     assert_is_valid_sumexp(object)
     if (is.null(fits(object)))  return(object)
     assert_is_a_bool(verbose)
-# Reset
+# Reset fdt
     pattern <- sprintf('~(%s)$', paste0(fit, collapse = '|'))
     cols <- grep(pattern, fvars(object), value = TRUE)
     for (col in cols)  fdt(object)[[col]] <- NULL
     if (length(cols)>0)  if (verbose)  cmessage('%sRm %s', spaces(22), pattern)
+# Reset metadata
+    metadata(object)$survival <- NULL
 # Return
     object
 }
@@ -834,6 +836,7 @@ fit_limma <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+        coefs = NULL,
     contrasts = NULL,
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
@@ -843,7 +846,7 @@ fit_limma <- function(
 ){
 # Fit
     object %<>% reset_fit(fit = 'limma')
-    limmadt <- .fit_limma(  object = object,
+    fitdt <- .fit_limma(  object = object,
                            formula = formula,
                               drop = drop,
                          codingfun = codingfun,
@@ -854,7 +857,7 @@ fit_limma <- function(
                                sep = sep,
                             suffix = suffix,
                            verbose = verbose )
-    object %<>% merge_fdt(limmadt)
+    object %<>% merge_fdt(fitdt)
   # fdt(object)$F.limma   <- limmares$F
   # fdt(object)$F.p.limma <- limmares$F.p
 # Return
@@ -991,22 +994,22 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     if (estimable)   limmafit %<>% eBayes()
     
 # p/t/fdr
-    limmadt <- data.table(feature_id = rownames(limmafit))
-    dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect',  sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',       sep, ., suffix); limmadt %<>% cbind(dt0)
-    dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',       sep, ., suffix); limmadt %<>% cbind(dt0)
-   #dt0 <- data.table(total = limmafit$df.total);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
-   #dt0 <- data.table(prior = limmafit$df.prior);                        names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
-   #dt0 <- data.table(resid = limmafit$df.residual);                     names(dt0) %<>% paste0('df',      sep, ., suffix); limmadt %<>% cbind(dt0)
-   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',      sep, ., suffix); limmadt %<>% cbind(dt0)
+    fitdt <- data.table(feature_id = rownames(limmafit))
+    dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect',  sep, ., suffix); fitdt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',       sep, ., suffix); fitdt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',       sep, ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(total = limmafit$df.total);                        names(dt0) %<>% paste0('df',      sep, ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(prior = limmafit$df.prior);                        names(dt0) %<>% paste0('df',      sep, ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(resid = limmafit$df.residual);                     names(dt0) %<>% paste0('df',      sep, ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',      sep, ., suffix); fitdt %<>% cbind(dt0)
 # F statistics                                        # Suprising shorthand for intercept-free fstats !
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
-    limmadt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
-    limmadt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
+    fitdt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
+    fitdt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
 # Return
-    sumdt <- summarize_fit(limmadt, fit = 'limma')
+    sumdt <- summarize_fit(fitdt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
-    limmadt
+    fitdt
 
 }
 

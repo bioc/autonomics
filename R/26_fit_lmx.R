@@ -267,21 +267,21 @@ fit_lmx <- function(
     dt <- sumexp_to_longdt(obj, svars = mdlvars, assay = assays)
     lhsformula <- addlhs(formula)
 # Fit
-    fitres <- dt[, fitmethod( .SD,   formula = lhsformula, 
+    fitdt <- dt[, fitmethod( .SD,   formula = lhsformula, 
                                        block = block, 
                                      weights = get(weightvar),
                                          sep = sep,
                                          opt = opt ),            by = 'feature_id' ]
-    names(fitres) %<>% stri_replace_first_fixed('(Intercept)', 'Intercept')
+    names(fitdt) %<>% stri_replace_first_fixed('(Intercept)', 'Intercept')
     vars <- all.vars(formula)
     if (drop)   for (var in vars){     # t.p: p~subgroupt1 -> p~t1
                     pat <- sprintf('%s(.+)', var)   # f.p: p~subgroup
-                    names(fitres) %<>% stri_replace_first_regex(pat, '$1') }
+                    names(fitdt) %<>% stri_replace_first_regex(pat, '$1') }
 # Extract
-    names(fitres)[-1] %<>% paste0(suffix)
-    if (verbose)  message_df('                      %s', summarize_fit(fitres, fit = fit))
+    names(fitdt)[-1] %<>% paste0(suffix)
+    if (verbose)  message_df('                      %s', summarize_fit(fitdt, fit = fit))
 # Merge back
-    object %<>% merge_fit(fitres)
+    object %<>% merge_fit(fitdt)
     formula %<>% droplhs() %<>% formula2str()
     
     if (!is.null(weights))  formula %<>% paste0(', weights = assays(object)$', weightvar)

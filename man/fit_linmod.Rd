@@ -41,6 +41,7 @@ fit_limma(
   drop = varlevels_dont_clash(object, all.vars(formula)),
   codingfun = code_control,
   design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+  coefs = NULL,
   contrasts = NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
