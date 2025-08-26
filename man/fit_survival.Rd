@@ -22,6 +22,7 @@ fit_survival(
   engine = c("coxph", "survdiff", "logrank")[1],
   drop = TRUE,
   codingfun = code_control,
+  coefficients = NULL,
   verbose = TRUE,
   outdir = NULL,
   plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
@@ -77,6 +78,8 @@ plot_survival(
 \item{codingfun}{coding function}
 
 \item{verbose}{TRUE or FALSE}
+
+\item{coefficients}{NULL or character (subset coefficients to store in object)}
 
 \item{outdir}{output directory}
 

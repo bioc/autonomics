@@ -365,6 +365,7 @@ all_non_numeric <- function(object, formula){
 #' @param engine       'coxph', 'survdiff' or 'logrank'
 #' @param drop          TRUE or FALSE : whether to drop var in coefname
 #' @param codingfun     coding function
+#' @param coefficients  NULL or character (subset coefficients to store in object)
 #' @param verbose       TRUE or FALSE
 #' @param outdir        output directory
 #' @param plot          TRUE or FALSE
@@ -448,6 +449,7 @@ fit_survival <- function(
         engine = c('coxph', 'survdiff', 'logrank')[1],
           drop = TRUE,
      codingfun = code_control,
+  coefficients = NULL,
        verbose = TRUE,
         outdir = NULL,
           plot = if (all_non_numeric(object, formula)) TRUE else FALSE,
@@ -470,6 +472,11 @@ fit_survival <- function(
                                    drop = drop,
                               codingfun = codingfun,
                                 verbose = verbose )
+        if (!is.null(coefficients)){
+            idx <- which(split_extract_fixed(names(outdt), '~', 2) %in% coefficients)
+            idx %<>% c(1, .)
+            outdt %<>% extract(, idx, with = FALSE)
+        }
         if (all(all.vars(formula) %in% svars(object))){  metadata(object)$survival <-  outdt
         } else {                                         object %<>% merge_fdt(outdt)  }
     }
@@ -732,8 +739,8 @@ plot_survival <- function(
             labeldt <- labeldt[, .SD[rev(order(auc))], by = 'facet']
             labeldt[, i := seq(0,.N-1) , by = 'facet']
             labeldt[, y := (1-i*0.12)*y ]
-            p <- p + geom_text(data = labeldt, mapping = aes(x = x, y = y, label = label, color = !!colorsym, alpha = !!alphasym), hjust = 1, vjust = 1)
-            p <- p + guides(color = 'none', alpha = 'none')
+            p <- p + geom_text(data = labeldt, mapping = aes(x = x, y = y, label = label, color = !!colorsym, alpha = !!alphasym), hjust = 1, vjust = 1, show.legend = FALSE)
+           #p <- p + guides(color = 'none', alpha = 'none')
              #scale_color_manual(values = colordt$color %>% set_names(colordt$color)) #+ 
              #geom_point(data = plotdt[curOut>0], aes(x = timetoevent, y = survival, color = survivalgroup), size = 1, show.legend = FALSE) + 
                 # Note that here the dropout is placed after the stepdown.
