@@ -28,11 +28,10 @@ fit_linmod(
   verbose = TRUE,
   outdir = NULL,
   writefun = "write_xl",
-  volcano = FALSE,
-  volcanoargs = list(),
-  exprs = FALSE,
-  exprargs = list(),
-  ...
+  plotvolcano = FALSE,
+  plotexprs = FALSE,
+  argsvolcano = list(),
+  argsexprs = list()
 )
 
 fit_limma(
@@ -153,9 +152,9 @@ fit_wilcoxon(
 
 \item{block}{block svar (or NULL)}
 
-\item{coefs}{NULL or character vector: model coefs to test}
+\item{coefs}{NULL or character vector: model coefs to record}
 
-\item{contrasts}{NULL or character vector: coefficient contrasts to test}
+\item{contrasts}{NULL or character vector: posthoc contrasts to record}
 
 \item{weightvar}{NULL or name of weight matrix in assays(object)}
 
@@ -169,15 +168,13 @@ fit_wilcoxon(
 
 \item{writefun}{'write_xl' or 'write_ods'}
 
-\item{volcano}{TRUE or FALSE}
+\item{plotvolcano}{TRUE or FALSE}
 
-\item{volcanoargs}{list: volcano args}
+\item{plotexprs}{TRUE or FALSE}
 
-\item{exprs}{TRUE or FALSE}
+\item{argsvolcano}{list: volcano args}
 
-\item{exprargs}{list:  expr   args}
-
-\item{...}{passed to fit_(limma|lm|lme|lmer) functions}
+\item{argsexprs}{list:  expr   args}
 
 \item{opt}{lme options}
 }
@@ -226,9 +223,9 @@ Fit General Linear Model
 
 # Top-level function also plots and writes
   fit_linmod(object, block = 'Subject', coefs = 't1-t0')
-  fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE)
-  fit_linmod(object, block = 'Subject', coefs = 't1-t0',   exprs = TRUE)
-  fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE)
-  fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE, outdir = tempdir())
-  fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE, outdir = tempdir())
+  fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
+  fit_linmod(object, block = 'Subject', coefs = 't1-t0',   plotexprs = TRUE)
+  fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE)
+  fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
+  fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
 }

@@ -691,21 +691,20 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'     \item code_helmert_forward:     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
 #' }
 #' @param design    design matrix
-#' @param contrasts NULL or character vector: coefficient contrasts to test
-#' @param coefs     NULL or character vector: model coefs to test
 #' @param block     block svar (or NULL)
+#' @param coefs     NULL or character vector: model coefs to record
+#' @param contrasts NULL or character vector: posthoc contrasts to record
 #' @param weightvar NULL or name of weight matrix in assays(object)
 #' @param sep       string: pvar separator  ("~" in "p~t2~limma")
 #' @param suffix    string: pvar suffix ("limma" in "p~t2~limma")
 #' @param verbose   whether to msg
 #' @param outdir    NULL or dir
 #' @param writefun  'write_xl' or 'write_ods'
-#' @param volcano     TRUE or FALSE
-#' @param volcanoargs list: volcano args
-#' @param exprs       TRUE or FALSE
-#' @param exprargs    list:  expr   args
-#' @param ...         passed to fit_(limma|lm|lme|lmer) functions
-#' @param opt         lme options
+#' @param plotvolcano  TRUE or FALSE
+#' @param plotexprs    TRUE or FALSE
+#' @param argsvolcano  list: volcano args
+#' @param argsexprs    list:  expr   args
+#' @param opt          lme options
 #' @return Updated SummarizedExperiment
 #' @examples
 #' # Standard usage
@@ -746,11 +745,11 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'
 #' # Top-level function also plots and writes
 #'   fit_linmod(object, block = 'Subject', coefs = 't1-t0')
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE)
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0',   exprs = TRUE)
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE)
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE, outdir = tempdir())
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', volcano = TRUE, exprs = TRUE, outdir = tempdir())
+#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
+#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0',   plotexprs = TRUE)
+#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE)
+#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
+#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
 #' @export
 fit_linmod <- function(
        object, 
@@ -768,20 +767,21 @@ fit_linmod <- function(
       verbose = TRUE, 
        outdir = NULL,
      writefun = 'write_xl',
-      volcano = FALSE, 
-  volcanoargs = list(),
-        exprs = FALSE, 
-     exprargs = list(),
-             ...
+  plotvolcano = FALSE, 
+    plotexprs = FALSE, 
+  argsvolcano = list(),
+    argsexprs = list()
 ){
 # Assert
     assert_scalar_subset(engine, c('limma', 'lme', 'lmer', 'wilcoxon', 'lm'))
     if (!is.null(outdir))  assert_all_are_dirs(outdir)
     assert_scalar_subset(writefun, c('write_xl', 'write_ods'))
-    assert_is_a_bool(volcano)
-    assert_is_a_bool(exprs)
-    assert_is_list(volcanoargs)
-    assert_is_list(exprargs)
+    assert_is_a_bool(plotvolcano)
+    assert_is_a_bool(plotexprs)
+    if (plotvolcano)  assert_is_not_null(coefs)
+    if (plotexprs)    assert_is_not_null(coefs)
+    assert_is_list(argsvolcano)
+    assert_is_list(argsexprs)
 # Fit
     if (verbose)  cmessage('%sLinMod', spaces(4)) # unwanted when called during survival
     fitfun <- paste0('fit_', engine)
@@ -789,8 +789,9 @@ fit_linmod <- function(
                                  drop = drop,
                             codingfun = codingfun, 
                                design = design,
-                            contrasts = contrasts,
                                 block = block, 
+                                coefs = coefs,
+                            contrasts = contrasts,
                             weightvar = weightvar,
                                   sep = sep,
                                suffix = suffix, 
@@ -804,22 +805,22 @@ fit_linmod <- function(
     tablefile <- if (is.null(outdir)) NULL else sprintf('%s/tables.%s',    outdir, tableext)
     if (!is.null(outdir))  get(writefun)(object, tablefile) 
 # Volcanoes
-    if (volcano){
+    if (plotvolcano){
     for (coef in coefs){
         file <- if (is.null(outdir)) NULL else sprintf('%s/%s.volcano.pdf', outdir, coef)
         title <- sprintf('%s', formula2str(formula))
         args <- list( object = object, fit = engine, coefs = coef, title = title, file = file )
-        args %<>% c( volcanoargs )
+        args %<>% c( argsvolcano )
         p <- do.call(plot_volcano, args)
         if (is.null(outdir))  print(p)
     }}
 # Exprs
-    if (exprs){
+    if (plotexprs){
     for (coef in coefs){
         file <- if (is.null(outdir)) NULL else sprintf('%s/%s.exprs.pdf',   outdir, coef)
         title <- sprintf('%s', formula2str(formula))
         args <- list( object = object,  fit = engine, coefs = coef, title = title,  file = file, block = block )
-        args %<>% c( exprargs )
+        args %<>% c( argsexprs )
         p <- do.call(plot_exprs, args)
         if (is.null(outdir))  print(p)
     }}
