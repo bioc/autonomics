@@ -779,7 +779,7 @@ fit_linmod <- function(
     codingfun = code_control, # if (engine == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment , 
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE),
         block = NULL,
-        coefs = NULL,
+        coefs = contrast_coefs(object, design = design),
     contrasts = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights'    else NULL,
           sep = FITSEP,
@@ -858,7 +858,7 @@ fit_limma <- function(
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
         block = NULL,
-        coefs = NULL,
+        coefs = contrast_coefs(design = design),
     contrasts = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
           sep = FITSEP,
@@ -972,7 +972,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
-        coefs = NULL,
+        coefs = contrast_coefs(design = design),
     contrasts = NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -1030,8 +1030,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     fitdt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
     fitdt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
 # Select/Return
-    if (!is.null(coefs)){  idx <- c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs))
-                           fitdt %<>% extract(, idx, with = FALSE)  }
+    fitdt %<>% extract(, c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs)), with = FALSE)
     sumdt <- summarize_fit(fitdt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
     fitdt
