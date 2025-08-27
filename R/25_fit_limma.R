@@ -328,7 +328,7 @@ code.data.table <- function(object, codingfun, vars = names(object), verbose = T
 # Code
     for (var in vars){
         if (verbose)  cmessage('              Code `%s`', var)  # varname only at this level !
-        object[[var]] %<>% code.factor(codingfun, verbose = verbose)
+        object[[var]] %<>% code(codingfun, verbose = verbose)
     }
 # Return
     object
