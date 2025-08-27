@@ -969,8 +969,8 @@ order_on_effect <- function(
 
 #' Extract coefficient features
 #' @param object      SummarizedXExperiment
-#' @param fit         subset of fits(object)
-#' @param coefs       subset of coefs(object)
+#' @param fit         character: subset of fits(object)
+#' @param coefs       NULL/character: subset of coefs(object)
 #' @param combiner    '|' or '&': how to combine multiple fits/coefs
 #' @param decreasing  TRUE or FALSE
 #' @param p           p threshold
@@ -1018,8 +1018,10 @@ extract_contrast_features <- function(
       features = NULL,
        verbose = TRUE
 ){
-# Filter
+# Assert
+    if (is.null(coefs))  return(object)
     if (all(coefs %in% autonomics::coefs(metadata(object)$survival)))  return(object[0,])
+# Filter
     args <- list(coefs = coefs, fit = fit, combiner = combiner, verbose = verbose)
     object %<>% add_adjusted_pvalues('fdr', fit = fit, coefs = coefs)
     object <- do.call(         .extract_p_features, c(args, list(object = object, features = features,          p = p          )))

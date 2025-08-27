@@ -66,11 +66,11 @@ extract_contrast_features(
 \arguments{
 \item{object}{SummarizedXExperiment}
 
-\item{coefs}{subset of coefs(object)}
+\item{coefs}{NULL/character: subset of coefs(object)}
 
 \item{p}{p threshold}
 
-\item{fit}{subset of fits(object)}
+\item{fit}{character: subset of fits(object)}
 
 \item{combiner}{'|' or '&': how to combine multiple fits/coefs}
 

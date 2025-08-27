@@ -86,7 +86,7 @@ plot_survival(
 
 \item{plot}{TRUE or FALSE}
 
-\item{order}{coefs to order plots}
+\item{order}{NULL/character (coefs to order plots on)}
 
 \item{stats}{coefs to print stats for}
 

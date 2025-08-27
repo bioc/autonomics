@@ -375,7 +375,7 @@ all_non_numeric <- function(object, formula){
 #' @param n_col         number of columns
 #' @param n_row         number of rows
 #' @param writefunname  'write_xl' or 'write_ods'
-#' @param order         coefs to order plots
+#' @param order         NULL/character (coefs to order plots on)
 #' @param stats         coefs to print stats for
 #' @param title         string
 #' @param dodge         number
@@ -544,7 +544,7 @@ prep_survival <- function(
     assert_is_valid_sumexp(object)
     assert_is_subset(all.vars(formula), c(svars(object), assayNames(object)))
     assert_scalar_subset(engine, fits(object))
-    assert_is_subset(order, autonomics::coefs(object, fit = engine))
+    if (!is.null(order))  assert_is_subset(order, autonomics::coefs(object, fit = engine))
     assert_is_subset(stats, autonomics::coefs(object, fit = engine))
     event <- timetoevent <- NULL      # svar
     curOut <- facet <- label <- nalive <- nout <- totDead <- totObs <- survival <- y <- NULL
