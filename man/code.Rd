@@ -3,6 +3,9 @@
 \name{code}
 \alias{code}
 \alias{code.factor}
+\alias{code.character}
+\alias{code.logical}
+\alias{code.numeric}
 \alias{code.data.table}
 \alias{contr.treatment.explicit}
 \alias{code_control}
@@ -18,6 +21,12 @@
 code(object, ...)
 
 \method{code}{factor}(object, codingfun, verbose = TRUE, ...)
+
+\method{code}{character}(object, codingfun, verbose = TRUE, ...)
+
+\method{code}{logical}(object, codingfun, verbose = TRUE, ...)
+
+\method{code}{numeric}(object, codingfun, verbose = TRUE, ...)
 
 \method{code}{data.table}(object, codingfun, vars = names(object), verbose = TRUE, ...)
 

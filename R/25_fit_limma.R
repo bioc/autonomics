@@ -276,11 +276,14 @@ beta <- function( object, fit = fits(object)[1] ){
 #' @export
 code <- function(object, ...)  UseMethod('code')
 
+
 #' @rdname code
 #' @export
 code.factor <- function(object, codingfun, verbose = TRUE, ...){
+# Assert
     if (is.null(codingfun))  return(object)
     assert_is_function(codingfun)
+# Code
     k <- length(levels(object))
     contrasts(object) <- codingfun(levels(object))
     if (verbose){
@@ -290,9 +293,31 @@ code.factor <- function(object, codingfun, verbose = TRUE, ...){
         names(dimnames(contrastmat)) <- c('coefficient', 'level')
         message_df('                    %s', contrastmat)
     }
+# Return
     object
 }
 
+
+#' @rdname code
+#' @export
+code.character <- function(object, codingfun, verbose = TRUE, ...){
+    code.factor(factor(object), codingfun = codingfun, verbose = verbose, ...)
+}
+
+
+#' @rdname code
+#' @export
+code.logical <- function(object, codingfun, verbose = TRUE, ...){
+    code.factor(factor(object, codingfun = codingfun, verbose = verbose, ...))
+}
+
+
+#' @rdname code
+#' @export
+code.numeric <- function(object, codingfun, verbose = TRUE, ...){
+    object
+}
+    
 
 #' @rdname code
 #' @export
@@ -302,18 +327,13 @@ code.data.table <- function(object, codingfun, vars = names(object), verbose = T
     if (is.null(codingfun)) return(object)
 # Code
     for (var in vars){
-        if (is.character(object[[var]]))  object[[var]] %<>% factor()
-        if (is.logical(  object[[var]]))  object[[var]] %<>% factor()
-    }
-    for (var in vars){
-        if (is.factor(object[[var]])){
-            if (verbose)  cmessage('              Code `%s`', var)
-            object[[var]] %<>% code.factor(codingfun, verbose = verbose)
-        }
+        if (verbose)  cmessage('              Code `%s`', var)  # varname only at this level !
+        object[[var]] %<>% code.factor(codingfun, verbose = verbose)
     }
 # Return
     object
 }
+
 
 #' @rdname code
 #' @export
