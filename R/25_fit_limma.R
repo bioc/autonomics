@@ -858,8 +858,8 @@ fit_limma <- function(
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
         block = NULL,
-        coefs = contrast_coefs(design = design),
     contrasts = NULL,
+        coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
           sep = FITSEP,
        suffix = paste0(sep, 'limma'),
@@ -972,8 +972,8 @@ varlevels_dont_clash.SummarizedExperiment <- function(
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
        design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
-        coefs = contrast_coefs(design = design),
     contrasts = NULL,
+        coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           sep = FITSEP,
@@ -1030,6 +1030,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     fitdt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
     fitdt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
 # Select/Return
+    if (is.null(coefs))  coefs <- contrasts
     fitdt %<>% extract(, c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs)), with = FALSE)
     sumdt <- summarize_fit(fitdt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
