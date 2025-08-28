@@ -862,11 +862,11 @@ fit_limma <- function(
         coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
           sep = FITSEP,
-       suffix = paste0(sep, 'limma'),
-      verbose = TRUE
-){
-# Fit
-    object %<>% reset_fit(fit = 'limma')
+       suffix = paste0(sep, 'limma'),        # Often useful to run multiple models
+      verbose = TRUE                         # To get all questions answered
+){                                           # By fitting alternative designs (across, within, betrween)
+# Fit                                        # Or fitting alternative coding systems (control, difference)
+  # object %<>% reset_fit(fit = 'limma')     # Therefore, dont wipe earlier results
     fitdt <- .fit_limma(  object = object,
                            formula = formula,
                               drop = drop,

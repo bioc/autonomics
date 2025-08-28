@@ -253,7 +253,7 @@ fit_lmx <- function(
     obj %<>% keep_connected_blocks(    block,   verbose = verbose)  # keep samples from fully connected blocks (in sdt, feature-specific NA values not considered)
     obj %<>% keep_connected_features(  block,   verbose = verbose)  # keep features with 2+ connected blocks
 # Prepare
-    object %<>% reset_fit(fit)
+   #object %<>% reset_fit(fit)  # Dont wipe - often desirable to run multiple models sequentially
     if ( fit == 'lme'  ){     block %<>% block2lme(); mdlvars <-  unique(c(all.vars(formula), names(block)))   }
     if ( fit == 'lmer' ){   formula %<>% formula2lmer(block); mdlvars <- all.vars(formula)                     }
     if ( fit == 'lm'   ){   formula %<>% formula2lm(  block); mdlvars <- all.vars(formula)                     }
