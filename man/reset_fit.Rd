@@ -22,6 +22,6 @@ object <- read_metabolon(file)
 object \%>\% fdt()
 object \%>\% limma() \%>\% fdt()
 object \%>\% limma() \%>\% reset_fit() \%>\% fdt()
-object \%>\% limma() \%>\% fit_lm() \%>\% reset_fit('limma') \%>\% fdt()
-object \%>\% limma() \%>\% fit_lm() \%>\% reset_fit() \%>\% fdt()
+object \%>\% limma() \%>\% lm.() \%>\% reset_fit('limma') \%>\% fdt()
+object \%>\% limma() \%>\% lm.() \%>\% reset_fit() \%>\% fdt()
 }

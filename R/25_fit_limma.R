@@ -849,6 +849,32 @@ linmod <- function(
 }
 
 
+#' @rdname linmod
+#' @export
+fit_limma <- function(...){ .Deprecated('limma'); limma(...)}
+
+
+#' @rdname linmod
+#' @export
+fit_lm <- function(...){ .Deprecated('lm.'); lm.(...)}
+
+
+#' @rdname linmod
+#' @export
+fit_lme <- function(...){ .Deprecated('lme'); lme(...)}
+
+
+#' @rdname linmod
+#' @export
+fit_lmer <- function(...){ .Deprecated('lmer'); lmer(...)}
+
+
+#' @rdname linmod
+#' @export
+fit_wilcoxon <- function(...){ .Deprecated('wilcoxon'); wilcoxon(...)}
+
+
+
 #' Get all variables from formulas or formula strings
 #'
 #' An extended version of \code{base::all.vars()} that also accepts character
