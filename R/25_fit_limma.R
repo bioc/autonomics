@@ -849,44 +849,6 @@ fit_linmod <- function(
 }
 
 
-#' @rdname fit_linmod
-#' @export
-fit_limma <- function(
-       object,
-      formula = as.formula('~ subgroup'),
-         drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control,
-       design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
-        block = NULL,
-    contrasts = NULL,
-        coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
-    weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
-          sep = FITSEP,
-       suffix = paste0(sep, 'limma'),        # Often useful to run multiple models
-      verbose = TRUE                         # To get all questions answered
-){                                           # By fitting alternative designs (across, within, betrween)
-# Fit                                        # Or fitting alternative coding systems (control, difference)
-  # object %<>% reset_fit(fit = 'limma')     # Therefore, dont wipe earlier results
-    fitdt <- .fit_limma(  object = object,
-                           formula = formula,
-                              drop = drop,
-                         codingfun = codingfun,
-                            design = design,
-                             block = block,
-                             coefs = coefs,
-                         contrasts = contrasts, 
-                         weightvar = weightvar,
-                               sep = sep,
-                            suffix = suffix,
-                           verbose = verbose )
-    object %<>% merge_fdt(fitdt)
-  # fdt(object)$F.limma   <- limmares$F
-  # fdt(object)$F.p.limma <- limmares$F.p
-# Return
-    object
-}
-
-
 #' Get all variables from formulas or formula strings
 #'
 #' An extended version of \code{base::all.vars()} that also accepts character
@@ -966,7 +928,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
 
 #' @rdname fit_linmod
 #' @export
-.fit_limma <- function(
+fit_limma <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -1029,14 +991,18 @@ varlevels_dont_clash.SummarizedExperiment <- function(
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
     fitdt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
     fitdt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
-# Select/Return
+# Select
     if (is.null(coefs))  coefs <- contrasts
     fitdt %<>% extract(, c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs)), with = FALSE)
     sumdt <- summarize_fit(fitdt, fit = 'limma')
     if (verbose)  message_df('                  %s', sumdt)
-    fitdt
-
+# Return    
+  # fdt(object)$F.limma   <- fitdt$F
+  # fdt(object)$F.p.limma <- fitdt$F.p
+    object %<>% merge_fdt(fitdt)
+    object
 }
+
 
 pull_level <- function(x, lev){
     assert_is_factor(x)
