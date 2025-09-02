@@ -691,7 +691,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 }
 
 
-#' Fit General Linear Model
+#' General Linear Model
 #'
 #' @param object    SummarizedExperiment
 #' @param formula   model formula
@@ -730,9 +730,9 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #' # Standard usage
 #'   file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'   object <- read_metabolon(file)
-#'   object %<>% fit_linmod()                                # Default
-#'   object %<>% fit_linmod(  ~subgroup )                    # Custom formula
-#'   object %<>% fit_linmod(  ~subgroup, block = 'Subject')  # Block effect
+#'   object %<>% linmod()                                # Default
+#'   object %<>% linmod(  ~subgroup )                    # Custom formula
+#'   object %<>% linmod(  ~subgroup, block = 'Subject')  # Block effect
 #'   summarize_fit(object)
 #'   
 #' # Alternative engines: argument 'engine' or dedicated function
@@ -764,14 +764,14 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   fdt( fit_limma(object, block = 'Subject', sep = '.') )
 #'
 #' # Top-level function also plots and writes
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0')
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0',   plotexprs = TRUE)
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE)
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
-#'   fit_linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
+#'   linmod(object, block = 'Subject', coefs = 't1-t0')
+#'   linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
+#'   linmod(object, block = 'Subject', coefs = 't1-t0',   plotexprs = TRUE)
+#'   linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE)
+#'   linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
+#'   linmod(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
 #' @export
-fit_linmod <- function(
+linmod <- function(
        object, 
       formula = as.formula('~ subgroup'),
        engine = 'limma', 
@@ -926,7 +926,7 @@ varlevels_dont_clash.SummarizedExperiment <- function(
 }
 
 
-#' @rdname fit_linmod
+#' @rdname linmod
 #' @export
 fit_limma <- function(
        object, 

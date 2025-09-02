@@ -57,7 +57,7 @@ analyze <- function(
     for (curfit in fit){
         if (is.null(formula)) formula <- ~ subgroup
         if (is.null(coefs))   coefs <- contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun)
-        object %<>% fit_linmod(engine = fit,
+        object %<>% linmod(engine = fit,
                               formula = formula,
                                  drop = drop,
                             codingfun = codingfun,

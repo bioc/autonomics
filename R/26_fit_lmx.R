@@ -291,14 +291,14 @@ fit_lmx <- function(
 }
 
 
-#' @rdname fit_linmod
+#' @rdname linmod
 #' @export
 fit_lm <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
-       design = NULL,  # only to make fit_linmod(.) work!
+       design = NULL,  # only to make linmod(.) work!
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -323,14 +323,14 @@ fit_lm <- function(
 }
 
 
-#' @rdname fit_linmod
+#' @rdname linmod
 #' @export
 fit_lme <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
-       design = NULL,  # only to make fit_linmod(.) work!
+       design = NULL,  # only to make linmod(.) work!
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
@@ -360,14 +360,14 @@ fit_lme <- function(
 }
 
 
-#' @rdname fit_linmod
+#' @rdname linmod
 #' @export
 fit_lmer <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
-       design = NULL,  # only to make fit_linmod(.) work!
+       design = NULL,  # only to make linmod(.) work!
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
