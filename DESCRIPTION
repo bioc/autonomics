@@ -1,7 +1,7 @@
 Package: autonomics
 Type: Package
 Title: Unified Statistical Modeling of Omics Data
-Version: 1.15.377
+Version: 1.15.378
 Authors@R: c(person('Aditya',   'Bhagwat',      email = 'aditya.bhagwat@uni-marburg.de',    role = c('aut', 'cre')), 
              person('Richard',  'Cotton',       email = 'richierocks@gmail.com',            role = c('aut')),
              person('Vanessa',  'Beutgen',      email = 'vanessa.beutgen@uni-marburg.de',   role = c('ctb')),

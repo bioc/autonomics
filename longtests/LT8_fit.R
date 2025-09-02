@@ -42,8 +42,8 @@ context('fit: GSE161731')
     # fails
     # lme: nlminb problem, convergence error code = 1 singular convergence (7)
     # lmer: keeps running
-    test_that(  "fit_lme(r): formula = ~ 0 + time_since_onset | subject_id", {
-        object %<>% fit_lme(formula = ~time_since_onset, block = 'subject_id')
+    test_that(  "lme(r): formula = ~ 0 + time_since_onset | subject_id", {
+        object %<>% lme(formula = ~time_since_onset, block = 'subject_id')
         #object %<>% fit_lmer(formula = ~time_since_onset, block='subject_id')
         #expect_true(sumexp_contains_fit(object))
         #expect_true(summarize_fit(fdt(object), 'limma')$ndown==8)

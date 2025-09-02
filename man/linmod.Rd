@@ -5,7 +5,7 @@
 \alias{linmod}
 \alias{limma}
 \alias{fit_lm}
-\alias{fit_lme}
+\alias{lme}
 \alias{fit_lmer}
 \alias{wilcoxon}
 \title{General Linear Model}
@@ -63,7 +63,7 @@ fit_lm(
   verbose = TRUE
 )
 
-fit_lme(
+lme(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -181,7 +181,7 @@ General Linear Model
   fdt(object) \%<>\% extract(, 'feature_id')
   object \%<>\% limma(   ~subgroup, block = 'Subject')  # Default engine
   object \%<>\% fit_lm(      ~subgroup, block = 'Subject')  # Traditional
-  object \%<>\% fit_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
+  object \%<>\% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
   object \%<>\% fit_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
   object \%<>\% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
   summarize_fit(object)
@@ -189,7 +189,7 @@ General Linear Model
 # Alternative coding: backward diffs instead of baseline
   fdt(object) \%<>\% extract(, 'feature_id')
   object \%<>\% limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
-  object \%<>\% fit_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
   object \%<>\% fit_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
   summarize_fit(object)
     

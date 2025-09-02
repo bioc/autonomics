@@ -325,7 +325,7 @@ fit_lm <- function(
 
 #' @rdname linmod
 #' @export
-fit_lme <- function(
+lme <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
