@@ -16,7 +16,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
         expect_true(sumexp_contains_fit(limma(object),                   'limma'))
         expect_true(sumexp_contains_fit(limma(object, weightvar = NULL), 'limma'))
         # expect_true(sumexp_contains_fit(fit_lm(object),       'lm'))         # slow
-        # expect_true(sumexp_contains_fit(fit_wilcoxon(object), 'wilcoxon'))   # slow
+        # expect_true(sumexp_contains_fit(wilcoxon(object), 'wilcoxon'))   # slow
     })
 
 
@@ -26,7 +26,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             select <-  c('E00','E01', 'E02','E05','E15','E30', 'M00')
             select %<>% paste0('_STD')
             object <- read_maxquant_proteingroups(file, subgroups = select)
-            expect_true(sumexp_contains_fit(fit_wilcoxon(object), 'wilcoxon'))
+            expect_true(sumexp_contains_fit(wilcoxon(object), 'wilcoxon'))
             expect_true(sumexp_contains_fit(fit_lm(object),       'lm'))
             expect_true(sumexp_contains_fit(limma(object),    'limma'))
         # subtracted
@@ -38,7 +38,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
     test_that( " fit: fukuda20.proteingroups ", {
         file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics') 
         object <- read_maxquant_proteingroups(file)
-        expect_true(sumexp_contains_fit(fit_wilcoxon(object), 'wilcoxon'))
+        expect_true(sumexp_contains_fit(wilcoxon(object), 'wilcoxon'))
         expect_true(sumexp_contains_fit(fit_lm(object),       'lm'))
         expect_true(sumexp_contains_fit(limma(object),    'limma'))
     })
@@ -51,7 +51,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             expect_true( sumexp_contains_fit(       fit_lm( object, ~ Time + Diabetes                    ), 'lm'      ) )
             expect_true( sumexp_contains_fit(      fit_lme( object, ~ Time + Diabetes, block = 'Subject' ), 'lme'     ) )
             expect_true( sumexp_contains_fit(     fit_lmer( object, ~ Time + Diabetes, block = 'Subject' ), 'lmer'    ) )
-            expect_true( sumexp_contains_fit( fit_wilcoxon( object, ~ Time,            block = 'Subject' ), 'wilcoxon') )
+            expect_true( sumexp_contains_fit( wilcoxon( object, ~ Time,            block = 'Subject' ), 'wilcoxon') )
         # Subtracted
             object %<>% subtract_differences(block = 'Subject', subgroupvar ='Time')
             expect_true( sumexp_contains_fit(    fit_lm(object, ~ 0 + Time), 'lm'   ))
@@ -67,7 +67,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             expect_true(sumexp_contains_fit(                     fit_lm( object, ~ subgroup, block = 'Subject'),  'lm'      ))
             expect_true(sumexp_contains_fit(                    fit_lme( object, ~ subgroup, block = 'Subject'),  'lme'     ))
             expect_true(sumexp_contains_fit( suppressWarnings( fit_lmer( object, ~ subgroup, block = 'Subject')), 'lmer'    ))
-            expect_true(sumexp_contains_fit(               fit_wilcoxon( object, ~ subgroup, block = 'Subject'),  'wilcoxon'))
+            expect_true(sumexp_contains_fit(               wilcoxon( object, ~ subgroup, block = 'Subject'),  'wilcoxon'))
     })
     
     test_that( " fit: mcclain21 ", {

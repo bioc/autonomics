@@ -101,7 +101,7 @@ object %<>% limma(~subgroup, block = 'Subject', codingfun = code_diff)  # backwa
 ```{r}
 object <- read_metabolon(file)
 object %<>% limma(   ~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
-object %<>% fit_wilcoxon(~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
+object %<>% wilcoxon(~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
 plot_contrast_venn(is_sig(object, contrast = 't3-t0', fit = fits(fdt(object))))
 ```
 

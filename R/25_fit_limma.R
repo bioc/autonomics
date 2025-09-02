@@ -741,7 +741,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   object %<>% fit_lm(      ~subgroup, block = 'Subject')  # Traditional
 #'   object %<>% fit_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
 #'   object %<>% fit_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
-#'   object %<>% fit_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
+#'   object %<>% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
 #'   summarize_fit(object)
 #'     
 #' # Alternative coding: backward diffs instead of baseline

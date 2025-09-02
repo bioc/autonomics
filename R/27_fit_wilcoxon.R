@@ -1,6 +1,6 @@
 #==============================================================================
 #
-#                           fit_wilcoxon
+#                           wilcoxon
 #
 #==============================================================================
 
@@ -82,7 +82,7 @@ all_vars <- function(x){
     
 #' @export
 #' @rdname linmod
-fit_wilcoxon <- function(
+wilcoxon <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = NULL,
