@@ -556,7 +556,7 @@ write_ods <- function(
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
 #'     object %<>% limma()
-#'     object %<>% fit_lm()
+#'     object %<>% lm.()
 #' 
 #'     effectvar(object)
 #'     effectvec(object)[1:3]
@@ -597,7 +597,7 @@ modelvar.data.table <- function(
     x <-  paste(x$quantity, x$coef, x$fit, sep = sep)
     x %<>% intersect(names(object))     # fits dont always contain same coefs: 
     if (length(x)==0)  x <- NULL           # `limma(contrasts)` mostly without intercept
-    x   # NULL[1] and c('a', NULL) work!   # `lm(coefs)` mostly with intercept               
+    x   # NULL[1] and c('a', NULL) work!   # `lm.(coefs)` mostly with intercept               
 }
 
 
@@ -1008,7 +1008,7 @@ downfeatures <- function(
 #' @examples
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
-#' object %<>% fit_lm()
+#' object %<>% lm.()
 #' object %<>% limma()
 #' issig <- is_sig(object, fit = c('lm','limma'), contrast = 'Adult-X30dpt')
 #' plot_contrast_venn(issig)

@@ -208,7 +208,7 @@ make_volcano_dt <- function(
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
 #'     object %<>% limma()
-#'     object %<>% fit_lm()
+#'     object %<>% lm.()
 #'     plot_volcano(object, coefs = 't3-t0', fit = 'limma')                   # single contrast
 #'     plot_volcano(object, coefs = c('t2-t0', 't3-t0'), fit = 'limma')          # multip contrasts
 #'     plot_volcano(object, coefs = c('t2-t0', 't3-t0'), fit = c('limma', 'lm')) # multip contrs & methods

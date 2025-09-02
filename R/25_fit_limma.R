@@ -606,8 +606,8 @@ vectorize_contrasts <- function(contrasts){
 #' object %>% fdt()
 #' object %>% limma() %>% fdt()
 #' object %>% limma() %>% reset_fit() %>% fdt()
-#' object %>% limma() %>% fit_lm() %>% reset_fit('limma') %>% fdt()
-#' object %>% limma() %>% fit_lm() %>% reset_fit() %>% fdt()
+#' object %>% limma() %>% lm.() %>% reset_fit('limma') %>% fdt()
+#' object %>% limma() %>% lm.() %>% reset_fit() %>% fdt()
 #' @export
 reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
 # Assert
@@ -738,7 +738,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #' # Alternative engines: argument 'engine' or dedicated function
 #'   fdt(object) %<>% extract(, 'feature_id')
 #'   object %<>% limma(   ~subgroup, block = 'Subject')  # Default engine
-#'   object %<>% fit_lm(      ~subgroup, block = 'Subject')  # Traditional
+#'   object %<>% lm.(     ~subgroup, block = 'Subject')  # Traditional
 #'   object %<>% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
 #'   object %<>% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
 #'   object %<>% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
@@ -1022,7 +1022,7 @@ pull_level <- function(x, lev){
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' object %<>% limma()
-#' object %<>% fit_lm()
+#' object %<>% lm.()
 #' summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #' @export
 summarize_fit <- function(object, ...)  UseMethod('summarize_fit')
@@ -1089,7 +1089,7 @@ summarize_fit.SummarizedExperiment <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% fit_lm()
+#' object %<>% lm.()
 #' object %<>% limma(block = 'Subject')
 #' sumdt <- summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #' plot_fit_summary(sumdt)

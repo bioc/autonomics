@@ -467,7 +467,7 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
                                     # F test would actually be more suited
         fdt(object) %<>% extract(, 1:2)
         fdt(limma(object))
-        fdt(lm(object))
+        fdt(  lm.(object))
         
         
 #----------------

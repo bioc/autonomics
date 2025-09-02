@@ -75,7 +75,7 @@ context('fit: GSE161731')
     # a bit slow    
     #test_that(  "lm: formula = ~1", {
     #    object$subgroup <- NULL
-    #    object %<>% fit_lm(formula=~1)
+    #    object %<>% lm.(formula=~1)
     #    expect_true(sumexp_contains_fit(object))
     #    expect_true(summarize_fit(fdt(object), 'limma')$ndown==0)
     #    expect_true(summarize_fit(fdt(object), 'limma')$nup  ==0)

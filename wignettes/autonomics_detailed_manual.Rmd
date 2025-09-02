@@ -179,7 +179,7 @@ The detection plot (right) shows imputed values with a lighter color.
 
 # Analyze
 
-## `fit_lm`: General Linear Model
+## `lm.`: General Linear Model
 
 ### $t$ statistic and $p$ value {.unnumbered}
 
@@ -200,12 +200,12 @@ The General Linear Model generalizes the (two-subgroup) t-test to multiple subgr
 
 ```{r}
   require(magrittr)
-  object %<>% fit_lm()
+  object %<>% lm.()
 ```
 
 ```{r, echo = FALSE, message = FALSE}
   summary <- summarize_fit(fdt(object), fit = 'lm')
-  systime <- system.time(object %<>% fit_lm())
+  systime <- system.time(object %<>% lm.())
 ```
 
 In the example dataset `lm` found `r summary$ndown` age-associated downregulations and `r summary$nup` upregulations. Running `lm` on `r nrow(object)` proteins took no more that `r systime[[3]]` seconds, a feat achieved through a performant backend that integrates `lm` into a `data.table` environment.
@@ -217,8 +217,8 @@ Autonomics provides three ways to specify the model, aimed at serving the tastes
 The simplest approach is to rely on the automated **defaults**, which build a model (with intercept) using the sample variable 'subgroup'. A more flexible option is to use the **formula** interface, allowing to drop intercept, include multiple factors, or numeric covariates. These different options are illustrated below.
 
 ```{r, eval = FALSE}
-object %<>% fit_lm()
-object %<>% fit_lm(formula = ~ subgroup)
+object %<>% lm.()
+object %<>% lm.(formula = ~ subgroup)
 ```
 
 ### Changing the coefficient meanings {.unnumbered}
