@@ -53,7 +53,7 @@ p <- p + scale_fill_manual(values = c(NGSRNA = "#F8766D", ARRRNA = "#F564E3", DD
 
 p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "object %<>% fit_lm(       ~time)                                           # classic") + 
     annotate('text', x = -3, y = -2.3, hjust = 0, family = 'mono', label = "            lme(      ~time, block = 'subject')                        # random effects") + 
-    annotate('text', x = -3, y = -2.6, hjust = 0, family = 'mono', label = "            fit_lmer(     ~time, block = 'subject')                        # advanced random effects") + 
+    annotate('text', x = -3, y = -2.6, hjust = 0, family = 'mono', label = "            lmer(     ~time, block = 'subject')                        # advanced random effects") + 
     annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            wilcoxon( ~time, block = 'subject')                        # unparametric") +
     
     annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "            limma(    ~time, block = 'subject'                         # large-scale") + 
@@ -64,7 +64,7 @@ p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "obje
 fdt(object) %<>% extract(, 1:2)
 object %<>% fit_lm(      codingfun = contr.treatment.explicit, coefs = 't3-t0')
 object %<>% lme(     codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% fit_lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
+object %<>% lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
 object %<>% limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
 object %<>% wilcoxon(block = 'Subject')
 

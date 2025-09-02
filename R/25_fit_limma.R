@@ -740,7 +740,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   object %<>% limma(   ~subgroup, block = 'Subject')  # Default engine
 #'   object %<>% fit_lm(      ~subgroup, block = 'Subject')  # Traditional
 #'   object %<>% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-#'   object %<>% fit_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
+#'   object %<>% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
 #'   object %<>% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
 #'   summarize_fit(object)
 #'     
@@ -748,7 +748,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   fdt(object) %<>% extract(, 'feature_id')
 #'   object %<>% limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
 #'   object %<>% lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   object %<>% fit_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   object %<>% lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
 #'   summarize_fit(object)
 #'     
 #' # Posthoc contrasts: limma-only, flexible, but sometimes approximate

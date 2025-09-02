@@ -71,7 +71,7 @@ Autonomics provides easy access to model block effects with the `block` variable
 object <- read_metabolon(file)
 object %<>% limma(~ subgroup, block = 'Subject')
 object %<>% lme(  ~ subgroup, block = 'Subject')
-object %<>% fit_lmer( ~ subgroup, block = 'Subject') # results identical for this basic 
+object %<>% lmer( ~ subgroup, block = 'Subject') # results identical for this basic 
 plot_contrast_venn(is_sig(object, fit = fits(fdt(object)), contrast = 't3'))
 # plot_contrast_boxplots(object, subgroupvar='SET', contrast='t3', fit = c('lm', 'limma'))
 ```

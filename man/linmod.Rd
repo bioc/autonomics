@@ -6,7 +6,7 @@
 \alias{limma}
 \alias{fit_lm}
 \alias{lme}
-\alias{fit_lmer}
+\alias{lmer}
 \alias{wilcoxon}
 \title{General Linear Model}
 \usage{
@@ -79,7 +79,7 @@ lme(
   verbose = TRUE
 )
 
-fit_lmer(
+lmer(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -182,7 +182,7 @@ General Linear Model
   object \%<>\% limma(   ~subgroup, block = 'Subject')  # Default engine
   object \%<>\% fit_lm(      ~subgroup, block = 'Subject')  # Traditional
   object \%<>\% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-  object \%<>\% fit_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
+  object \%<>\% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
   object \%<>\% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
   summarize_fit(object)
     
@@ -190,7 +190,7 @@ General Linear Model
   fdt(object) \%<>\% extract(, 'feature_id')
   object \%<>\% limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
   object \%<>\% lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-  object \%<>\% fit_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
   summarize_fit(object)
     
 # Posthoc contrasts: limma-only, flexible, but sometimes approximate
