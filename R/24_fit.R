@@ -327,7 +327,7 @@ subgroup_matrix <- function(object, subgroupvar){
 #' @return  character vector
 #' @examples 
 #' object <- survobj()
-#' object %<>% fit_limma(~sex+age)
+#' object %<>% limma(~sex+age)
 #' 
 #' fits(object)
 #'
@@ -432,7 +432,7 @@ fitcoefs <- function(object){
 #' @return data.table
 #' @examples
 #' object <- survobj()
-#' object %<>% fit_limma(~sex + age)
+#' object %<>% limma(~sex + age)
 #' contrastdt(object, 'm-f~limma')
 #' @export
 contrastdt <- function(
@@ -555,7 +555,7 @@ write_ods <- function(
 #' @examples 
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
-#'     object %<>% fit_limma()
+#'     object %<>% limma()
 #'     object %<>% fit_lm()
 #' 
 #'     effectvar(object)
@@ -1009,7 +1009,7 @@ downfeatures <- function(
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
 #' object %<>% fit_lm()
-#' object %<>% fit_limma()
+#' object %<>% limma()
 #' issig <- is_sig(object, fit = c('lm','limma'), contrast = 'Adult-X30dpt')
 #' plot_contrast_venn(issig)
 #' @export

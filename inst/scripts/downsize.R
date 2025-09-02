@@ -55,8 +55,8 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
   biplot(pca(mobj))
   biplot(pca(sobj))
   
-  plot_volcano(fit_limma(mobj), coefs = 't2')
-  plot_volcano(fit_limma(sobj), coefs = 't2')
+  plot_volcano(limma(mobj), coefs = 't2')
+  plot_volcano(limma(sobj), coefs = 't2')
 
     
   read_metabolon('inst/extdata/atkin.metabolon.xlsx')
@@ -92,7 +92,7 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
     fdt(object)
     
 # LinMod
-    object %<>% fit_limma()
+    object %<>% limma()
     object %<>% extract( order(fdt(.)$`p~Adult~limma`) , )
     fdt(object)
     
@@ -179,9 +179,9 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
         rna  %>% impute() # no NA
         pro %<>% impute()
         fos %<>% impute()
-        rna %<>% fit_limma() # differentiation E00 -> M00
-        pro %<>% fit_limma()
-        fos %<>% fit_limma()
+        rna %<>% limma() # differentiation E00 -> M00
+        pro %<>% limma()
+        fos %<>% limma()
         rna %<>% extract(order(fdt(.)$`p~M00~limma`), )
         pro %<>% extract(order(fdt(.)$`p~M00~limma`), )
         fos %<>% extract(order(fdt(.)$`p~M00~limma`), )
@@ -362,12 +362,12 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
                          p5 = biplot(pca(fos ), nx = 1, ny = 1, feature_label = 'gene') + ggtitle('FOS'),  #  VIM
                          p6 = biplot(pca(fos1), nx = 1, ny = 1, feature_label = 'gene') + ggtitle('fos') ) #  NES
         gridExtra::grid.arrange(grobs = pcalist, layout_matrix = matrix(1:6, nrow = 3, byrow = TRUE))
-        rna  %<>% fit_limma()
-        pro  %<>% fit_limma()
-        fos  %<>% fit_limma()
-        rna1 %<>% fit_limma()
-        pro1 %<>% fit_limma()
-        fos1 %<>% fit_limma()
+        rna  %<>% limma()
+        pro  %<>% limma()
+        fos  %<>% limma()
+        rna1 %<>% limma()
+        pro1 %<>% limma()
+        fos1 %<>% limma()
         gridExtra::grid.arrange( plot_volcano(rna,  label = 'gene_name'), 
                                  plot_volcano(rna1, label = 'gene'     ) )
         gridExtra::grid.arrange( plot_volcano(pro,  label = 'gene'     ), 
@@ -466,8 +466,8 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
                                     # And flat backgrounders will not have a consistent pattern anyways
                                     # F test would actually be more suited
         fdt(object) %<>% extract(, 1:2)
-        fdt(fit_limma(object))
-        fdt(fit_lm(object))
+        fdt(limma(object))
+        fdt(lm(object))
         
         
 #----------------
@@ -484,12 +484,12 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
         object$cell <- split_extract_fixed(object$subgroup, '_', 1)
         object$conc <- split_extract_fixed(object$subgroup, '_', 2)
         object$repl <- split_extract_fixed(object$subgroup, '_', 3)
-        object %<>% fit_limma( ~ cell/conc, codingfun = code_control, 
+        object %<>% limma( ~ cell/conc, codingfun = code_control, 
                                coefs = c( 'Panc1-Hek',                       # cell across conc
                                           'Hek:5mM-0mM', 'Panc1:5mM-0mM'))   # conc within cell
         
-        object %<>% fit_limma( ~ conc/cell, codingfun = code_control, coefs = c(''))
-        object %>% fit_limma( ~ cell*conc, coefs = )
+        object %<>% limma( ~ conc/cell, codingfun = code_control, coefs = c(''))
+        object %>%  limma( ~ cell*conc, coefs = )
         
 
         

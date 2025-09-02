@@ -54,7 +54,7 @@ add_assay_means <- function(
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
 #' fdt(object) %<>% extract(, 1:2)
-#' object %<>% fit_limma()
+#' object %<>% limma()
 #' object %<>% extract(order(fdt(.)$`p~Adult-X30dpt~limma`), )
 #'  fdt(object)
 #' (fdt(object) %<>% add_adjusted_pvalues('fdr'))
@@ -207,7 +207,7 @@ make_volcano_dt <- function(
 #' # Regular Usage
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
-#'     object %<>% fit_limma()
+#'     object %<>% limma()
 #'     object %<>% fit_lm()
 #'     plot_volcano(object, coefs = 't3-t0', fit = 'limma')                   # single contrast
 #'     plot_volcano(object, coefs = c('t2-t0', 't3-t0'), fit = 'limma')          # multip contrasts
@@ -221,7 +221,7 @@ make_volcano_dt <- function(
 #' # Additional mappings
 #'     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #'     object <- read_maxquant_proteingroups(file, impute = TRUE)
-#'     object %<>% fit_limma()
+#'     object %<>% limma()
 #'     plot_volcano(object)
 #'     plot_volcano(object, label = 'gene')
 #'     plot_volcano(object, label = 'gene', size = 'log2maxlfq')
@@ -425,12 +425,12 @@ map_fvalues <- function(
 #' # Read/Fit
 #'    file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'    object <- read_metabolon(file)
-#'    object %<>% fit_limma()
+#'    object %<>% limma()
 #'    pcol <- pvar(fdt(object), fit = 'limma', coef = 't3-t0')
 #'    object %<>% extract(order(fdt(.)[[pcol]]), )
 #'    object %<>% extract(1:10, )
 #'    fdt(object) %<>% extract(, 1)
-#'    object %<>% fit_limma()
+#'    object %<>% limma()
 #' # fdr2p
 #'    fdt(object)[[pcol]]
 #'    fdt(object)[[pcol]] %>% p.adjust(method = 'fdr')
@@ -454,7 +454,7 @@ fdr2p <- function(fdr){
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% fit_limma(~subgroup, block = 'Subject')
+#' object %<>% limma(~subgroup, block = 'Subject')
 #' plot_coef_densities(object)
 #' @export
 plot_coef_densities <- function(

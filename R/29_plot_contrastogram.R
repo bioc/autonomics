@@ -13,7 +13,7 @@ fit_limma_contrastogram <- function(object, subgroupvar, design){
     colcontrasts <- contrast_subgroup_cols(object, subgroupvar)
     rowcontrasts <- contrast_subgroup_rows(object, subgroupvar)
     contrasts <-  c( c(t(colcontrasts)), c(t(rowcontrasts)))
-    object %<>% fit_limma(design = design, contrasts = contrasts)
+    object %<>% limma(design = design, contrasts = contrasts)
     object
 }
 

@@ -50,7 +50,7 @@ Get fit models
 }
 \examples{
 object <- survobj()
-object \%<>\% fit_limma(~sex+age)
+object \%<>\% limma(~sex+age)
 
 fits(object)
 

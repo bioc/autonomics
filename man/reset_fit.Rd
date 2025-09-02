@@ -20,8 +20,8 @@ Reset fit
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 object \%>\% fdt()
-object \%>\% fit_limma() \%>\% fdt()
-object \%>\% fit_limma() \%>\% reset_fit() \%>\% fdt()
-object \%>\% fit_limma() \%>\% fit_lm() \%>\% reset_fit('limma') \%>\% fdt()
-object \%>\% fit_limma() \%>\% fit_lm() \%>\% reset_fit() \%>\% fdt()
+object \%>\% limma() \%>\% fdt()
+object \%>\% limma() \%>\% reset_fit() \%>\% fdt()
+object \%>\% limma() \%>\% fit_lm() \%>\% reset_fit('limma') \%>\% fdt()
+object \%>\% limma() \%>\% fit_lm() \%>\% reset_fit() \%>\% fdt()
 }

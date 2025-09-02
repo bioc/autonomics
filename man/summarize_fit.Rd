@@ -40,7 +40,7 @@ Summarize fit
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% fit_limma()
+object \%<>\% limma()
 object \%<>\% fit_lm()
 summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 }
