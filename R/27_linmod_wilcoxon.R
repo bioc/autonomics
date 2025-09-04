@@ -82,7 +82,7 @@ all_vars <- function(x){
     
 #' @export
 #' @rdname linmod
-linmod_wilcoxon <- function(
+limo_wilcoxon <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = NULL,
@@ -141,6 +141,6 @@ linmod_wilcoxon <- function(
 
 #' @rdname linmod
 #' @export
-fit_wilcoxon <- function(...){ .Deprecated('linmod_wilcoxon'); linmod_wilcoxon(...)}
+fit_wilcoxon <- function(...){ .Deprecated('limo_wilcoxon'); limo_wilcoxon(...)}
 
 

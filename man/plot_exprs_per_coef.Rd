@@ -57,7 +57,7 @@ Plot exprs per coef
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% linmod_limma()
+object \%<>\% limo_limma()
 object \%<>\% pls(by = 'subgroup')
 object \%<>\% pls(by = 'Diabetes')
 object \%<>\% pls(by = 'Subject')

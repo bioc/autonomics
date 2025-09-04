@@ -34,6 +34,6 @@ file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 object \%<>\% pca()
 object \%<>\% pls(by = 'subgroup')
-object \%<>\% linmod_limma()
+object \%<>\% limo_limma()
 plot_summary(object, block = 'Subject')
 }

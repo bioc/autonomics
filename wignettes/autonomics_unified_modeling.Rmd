@@ -39,7 +39,7 @@ The design is defined using the `formula` interface:
 object <- read_metabolon(file)
 object$subgroup %<>% factor()
 object$Subject %<>% factor()
-object %<>% linmod_lm(~ subgroup)
+object %<>% limo_lm(~ subgroup)
 ```
 ## limma {-}
 
@@ -54,8 +54,8 @@ The results of lm and limma are quite similar for coefficient (`t3`, i.e. the re
 
 ```{r}
 object <- read_metabolon(file)
-object %<>% linmod_lm(   ~ subgroup)
-object %<>% linmod_limma(~ subgroup) # prefers large effects over small sds
+object %<>% limo_lm(   ~ subgroup)
+object %<>% limo_limma(~ subgroup) # prefers large effects over small sds
 plot_contrast_venn(is_sig(object, fit = fits(fdt(object)), contrast = 't3'))
 # plot_contrast_boxplots(object, subgroupvar='SET', contrast='t3', fit = c('lm', 'limma'))
 ```
@@ -69,9 +69,9 @@ Autonomics provides easy access to model block effects with the `block` variable
 
 ```{r}
 object <- read_metabolon(file)
-object %<>% linmod_limma(~ subgroup, block = 'Subject')
-object %<>% linmod_lme(  ~ subgroup, block = 'Subject')
-object %<>% linmod_lmer( ~ subgroup, block = 'Subject') # results identical for this basic 
+object %<>% limo_limma(~ subgroup, block = 'Subject')
+object %<>% limo_lme(  ~ subgroup, block = 'Subject')
+object %<>% limo_lmer( ~ subgroup, block = 'Subject') # results identical for this basic 
 plot_contrast_venn(is_sig(object, fit = fits(fdt(object)), contrast = 't3'))
 # plot_contrast_boxplots(object, subgroupvar='SET', contrast='t3', fit = c('lm', 'limma'))
 ```
@@ -82,8 +82,8 @@ autonomics also provides easy access to limma's extremely flexible contrasts.fit
 
 ```{r}
 object <- read_metabolon(file)
-object %<>% linmod_limma(~0+subgroup, contrasts = c('t1-t0', 't2-t0', 't3-t0'), block = 'Subject')
-object %<>% linmod_limma(~0+subgroup, contrasts = c('t1-t0', 't2-t1', 't3-t2'), block = 'Subject')
+object %<>% limo_limma(~0+subgroup, contrasts = c('t1-t0', 't2-t0', 't3-t0'), block = 'Subject')
+object %<>% limo_limma(~0+subgroup, contrasts = c('t1-t0', 't2-t1', 't3-t2'), block = 'Subject')
 ```
 
 # Alternative coding schemes: limma, lm, lme, lmer
@@ -92,16 +92,16 @@ An alternative approach to compute statistics of interest is to use alternative 
 
 ```{r}
 object <- read_metabolon(file)
-object %<>% linmod_limma(~subgroup, block = 'Subject')  # baseline diffs
-object %<>% linmod_limma(~subgroup, block = 'Subject', codingfun = code_diff)  # backward diffs
+object %<>% limo_limma(~subgroup, block = 'Subject')  # baseline diffs
+object %<>% limo_limma(~subgroup, block = 'Subject', codingfun = code_diff)  # backward diffs
 ```
 
 # A non-parameteric alternative: **wilcoxon**
 
 ```{r}
 object <- read_metabolon(file)
-object %<>% linmod_limma(   ~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
-object %<>% linmod_wilcoxon(~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
+object %<>% limo_limma(   ~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
+object %<>% limo_wilcoxon(~0+subgroup, contrasts = c('t3-t0'), block = 'Subject')
 plot_contrast_venn(is_sig(object, contrast = 't3-t0', fit = fits(fdt(object))))
 ```
 

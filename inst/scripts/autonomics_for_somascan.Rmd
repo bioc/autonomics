@@ -127,12 +127,12 @@ The General Linear Model generalizes the (two-subgroup) t-test to multiple subgr
 
 ```{r}
   require(magrittr)
-  object %<>% linmod_lm()
+  object %<>% limo_lm()
 ```
 
 ```{r, echo = FALSE, message = FALSE}
   summary <- summarize_fit(object, 'lm')[contrast=='Adult']
-  systime <- system.time(object %<>% linmod_lm())
+  systime <- system.time(object %<>% limo_lm())
 ```
 
 In the example dataset `lm` found `r summary$ndown` age-associated downregulations and `r summary$nup` upregulations. Running `lm` on `r nrow(object)` proteins took no more that `r systime[[3]]` seconds, a feat achieved through a performant backend that integrates `lm` into a `data.table` environment.
@@ -144,8 +144,8 @@ The simplest approach is to rely on the automated **defaults**, which build a mo
 
 ```{r, eval = FALSE}
 require(magrittr)
-object %<>% linmod_lm()
-object %<>% linmod_lm(formula = ~ subgroup)
+object %<>% limo_lm()
+object %<>% limo_lm(formula = ~ subgroup)
 ```
 
 
@@ -160,7 +160,7 @@ This moderated t statistic was then extended into a General Linear Model. Very i
 ```{r, message = FALSE}
 file <- download_data('atkin18.metabolon.xlsx')
 object <- read_proteingroups(file)
-object %<>% linmod_limma(formula   = ~ 0 + subgroup, 
+object %<>% limo_limma(formula   = ~ 0 + subgroup, 
                       contrasts = c('Adult - X30dpt'))
 ```
 

@@ -26,10 +26,10 @@ context('fit: GSE161731')
         # object %<>% pca()
         # biplot(object, color=subject_id,group=subject_id, shape=time_since_onset)
 
-    test_that(  "linmod_limma( formula = ~ time_since_onset)", {             # 0 down, 37 up
+    test_that(  "limo_limma( formula = ~ time_since_onset)", {             # 0 down, 37 up
         # ~ time_since_onset
-            object %<>% linmod_limma(formula =     ~ time_since_onset, block = 'subject_id')                            # 37 up
-            object %<>% linmod_limma(formula = ~ 0 + time_since_onset, block = 'subject_id', contrasts = 'late-early')  # 37 up
+            object %<>% limo_limma(formula =     ~ time_since_onset, block = 'subject_id')                            # 37 up
+            object %<>% limo_limma(formula = ~ 0 + time_since_onset, block = 'subject_id', contrasts = 'late-early')  # 37 up
     })
 
     
@@ -42,9 +42,9 @@ context('fit: GSE161731')
     # fails
     # lme: nlminb problem, convergence error code = 1 singular convergence (7)
     # lmer: keeps running
-    test_that(  "linmod_lme(r): formula = ~ 0 + time_since_onset | subject_id", {
-        object %<>% linmod_lme(formula = ~time_since_onset, block = 'subject_id')
-        #object %<>% linmod_lmer(formula = ~time_since_onset, block='subject_id')
+    test_that(  "limo_lme(r): formula = ~ 0 + time_since_onset | subject_id", {
+        object %<>% limo_lme(formula = ~time_since_onset, block = 'subject_id')
+        #object %<>% limo_lmer(formula = ~time_since_onset, block='subject_id')
         #expect_true(sumexp_contains_fit(object))
         #expect_true(summarize_fit(fdt(object), 'limma')$ndown==8)
         #expect_true(summarize_fit(fdt(object), 'limma')$nup  ==86)
@@ -57,16 +57,16 @@ context('fit: GSE161731')
         # biplot(object, 
         #       color=subject_id, group=subject_id, shape=time_since_onset)
         # 'subgroup1'
-        object %<>% linmod_limma()
+        object %<>% limo_limma()
         ndown <- summarize_fit(fdt(object), 'limma', 'late')$downp
         nup   <- summarize_fit(fdt(object), 'limma', 'late')$upp
         # NULL subgroup
         object$subgroup <- NULL
-        object %<>% linmod_limma()
+        object %<>% limo_limma()
         expect_true(summarize_fit(fdt(object), 'limma', 'Intercept')$downp==ndown)
         expect_true(summarize_fit(fdt(object), 'limma', 'Intercept')$upp  ==nup)
         # ~ 1
-        object %<>% linmod_limma(formula=~1)
+        object %<>% limo_limma(formula=~1)
         expect_true(sumexp_contains_fit(object))
         expect_true(summarize_fit(fdt(object), 'limma')$ndown==ndown)
         expect_true(summarize_fit(fdt(object), 'limma')$nup  ==nup)
@@ -75,7 +75,7 @@ context('fit: GSE161731')
     # a bit slow    
     #test_that(  "lm: formula = ~1", {
     #    object$subgroup <- NULL
-    #    object %<>% linmod_lm(formula=~1)
+    #    object %<>% limo_lm(formula=~1)
     #    expect_true(sumexp_contains_fit(object))
     #    expect_true(summarize_fit(fdt(object), 'limma')$ndown==0)
     #    expect_true(summarize_fit(fdt(object), 'limma')$nup  ==0)

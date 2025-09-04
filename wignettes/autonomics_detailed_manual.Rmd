@@ -200,12 +200,12 @@ The General Linear Model generalizes the (two-subgroup) t-test to multiple subgr
 
 ```{r}
   require(magrittr)
-  object %<>% linmod_lm()
+  object %<>% limo_lm()
 ```
 
 ```{r, echo = FALSE, message = FALSE}
   summary <- summarize_fit(fdt(object), fit = 'lm')
-  systime <- system.time(object %<>% linmod_lm())
+  systime <- system.time(object %<>% limo_lm())
 ```
 
 In the example dataset `lm` found `r summary$ndown` age-associated downregulations and `r summary$nup` upregulations. Running `lm` on `r nrow(object)` proteins took no more that `r systime[[3]]` seconds, a feat achieved through a performant backend that integrates `lm` into a `data.table` environment.
@@ -217,8 +217,8 @@ Autonomics provides three ways to specify the model, aimed at serving the tastes
 The simplest approach is to rely on the automated **defaults**, which build a model (with intercept) using the sample variable 'subgroup'. A more flexible option is to use the **formula** interface, allowing to drop intercept, include multiple factors, or numeric covariates. These different options are illustrated below.
 
 ```{r, eval = FALSE}
-object %<>% linmod_lm()
-object %<>% linmod_lm(formula = ~ subgroup)
+object %<>% limo_lm()
+object %<>% limo_lm(formula = ~ subgroup)
 ```
 
 ### Changing the coefficient meanings {.unnumbered}
@@ -240,6 +240,6 @@ This moderated t statistic was then extended into a General Linear Model. Very i
 ```{r, message = FALSE}
 file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 object <- read_maxquant_proteingroups(file)
-object %<>% linmod_limma(formula   = ~ 0 + subgroup, contrasts = c('Adult - X30dpt'))
+object %<>% limo_limma(formula   = ~ 0 + subgroup, contrasts = c('Adult - X30dpt'))
 ```
 # References
