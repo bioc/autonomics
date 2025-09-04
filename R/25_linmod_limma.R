@@ -606,8 +606,8 @@ vectorize_contrasts <- function(contrasts){
 #' object %>% fdt()
 #' object %>% linmod_limma() %>% fdt()
 #' object %>% linmod_limma() %>% reset_fit() %>% fdt()
-#' object %>% linmod_limma() %>% lm.() %>% reset_fit('limma') %>% fdt()
-#' object %>% linmod_limma() %>% lm.() %>% reset_fit() %>% fdt()
+#' object %>% linmod_limma() %>% linmod_lm() %>% reset_fit('limma') %>% fdt()
+#' object %>% linmod_limma() %>% linmod_lm() %>% reset_fit() %>% fdt()
 #' @export
 reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
 # Assert
@@ -738,7 +738,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #' # Alternative engines: argument 'engine' or dedicated function
 #'   fdt(object) %<>% extract(, 'feature_id')
 #'   object %<>% linmod_limma(   ~subgroup, block = 'Subject')  # Default engine
-#'   object %<>% lm.(     ~subgroup, block = 'Subject')  # Traditional
+#'   object %<>% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
 #'   object %<>% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
 #'   object %<>% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
 #'   object %<>% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
@@ -856,7 +856,7 @@ fit_limma <- function(...){ .Deprecated('linmod_limma'); linmod_limma(...)}
 
 #' @rdname linmod
 #' @export
-fit_lm <- function(...){ .Deprecated('lm.'); lm.(...)}
+fit_lm <- function(...){ .Deprecated('linmod_lm'); linmod_lm(...)}
 
 
 #' @rdname linmod
@@ -1111,7 +1111,7 @@ pull_level <- function(x, lev){
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' object %<>% linmod_limma()
-#' object %<>% lm.()
+#' object %<>% linmod_lm()
 #' summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #' @export
 summarize_fit <- function(object, ...)  UseMethod('summarize_fit')
@@ -1178,7 +1178,7 @@ summarize_fit.SummarizedExperiment <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% lm.()
+#' object %<>% linmod_lm()
 #' object %<>% linmod_limma(block = 'Subject')
 #' sumdt <- summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #' plot_fit_summary(sumdt)

@@ -9,7 +9,7 @@
 \alias{fit_lmer}
 \alias{fit_wilcoxon}
 \alias{linmod_limma}
-\alias{lm.}
+\alias{linmod_lm}
 \alias{lme}
 \alias{lmer}
 \alias{wilcoxon}
@@ -63,7 +63,7 @@ linmod_limma(
   verbose = TRUE
 )
 
-lm.(
+linmod_lm(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -195,7 +195,7 @@ General Linear Model
 # Alternative engines: argument 'engine' or dedicated function
   fdt(object) \%<>\% extract(, 'feature_id')
   object \%<>\% linmod_limma(   ~subgroup, block = 'Subject')  # Default engine
-  object \%<>\% lm.(     ~subgroup, block = 'Subject')  # Traditional
+  object \%<>\% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
   object \%<>\% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
   object \%<>\% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
   object \%<>\% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric

@@ -29,7 +29,7 @@ Is significant?
 \examples{
 file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 object <- read_maxquant_proteingroups(file)
-object \%<>\% lm.()
+object \%<>\% linmod_lm()
 object \%<>\% linmod_limma()
 issig <- is_sig(object, fit = c('lm','limma'), contrast = 'Adult-X30dpt')
 plot_contrast_venn(issig)

@@ -556,7 +556,7 @@ write_ods <- function(
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
 #'     object %<>% linmod_limma()
-#'     object %<>% lm.()
+#'     object %<>% linmod_lm.()
 #' 
 #'     effectvar(object)
 #'     effectvec(object)[1:3]
@@ -1008,7 +1008,7 @@ downfeatures <- function(
 #' @examples
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
-#' object %<>% lm.()
+#' object %<>% linmod_lm()
 #' object %<>% linmod_limma()
 #' issig <- is_sig(object, fit = c('lm','limma'), contrast = 'Adult-X30dpt')
 #' plot_contrast_venn(issig)
