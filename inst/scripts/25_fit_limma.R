@@ -962,12 +962,12 @@ varlevels_dont_clash.SummarizedExperiment <- function(
 #' @examples
 #' object <- survobj()
 #' svars(object)
-#' limoawb(object, engine = 'limma', modelvars = c('age', 'sex'))
-#' limoawb_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
-#' limoawb_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
-#' limoawb_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
-#' limoawb_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
-limoawb <- function(
+#' awb(object, engine = 'limma', modelvars = c('age', 'sex'))
+#' awb_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awb_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awb_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awb_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
+awb <- function(
     object, 
     engine,
  modelvars,
@@ -1024,30 +1024,30 @@ limoawb <- function(
 }
 
 
-#' @rdname limoawb
+#' @rdname awb
 #' @export
-limoawb_limma <- function(object, ...)  limoawb(object, engine = 'limma', ...)
+awb_limma <- function(object, ...)  limoawb(object, engine = 'limma', ...)
 
 
-#' @rdname limoawb
+#' @rdname awb
 #' @export
-limoawb_lm    <- function(object, ...)  limoawb(object, engine = 'lm', ...)
+awb_lm    <- function(object, ...)  limoawb(object, engine = 'lm', ...)
 
 
-#' @rdname limoawb
+#' @rdname awb
 #' @export
-limoawb_lme   <- function(object, ...)  limoawb(object, engine = 'lme', ...)
+awb_lme   <- function(object, ...)  limoawb(object, engine = 'lme', ...)
 
 
-#' @rdname limoawb
+#' @rdname awb
 #' @export
-limoawb_lmer  <- function(object, ...)  limoawb(object, engine = 'lmer', ...)
+awb_lmer  <- function(object, ...)  limoawb(object, engine = 'lmer', ...)
 
 
   
 #' @rdname linmod
 #' @export
-limma <- function(
+gen_limma <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
