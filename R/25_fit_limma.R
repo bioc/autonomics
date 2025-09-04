@@ -952,6 +952,69 @@ varlevels_dont_clash.SummarizedExperiment <- function(
 }
 
 
+#' General Linear Model (awb interface)
+#' @param object    SummarizedExperiment
+#' @param modelvars svars
+#' @param block     svar
+#' @param weightvar svar
+#' @param across    TRUE or FALSE: whether to fit across  model (i.e. additive model)
+#' @param within    TRUE or FALSE: whether to fit within  model (i.e. nested model)
+#' @param between   TRUE or FALSE: whether to fit between model (i.e. interaction model)
+#' @examples
+#' object <- survobj()
+#' svars(object)
+#' object %<>% linmodawb_limma(modelvars = c('age', 'sex'))
+linmodawb_limma <- function(
+    object, 
+    modelvars,
+        block = NULL,
+    weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
+       across = TRUE,
+       within = TRUE, 
+      between = TRUE, 
+    codingfun = code_control,
+         drop = TRUE
+){
+# Assert
+    assert_is_valid_sumexp(object)
+    assert_is_subset(modelvars, svars(object))
+# Model
+    if (across){
+        formula  <- paste0(modelvars, collapse = '+')
+        formula %<>% as.formula()
+        coefs  <- colnames(create_design(object,  formula, codingfun = codingfun, drop = drop))
+        coefs %<>% setdiff('Intercept')
+        object %<>% limma(formula,  codingfun = codingfun, drop = drop, coefs =  coefs)
+    }
+    if (within){
+        formula <- paste0(modelvars, collapse = '/')
+        formula %<>% as.formula()
+        coefs <- colnames(create_design(obj, formula, codingfun = codingfun, drop = drop))
+        coefs %<>% extract(stri_detect_fixed(., ':'))
+        object %<>% limma(formula, codingfun = codingfun, drop = drop, coefs = coefs, weights = weights)
+        fvars(object) %<>% stri_replace_first_fixed(':', '/')
+    }
+    if (within){
+        formula <- paste0(rev(modelvars), collapse = '/')
+        formula %<>% as.formula()
+        coefs <- colnames(create_design(obj, formula, codingfun = codingfun, drop = drop, weights = weights))
+        coefs %<>% extract(stri_detect_fixed(., ':'))
+        object %<>% limma(formula, codingfun = codingfun, drop = drop, coefs = coefs)
+        fvars(object) %<>% stri_replace_first_fixed(':', '/')
+    }
+    if (between){
+        formula <- paste0(modelvars, collapse = '*')
+        formula %<>% as.formula()
+        coefs <- colnames(create_design(obj, formula, codingfun = codingfun, drop = drop, weights = weights))
+        coefs %<>% extract(stri_detect_fixed(., ':'))
+        object %<>% limma(formula, codingfun = codingfun, drop = drop, coefs = coefs)
+        fvars(object) %<>% stri_replace_first_fixed(':', '*')
+    }
+# Return
+    object
+}
+
+
 #' @rdname linmod
 #' @export
 limma <- function(
