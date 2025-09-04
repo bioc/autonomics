@@ -983,7 +983,7 @@ limoawb <- function(
     assert_is_subset(modelvars, svars(object))
 
 # Model
-    modelfun <- switch(engine, limma = linmod_limma, lm = linmod_lm, lme = linmod_lme, lmer = linmod_lmer)
+    modelfun <- switch(engine, limma = limo_limma, lm = limo_lm, lme = limo_lme, lmer = limo_lmer)
     if (across){
         formula  <- paste0(modelvars, collapse = '+')
         formula %<>% paste0('~', .)
