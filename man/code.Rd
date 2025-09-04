@@ -123,14 +123,14 @@ A General Linear Model contains:                                                
 # Model
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file)
-    object \%<>\% gen_limma(codingfun = contr.treatment) # default
-    object \%<>\% gen_limma(codingfun = contr.treatment.explicit)
-    object \%<>\% gen_limma(codingfun = contr.diff)
-    object \%<>\% gen_limma(codingfun = code_control)
-    object \%<>\% gen_limma(codingfun = code_diff)
-    object \%<>\% gen_limma(codingfun = code_diff_forward)
-    object \%<>\% gen_limma(codingfun = code_deviation)
-    object \%<>\% gen_limma(codingfun = code_deviation_first)
-    object \%<>\% gen_limma(codingfun = code_helmert)
-    object \%<>\% gen_limma(codingfun = code_helmert_forward)
+    object \%<>\% linmod_limma(codingfun = contr.treatment) # default
+    object \%<>\% linmod_limma(codingfun = contr.treatment.explicit)
+    object \%<>\% linmod_limma(codingfun = contr.diff)
+    object \%<>\% linmod_limma(codingfun = code_control)
+    object \%<>\% linmod_limma(codingfun = code_diff)
+    object \%<>\% linmod_limma(codingfun = code_diff_forward)
+    object \%<>\% linmod_limma(codingfun = code_deviation)
+    object \%<>\% linmod_limma(codingfun = code_deviation_first)
+    object \%<>\% linmod_limma(codingfun = code_helmert)
+    object \%<>\% linmod_limma(codingfun = code_helmert_forward)
 }

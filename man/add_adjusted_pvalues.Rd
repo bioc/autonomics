@@ -52,7 +52,7 @@ Add adjusted pvalues
 file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 object <- read_maxquant_proteingroups(file)
 fdt(object) \%<>\% extract(, 1:2)
-object \%<>\% gen_limma()
+object \%<>\% linmod_limma()
 object \%<>\% extract(order(fdt(.)$`p~Adult-X30dpt~limma`), )
  fdt(object)
 (fdt(object) \%<>\% add_adjusted_pvalues('fdr'))

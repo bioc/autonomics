@@ -155,7 +155,7 @@ Plot exprs for coef
     plot_exprs(object, dim = 'samples')
     plot_exprs(object, dim = 'features', block = 'sample_id')
 # With limma 
-    object \%<>\% gen_limma(block = 'Subject')
+    object \%<>\% linmod_limma(block = 'Subject')
     plot_exprs(object, block = 'Subject')
     plot_exprs(object, block = 'Subject', coefs = c('t1-t0', 't2-t0', 't3-t0'))
     plot_exprs_per_coef(object, x = 'Time', block = 'Subject')

@@ -56,7 +56,7 @@ fit_xxx_across <- function(object, groupvars, block){
         contrasts(object[[groupvar]]) <- contrastmat
         coefs %<>% c(colnames(contrastmat))
     }
-    object %<>% gen_limma(formula = formula, block = block,  coefs = coefs)
+    object %<>% linmod_limma(formula = formula, block = block,  coefs = coefs)
 # Treatment Contrasts
     coefs <- character(0)
     for (groupvar in groupvars){
@@ -153,8 +153,8 @@ fit_across_within_between <- function(object, groupvars, block){
 
 
 pdt2 <- .fit_limma(pobj, formula = ~ Time + Diabetes, block = 'Subject', coefs = c('t1-t0', 't2-t1', 't3-t2', 'T2DM'))
-mobj %<>% gen_limma(     formula = ~ Time + Diabetes, block = 'Subject', coefs = c('t1-t0', 't2-t1', 't3-t2', 'T2DM'))
-pobj %<>% gen_limma(     formula = ~ Time + Diabetes, block = 'Subject', coefs = c('t1-t0', 't2-t1', 't3-t2', 'T2DM'))
+mobj %<>% linmod_limma(     formula = ~ Time + Diabetes, block = 'Subject', coefs = c('t1-t0', 't2-t1', 't3-t2', 'T2DM'))
+pobj %<>% linmod_limma(     formula = ~ Time + Diabetes, block = 'Subject', coefs = c('t1-t0', 't2-t1', 't3-t2', 'T2DM'))
 mobj %<>% order_on_p(coef = 't1-t0')
 pobj %<>% order_on_p(coef = 't1-t0')
 plot_exprs(mobj[1,],
@@ -212,8 +212,8 @@ plot_exprs(pobj[1,],
            shape = 'Diabetes', facet = 'EntrezGeneSymbol') + theme(legend.position = "none") + ylab(NULL) + theme(axis.text.x = element_blank(), axis.text.y = element_blank())
 
 # D : t1 - t0
-mobj %<>% gen_limma(formula = ~ Diabetes/Time, block = 'Subject')
-pobj %<>% gen_limma(formula = ~ Diabetes/Time, block = 'Subject')
+mobj %<>% linmod_limma(formula = ~ Diabetes/Time, block = 'Subject')
+pobj %<>% linmod_limma(formula = ~ Diabetes/Time, block = 'Subject')
 mobj %<>% order_on_p(coef = 'T2DM:t1-t0')
 pobj %<>% order_on_p(coef = 'T2DM:t1-t0')
 plot_exprs(mobj[1,],
@@ -327,7 +327,7 @@ plot_exprs(mobj[c(29,1,2,3), ],
            nrow  = 1, ncol = 4) + scale_size_manual(values = c(Control = 3, T2DM = 3))
 
 
-mobj %>% gen_limma()
+mobj %>% linmod_limma()
 mobj$Time
 mobj$Diabetes
 
@@ -336,24 +336,24 @@ mobj
 
 # t0: strong dip and T2D/control difference
 contrasts(mobj$subgroup) <- MASS::contr.sdif(levels(mobj$subgroup))
-mobj %<>% gen_limma(formula = ~ subgroup/Diabetes, block = 'Subject')
+mobj %<>% linmod_limma(formula = ~ subgroup/Diabetes, block = 'Subject')
 mobj %<>% order_on_p(    coefs = c('t1-t0', 't0:T2DM'), combiner = '&')
 mobj[1, ] %>% plot_exprs(coefs = c('t1-t0', 't0:T2DM'), geom = 'point', block = 'Subject', shape = 'Diabetes', size = 'Diabetes') +  scale_size_manual(values = c(Control = 2, T2DM = 3))
 
 # t3: strong recovery AND difference between diabetics and controls
 contrasts(mobj$subgroup) <- MASS::contr.sdif(levels(mobj$subgroup))
-mobj %<>% gen_limma(formula = ~ subgroup/Diabetes, block = 'Subject')
+mobj %<>% linmod_limma(formula = ~ subgroup/Diabetes, block = 'Subject')
 mobj %<>% order_on_p(    coefs = c('t3-t2', 't3:T2DM'), combiner = '&')
 mobj[1, ] %>% plot_exprs(coefs = c('t3-t2', 't3:T2DM'), geom = 'point', block = 'Subject', shape = 'Diabetes', size = 'Diabetes') +  scale_size_manual(values = c(Control = 2, T2DM = 3))
 
 # 
 contrasts(mobj$subgroup) <- MASS::contr.sdif(levels(mobj$subgroup))
-mobj %<>% gen_limma(formula = ~ subgroup*Diabetes, block = 'Subject')
+mobj %<>% linmod_limma(formula = ~ subgroup*Diabetes, block = 'Subject')
 mobj %<>% order_on_p(coefs = c('t3-t2', 't3-t2:T2DM'), combiner = '&')
 mobj[1, ] %>% plot_exprs(coef = NULL, geom = 'point', block = 'Subject', shape = 'Diabetes', facet = 'Diabetes', ncol = 2)
 
 
-mobj |> gen_limma(formula = ~ Diabetes/subgroup, block = 'Subject') |>
+mobj |> linmod_limma(formula = ~ Diabetes/subgroup, block = 'Subject') |>
         plot_exprs(coef = 'Diabetes', geom = 'point', block = 'Subject', shape = 'Diabetes', size = 'Diabetes') + 
         scale_size_manual(values = c(Control = 3, T2DM = 3))
     

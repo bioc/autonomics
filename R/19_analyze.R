@@ -90,7 +90,7 @@ analyze <- function(
 #' object <- read_metabolon(file)
 #' object %<>% pca()
 #' object %<>% pls(by = 'subgroup')
-#' object %<>% gen_limma()
+#' object %<>% linmod_limma()
 #' plot_summary(object, block = 'Subject')
 #' @export
 plot_summary <- function(

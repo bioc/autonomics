@@ -29,7 +29,7 @@ awb <- function(
     assert_is_subset(modelvars, svars(object))
 
 # Model
-    modelfun <- switch(engine, limma = gen_limma, lm = gen_lm, lme = gen_lme, lmer = gen_lmer)
+    modelfun <- switch(engine, limma = linmod_limma, lm = linmod_lm, lme = linmod_lme, lmer = linmod_lmer)
     if (across){
         formula  <- paste0(modelvars, collapse = '+')
         formula %<>% paste0('~', .)

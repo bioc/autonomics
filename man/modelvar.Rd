@@ -284,8 +284,8 @@ Get model variable
 \examples{
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file)
-    object \%<>\% gen_limma()
-    object \%<>\% gen_lm.()
+    object \%<>\% linmod_limma()
+    object \%<>\% linmod_lm.()
 
     effectvar(object)
     effectvec(object)[1:3]

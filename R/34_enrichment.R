@@ -189,7 +189,7 @@ utils::globalVariables(c('in', 'in.selected', 'out', 'selected', 'p.selected'))
 #' @examples 
 #' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 #' object <- read_maxquant_proteingroups(file)
-#' object %<>% gen_limma()
+#' object %<>% linmod_limma()
 #' guess_fitsep(object)
 #' @export
 guess_fitsep <- function(object, ...)  UseMethod('guess_fitsep')

@@ -16,12 +16,12 @@ fdr to p
 # Read/Fit
    file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
    object <- read_metabolon(file)
-   object \%<>\% gen_limma()
+   object \%<>\% linmod_limma()
    pcol <- pvar(fdt(object), fit = 'limma', coef = 't3-t0')
    object \%<>\% extract(order(fdt(.)[[pcol]]), )
    object \%<>\% extract(1:10, )
    fdt(object) \%<>\% extract(, 1)
-   object \%<>\% gen_limma()
+   object \%<>\% linmod_limma()
 # fdr2p
    fdt(object)[[pcol]]
    fdt(object)[[pcol]] \%>\% p.adjust(method = 'fdr')
