@@ -10,8 +10,8 @@
 \alias{fit_wilcoxon}
 \alias{linmod_limma}
 \alias{linmod_lm}
-\alias{lme}
-\alias{lmer}
+\alias{linmod_lme}
+\alias{linmod_lmer}
 \alias{wilcoxon}
 \title{General Linear Model}
 \usage{
@@ -78,7 +78,7 @@ linmod_lm(
   verbose = TRUE
 )
 
-lme(
+linmod_lme(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -94,7 +94,7 @@ lme(
   verbose = TRUE
 )
 
-lmer(
+linmod_lmer(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -197,7 +197,7 @@ General Linear Model
   object \%<>\% linmod_limma(   ~subgroup, block = 'Subject')  # Default engine
   object \%<>\% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
   object \%<>\% linmod_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-  object \%<>\% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
+  object \%<>\% linmod_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
   object \%<>\% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
   summarize_fit(object)
     
@@ -205,7 +205,7 @@ General Linear Model
   fdt(object) \%<>\% extract(, 'feature_id')
   object \%<>\% linmod_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
   object \%<>\% linmod_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-  object \%<>\% lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% linmod_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
   summarize_fit(object)
     
 # Posthoc contrasts: limma-only, flexible, but sometimes approximate

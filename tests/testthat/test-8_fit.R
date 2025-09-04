@@ -50,7 +50,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             expect_true( sumexp_contains_fit(    linmod_limma( object, ~ Time + Diabetes, block = 'Subject' ), 'limma'   ) )
             expect_true( sumexp_contains_fit(      linmod_lm( object, ~ Time + Diabetes                    ), 'lm'      ) )
             expect_true( sumexp_contains_fit(      linmod_lme( object, ~ Time + Diabetes, block = 'Subject' ), 'lme'     ) )
-            expect_true( sumexp_contains_fit(     lmer( object, ~ Time + Diabetes, block = 'Subject' ), 'lmer'    ) )
+            expect_true( sumexp_contains_fit(     linmod_lmer( object, ~ Time + Diabetes, block = 'Subject' ), 'lmer'    ) )
             expect_true( sumexp_contains_fit( wilcoxon( object, ~ Time,            block = 'Subject' ), 'wilcoxon') )
         # Subtracted
             object %<>% subtract_differences(block = 'Subject', subgroupvar ='Time')
@@ -66,7 +66,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             expect_true(sumexp_contains_fit(                  linmod_limma( object, ~ subgroup, block = 'Subject'),  'limma'   ))
             expect_true(sumexp_contains_fit(                    linmod_lm( object, ~ subgroup, block = 'Subject'),  'lm'      ))
             expect_true(sumexp_contains_fit(                    linmod_lme( object, ~ subgroup, block = 'Subject'),  'lme'     ))
-            expect_true(sumexp_contains_fit( suppressWarnings( lmer( object, ~ subgroup, block = 'Subject')), 'lmer'    ))
+            expect_true(sumexp_contains_fit( suppressWarnings( linmod_lmer( object, ~ subgroup, block = 'Subject')), 'lmer'    ))
             expect_true(sumexp_contains_fit(               wilcoxon( object, ~ subgroup, block = 'Subject'),  'wilcoxon'))
     })
     

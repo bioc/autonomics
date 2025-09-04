@@ -740,7 +740,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   object %<>% linmod_limma(   ~subgroup, block = 'Subject')  # Default engine
 #'   object %<>% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
 #'   object %<>% linmod_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-#'   object %<>% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
+#'   object %<>% linmod_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
 #'   object %<>% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
 #'   summarize_fit(object)
 #'     
@@ -748,7 +748,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   fdt(object) %<>% extract(, 'feature_id')
 #'   object %<>% linmod_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
 #'   object %<>% linmod_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   object %<>% lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   object %<>% linmod_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
 #'   summarize_fit(object)
 #'     
 #' # Posthoc contrasts: limma-only, flexible, but sometimes approximate
@@ -866,7 +866,7 @@ fit_lme <- function(...){ .Deprecated('linmod_lme'); linmod_lme(...)}
 
 #' @rdname linmod
 #' @export
-fit_lmer <- function(...){ .Deprecated('lmer'); lmer(...)}
+fit_lmer <- function(...){ .Deprecated('linmod_lmer'); linmod_lmer(...)}
 
 
 #' @rdname linmod
