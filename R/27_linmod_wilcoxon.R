@@ -138,3 +138,9 @@ linmod_wilcoxon <- function(
     object
 }
 
+
+#' @rdname linmod
+#' @export
+fit_wilcoxon <- function(...){ .Deprecated('linmod_wilcoxon'); linmod_wilcoxon(...)}
+
+

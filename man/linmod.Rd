@@ -3,16 +3,16 @@
 %   R/27_linmod_wilcoxon.R
 \name{linmod}
 \alias{linmod}
-\alias{fit_limma}
-\alias{fit_lm}
-\alias{fit_lme}
-\alias{fit_lmer}
-\alias{fit_wilcoxon}
 \alias{linmod_limma}
+\alias{fit_limma}
 \alias{linmod_lm}
+\alias{fit_lm}
 \alias{linmod_lme}
+\alias{fit_lme}
 \alias{linmod_lmer}
+\alias{fit_lmer}
 \alias{linmod_wilcoxon}
+\alias{fit_wilcoxon}
 \title{General Linear Model}
 \usage{
 linmod(
@@ -38,16 +38,6 @@ linmod(
   argsexprs = list()
 )
 
-fit_limma(...)
-
-fit_lm(...)
-
-fit_lme(...)
-
-fit_lmer(...)
-
-fit_wilcoxon(...)
-
 linmod_limma(
   object,
   formula = as.formula("~ subgroup"),
@@ -63,6 +53,8 @@ linmod_limma(
   verbose = TRUE
 )
 
+fit_limma(...)
+
 linmod_lm(
   object,
   formula = as.formula("~ subgroup"),
@@ -77,6 +69,8 @@ linmod_lm(
   contrasts = NULL,
   verbose = TRUE
 )
+
+fit_lm(...)
 
 linmod_lme(
   object,
@@ -94,6 +88,8 @@ linmod_lme(
   verbose = TRUE
 )
 
+fit_lme(...)
+
 linmod_lmer(
   object,
   formula = as.formula("~ subgroup"),
@@ -109,6 +105,8 @@ linmod_lmer(
   verbose = TRUE
 )
 
+fit_lmer(...)
+
 linmod_wilcoxon(
   object,
   formula = as.formula("~ subgroup"),
@@ -123,6 +121,8 @@ linmod_wilcoxon(
   suffix = paste0(sep, "wilcoxon"),
   verbose = TRUE
 )
+
+fit_wilcoxon(...)
 }
 \arguments{
 \item{object}{SummarizedExperiment}

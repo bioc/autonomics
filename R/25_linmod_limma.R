@@ -849,31 +849,6 @@ linmod <- function(
 }
 
 
-#' @rdname linmod
-#' @export
-fit_limma <- function(...){ .Deprecated('linmod_limma'); linmod_limma(...)}
-
-
-#' @rdname linmod
-#' @export
-fit_lm <- function(...){ .Deprecated('linmod_lm'); linmod_lm(...)}
-
-
-#' @rdname linmod
-#' @export
-fit_lme <- function(...){ .Deprecated('linmod_lme'); linmod_lme(...)}
-
-
-#' @rdname linmod
-#' @export
-fit_lmer <- function(...){ .Deprecated('linmod_lmer'); linmod_lmer(...)}
-
-
-#' @rdname linmod
-#' @export
-fit_wilcoxon <- function(...){ .Deprecated('linmod_wilcoxon'); linmod_wilcoxon(...)}
-
-
 
 #' Get all variables from formulas or formula strings
 #'
@@ -1091,6 +1066,11 @@ linmod_limma <- function(
     object %<>% merge_fdt(fitdt)
     object
 }
+
+
+#' @rdname linmod
+#' @export
+fit_limma <- function(...){ .Deprecated('linmod_limma'); linmod_limma(...)}
 
 
 pull_level <- function(x, lev){

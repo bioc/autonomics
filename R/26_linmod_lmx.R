@@ -223,7 +223,7 @@ block_vars <- function(formula){
 }
 
 
-fit_lmx <- function(
+lmx <- function(
        object, 
           fit, 
       formula = as.formula('~ subgroup'),
@@ -291,6 +291,9 @@ fit_lmx <- function(
 }
 
 
+
+
+
 #' @rdname linmod
 #' @export
 linmod_lm <- function(
@@ -309,18 +312,29 @@ linmod_lm <- function(
 ){
     
     sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
-    fit_lmx(    object,
-                   fit = 'lm', 
-               formula = formula,
-                  drop = drop,
-             codingfun = codingfun,
-                 block = block,
-                 coefs = coefs,
-             weightvar = weightvar,
-                   sep = sep,
-                suffix = suffix,
-               verbose = verbose )
+    lmx(    object,
+               fit = 'lm', 
+           formula = formula,
+              drop = drop,
+         codingfun = codingfun,
+             block = block,
+             coefs = coefs,
+         weightvar = weightvar,
+               sep = sep,
+            suffix = suffix,
+           verbose = verbose )
 }
+
+
+#' @rdname linmod
+#' @export
+fit_lm <- function(...){ .Deprecated('linmod_lm'); linmod_lm(...)}
+
+
+
+
+
+
 
 
 #' @rdname linmod
@@ -345,19 +359,29 @@ linmod_lme <- function(
     if (!installed('nlme'))  return(object)
 # Fit
     sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
-    fit_lmx(    object,
-                   fit = 'lme', 
-               formula = formula,
-                  drop = drop,
-             codingfun = codingfun,
-                 block = block, 
-                 coefs = coefs,
-             weightvar = weightvar,
-                   sep = sep,
-                suffix = suffix,
-                   opt = opt,
-               verbose = verbose )
+    lmx(    object,
+               fit = 'lme', 
+           formula = formula,
+              drop = drop,
+         codingfun = codingfun,
+             block = block, 
+             coefs = coefs,
+         weightvar = weightvar,
+               sep = sep,
+            suffix = suffix,
+               opt = opt,
+           verbose = verbose )
 }
+
+#' @rdname linmod
+#' @export
+fit_lme <- function(...){ .Deprecated('linmod_lme'); linmod_lme(...)}
+
+
+
+
+
+
 
 
 #' @rdname linmod
@@ -382,15 +406,21 @@ linmod_lmer <- function(
     if (!installed('lmerTest'))  return(object)
 # Fit
     sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
-    fit_lmx(    object,
-                   fit = 'lmer', 
-               formula = formula,
-                  drop = drop,
-             codingfun = codingfun,
-                 block = block, 
-                 coefs = coefs,
-             weightvar = weightvar,
-                   sep = sep,
-                suffix = suffix,
-               verbose = verbose )
+    lmx(    object,
+               fit = 'lmer', 
+           formula = formula,
+              drop = drop,
+         codingfun = codingfun,
+             block = block, 
+             coefs = coefs,
+         weightvar = weightvar,
+               sep = sep,
+            suffix = suffix,
+           verbose = verbose )
 }
+
+
+#' @rdname linmod
+#' @export
+fit_lmer <- function(...){ .Deprecated('linmod_lmer'); linmod_lmer(...)}
+
