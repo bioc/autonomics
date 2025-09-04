@@ -82,7 +82,7 @@ all_vars <- function(x){
     
 #' @export
 #' @rdname linmod
-wilcoxon <- function(
+linmod_wilcoxon <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = NULL,

@@ -20,7 +20,7 @@ Plot contrast venn
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% wilcoxon(~ subgroup, block = 'Subject')
+object \%<>\% linmod_wilcoxon(~ subgroup, block = 'Subject')
 object \%<>\% linmod_limma(   ~ subgroup, block = 'Subject')
 isfdr <- is_sig(object, contrast = 't3-t0', quantity = 'p', fit = fits(object))
 plot_contrast_venn(isfdr)

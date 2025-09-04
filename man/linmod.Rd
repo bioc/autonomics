@@ -12,7 +12,7 @@
 \alias{linmod_lm}
 \alias{linmod_lme}
 \alias{linmod_lmer}
-\alias{wilcoxon}
+\alias{linmod_wilcoxon}
 \title{General Linear Model}
 \usage{
 linmod(
@@ -109,7 +109,7 @@ linmod_lmer(
   verbose = TRUE
 )
 
-wilcoxon(
+linmod_wilcoxon(
   object,
   formula = as.formula("~ subgroup"),
   drop = NULL,
@@ -198,7 +198,7 @@ General Linear Model
   object \%<>\% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
   object \%<>\% linmod_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
   object \%<>\% linmod_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
-  object \%<>\% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
+  object \%<>\% linmod_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
   summarize_fit(object)
     
 # Alternative coding: backward diffs instead of baseline

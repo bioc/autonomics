@@ -741,7 +741,7 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   object %<>% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
 #'   object %<>% linmod_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
 #'   object %<>% linmod_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
-#'   object %<>% wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
+#'   object %<>% linmod_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
 #'   summarize_fit(object)
 #'     
 #' # Alternative coding: backward diffs instead of baseline
@@ -871,7 +871,7 @@ fit_lmer <- function(...){ .Deprecated('linmod_lmer'); linmod_lmer(...)}
 
 #' @rdname linmod
 #' @export
-fit_wilcoxon <- function(...){ .Deprecated('wilcoxon'); wilcoxon(...)}
+fit_wilcoxon <- function(...){ .Deprecated('linmod_wilcoxon'); linmod_wilcoxon(...)}
 
 
 

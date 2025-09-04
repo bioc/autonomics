@@ -54,7 +54,7 @@ p <- p + scale_fill_manual(values = c(NGSRNA = "#F8766D", ARRRNA = "#F564E3", DD
 p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "object %<>% linmod_lm(      ~time)                                           # classic") + 
     annotate('text', x = -3, y = -2.3, hjust = 0, family = 'mono', label = "            linmod_lme(      ~time, block = 'subject')                        # random effects") + 
     annotate('text', x = -3, y = -2.6, hjust = 0, family = 'mono', label = "            linmod_lmer(     ~time, block = 'subject')                        # advanced random effects") + 
-    annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            wilcoxon( ~time, block = 'subject')                        # unparametric") +
+    annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            linmod_wilcoxon( ~time, block = 'subject')                        # unparametric") +
     
     annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject'                         # large-scale") + 
     annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject', codingfun = contr.treatment.explicit   # alternative codings") + 
@@ -66,7 +66,7 @@ object %<>% linmod_lm(     codingfun = contr.treatment.explicit, coefs = 't3-t0'
 object %<>% linmod_lme(     codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
 object %<>% linmod_lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
 object %<>% linmod_limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% wilcoxon(block = 'Subject')
+object %<>% linmod_wilcoxon(block = 'Subject')
 
 
 
