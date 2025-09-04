@@ -294,7 +294,7 @@ lmx <- function(
 
 
 
-#' @rdname linmod
+#' @rdname LINMOD
 #' @export
 gen_lm <- function(
        object,
@@ -326,7 +326,7 @@ gen_lm <- function(
 }
 
 
-#' @rdname linmod
+#' @rdname LINMOD
 #' @export
 fit_lm <- function(...){ .Deprecated('gen_lm'); gen_lm(...)}
 
@@ -337,7 +337,7 @@ fit_lm <- function(...){ .Deprecated('gen_lm'); gen_lm(...)}
 
 
 
-#' @rdname linmod
+#' @rdname LINMOD
 #' @export
 gen_lme <- function(
        object, 
@@ -373,7 +373,7 @@ gen_lme <- function(
            verbose = verbose )
 }
 
-#' @rdname linmod
+#' @rdname LINMOD
 #' @export
 fit_lme <- function(...){ .Deprecated('gen_lme'); gen_lme(...)}
 
@@ -384,7 +384,7 @@ fit_lme <- function(...){ .Deprecated('gen_lme'); gen_lme(...)}
 
 
 
-#' @rdname linmod
+#' @rdname LINMOD
 #' @export
 gen_lmer <- function(
        object, 
@@ -420,7 +420,7 @@ gen_lmer <- function(
 }
 
 
-#' @rdname linmod
+#' @rdname LINMOD
 #' @export
 fit_lmer <- function(...){ .Deprecated('gen_lmer'); gen_lmer(...)}
 
