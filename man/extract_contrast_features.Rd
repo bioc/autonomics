@@ -98,7 +98,7 @@ Extract coefficient features
 # Read and Fit
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file)
-    object \%<>\% limma()
+    object \%<>\% linmod_limma()
     fdt(object) \%<>\% add_adjusted_pvalues('fdr')
 # Single coef
     object0 <- object

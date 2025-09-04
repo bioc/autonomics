@@ -26,10 +26,10 @@ context('fit: GSE161731')
         # object %<>% pca()
         # biplot(object, color=subject_id,group=subject_id, shape=time_since_onset)
 
-    test_that(  "limma( formula = ~ time_since_onset)", {             # 0 down, 37 up
+    test_that(  "linmod_limma( formula = ~ time_since_onset)", {             # 0 down, 37 up
         # ~ time_since_onset
-            object %<>% limma(formula =     ~ time_since_onset, block = 'subject_id')                            # 37 up
-            object %<>% limma(formula = ~ 0 + time_since_onset, block = 'subject_id', contrasts = 'late-early')  # 37 up
+            object %<>% linmod_limma(formula =     ~ time_since_onset, block = 'subject_id')                            # 37 up
+            object %<>% linmod_limma(formula = ~ 0 + time_since_onset, block = 'subject_id', contrasts = 'late-early')  # 37 up
     })
 
     
@@ -57,16 +57,16 @@ context('fit: GSE161731')
         # biplot(object, 
         #       color=subject_id, group=subject_id, shape=time_since_onset)
         # 'subgroup1'
-        object %<>% limma()
+        object %<>% linmod_limma()
         ndown <- summarize_fit(fdt(object), 'limma', 'late')$downp
         nup   <- summarize_fit(fdt(object), 'limma', 'late')$upp
         # NULL subgroup
         object$subgroup <- NULL
-        object %<>% limma()
+        object %<>% linmod_limma()
         expect_true(summarize_fit(fdt(object), 'limma', 'Intercept')$downp==ndown)
         expect_true(summarize_fit(fdt(object), 'limma', 'Intercept')$upp  ==nup)
         # ~ 1
-        object %<>% limma(formula=~1)
+        object %<>% linmod_limma(formula=~1)
         expect_true(sumexp_contains_fit(object))
         expect_true(summarize_fit(fdt(object), 'limma')$ndown==ndown)
         expect_true(summarize_fit(fdt(object), 'limma')$nup  ==nup)

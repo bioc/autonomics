@@ -160,7 +160,7 @@ This moderated t statistic was then extended into a General Linear Model. Very i
 ```{r, message = FALSE}
 file <- download_data('atkin18.metabolon.xlsx')
 object <- read_proteingroups(file)
-object %<>% limma(formula   = ~ 0 + subgroup, 
+object %<>% linmod_limma(formula   = ~ 0 + subgroup, 
                       contrasts = c('Adult - X30dpt'))
 ```
 

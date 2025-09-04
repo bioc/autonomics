@@ -2,7 +2,7 @@ require(devtools)
 load_all()
 file <- download_data('atkin.somascan.adat')
 object <- read_somascan(file)
-object %<>% limma(block = 'Subject', codingfun = code_diff)
+object %<>% linmod_limma(block = 'Subject', codingfun = code_diff)
 plot_exprs(object, coef = 't1-t0', block = 'Subject', n = 2)
 
 require(ggplot2)
@@ -56,16 +56,16 @@ p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "obje
     annotate('text', x = -3, y = -2.6, hjust = 0, family = 'mono', label = "            lmer(     ~time, block = 'subject')                        # advanced random effects") + 
     annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            wilcoxon( ~time, block = 'subject')                        # unparametric") +
     
-    annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "            limma(    ~time, block = 'subject'                         # large-scale") + 
-    annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "            limma(    ~time, block = 'subject', codingfun = contr.treatment.explicit   # alternative codings") + 
-    annotate('text', x = -3, y = -4.1, hjust = 0, family = 'mono', label = "            limma(  ~0+time, block = 'subject', contrasts = 't1-t0')   # simplified contrasts")
+    annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject'                         # large-scale") + 
+    annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject', codingfun = contr.treatment.explicit   # alternative codings") + 
+    annotate('text', x = -3, y = -4.1, hjust = 0, family = 'mono', label = "     linmod_limma(  ~0+time, block = 'subject', contrasts = 't1-t0')   # simplified contrasts")
 
 
 fdt(object) %<>% extract(, 1:2)
 object %<>% lm.(     codingfun = contr.treatment.explicit, coefs = 't3-t0')
 object %<>% lme(     codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
 object %<>% lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
+object %<>% linmod_limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
 object %<>% wilcoxon(block = 'Subject')
 
 

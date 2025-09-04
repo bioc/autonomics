@@ -832,7 +832,7 @@ cmessage <- function(pattern, ...)  message(sprintf(pattern, ...))
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
 #'     order_on_p(object)
-#'     object %<>% limma()
+#'     object %<>% linmod_limma()
 #'     order_on_p(object)
 #' # Survival
 #'     object <- survobj()
@@ -985,7 +985,7 @@ order_on_effect <- function(
 #' # Read and Fit
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
-#'     object %<>% limma()
+#'     object %<>% linmod_limma()
 #'     fdt(object) %<>% add_adjusted_pvalues('fdr')
 #' # Single coef
 #'     object0 <- object
@@ -1245,7 +1245,7 @@ add_facetvars <- function(
 #'     plot_exprs(object, dim = 'samples')
 #'     plot_exprs(object, dim = 'features', block = 'sample_id')
 #' # With limma 
-#'     object %<>% limma(block = 'Subject')
+#'     object %<>% linmod_limma(block = 'Subject')
 #'     plot_exprs(object, block = 'Subject')
 #'     plot_exprs(object, block = 'Subject', coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #'     plot_exprs_per_coef(object, x = 'Time', block = 'Subject')
@@ -1400,7 +1400,7 @@ plot_feature_boxplots <- function(object, ...){
 #' @examples 
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% limma()
+#' object %<>% linmod_limma()
 #' object %<>% pls(by = 'subgroup')
 #' object %<>% pls(by = 'Diabetes')
 #' object %<>% pls(by = 'Subject')
@@ -1628,7 +1628,7 @@ plot_venn <- function(x){
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' object %<>% wilcoxon(~ subgroup, block = 'Subject')
-#' object %<>% limma(   ~ subgroup, block = 'Subject')
+#' object %<>% linmod_limma(   ~ subgroup, block = 'Subject')
 #' isfdr <- is_sig(object, contrast = 't3-t0', quantity = 'p', fit = fits(object))
 #' plot_contrast_venn(isfdr)
 #' @export

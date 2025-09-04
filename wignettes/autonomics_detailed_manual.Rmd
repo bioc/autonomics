@@ -240,6 +240,6 @@ This moderated t statistic was then extended into a General Linear Model. Very i
 ```{r, message = FALSE}
 file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 object <- read_maxquant_proteingroups(file)
-object %<>% limma(formula   = ~ 0 + subgroup, contrasts = c('Adult - X30dpt'))
+object %<>% linmod_limma(formula   = ~ 0 + subgroup, contrasts = c('Adult - X30dpt'))
 ```
 # References

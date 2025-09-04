@@ -32,6 +32,6 @@ Plot contrast densities
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% limma(~subgroup, block = 'Subject')
+object \%<>\% linmod_limma(~subgroup, block = 'Subject')
 plot_coef_densities(object)
 }

@@ -8,7 +8,7 @@
 \alias{fit_lme}
 \alias{fit_lmer}
 \alias{fit_wilcoxon}
-\alias{limma}
+\alias{linmod_limma}
 \alias{lm.}
 \alias{lme}
 \alias{lmer}
@@ -48,7 +48,7 @@ fit_lmer(...)
 
 fit_wilcoxon(...)
 
-limma(
+linmod_limma(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -194,7 +194,7 @@ General Linear Model
   
 # Alternative engines: argument 'engine' or dedicated function
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% limma(   ~subgroup, block = 'Subject')  # Default engine
+  object \%<>\% linmod_limma(   ~subgroup, block = 'Subject')  # Default engine
   object \%<>\% lm.(     ~subgroup, block = 'Subject')  # Traditional
   object \%<>\% lme(     ~subgroup, block = 'Subject')  # Powerful random effects
   object \%<>\% lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
@@ -203,22 +203,22 @@ General Linear Model
     
 # Alternative coding: backward diffs instead of baseline
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% linmod_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
   object \%<>\% lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
   object \%<>\% lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
   summarize_fit(object)
     
 # Posthoc contrasts: limma-only, flexible, but sometimes approximate
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% limma( ~ subgroup, block = 'Subject', codingfun = code_control)
-  object \%<>\% limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
+  object \%<>\% linmod_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
+  object \%<>\% linmod_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
       # flexible, but only approximate
       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
         
 # Custom separator
   fdt(object) \%<>\% extract(, 'feature_id')
-  fdt( limma(object, sep = '.'))
-  fdt( limma(object, block = 'Subject', sep = '.') )
+  fdt( linmod_limma(object, sep = '.'))
+  fdt( linmod_limma(object, block = 'Subject', sep = '.') )
 
 # Top-level function also plots and writes
   linmod(object, block = 'Subject', coefs = 't1-t0')

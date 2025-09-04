@@ -13,8 +13,8 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
     test_that( " fit: billing19.rnacounts ", {
         file <- system.file('extdata/billing19.rnacounts.txt', package = 'autonomics')
         object <- read_rnaseq_counts(file)
-        expect_true(sumexp_contains_fit(limma(object),                   'limma'))
-        expect_true(sumexp_contains_fit(limma(object, weightvar = NULL), 'limma'))
+        expect_true(sumexp_contains_fit(linmod_limma(object),                   'limma'))
+        expect_true(sumexp_contains_fit(linmod_limma(object, weightvar = NULL), 'limma'))
         # expect_true(sumexp_contains_fit(lm.(object),       'lm'))         # slow
         # expect_true(sumexp_contains_fit(wilcoxon(object), 'wilcoxon'))   # slow
     })
@@ -28,11 +28,11 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             object <- read_maxquant_proteingroups(file, subgroups = select)
             expect_true(sumexp_contains_fit(wilcoxon(object), 'wilcoxon'))
             expect_true(sumexp_contains_fit(lm.(object),       'lm'))
-            expect_true(sumexp_contains_fit(limma(object),    'limma'))
+            expect_true(sumexp_contains_fit(linmod_limma(object),    'limma'))
         # subtracted
             obj <- object
             obj %<>% subtract_baseline('subgroup', 'E00_STD')
-            expect_true(sumexp_contains_fit(limma(object, ~1), 'limma'))
+            expect_true(sumexp_contains_fit(linmod_limma(object, ~1), 'limma'))
     })
 
     test_that( " fit: fukuda20.proteingroups ", {
@@ -40,14 +40,14 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
         object <- read_maxquant_proteingroups(file)
         expect_true(sumexp_contains_fit(wilcoxon(object), 'wilcoxon'))
         expect_true(sumexp_contains_fit(lm.(object),       'lm'))
-        expect_true(sumexp_contains_fit(limma(object),    'limma'))
+        expect_true(sumexp_contains_fit(linmod_limma(object),    'limma'))
     })
 
     test_that( " fit: atkin.somascan ", {
         # Original
             file <- system.file('extdata/atkin.somascan.adat', package = 'autonomics')
             object <- read_somascan(file)
-            expect_true( sumexp_contains_fit(    limma( object, ~ Time + Diabetes, block = 'Subject' ), 'limma'   ) )
+            expect_true( sumexp_contains_fit(    linmod_limma( object, ~ Time + Diabetes, block = 'Subject' ), 'limma'   ) )
             expect_true( sumexp_contains_fit(      lm.( object, ~ Time + Diabetes                    ), 'lm'      ) )
             expect_true( sumexp_contains_fit(      lme( object, ~ Time + Diabetes, block = 'Subject' ), 'lme'     ) )
             expect_true( sumexp_contains_fit(     lmer( object, ~ Time + Diabetes, block = 'Subject' ), 'lmer'    ) )
@@ -55,7 +55,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
         # Subtracted
             object %<>% subtract_differences(block = 'Subject', subgroupvar ='Time')
             expect_true( sumexp_contains_fit(   lm.(object, ~ 0 + Time), 'lm'   ))
-            expect_true( sumexp_contains_fit( limma(object, ~ 0 + Time), 'limma'))
+            expect_true( sumexp_contains_fit( linmod_limma(object, ~ 0 + Time), 'limma'))
     })
     
     test_that( " fit: atkin.metabolon ", {
@@ -63,7 +63,7 @@ sumexp_contains_fit <- function(object, fit = 'limma'){
             file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
             object <- read_metabolon(file)
         # test
-            expect_true(sumexp_contains_fit(                  limma( object, ~ subgroup, block = 'Subject'),  'limma'   ))
+            expect_true(sumexp_contains_fit(                  linmod_limma( object, ~ subgroup, block = 'Subject'),  'limma'   ))
             expect_true(sumexp_contains_fit(                    lm.( object, ~ subgroup, block = 'Subject'),  'lm'      ))
             expect_true(sumexp_contains_fit(                    lme( object, ~ subgroup, block = 'Subject'),  'lme'     ))
             expect_true(sumexp_contains_fit( suppressWarnings( lmer( object, ~ subgroup, block = 'Subject')), 'lmer'    ))

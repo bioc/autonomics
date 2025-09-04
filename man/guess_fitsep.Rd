@@ -26,6 +26,6 @@ guess fitsep
 \examples{
 file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
 object <- read_maxquant_proteingroups(file)
-object \%<>\% limma()
+object \%<>\% linmod_limma()
 guess_fitsep(object)
 }

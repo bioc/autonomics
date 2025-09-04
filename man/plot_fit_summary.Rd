@@ -22,7 +22,7 @@ Plot fit summary
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 object \%<>\% lm.()
-object \%<>\% limma(block = 'Subject')
+object \%<>\% linmod_limma(block = 'Subject')
 sumdt <- summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 plot_fit_summary(sumdt)
 }

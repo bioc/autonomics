@@ -87,7 +87,7 @@ Plot volcano
 # Regular Usage
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file)
-    object \%<>\% limma()
+    object \%<>\% linmod_limma()
     object \%<>\% lm.()
     plot_volcano(object, coefs = 't3-t0', fit = 'limma')                   # single contrast
     plot_volcano(object, coefs = c('t2-t0', 't3-t0'), fit = 'limma')          # multip contrasts
@@ -101,7 +101,7 @@ Plot volcano
 # Additional mappings
     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
     object <- read_maxquant_proteingroups(file, impute = TRUE)
-    object \%<>\% limma()
+    object \%<>\% linmod_limma()
     plot_volcano(object)
     plot_volcano(object, label = 'gene')
     plot_volcano(object, label = 'gene', size = 'log2maxlfq')
