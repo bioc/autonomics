@@ -34,7 +34,7 @@ Model based prediction
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% limo_limma(block = 'Subject') # intercept required!
+object \%<>\% gen_limma(block = 'Subject') # intercept required!
 beta(object)                    #    betas : nlevel x nfeature
    X(object)                    #   design : nlevel x nlevel
    X(object) \%*\% beta(object)   # response : nlevel x nfeature

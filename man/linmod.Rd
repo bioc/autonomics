@@ -3,15 +3,15 @@
 %   R/27_linmod_wilcoxon.R
 \name{linmod}
 \alias{linmod}
-\alias{limo_limma}
+\alias{gen_limma}
 \alias{fit_limma}
-\alias{limo_lm}
+\alias{gen_lm}
 \alias{fit_lm}
-\alias{limo_lme}
+\alias{gen_lme}
 \alias{fit_lme}
-\alias{limo_lmer}
+\alias{gen_lmer}
 \alias{fit_lmer}
-\alias{limo_wilcoxon}
+\alias{gen__wilcoxon}
 \alias{fit_wilcoxon}
 \title{General Linear Model}
 \usage{
@@ -38,7 +38,7 @@ linmod(
   argsexprs = list()
 )
 
-limo_limma(
+gen_limma(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -55,7 +55,7 @@ limo_limma(
 
 fit_limma(...)
 
-limo_lm(
+gen_lm(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -72,7 +72,7 @@ limo_lm(
 
 fit_lm(...)
 
-limo_lme(
+gen_lme(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -90,7 +90,7 @@ limo_lme(
 
 fit_lme(...)
 
-limo_lmer(
+gen_lmer(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -107,7 +107,7 @@ limo_lmer(
 
 fit_lmer(...)
 
-limo_wilcoxon(
+gen__wilcoxon(
   object,
   formula = as.formula("~ subgroup"),
   drop = NULL,
@@ -194,31 +194,31 @@ General Linear Model
   
 # Alternative engines: argument 'engine' or dedicated function
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% limo_limma(   ~subgroup, block = 'Subject')  # Default engine
-  object \%<>\% limo_lm(     ~subgroup, block = 'Subject')  # Traditional
-  object \%<>\% limo_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-  object \%<>\% limo_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
-  object \%<>\% limo_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
+  object \%<>\% gen_limma(   ~subgroup, block = 'Subject')  # Default engine
+  object \%<>\% gen_lm(     ~subgroup, block = 'Subject')  # Traditional
+  object \%<>\% gen_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
+  object \%<>\% gen_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
+  object \%<>\% gen_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
   summarize_fit(object)
     
 # Alternative coding: backward diffs instead of baseline
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% limo_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
-  object \%<>\% limo_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-  object \%<>\% limo_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% gen_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% gen_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
+  object \%<>\% gen_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
   summarize_fit(object)
     
 # Posthoc contrasts: limma-only, flexible, but sometimes approximate
   fdt(object) \%<>\% extract(, 'feature_id')
-  object \%<>\% limo_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
-  object \%<>\% limo_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
+  object \%<>\% gen_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
+  object \%<>\% gen_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
       # flexible, but only approximate
       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
         
 # Custom separator
   fdt(object) \%<>\% extract(, 'feature_id')
-  fdt( limo_limma(object, sep = '.'))
-  fdt( limo_limma(object, block = 'Subject', sep = '.') )
+  fdt( gen_limma(object, sep = '.'))
+  fdt( gen_limma(object, block = 'Subject', sep = '.') )
 
 # Top-level function also plots and writes
   linmod(object, block = 'Subject', coefs = 't1-t0')

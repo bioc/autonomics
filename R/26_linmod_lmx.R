@@ -296,7 +296,7 @@ lmx <- function(
 
 #' @rdname linmod
 #' @export
-limo_lm <- function(
+gen_lm <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -328,7 +328,7 @@ limo_lm <- function(
 
 #' @rdname linmod
 #' @export
-fit_lm <- function(...){ .Deprecated('limo_lm'); limo_lm(...)}
+fit_lm <- function(...){ .Deprecated('gen_lm'); gen_lm(...)}
 
 
 
@@ -339,7 +339,7 @@ fit_lm <- function(...){ .Deprecated('limo_lm'); limo_lm(...)}
 
 #' @rdname linmod
 #' @export
-limo_lme <- function(
+gen_lme <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -375,7 +375,7 @@ limo_lme <- function(
 
 #' @rdname linmod
 #' @export
-fit_lme <- function(...){ .Deprecated('limo_lme'); limo_lme(...)}
+fit_lme <- function(...){ .Deprecated('gen_lme'); gen_lme(...)}
 
 
 
@@ -386,7 +386,7 @@ fit_lme <- function(...){ .Deprecated('limo_lme'); limo_lme(...)}
 
 #' @rdname linmod
 #' @export
-limo_lmer <- function(
+gen_lmer <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -422,5 +422,5 @@ limo_lmer <- function(
 
 #' @rdname linmod
 #' @export
-fit_lmer <- function(...){ .Deprecated('limo_lmer'); limo_lmer(...)}
+fit_lmer <- function(...){ .Deprecated('gen_lmer'); gen_lmer(...)}
 

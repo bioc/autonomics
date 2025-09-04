@@ -56,7 +56,7 @@ Order on p
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file)
     order_on_p(object)
-    object \%<>\% limo_limma()
+    object \%<>\% gen_limma()
     order_on_p(object)
 # Survival
     object <- survobj()

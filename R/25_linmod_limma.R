@@ -160,7 +160,7 @@ create_design.data.table <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% limo_limma(block = 'Subject') # intercept required!
+#' object %<>% gen_limma(block = 'Subject') # intercept required!
 #' beta(object)                    #    betas : nlevel x nfeature
 #'    X(object)                    #   design : nlevel x nlevel
 #'    X(object) %*% beta(object)   # response : nlevel x nfeature
@@ -263,16 +263,16 @@ beta <- function( object, fit = fits(object)[1] ){
 #' # Model
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
-#'     object %<>% limo_limma(codingfun = contr.treatment) # default
-#'     object %<>% limo_limma(codingfun = contr.treatment.explicit)
-#'     object %<>% limo_limma(codingfun = contr.diff)
-#'     object %<>% limo_limma(codingfun = code_control)
-#'     object %<>% limo_limma(codingfun = code_diff)
-#'     object %<>% limo_limma(codingfun = code_diff_forward)
-#'     object %<>% limo_limma(codingfun = code_deviation)
-#'     object %<>% limo_limma(codingfun = code_deviation_first)
-#'     object %<>% limo_limma(codingfun = code_helmert)
-#'     object %<>% limo_limma(codingfun = code_helmert_forward)
+#'     object %<>% gen_limma(codingfun = contr.treatment) # default
+#'     object %<>% gen_limma(codingfun = contr.treatment.explicit)
+#'     object %<>% gen_limma(codingfun = contr.diff)
+#'     object %<>% gen_limma(codingfun = code_control)
+#'     object %<>% gen_limma(codingfun = code_diff)
+#'     object %<>% gen_limma(codingfun = code_diff_forward)
+#'     object %<>% gen_limma(codingfun = code_deviation)
+#'     object %<>% gen_limma(codingfun = code_deviation_first)
+#'     object %<>% gen_limma(codingfun = code_helmert)
+#'     object %<>% gen_limma(codingfun = code_helmert_forward)
 #' @export
 code <- function(object, ...)  UseMethod('code')
 
@@ -531,7 +531,7 @@ contrast_coefs <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% limo_limma()
+#' object %<>% gen_limma()
 #' model_coefs(object)
 #' contrast_coefs(object)
 #' @export
@@ -604,10 +604,10 @@ vectorize_contrasts <- function(contrasts){
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' object %>% fdt()
-#' object %>% limo_limma() %>% fdt()
-#' object %>% limo_limma() %>% reset_fit() %>% fdt()
-#' object %>% limo_limma() %>% limo_lm() %>% reset_fit('limma') %>% fdt()
-#' object %>% limo_limma() %>% limo_lm() %>% reset_fit() %>% fdt()
+#' object %>% gen_limma() %>% fdt()
+#' object %>% gen_limma() %>% reset_fit() %>% fdt()
+#' object %>% gen_limma() %>% gen_lm() %>% reset_fit('limma') %>% fdt()
+#' object %>% gen_limma() %>% gen_lm() %>% reset_fit() %>% fdt()
 #' @export
 reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
 # Assert
@@ -737,31 +737,31 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   
 #' # Alternative engines: argument 'engine' or dedicated function
 #'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% limo_limma(   ~subgroup, block = 'Subject')  # Default engine
-#'   object %<>% limo_lm(     ~subgroup, block = 'Subject')  # Traditional
-#'   object %<>% limo_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-#'   object %<>% limo_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
-#'   object %<>% limo_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
+#'   object %<>% gen_limma(   ~subgroup, block = 'Subject')  # Default engine
+#'   object %<>% gen_lm(     ~subgroup, block = 'Subject')  # Traditional
+#'   object %<>% gen_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
+#'   object %<>% gen_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
+#'   object %<>% gen_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
 #'   summarize_fit(object)
 #'     
 #' # Alternative coding: backward diffs instead of baseline
 #'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% limo_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   object %<>% limo_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   object %<>% limo_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   object %<>% gen_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   object %<>% gen_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   object %<>% gen_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
 #'   summarize_fit(object)
 #'     
 #' # Posthoc contrasts: limma-only, flexible, but sometimes approximate
 #'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% limo_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
-#'   object %<>% limo_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
+#'   object %<>% gen_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
+#'   object %<>% gen_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
 #'       # flexible, but only approximate
 #'       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
 #'         
 #' # Custom separator
 #'   fdt(object) %<>% extract(, 'feature_id')
-#'   fdt( limo_limma(object, sep = '.'))
-#'   fdt( limo_limma(object, block = 'Subject', sep = '.') )
+#'   fdt( gen_limma(object, sep = '.'))
+#'   fdt( gen_limma(object, block = 'Subject', sep = '.') )
 #'
 #' # Top-level function also plots and writes
 #'   linmod(object, block = 'Subject', coefs = 't1-t0')
@@ -959,14 +959,14 @@ linmodawb_limma <- function(
         formula %<>% as.formula()
         coefs  <- colnames(create_design(object,  formula, codingfun = codingfun, drop = drop))
         coefs %<>% setdiff('Intercept')
-        object %<>% limo_limma(formula,  codingfun = codingfun, drop = drop, coefs =  coefs)
+        object %<>% gen_limma(formula,  codingfun = codingfun, drop = drop, coefs =  coefs)
     }
     if (within){
         formula <- paste0(modelvars, collapse = '/')
         formula %<>% as.formula()
         coefs <- colnames(create_design(obj, formula, codingfun = codingfun, drop = drop))
         coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% limo_limma(formula, codingfun = codingfun, drop = drop, coefs = coefs, weights = weights)
+        object %<>% gen_limma(formula, codingfun = codingfun, drop = drop, coefs = coefs, weights = weights)
         fvars(object) %<>% stri_replace_first_fixed(':', '/')
     }
     if (within){
@@ -974,7 +974,7 @@ linmodawb_limma <- function(
         formula %<>% as.formula()
         coefs <- colnames(create_design(obj, formula, codingfun = codingfun, drop = drop, weights = weights))
         coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% limo_limma(formula, codingfun = codingfun, drop = drop, coefs = coefs)
+        object %<>% gen_limma(formula, codingfun = codingfun, drop = drop, coefs = coefs)
         fvars(object) %<>% stri_replace_first_fixed(':', '/')
     }
     if (between){
@@ -982,7 +982,7 @@ linmodawb_limma <- function(
         formula %<>% as.formula()
         coefs <- colnames(create_design(obj, formula, codingfun = codingfun, drop = drop, weights = weights))
         coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% limo_limma(formula, codingfun = codingfun, drop = drop, coefs = coefs)
+        object %<>% gen_limma(formula, codingfun = codingfun, drop = drop, coefs = coefs)
         fvars(object) %<>% stri_replace_first_fixed(':', '*')
     }
 # Return
@@ -992,7 +992,7 @@ linmodawb_limma <- function(
 
 #' @rdname linmod
 #' @export
-limo_limma <- function(
+gen_limma <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
@@ -1070,7 +1070,7 @@ limo_limma <- function(
 
 #' @rdname linmod
 #' @export
-fit_limma <- function(...){ .Deprecated('limo_limma'); limo_limma(...)}
+fit_limma <- function(...){ .Deprecated('gen_limma'); gen_limma(...)}
 
 
 pull_level <- function(x, lev){
@@ -1090,8 +1090,8 @@ pull_level <- function(x, lev){
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% limo_limma()
-#' object %<>% limo_lm()
+#' object %<>% gen_limma()
+#' object %<>% gen_lm()
 #' summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #' @export
 summarize_fit <- function(object, ...)  UseMethod('summarize_fit')
@@ -1158,8 +1158,8 @@ summarize_fit.SummarizedExperiment <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% limo_lm()
-#' object %<>% limo_limma(block = 'Subject')
+#' object %<>% gen_lm()
+#' object %<>% gen_limma(block = 'Subject')
 #' sumdt <- summarize_fit(object, coefs = c('t1-t0', 't2-t0', 't3-t0'))
 #' plot_fit_summary(sumdt)
 #' @export

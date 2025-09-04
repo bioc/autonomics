@@ -28,6 +28,6 @@ Get contrastdt
 }
 \examples{
 object <- survobj()
-object \%<>\% limo_limma(~sex + age)
+object \%<>\% gen_limma(~sex + age)
 contrastdt(object, 'm-f~limma')
 }

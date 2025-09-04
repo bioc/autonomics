@@ -69,7 +69,7 @@ cluster <- function(object, formula = ~ Subject + Time){
     names(contrast.arg) <- factors
     mode(contrast.arg) <- 'list'
     contrastdefs <- create_design(object, formula = formula)
-    limo_limma(object, formula=formula, contrastdefs = contrastdefs)
+    gen_limma(object, formula=formula, contrastdefs = contrastdefs)
 
 # Filter
     idx <- rowAnys(metadata(object )[[fit]][,,'p'] < filter_p, na.rm=TRUE)
@@ -97,10 +97,10 @@ cluster <- function(object, formula = ~ Subject + Time){
     
     formula <- ~ Subject + Time
     contrastdefs <- colnames(create_design(object, formula = formula))[-1]
-    object %<>% limo_limma(formula = formula, contrastdefs = contrastdefs)
+    object %<>% gen_limma(formula = formula, contrastdefs = contrastdefs)
     values(object)[1:3, 1:3]
     
-    blockeffects <- limo_limma(object)[, levels(factor(object$Subject))[-1], 'effect']
+    blockeffects <- gen_limma(object)[, levels(factor(object$Subject))[-1], 'effect']
     blockeffects %<>% data.table(keep.rownames = TRUE)
     setnames(blockeffects, 'rn', 'feature_id')
     blockeffects %<>% melt.data.table(id.vars = 'feature_id', variable.name = block, value.name = 'blockeffect')

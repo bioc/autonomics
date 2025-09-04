@@ -2,7 +2,7 @@ require(devtools)
 load_all()
 file <- download_data('atkin.somascan.adat')
 object <- read_somascan(file)
-object %<>% limo_limma(block = 'Subject', codingfun = code_diff)
+object %<>% gen_limma(block = 'Subject', codingfun = code_diff)
 plot_exprs(object, coef = 't1-t0', block = 'Subject', n = 2)
 
 require(ggplot2)
@@ -51,22 +51,22 @@ p <- p + geom_label(data = dt, aes(x = x, y = y, label = label, fill = platform)
 p <- p + guides(fill = 'none') + xlim(1+c(-6, +6)) + ylim(1+c(-6, +6))
 p <- p + scale_fill_manual(values = c(NGSRNA = "#F8766D", ARRRNA = "#F564E3", DDAPRO = "#619CFF", DIAPRO = "#00BFC4", AFFPRO = "#00BA38", MET = "yellow"  ))
 
-p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "object %<>% limo_lm(      ~time)                                           # classic") + 
-    annotate('text', x = -3, y = -2.3, hjust = 0, family = 'mono', label = "            limo_lme(      ~time, block = 'subject')                        # random effects") + 
-    annotate('text', x = -3, y = -2.6, hjust = 0, family = 'mono', label = "            limo_lmer(     ~time, block = 'subject')                        # advanced random effects") + 
-    annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            limo_wilcoxon( ~time, block = 'subject')                        # unparametric") +
+p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "object %<>% gen_lm(      ~time)                                           # classic") + 
+    annotate('text', x = -3, y = -2.3, hjust = 0, family = 'mono', label = "            gen_lme(      ~time, block = 'subject')                        # random effects") + 
+    annotate('text', x = -3, y = -2.6, hjust = 0, family = 'mono', label = "            gen_lmer(     ~time, block = 'subject')                        # advanced random effects") + 
+    annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            gen_wilcoxon( ~time, block = 'subject')                        # unparametric") +
     
-    annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "     limo_limma(    ~time, block = 'subject'                         # large-scale") + 
-    annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "     limo_limma(    ~time, block = 'subject', codingfun = contr.treatment.explicit   # alternative codings") + 
-    annotate('text', x = -3, y = -4.1, hjust = 0, family = 'mono', label = "     limo_limma(  ~0+time, block = 'subject', contrasts = 't1-t0')   # simplified contrasts")
+    annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "     gen_limma(    ~time, block = 'subject'                         # large-scale") + 
+    annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "     gen_limma(    ~time, block = 'subject', codingfun = contr.treatment.explicit   # alternative codings") + 
+    annotate('text', x = -3, y = -4.1, hjust = 0, family = 'mono', label = "     gen_limma(  ~0+time, block = 'subject', contrasts = 't1-t0')   # simplified contrasts")
 
 
 fdt(object) %<>% extract(, 1:2)
-object %<>% limo_lm(     codingfun = contr.treatment.explicit, coefs = 't3-t0')
-object %<>% limo_lme(     codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% limo_lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% limo_limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% limo_wilcoxon(block = 'Subject')
+object %<>% gen_lm(     codingfun = contr.treatment.explicit, coefs = 't3-t0')
+object %<>% gen_lme(     codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
+object %<>% gen_lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
+object %<>% gen_limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
+object %<>% gen_wilcoxon(block = 'Subject')
 
 
 
