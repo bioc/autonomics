@@ -8,12 +8,12 @@
 #' @examples
 #' object <- survobj()
 #' svars(object)
-#' awb(object, engine = 'limma', modelvars = c('age', 'sex'))
-#' awb_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awb_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awb_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awb_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
-awb <- function(
+#' awbmod(object, engine = 'limma', modelvars = c('age', 'sex'))
+#' awbmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awbmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awbmod_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awbmod_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
+awbmod <- function(
     object, 
     engine,
  modelvars,
@@ -70,24 +70,24 @@ awb <- function(
 }
 
 
-#' @rdname awb
+#' @rdname awbmod
 #' @export
-awb_limma <- function(object, ...)  awb(object, engine = 'limma', ...)
+awbmod_limma <- function(object, ...)  awbmod(object, engine = 'limma', ...)
 
 
-#' @rdname awb
+#' @rdname awbmod
 #' @export
-awb_lm    <- function(object, ...)  awb(object, engine = 'lm', ...)
+awbmod_lm    <- function(object, ...)  awbmod(object, engine = 'lm', ...)
 
 
-#' @rdname awb
+#' @rdname awbmod
 #' @export
-awb_lme   <- function(object, ...)  awb(object, engine = 'lme', ...)
+awbmod_lme   <- function(object, ...)  awbmod(object, engine = 'lme', ...)
 
 
-#' @rdname awb
+#' @rdname awbmod
 #' @export
-awb_lmer  <- function(object, ...)  awb(object, engine = 'lmer', ...)
+awbmod_lmer  <- function(object, ...)  awbmod(object, engine = 'lmer', ...)
 
 
   
