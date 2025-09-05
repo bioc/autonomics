@@ -1,4 +1,4 @@
-#' Across/Within/Between model
+#' General Linear Modeling (across-within-between interface)
 #' @param object    SummarizedExperiment
 #' @param engine 'limma', 'lm', 'lme', or 'lmer'
 #' @param modelvars svars
@@ -8,12 +8,12 @@
 #' @examples
 #' object <- survobj()
 #' svars(object)
-#' awbmod(object, engine = 'limma', modelvars = c('age', 'sex'))
-#' awbmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awbmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awbmod_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awbmod_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
-awbmod <- function(
+#' awblinmod(object, engine = 'limma', modelvars = c('age', 'sex'))
+#' awblinmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awblinmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awblinmod_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awblinmod_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
+awblinmod <- function(
     object, 
     engine,
  modelvars,
@@ -70,24 +70,24 @@ awbmod <- function(
 }
 
 
-#' @rdname awbmod
+#' @rdname awblinmod
 #' @export
-awbmod_limma <- function(object, ...)  awbmod(object, engine = 'limma', ...)
+awblinmod_limma <- function(object, ...)  awblinmod(object, engine = 'limma', ...)
 
 
-#' @rdname awbmod
+#' @rdname awblinmod
 #' @export
-awbmod_lm    <- function(object, ...)  awbmod(object, engine = 'lm', ...)
+awblinmod_lm    <- function(object, ...)  awblinmod(object, engine = 'lm', ...)
 
 
-#' @rdname awbmod
+#' @rdname awblinmod
 #' @export
-awbmod_lme   <- function(object, ...)  awbmod(object, engine = 'lme', ...)
+awblinmod_lme   <- function(object, ...)  awblinmod(object, engine = 'lme', ...)
 
 
-#' @rdname awbmod
+#' @rdname awblinmod
 #' @export
-awbmod_lmer  <- function(object, ...)  awbmod(object, engine = 'lmer', ...)
+awblinmod_lmer  <- function(object, ...)  awblinmod(object, engine = 'lmer', ...)
 
 
   
