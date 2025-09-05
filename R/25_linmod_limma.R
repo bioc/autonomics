@@ -2,21 +2,11 @@
 #==============================================================================
 #
 #                       create_design
-#                           single_subgroup
-#                           are_factor
 #                           singlelevel
 #                           multilevel
 #                               nlevels
 #
 #==============================================================================
-
-single_subgroup <- function(object){
-    assert_is_subset('subgroup', svars(object))
-    length(unique(object$subgroup))==1
-}
-
-
-are_factor <- function(df) vapply(df, is.factor, logical(1))
 
 nlevels <- function(object, svar){
     if (!svar %in% svars(object))  return(0)
@@ -26,11 +16,21 @@ nlevels <- function(object, svar){
 singlelevel <- function(object, svar)   nlevels(object, svar) ==1
 multilevel  <- function(object, svar)   nlevels(object, svar) > 1
 
-#' @rdname default_formula
-#' @export
-default_subgroupvar <- function(object){
-    if ('subgroup' %in% svars(object))  'subgroup' else NULL
-}
+
+#' Does object contain ratio values?
+#' @param object SummarizedExperiment
+#' @return logical
+#' @examples
+#' file <- system.file('extdata/billing19.proteingroups.txt', package = 'autonomics')
+#' object <- read_maxquant_proteingroups(file)
+#' contains_ratios(object)
+#'
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' contains_ratios(object)
+#' @noRd
+contains_ratios <- function(object)  any(grepl('[Rr]atio', assayNames(object)))
+
 
 #' Create default formula
 #' @param object SummarizedExperiment

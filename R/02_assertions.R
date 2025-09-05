@@ -49,21 +49,6 @@ has_some_svalues <- function(object, svar){
 
 
 
-#' Does object contain ratio values?
-#' @param object SummarizedExperiment
-#' @return logical
-#' @examples
-#' file <- system.file('extdata/billing19.proteingroups.txt', package = 'autonomics')
-#' object <- read_maxquant_proteingroups(file)
-#' contains_ratios(object)
-#'
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' contains_ratios(object)
-#' @noRd
-contains_ratios <- function(object)  any(grepl('[Rr]atio', assayNames(object)))
-
-
 #==============================================================================
 #
 #                        assert_is_valid_sumexp
