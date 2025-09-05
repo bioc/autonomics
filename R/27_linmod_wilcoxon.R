@@ -57,7 +57,7 @@
 }
 
 
-.wilcoxon <- function(contrastdef, dt, subgroupvar, block, sep, verbose){
+.wilcoxon <- function(contrastdef, dt, subgroupvar, block, verbose){
     subgrouplevels <- stri_split_regex(contrastdef, pattern = '[ ]*[-][ ]*')
     subgrouplevels %<>% unlist()
     subgrouplevels %<>% rev()
@@ -70,7 +70,7 @@
                 subgrouplevels = subgrouplevels, 
                 block = block, verbose = verbose)
     data.table::setnames(resdt, c('p', 't', 'effect'), 
-                        paste(c('p', 't', 'effect'), contrastdef, sep = sep ))
+                        paste(c('p', 't', 'effect'), contrastdef, sep = '~' ))
     resdt
 }
 
@@ -98,8 +98,7 @@ linmod_wilcoxon <- function(
         coefs = NULL,
     contrasts = NULL,
     weightvar = NULL, 
-          sep = '~',
-       suffix = paste0(sep, 'wilcoxon'),
+       suffix = '~wilcoxon',
       verbose = TRUE
 ){
 # assert
@@ -121,7 +120,7 @@ linmod_wilcoxon <- function(
     dt <- sumexp_to_longdt(obj, svars = c(subgroupvar, block))
     if (verbose)  cmessage('%sWilcoxon', spaces(14))
     fitdt <- lapply(vectorize_contrasts(contrasts), .wilcoxon, 
-                     dt, subgroupvar = subgroupvar, block = block, sep = sep, verbose = verbose)
+                     dt, subgroupvar = subgroupvar, block = block, verbose = verbose)
     fitdt %<>% Reduce(function(x, y)  merge(x, y, by = 'feature_id', all = TRUE), .)
     #pattern <- sprintf('^(feature_id|%s)',  paste0(statvars, collapse = '|'))   # select statvars
     #fitdt <- fitdt[, .SD, .SDcols = patterns(pattern) ]
