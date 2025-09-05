@@ -435,76 +435,6 @@ code_helmert_forward <- function(n){
     y
 }
 
-#=============================================================================
-#
-#               contrast_coefs
-#                   contrast_subgroup_cols
-#                   contrast_subgroup_rows
-#
-#==============================================================================
-
-
-#' Row/Col contrasts
-#' @param object       SummarizedExperiment
-#' @param subgroupvar  subgroup svar
-#' @return  matrix
-#' @examples
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' object$subgroup <- paste0(object$Diabetes, '.', object$Time)
-#' subgroup_matrix(object, subgroupvar = 'subgroup')
-#' contrast_subgroup_cols(object, subgroupvar = 'subgroup')
-#' contrast_subgroup_rows(object, subgroupvar = 'subgroup')
-#' @export
-contrast_subgroup_cols <- function(object, subgroupvar){
-    subgroupmat <- subgroup_matrix(object, subgroupvar)
-    if (is_scalar(subgroupmat))  return(subgroupmat)
-    if (ncol(subgroupmat)==1) return(matrix(, ncol=0, nrow=nrow(subgroupmat)))
-    colcontrasts <- matrix(  sprintf('%s-%s',    # no space: as lm(contr.sdiff)
-                                    subgroupmat[, -1],
-                                    subgroupmat[, -ncol(subgroupmat)]),
-                            nrow = nrow(subgroupmat),
-                            ncol = ncol(subgroupmat)-1)
-    rownames(colcontrasts) <- rownames(subgroupmat)
-    colnames(colcontrasts) <- sprintf('%s-%s',   # no space: as lm(contr.sdiff)
-                            colnames(subgroupmat)[-1],
-                            colnames(subgroupmat)[-ncol(subgroupmat)])
-    colcontrasts
-}
-
-
-#' @rdname contrast_subgroup_cols
-#' @export
-contrast_subgroup_rows <- function(object, subgroupvar){
-    subgroupmat <- subgroup_matrix(object, subgroupvar)
-    if (nrow(subgroupmat)==1) return(matrix(, nrow=0, ncol=ncol(subgroupmat)))
-    rowcontrasts <- matrix(  sprintf('%s-%s',  # no space: as lm(contr.sdiff)
-                                    subgroupmat[-nrow(subgroupmat), ],
-                                    subgroupmat[-1, ]),
-                            nrow = nrow(subgroupmat)-1,
-                            ncol = ncol(subgroupmat))
-    colnames(rowcontrasts) <- colnames(subgroupmat)
-    rownames(rowcontrasts) <- sprintf('%s-%s', # no space: as lm(contr.sdiff)
-                            rownames(subgroupmat)[-nrow(subgroupmat)],
-                            rownames(subgroupmat)[-1])
-    rowcontrasts
-}
-
-
-# contrast_coefs <- function(object, formula){
-#     subgroupvar <- all.vars(formula)[1]
-#     design <- create_design(object, formula = formula)
-#     if (ncol(design)==1){
-#         list(matrix(colnames(design), nrow=1, ncol=1), 
-#             matrix(nrow=0, ncol=0))
-#     } else if (all(design[, 1]==1)){
-#         list(colnames(design)[-1][seq_len(nlevels(object, subgroupvar)-1)], 
-#             matrix(nrow=0, ncol=0))
-#     } else {
-#         list(contrast_subgroup_cols(object, subgroupvar),
-#             contrast_subgroup_rows( object, subgroupvar)) }
-# }
-
 
 #' @rdname model_coefs
 #' @export
@@ -518,6 +448,8 @@ contrast_coefs <- function(
     
     if (ncol(design)==1)  colnames(design) else setdiff(colnames(design), 'Intercept')
 }
+
+
 
 
 #' Get model coefs

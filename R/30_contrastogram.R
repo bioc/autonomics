@@ -1,5 +1,60 @@
 #=============================================================================
 #
+#                   contrast_subgroup_cols
+#                   contrast_subgroup_rows
+#
+#==============================================================================
+
+
+#' Row/Col contrasts
+#' @param object       SummarizedExperiment
+#' @param subgroupvar  subgroup svar
+#' @return  matrix
+#' @examples
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' object$subgroup <- paste0(object$Diabetes, '.', object$Time)
+#' subgroup_matrix(object, subgroupvar = 'subgroup')
+#' contrast_subgroup_cols(object, subgroupvar = 'subgroup')
+#' contrast_subgroup_rows(object, subgroupvar = 'subgroup')
+#' @export
+contrast_subgroup_cols <- function(object, subgroupvar){
+    subgroupmat <- subgroup_matrix(object, subgroupvar)
+    if (is_scalar(subgroupmat))  return(subgroupmat)
+    if (ncol(subgroupmat)==1) return(matrix(, ncol=0, nrow=nrow(subgroupmat)))
+    colcontrasts <- matrix(  sprintf('%s-%s',    # no space: as lm(contr.sdiff)
+                                    subgroupmat[, -1],
+                                    subgroupmat[, -ncol(subgroupmat)]),
+                            nrow = nrow(subgroupmat),
+                            ncol = ncol(subgroupmat)-1)
+    rownames(colcontrasts) <- rownames(subgroupmat)
+    colnames(colcontrasts) <- sprintf('%s-%s',   # no space: as lm(contr.sdiff)
+                            colnames(subgroupmat)[-1],
+                            colnames(subgroupmat)[-ncol(subgroupmat)])
+    colcontrasts
+}
+
+
+#' @rdname contrast_subgroup_cols
+#' @export
+contrast_subgroup_rows <- function(object, subgroupvar){
+    subgroupmat <- subgroup_matrix(object, subgroupvar)
+    if (nrow(subgroupmat)==1) return(matrix(, nrow=0, ncol=ncol(subgroupmat)))
+    rowcontrasts <- matrix(  sprintf('%s-%s',  # no space: as lm(contr.sdiff)
+                                    subgroupmat[-nrow(subgroupmat), ],
+                                    subgroupmat[-1, ]),
+                            nrow = nrow(subgroupmat)-1,
+                            ncol = ncol(subgroupmat))
+    colnames(rowcontrasts) <- colnames(subgroupmat)
+    rownames(rowcontrasts) <- sprintf('%s-%s', # no space: as lm(contr.sdiff)
+                            rownames(subgroupmat)[-nrow(subgroupmat)],
+                            rownames(subgroupmat)[-1])
+    rowcontrasts
+}
+
+
+#=============================================================================
+#
 #             plot_contrastogram
 #                 compute_connections
 #
