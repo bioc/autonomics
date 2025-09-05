@@ -27,8 +27,7 @@ LINMOD(
   coefs = contrast_coefs(object, design = design),
   contrasts = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = "~",
-  suffix = paste0(sep, engine),
+  suffix = paste0("~", engine),
   verbose = TRUE,
   outdir = NULL,
   writefun = "write_xl",
@@ -48,8 +47,7 @@ linmod_limma(
   coefs = if (is.null(contrasts)) contrast_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = "~",
-  suffix = paste0(sep, "limma"),
+  suffix = "~limma",
   verbose = TRUE
 )
 
@@ -157,8 +155,6 @@ fit_wilcoxon(...)
 
 \item{weightvar}{NULL or name of weight matrix in assays(object)}
 
-\item{sep}{string: pvar separator  ("~" in "p~t2~limma")}
-
 \item{suffix}{string: pvar suffix ("limma" in "p~t2~limma")}
 
 \item{verbose}{whether to msg}
@@ -215,11 +211,6 @@ General Linear Model
       # flexible, but only approximate
       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
         
-# Custom separator
-  fdt(object) \%<>\% extract(, 'feature_id')
-  fdt( linmod_limma(object, sep = '.'))
-  fdt( linmod_limma(object, block = 'Subject', sep = '.') )
-
 # Top-level function also plots and writes
   LINMOD(object, block = 'Subject', coefs = 't1-t0')
   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)

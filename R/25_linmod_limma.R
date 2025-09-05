@@ -185,8 +185,7 @@ X <- function(
 #' @export
 beta <- function( object, fit = fits(object)[1] ){
     betas <- effectmat(object, fit = fit, coef = coefs(object, intercept = TRUE))
-    sep <- guess_fitsep(object)
-    colnames(betas) %<>% split_extract_fixed(sep, 1)
+    colnames(betas) %<>% split_extract_fixed('~', 1)
     if ('Intercept' %in% colnames(betas))  betas[ , 'Intercept' ] <- 0
     betas[ pmat(object, fit = fit) > 0.05 ] <- 0
     betas[ is.na(betas) ] <- 0
@@ -637,7 +636,6 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #' @param coefs     NULL or character vector: model coefs to record
 #' @param contrasts NULL or character vector: posthoc contrasts to record
 #' @param weightvar NULL or name of weight matrix in assays(object)
-#' @param sep       string: pvar separator  ("~" in "p~t2~limma")
 #' @param suffix    string: pvar suffix ("limma" in "p~t2~limma")
 #' @param verbose   whether to msg
 #' @param outdir    NULL or dir
@@ -680,11 +678,6 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'       # flexible, but only approximate
 #'       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
 #'         
-#' # Custom separator
-#'   fdt(object) %<>% extract(, 'feature_id')
-#'   fdt( linmod_limma(object, sep = '.'))
-#'   fdt( linmod_limma(object, block = 'Subject', sep = '.') )
-#'
 #' # Top-level function also plots and writes
 #'   LINMOD(object, block = 'Subject', coefs = 't1-t0')
 #'   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
@@ -704,8 +697,7 @@ LINMOD <- function(
         coefs = contrast_coefs(object, design = design),
     contrasts = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights'    else NULL,
-          sep = '~',
-       suffix = paste0(sep, engine),
+       suffix = paste0('~', engine),
       verbose = TRUE, 
        outdir = NULL,
      writefun = 'write_xl',
@@ -726,7 +718,7 @@ LINMOD <- function(
     assert_is_list(argsexprs)
 # Fit
     if (verbose)  cmessage('%sLinMod', spaces(4)) # unwanted when called during survival
-    fitfun <- paste0('fit_', engine)
+    fitfun <- paste0('linmod_', engine)
     object %<>%  get(fitfun)( formula = formula,
                                  drop = drop,
                             codingfun = codingfun, 
@@ -735,7 +727,6 @@ LINMOD <- function(
                                 coefs = coefs,
                             contrasts = contrasts,
                             weightvar = weightvar,
-                                  sep = sep,
                                suffix = suffix, 
                               verbose = verbose )
 # Write tables
@@ -861,8 +852,7 @@ linmod_limma <- function(
         coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = '~',
-       suffix = paste0(sep, 'limma'),
+       suffix = '~limma',
       verbose = TRUE
 ){
 # Assert
@@ -903,17 +893,17 @@ linmod_limma <- function(
     
 # p/t/fdr
     fitdt <- data.table(feature_id = rownames(limmafit))
-    dt0 <- data.table(limmafit$coefficients);                            names(dt0) %<>% paste0('effect',  sep, ., suffix); fitdt %<>% cbind(dt0)
-    dt0 <- data.table(limmafit$t);                                       names(dt0) %<>% paste0('t',       sep, ., suffix); fitdt %<>% cbind(dt0)
-    dt0 <- data.table(limmafit$p.value);                                 names(dt0) %<>% paste0('p',       sep, ., suffix); fitdt %<>% cbind(dt0)
-   #dt0 <- data.table(total = limmafit$df.total);                        names(dt0) %<>% paste0('df',      sep, ., suffix); fitdt %<>% cbind(dt0)
-   #dt0 <- data.table(prior = limmafit$df.prior);                        names(dt0) %<>% paste0('df',      sep, ., suffix); fitdt %<>% cbind(dt0)
-   #dt0 <- data.table(resid = limmafit$df.residual);                     names(dt0) %<>% paste0('df',      sep, ., suffix); fitdt %<>% cbind(dt0)
-   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se',      sep, ., suffix); fitdt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$coefficients);         names(dt0) %<>% paste0('effect~', ., suffix); fitdt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$t);                    names(dt0) %<>% paste0(     't~', ., suffix); fitdt %<>% cbind(dt0)
+    dt0 <- data.table(limmafit$p.value);              names(dt0) %<>% paste0(     'p~', ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(total = limmafit$df.total);     names(dt0) %<>% paste0(    'df~', ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(prior = limmafit$df.prior);     names(dt0) %<>% paste0(    'df~', ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(resid = limmafit$df.residual);  names(dt0) %<>% paste0(    'df~', ., suffix); fitdt %<>% cbind(dt0)
+   #dt0 <- data.table(sqrt(limmafit$s2.post) * limmafit$stdev.unscaled); names(dt0) %<>% paste0('se~', ., suffix); fitdt %<>% cbind(dt0)
 # F statistics                                        # Suprising shorthand for intercept-free fstats !
     cols <- setdiff(colnames(limmafit), 'Intercept')  # https://support.bioconductor.org/p/65253/#65268
-    fitdt[, (sprintf('PF%sglobal%s', sep, suffix)) := limmafit[, cols]$F.p.value ]
-    fitdt[, (sprintf( 'F%sglobal%s', sep, suffix)) := limmafit[, cols]$F         ]
+    fitdt[, (sprintf('PF~global%s', suffix)) := limmafit[, cols]$F.p.value ]
+    fitdt[, (sprintf( 'F~global%s', suffix)) := limmafit[, cols]$F         ]
 # Select
     if (is.null(coefs))  coefs <- contrasts
     fitdt %<>% extract(, c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs)), with = FALSE)
@@ -960,8 +950,9 @@ summarize_fit <- function(object, ...)  UseMethod('summarize_fit')
 #' @export
 summarize_fit.data.table <- function(
     object, 
-          fit = fits(object),
-        coefs = autonomics::coefs(object, fit = fit), ...
+       fit = fits(object),
+     coefs = autonomics::coefs(object, fit = fit), 
+       ...
 ){
 # Assert
     object %<>% copy()
@@ -969,8 +960,7 @@ summarize_fit.data.table <- function(
     statistic <- coefficient <- variable <- NULL
     effect <- p <- fdr <- NULL
 # Summarize
-     sep <- guess_fitsep(object)
-    cols <- names(object) %>% extract(stri_detect_fixed(., sep))
+    cols <- names(object) %>% extract(stri_detect_fixed(., '~'))
     object %<>% extract(, c('feature_id', cols), with = FALSE)
     object %<>% add_adjusted_pvalues(method = 'fdr', fit = fit, coefs = coefs)
     assert_has_no_duplicates(names(object))
@@ -978,9 +968,9 @@ summarize_fit.data.table <- function(
         # Because if there are duplicate cols then the dcasting further down is no longer unique
         # And dcasting then resorts to meaningless length aggregation
     longdt <- object %>% melt.data.table(id.vars = 'feature_id')
-    longdt[, statistic    := split_extract_fixed(variable, sep, 1) %>% factor(unique(.))]
-    longdt[,  coefficient := split_extract_fixed(variable, sep, 2) %>% factor(unique(.))]
-    longdt[,       fit    := split_extract_fixed(variable, sep, 3) %>% factor(unique(.))]
+    longdt[, statistic    := split_extract_fixed(variable, '~', 1) %>% factor(unique(.))]
+    longdt[,  coefficient := split_extract_fixed(variable, '~', 2) %>% factor(unique(.))]
+    longdt[,       fit    := split_extract_fixed(variable, '~', 3) %>% factor(unique(.))]
     longdt[, variable := NULL]
     
     sumdt <- dcast.data.table(longdt, feature_id + coefficient + fit ~ statistic, value.var = 'value')
