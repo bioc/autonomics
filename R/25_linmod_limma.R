@@ -138,10 +138,9 @@ create_design.data.table <- function(
             if (is.factor(object[[predictor]]))  colnames(myDesign) %<>% 
                         stri_replace_first_fixed(predictor, '') }
             # Fails for e.g. Diabetes = YES/NO: a meaningless column "YES" is created
-            # For other cases it works wonderfully, so I keep it for now.
-            # If it gives too many issues, roll back to doing the dropping only
-            # for "subgroup" levels:
-            #colnames(myDesign) %<>% gsub('subgroup', '', ., fixed=TRUE)
+            # For other cases it works wonderfully, so keep for now.
+            # If it gives too many issues, roll back to dropping only for "subgroup" levels:
+            # colnames(myDesign) %<>% gsub('subgroup', '', ., fixed=TRUE)
     }
 # Return
     return(myDesign)
@@ -160,7 +159,7 @@ create_design.data.table <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% linmod_limma(block = 'Subject') # intercept required!
+#' object %<>% linmod_limma(block = 'Subject', coefs = model_coefs(object)) # intercept required!
 #' beta(object)                    #    betas : nlevel x nfeature
 #'    X(object)                    #   design : nlevel x nlevel
 #'    X(object) %*% beta(object)   # response : nlevel x nfeature
@@ -995,11 +994,11 @@ linmod_limma <- function(
 # Select
     if (is.null(coefs))  coefs <- contrasts
     fitdt %<>% extract(, c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs)), with = FALSE)
-    sumdt <- summarize_fit(fitdt, fit = 'limma')
+    sumdt <- summarize_fit(fitdt, fit = 'limma', coefs = coefs)
     if (verbose)  message_df('                  %s', sumdt)
 # Return    
-  # fdt(object)$F.limma   <- fitdt$F
-  # fdt(object)$F.p.limma <- fitdt$F.p
+  # fdt(object)$F.limma   <- limmafit$F
+  # fdt(object)$F.p.limma <- limmafit$F.p
     object %<>% merge_fdt(fitdt)
     object
 }
