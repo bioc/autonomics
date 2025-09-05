@@ -436,6 +436,15 @@ code_helmert_forward <- function(n){
 }
 
 
+
+#==============================================================================
+#
+#                            contrast_coefs
+#                            model_coefs
+#
+#==============================================================================
+
+
 #' @rdname model_coefs
 #' @export
 contrast_coefs <- function(
@@ -483,9 +492,12 @@ model_coefs <- function(
 #
 #==============================================================================
 
+
 # Old approach - interesting 
 #     1. shows the metadata storage approach
 #     2. shows how to pull out F, F.p, se
+#
+#
 # .limmacontrast <- function(object, fit, formula){
 #     # compute contrasts
 #     design <- create_design(object, formula=formula, verbose = FALSE)
@@ -516,15 +528,6 @@ model_coefs <- function(
 #         fdata(object)$F.p.limma <- fit$F.p
 #     }
 # }
-
-contrvec2mat  <- function(contrasts)  matrix(
-                    contrasts, nrow=1, dimnames=list("", contrasts))
-
-contrmat2list <- function(contrasts)  list(colcontrasts = contrasts)
-
-vectorize_contrasts <- function(contrasts){
-    unname(unlist(lapply(contrasts, function(x) na.exclude(c(t(x))))))
-}
 
 
 #' Reset fit
