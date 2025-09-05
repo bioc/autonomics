@@ -26,7 +26,7 @@
     cbind(pvalues, tvalues, effects, stderrs, F = fval, F.p = f.p )
 }
 
-.lm <- function(sd, formula, block, weights, sep, optim = NULL){
+.lm <- function(sd, formula, block, weights, optim = NULL){
     # Initialize
         value <- NULL
         formula <- as.formula(formula)
@@ -59,11 +59,12 @@
         fitres %<>% extract(, c('effect', 't', 'p'), drop = FALSE)
         fitmat <- matrix(fitres, nrow = 1)
         colnames(fitmat) <- paste(rep(colnames(fitres), each = nrow(fitres)), 
-                                  rep(rownames(fitres), times = ncol(fitres)), sep = sep)
+                                  rep(rownames(fitres), times = ncol(fitres)), sep = '~')
         data.table(cbind(fitmat , t(tF), t(pF)))
 }
 
-.lme <- function(sd, formula, block, weights, sep, opt = 'optim'){
+
+.lme <- function(sd, formula, block, weights, opt = 'optim'){
     ctrl <- nlme::lmeControl(opt = opt)  # https://stats.stackexchange.com/a/40664
     fitres <- nlme::lme( fixed = formula, 
                         random = block, 
@@ -82,11 +83,12 @@
     fitres %<>% extract(, c('effect', 't', 'p'), drop = FALSE)
     fitmat <- matrix(fitres, nrow = 1)
     colnames(fitmat) <- paste(rep(colnames(fitres), each = nrow(fitres)), 
-                        rep(rownames(fitres), times = ncol(fitres)), sep = sep )
+                        rep(rownames(fitres), times = ncol(fitres)), sep = '~' )
     data.table(cbind(fitmat, t(tF), t(pF)))
 }
 
-.lmer <- function(sd, formula, block = NULL, weights, sep, optim = NULL){
+
+.lmer <- function(sd, formula, block = NULL, weights, optim = NULL){
     fitres <- lme4::lmer(  formula = formula,
                               data = sd,
                            weights = weights,
@@ -106,7 +108,7 @@
     fitres %<>% extract(, c('effect', 't', 'p'), drop = FALSE)
     fitmat <- matrix(fitres, nrow=1)
     colnames(fitmat) <- paste(rep(colnames(fitres), each = nrow(fitres)), 
-                        rep(rownames(fitres), times = ncol(fitres)), sep = sep )
+                        rep(rownames(fitres), times = ncol(fitres)), sep = '~' )
     data.table(cbind(fitmat, t(tF), t(pF)))
 }
 
@@ -233,8 +235,7 @@ lmx <- function(
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = '~',
-       suffix = paste0(sep, fit),
+       suffix = paste0('~', fit),
       verbose = TRUE
 ){
 # Assert
@@ -271,7 +272,6 @@ lmx <- function(
     fitdt <- dt[, fitmethod( .SD,   formula = lhsformula, 
                                        block = block, 
                                      weights = get(weightvar),
-                                         sep = sep,
                                          opt = opt ),            by = 'feature_id' ]
     names(fitdt) %<>% stri_replace_first_fixed('(Intercept)', 'Intercept')
     vars <- all.vars(formula)
@@ -292,8 +292,6 @@ lmx <- function(
 
 
 
-
-
 #' @rdname LINMOD
 #' @export
 linmod_lm <- function(
@@ -305,8 +303,7 @@ linmod_lm <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = '~',
-       suffix = paste0(sep, 'lm'),
+       suffix = '~lm',
     contrasts = NULL,
       verbose = TRUE
 ){
@@ -320,7 +317,6 @@ linmod_lm <- function(
              block = block,
              coefs = coefs,
          weightvar = weightvar,
-               sep = sep,
             suffix = suffix,
            verbose = verbose )
 }
@@ -349,8 +345,7 @@ linmod_lme <- function(
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           opt = 'optim',
-          sep = '~',
-       suffix = paste0(sep, 'lme'),
+       suffix = '~lme',
     contrasts = NULL,
       verbose = TRUE
 ){
@@ -367,7 +362,6 @@ linmod_lme <- function(
              block = block, 
              coefs = coefs,
          weightvar = weightvar,
-               sep = sep,
             suffix = suffix,
                opt = opt,
            verbose = verbose )
@@ -395,8 +389,7 @@ linmod_lmer <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = '~',
-       suffix = paste0(sep, 'lmer'),
+       suffix = '~lmer',
     contrasts = NULL,
       verbose = TRUE
 ){
@@ -414,7 +407,6 @@ linmod_lmer <- function(
              block = block, 
              coefs = coefs,
          weightvar = weightvar,
-               sep = sep,
             suffix = suffix,
            verbose = verbose )
 }

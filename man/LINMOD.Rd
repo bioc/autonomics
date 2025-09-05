@@ -62,8 +62,7 @@ linmod_lm(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = "~",
-  suffix = paste0(sep, "lm"),
+  suffix = "~lm",
   contrasts = NULL,
   verbose = TRUE
 )
@@ -80,8 +79,7 @@ linmod_lme(
   coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   opt = "optim",
-  sep = "~",
-  suffix = paste0(sep, "lme"),
+  suffix = "~lme",
   contrasts = NULL,
   verbose = TRUE
 )
@@ -97,8 +95,7 @@ linmod_lmer(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = "~",
-  suffix = paste0(sep, "lmer"),
+  suffix = "~lmer",
   contrasts = NULL,
   verbose = TRUE
 )
@@ -216,6 +213,5 @@ General Linear Model
   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
   LINMOD(object, block = 'Subject', coefs = 't1-t0',   plotexprs = TRUE)
   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE)
-  LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
 }

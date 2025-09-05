@@ -650,31 +650,25 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #' # Standard usage
 #'   file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'   object <- read_metabolon(file)
-#'   object %<>% LINMOD()                                # Default
-#'   object %<>% LINMOD(  ~subgroup )                    # Custom formula
-#'   object %<>% LINMOD(  ~subgroup, block = 'Subject')  # Block effect
-#'   summarize_fit(object)
+#'   LINMOD(object)                                # Default
+#'   LINMOD(object, ~subgroup )                    # Custom formula
+#'   LINMOD(object, ~subgroup, block = 'Subject')  # Block effect
 #'   
 #' # Alternative engines: argument 'engine' or dedicated function
-#'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% linmod_limma(   ~subgroup, block = 'Subject')  # Default engine
-#'   object %<>% linmod_lm(     ~subgroup, block = 'Subject')  # Traditional
-#'   object %<>% linmod_lme(     ~subgroup, block = 'Subject')  # Powerful random effects
-#'   object %<>% linmod_lmer(    ~subgroup, block = 'Subject')  # Yet more powerful random effects
-#'   object %<>% linmod_wilcoxon(~subgroup, block = 'Subject')  # Non-parametric
-#'   summarize_fit(object)
+#'   linmod_limma(   object, ~subgroup, block = 'Subject')  # Default engine
+#'   linmod_lm(      object, ~subgroup, block = 'Subject')  # Traditional
+#'   linmod_lme(     object, ~subgroup, block = 'Subject')  # Powerful random effects
+#'   linmod_lmer(    object, ~subgroup, block = 'Subject')  # Yet more powerful random effects
+#'   linmod_wilcoxon(object, ~subgroup, block = 'Subject')  # Non-parametric
 #'     
 #' # Alternative coding: backward diffs instead of baseline
-#'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% linmod_limma(     ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   object %<>% linmod_lme(       ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   object %<>% linmod_lmer(      ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   summarize_fit(object)
+#'   linmod_limma(object, ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   linmod_lme(  object, ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   linmod_lmer( object, ~ subgroup, block = 'Subject', codingfun = code_diff)
 #'     
 #' # Posthoc contrasts: limma-only, flexible, but sometimes approximate
-#'   fdt(object) %<>% extract(, 'feature_id')
-#'   object %<>% linmod_limma( ~ subgroup, block = 'Subject', codingfun = code_control)
-#'   object %<>% linmod_limma( ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
+#'   linmod_limma(object,     ~ subgroup, block = 'Subject', codingfun = code_control)
+#'   linmod_limma(object, ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
 #'       # flexible, but only approximate
 #'       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
 #'         
@@ -683,7 +677,6 @@ formulate <- function(modelvars, across = FALSE, within = FALSE, between = FALSE
 #'   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE)
 #'   LINMOD(object, block = 'Subject', coefs = 't1-t0',   plotexprs = TRUE)
 #'   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE)
-#'   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
 #'   LINMOD(object, block = 'Subject', coefs = 't1-t0', plotvolcano = TRUE, plotexprs = TRUE, outdir = tempdir())
 #' @export
 LINMOD <- function(
