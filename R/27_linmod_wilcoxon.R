@@ -79,7 +79,13 @@ all_vars <- function(x){
     if (length(y)==0)  y <- NULL
     y
 }
-    
+
+
+vectorize_contrasts <- function(contrasts){
+    unname(unlist(lapply(contrasts, function(x) na.exclude(c(t(x))))))
+}
+
+
 #' @export
 #' @rdname LINMOD
 linmod_wilcoxon <- function(
