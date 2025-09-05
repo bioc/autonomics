@@ -8,7 +8,6 @@ plot_coef_densities(
   object,
   fit = fits(object)[1],
   coefs = autonomics::coefs(object, fit = fit),
-  sep = "~",
   label = "feature_id"
 )
 }
@@ -18,8 +17,6 @@ plot_coef_densities(
 \item{fit}{'limma', 'lm', 'lme', 'lmer', or 'wilcoxon'}
 
 \item{coefs}{character vector}
-
-\item{sep}{string}
 
 \item{label}{svar}
 }

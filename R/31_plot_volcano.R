@@ -448,7 +448,6 @@ fdr2p <- function(fdr){
 #' @param object SummarizedExperiment
 #' @param fit  'limma', 'lm', 'lme', 'lmer', or 'wilcoxon'
 #' @param coefs character vector
-#' @param sep   string
 #' @param label svar
 #' @return ggplot
 #' @examples
@@ -461,7 +460,6 @@ plot_coef_densities <- function(
     object,
        fit = fits(object)[1],
      coefs = autonomics::coefs(object, fit = fit),
-       sep = '~',
      label = 'feature_id'
 ){
 # Prepare
