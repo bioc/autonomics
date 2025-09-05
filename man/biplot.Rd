@@ -23,7 +23,7 @@ biplot(
   ny = 0,
   colorpalette = make_svar_palette(object, color),
   alphapalette = make_alpha_palette(object, alpha),
-  title = paste0(method, guess_fitsep(fdt(object)), by),
+  title = paste0(method, "~", by),
   theme = ggplot2::theme(plot.title = element_text(hjust = 0.5), panel.grid =
     element_blank())
 )

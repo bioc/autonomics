@@ -14,7 +14,6 @@ pca(
   by = "sample_id",
   assay = assayNames(object)[1],
   ndim = 2,
-  sep = "~",
   minvar = 0,
   center_samples = TRUE,
   verbose = TRUE,
@@ -27,7 +26,6 @@ pls(
   by = "subgroup",
   assay = assayNames(object)[1],
   ndim = 2,
-  sep = "~",
   minvar = 0,
   verbose = FALSE,
   plot = FALSE,
@@ -39,7 +37,6 @@ sma(
   by = "sample_id",
   assay = assayNames(object)[1],
   ndim = 2,
-  sep = "~",
   minvar = 0,
   verbose = TRUE,
   plot = FALSE,
@@ -51,7 +48,6 @@ lda(
   assay = assayNames(object)[1],
   by = "subgroup",
   ndim = 2,
-  sep = "~",
   minvar = 0,
   verbose = TRUE,
   plot = FALSE,
@@ -63,7 +59,6 @@ spls(
   assay = assayNames(object)[1],
   by = "subgroup",
   ndim = 2,
-  sep = "~",
   minvar = 0,
   plot = FALSE,
   ...
@@ -74,7 +69,6 @@ opls(
   by = "subgroup",
   assay = assayNames(object)[1],
   ndim = 2,
-  sep = "~",
   minvar = 0,
   verbose = FALSE,
   plot = FALSE,
@@ -89,8 +83,6 @@ opls(
 \item{assay}{string}
 
 \item{ndim}{number}
-
-\item{sep}{string}
 
 \item{minvar}{number}
 

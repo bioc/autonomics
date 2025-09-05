@@ -74,19 +74,20 @@ evenify_upwards <- function(x)   if (is_odd(x)) x+1 else x
     object
 }
 
-   scorenames <- function( method = 'pca', by, dims = 1:2, sep = '~' )  paste0('t', sep, by, sep, method, dims)
- loadingnames <- function( method = 'pca', by, dims = 1:2, sep = '~' )  paste0('t', sep, by, sep, method, dims)
-   methodname <- function( method = 'pca', by,             sep = '~' )  paste0(          by, sep, method      )
-variancenames <- function(                     dims = 1:2            )  paste0('t',                       dims)
+   scorenames <- function( method = 'pca', by, dims = 1:2)  paste0('t~', by, '~', method, dims)
+ loadingnames <- function( method = 'pca', by, dims = 1:2)  paste0('t~', by, '~', method, dims)
+   methodname <- function( method = 'pca', by            )  paste0(      by, '~', method      )
+variancenames <- function(                     dims = 1:2)  paste0('t',                   dims)
 
 variances <- function(
-    object, method = 'pca', by = biplot_by(object, method), dims = 1:2, sep = '~'
+    object, method = 'pca', by = biplot_by(object, method), dims = 1:2
 ){
     y <- metadata(object)
-    y %<>% extract2(methodname(method, by = by, sep = sep))
+    y %<>% extract2(methodname(method, by = by))
     y %<>% extract(variancenames(dims))
     y
 }
+
 
 #' Extract scores/loadings
 #' @param object SummarizedExperiment
@@ -105,44 +106,43 @@ variances <- function(
 scoremat <- function(
     object, method = 'pca', by = biplot_by(object, method), dim = 1:2
 ){
-    sep <- guess_fitsep(fdt(object))
     cols <- 'sample_id'
-    cols %<>% c(scorenames(method = method, by = by, dims = dim, sep = sep))
+    cols %<>% c(scorenames(method = method, by = by, dims = dim))
     mat <- sdt(object)[, cols, with = FALSE]
     mat %<>% dt2mat()
     mat
 }
+
 
 #' @rdname scoremat
 #' @export
 scores <- function(
     object, method = 'pca', by = biplot_by(object, method), dim = 1
 ){
-    sep <- guess_fitsep(fdt(object))
-    cols <- scorenames(method = method, by = by, dims = dim, sep = sep)
+    cols <- scorenames(method = method, by = by, dims = dim)
     sdt(object)[[cols]]
 }
+
 
 #' @rdname scoremat
 #' @export
 loadingmat <- function(
     object, method = 'pca', by = biplot_by(object, method), dim = 1:2
 ){
-    sep <- guess_fitsep(fdt(object))
     cols <- 'feature_id'
-    cols %<>% c(loadingnames(method = method, by = by, dims = dim, sep = sep))
+    cols %<>% c(loadingnames(method = method, by = by, dims = dim))
     mat <- fdt(object)[, cols, with = FALSE]
     mat %<>% dt2mat()
     mat
 }
+
 
 #' @rdname scoremat
 #' @export
 loadings <- function(
     object, method = 'pca', by = biplot_by(object, method), dim = 1
 ){
-    sep <- guess_fitsep(fdt(object))
-    cols <- loadingnames(method = method, by = by, dims = dim, sep = sep)
+    cols <- loadingnames(method = method, by = by, dims = dim)
     fdt(object)[[cols]]
 }
 
@@ -154,7 +154,6 @@ loadings <- function(
 #'
 #' @param object          SummarizedExperiment
 #' @param by              svar or NULL
-#' @param sep             string
 #' @param assay           string
 #' @param ndim            number
 #' @param minvar          number
@@ -179,7 +178,6 @@ pca <- function(
                 by = 'sample_id', 
              assay = assayNames(object)[1], 
               ndim = 2,
-               sep = '~',
             minvar = 0, 
     center_samples = TRUE,
            verbose = TRUE,
@@ -218,13 +216,13 @@ pca <- function(
       samples <- pca_res@scores
      features <- pca_res@loadings
     variances <- round(100*pca_res@R2)
-     colnames(samples) <-    scorenames(method = 'pca', by = by, dims = seq_len(ndim), sep = sep)
-    colnames(features) <-  loadingnames(method = 'pca', by = by, dims = seq_len(ndim), sep = sep)
+     colnames(samples) <-    scorenames(method = 'pca', by = by, dims = seq_len(ndim))
+    colnames(features) <-  loadingnames(method = 'pca', by = by, dims = seq_len(ndim))
       names(variances) <- variancenames(seq_len(ndim))
 # Add
     object %<>% merge_sdt(mat2dt(samples,   'sample_id'))
     object %<>% merge_fdt(mat2dt(features, 'feature_id'))
-    metavar <- methodname(method = 'pca', by = by, sep = sep)
+    metavar <- methodname(method = 'pca', by = by)
     metadata(object)[[metavar]] <- variances
 # Filter for minvar
     object %<>% .filter_minvar('pca', minvar)
@@ -233,6 +231,7 @@ pca <- function(
     object
 }
 
+
 #' @rdname pca
 #' @export
 pls <- function(
@@ -240,7 +239,6 @@ pls <- function(
          by = 'subgroup',
       assay = assayNames(object)[1],
        ndim = 2, 
-        sep = '~',
      minvar = 0,
     verbose = FALSE,
        plot = FALSE, 
@@ -265,13 +263,13 @@ pls <- function(
     samples   <- pls_out$variates$X
     features  <- pls_out$loadings$X
     variances <- round(100*pls_out$prop_expl_var$X)
-    colnames(samples)  <-    scorenames(method = 'pls', by = by, dims = seq_len(ndim), sep = sep)
-    colnames(features) <-  loadingnames(method = 'pls', by = by, dims = seq_len(ndim), sep = sep)
+    colnames(samples)  <-    scorenames(method = 'pls', by = by, dims = seq_len(ndim))
+    colnames(features) <-  loadingnames(method = 'pls', by = by, dims = seq_len(ndim))
     names(variances)   <- variancenames(seq_len(ndim))
 # Add
     object %<>% merge_sdt(mat2dt(samples,   'sample_id'))
     object %<>% merge_fdt(mat2dt(features, 'feature_id'))
-    metavar <- methodname(method = 'pls', by = by, sep = sep)
+    metavar <- methodname(method = 'pls', by = by)
     metadata(object)[[metavar]] <- variances
 # Filter for minvar
     object %<>% .filter_minvar('pls', minvar)
@@ -288,7 +286,6 @@ sma <- function(
          by = 'sample_id', 
       assay = assayNames(object)[1], 
        ndim = 2, 
-        sep = '~',
      minvar = 0,
     verbose = TRUE, 
        plot = FALSE, 
@@ -320,8 +317,8 @@ sma <- function(
     samples   <- mpm_out$Columns
     features  <- mpm_out$Rows
     variances <- round(100*mpm_tmp$contrib[seq_len(ncomponents)])
-    names(samples)   <-    scorenames(method = 'sma', by = by, dims = seq_len(ndim), sep = sep)
-    names(features)  <-  loadingnames(method = 'sma', by = by, dims = seq_len(ndim), sep = sep)
+    names(samples)   <-    scorenames(method = 'sma', by = by, dims = seq_len(ndim))
+    names(features)  <-  loadingnames(method = 'sma', by = by, dims = seq_len(ndim))
     names(variances) <- variancenames(dims = seq_len(ndim))
 # Restrict
     if (is.infinite(ndim)) ndim <- ncol(samples)
@@ -333,7 +330,7 @@ sma <- function(
     features %<>% cbind(feature_id = rownames(.), .)
     object %<>% merge_sdt(data.table(samples),  'sample_id')
     object %<>% merge_fdt(data.table(features), 'feature_id')
-    metavar <- methodname(method = 'sma', by = by, sep = sep)
+    metavar <- methodname(method = 'sma', by = by)
     metadata(object)[[metavar]] <- variances
 # Filter for minvar
     object %<>% .filter_minvar('sma', minvar)
@@ -350,7 +347,6 @@ lda <- function(
       assay = assayNames(object)[1], 
          by = 'subgroup', 
        ndim = 2, 
-        sep = '~',
      minvar = 0, 
     verbose = TRUE, 
        plot = FALSE, 
@@ -387,8 +383,8 @@ lda <- function(
     variances %<>% extract(  seq_len(ndim))
     if (length(variances)==1) variances <- c(LD1 = variances, LD2 = 0)
 # Rename
-    colnames(samples)  <-    scorenames(method = 'lda', by = by, dims = seq_len(ndim), sep = sep)
-    colnames(features) <-  loadingnames(method = 'lda', by = by, dims = seq_len(ndim), sep = sep)
+    colnames(samples)  <-    scorenames(method = 'lda', by = by, dims = seq_len(ndim))
+    colnames(features) <-  loadingnames(method = 'lda', by = by, dims = seq_len(ndim))
     names(variances)   <- variancenames(ndim)
 # Restrict
     samples   %<>% extract(, seq_len(ndim), drop = FALSE)
@@ -397,7 +393,7 @@ lda <- function(
 # Merge - Filter - Return
     object %<>% merge_sdt(mat2dt(samples,   'sample_id'))
     object %<>% merge_fdt(mat2dt(features, 'feature_id'))
-    metavar <- methodname(method = 'lda', by = by, sep = sep)
+    metavar <- methodname(method = 'lda', by = by)
     metadata(object)[[metavar]] <- variances
     object %<>% .filter_minvar('lda', minvar)
     if (plot)  print(biplot(object, method = 'lda', dims = seq(1,ndim)[1:2], ...))
@@ -412,7 +408,6 @@ spls <- function(
      assay = assayNames(object)[1], 
         by = 'subgroup', 
       ndim = 2, 
-       sep = '~',
     minvar = 0, 
       plot = FALSE, 
        ...
@@ -435,13 +430,13 @@ spls <- function(
     samples   <- pls_out$variates$X
     features  <- pls_out$loadings$X
     variances <- round(100*pls_out$prop_expl_var$X)
-    colnames(samples)  <-    scorenames(method = 'spls', by = by, dims = seq_len(ndim), sep = sep)
-    colnames(features) <-  loadingnames(method = 'spls', by = by, dims = seq_len(ndim), sep = sep)
+    colnames(samples)  <-    scorenames(method = 'spls', by = by, dims = seq_len(ndim))
+    colnames(features) <-  loadingnames(method = 'spls', by = by, dims = seq_len(ndim))
     names(variances)   <- variancenames(seq_len(ndim))
 # Add
     object %<>% merge_sdt(mat2dt(samples,  'sample_id'))
     object %<>% merge_fdt(mat2dt(features,'feature_id'))
-    metavar <- methodname(method = 'spls', by = by, sep = sep)
+    metavar <- methodname(method = 'spls', by = by)
     metadata(object)[[metavar]] <- variances
 # Filter for minvar
     object %<>% .filter_minvar('spls', minvar)
@@ -458,7 +453,6 @@ opls <- function(
          by = 'subgroup', 
       assay = assayNames(object)[1],
        ndim = 2, 
-        sep = '~',
      minvar = 0, 
     verbose = FALSE,
        plot = FALSE, 
@@ -481,13 +475,13 @@ opls <- function(
     samples   <- pls_out@scoreMN
     features  <- pls_out@loadingMN
     variances <- round(pls_out@modelDF$R2X*100)
-    colnames(samples)  <-    scorenames(method = 'opls', by = by, dims = seq_len(ndim), sep = sep)
-    colnames(features) <-  loadingnames(method = 'opls', by = by, dims = seq_len(ndim), sep = sep)
+    colnames(samples)  <-    scorenames(method = 'opls', by = by, dims = seq_len(ndim))
+    colnames(features) <-  loadingnames(method = 'opls', by = by, dims = seq_len(ndim))
     names(variances)   <- variancenames(dims = seq_len(ndim))
 # Add
     object %<>% merge_sdt(mat2dt(samples,  'sample_id'))
     object %<>% merge_fdt(mat2dt(features, 'feature_id'))
-    metavar <- methodname(method = 'opls', by = by, sep = sep)
+    metavar <- methodname(method = 'opls', by = by)
     metadata(object)[[metavar]] <- variances
 # Filter for minvar
     object %<>% .filter_minvar('opls', minvar)
@@ -675,18 +669,16 @@ make_alpha_palette <- function(object, alpha){
 }
     
 biplot_methods <- function(object){
-    sep <- guess_fitsep(fdt(object))
     y <- grep('(pca|pls)', svars(object), value = TRUE)
-    y %<>% split_extract_fixed(sep, 3)
+    y %<>% split_extract_fixed('~', 3)
     y <- gsub('[0-9]+', '', y)
     y %<>% unique()
     y
 }
 
 biplot_by <- function(object, method = 'pca'){
-    sep <- guess_fitsep(fdt(object))
     y <- grep(method, svars(object), value = TRUE, fixed = TRUE)
-    y %<>% split_extract_fixed(sep, 2)
+    y %<>% split_extract_fixed('~', 2)
     y %<>% unique()
     y
 }
@@ -694,8 +686,7 @@ biplot_by <- function(object, method = 'pca'){
 biplot_dims <- function(
     object, method = 'pca', by = biplot_by(object, method)
 ){
-    sep <- guess_fitsep(fdt(object))
-    x <- paste0('t', sep, by, sep, method)
+    x <- paste0('t~', by, '~', method)
     y <- grep(x, svars(object), value = TRUE, fixed = TRUE)
     y <- gsub(x, '', y)
     y %<>% as.numeric()
@@ -755,7 +746,7 @@ biplot <- function(
                ny = 0,
      colorpalette =  make_svar_palette(object, color),
      alphapalette = make_alpha_palette(object, alpha), 
-            title = paste0(method, guess_fitsep(fdt(object)), by), 
+            title = paste0(method, '~', by), 
             theme = ggplot2::theme(plot.title = element_text(hjust = 0.5), 
                                    panel.grid = element_blank())
 ){
@@ -773,10 +764,9 @@ biplot <- function(
                           fixed %<>% extract(names(.) %>% setdiff('size'))}
     
     ndim <- max(dims)
-    sep <- guess_fitsep(fdt(object))
-    x <- scorenames(method, by = by, dims = dims[[1]], sep = sep)
-    y <- scorenames(method, by = by, dims = dims[[2]], sep = sep)
-    vars <- round(variances(object, method = method, by = by, dims = dims, sep = sep))
+    x <- scorenames(method, by = by, dims = dims[[1]])
+    y <- scorenames(method, by = by, dims = dims[[2]])
+    vars <- round(variances(object, method = method, by = by, dims = dims))
     xlab <- sprintf('X%d : %d%%', dims[[1]], vars[[1]])
     ylab <- sprintf('X%d : %d%%', dims[[2]], vars[[2]])
 
