@@ -8,7 +8,7 @@ plot_coef_densities(
   object,
   fit = fits(object)[1],
   coefs = autonomics::coefs(object, fit = fit),
-  sep = FITSEP,
+  sep = "~",
   label = "feature_id"
 )
 }

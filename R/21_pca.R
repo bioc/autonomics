@@ -74,13 +74,13 @@ evenify_upwards <- function(x)   if (is_odd(x)) x+1 else x
     object
 }
 
-   scorenames <- function( method = 'pca', by, dims = 1:2, sep = FITSEP )  paste0('t', sep, by, sep, method, dims)
- loadingnames <- function( method = 'pca', by, dims = 1:2, sep = FITSEP )  paste0('t', sep, by, sep, method, dims)
-   methodname <- function( method = 'pca', by,             sep = FITSEP )  paste0(          by, sep, method      )
-variancenames <- function(                     dims = 1:2               )  paste0('t',                       dims)
+   scorenames <- function( method = 'pca', by, dims = 1:2, sep = '~' )  paste0('t', sep, by, sep, method, dims)
+ loadingnames <- function( method = 'pca', by, dims = 1:2, sep = '~' )  paste0('t', sep, by, sep, method, dims)
+   methodname <- function( method = 'pca', by,             sep = '~' )  paste0(          by, sep, method      )
+variancenames <- function(                     dims = 1:2            )  paste0('t',                       dims)
 
 variances <- function(
-    object, method = 'pca', by = biplot_by(object, method), dims = 1:2, sep = FITSEP
+    object, method = 'pca', by = biplot_by(object, method), dims = 1:2, sep = '~'
 ){
     y <- metadata(object)
     y %<>% extract2(methodname(method, by = by, sep = sep))
@@ -179,7 +179,7 @@ pca <- function(
                 by = 'sample_id', 
              assay = assayNames(object)[1], 
               ndim = 2,
-               sep = FITSEP,
+               sep = '~',
             minvar = 0, 
     center_samples = TRUE,
            verbose = TRUE,
@@ -240,7 +240,7 @@ pls <- function(
          by = 'subgroup',
       assay = assayNames(object)[1],
        ndim = 2, 
-        sep = FITSEP,
+        sep = '~',
      minvar = 0,
     verbose = FALSE,
        plot = FALSE, 
@@ -288,7 +288,7 @@ sma <- function(
          by = 'sample_id', 
       assay = assayNames(object)[1], 
        ndim = 2, 
-        sep = FITSEP,
+        sep = '~',
      minvar = 0,
     verbose = TRUE, 
        plot = FALSE, 
@@ -350,7 +350,7 @@ lda <- function(
       assay = assayNames(object)[1], 
          by = 'subgroup', 
        ndim = 2, 
-        sep = FITSEP,
+        sep = '~',
      minvar = 0, 
     verbose = TRUE, 
        plot = FALSE, 
@@ -412,7 +412,7 @@ spls <- function(
      assay = assayNames(object)[1], 
         by = 'subgroup', 
       ndim = 2, 
-       sep = FITSEP,
+       sep = '~',
     minvar = 0, 
       plot = FALSE, 
        ...
@@ -458,7 +458,7 @@ opls <- function(
          by = 'subgroup', 
       assay = assayNames(object)[1],
        ndim = 2, 
-        sep = FITSEP,
+        sep = '~',
      minvar = 0, 
     verbose = FALSE,
        plot = FALSE, 

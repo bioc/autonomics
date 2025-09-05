@@ -43,7 +43,7 @@ test_that(  "read_metabolon: fit = 'limma' ", {
         object <- read_metabolon(file, fit = 'limma', block = 'Subject')
     # Test
         expect_s4_class(object, 'SummarizedExperiment')
-        expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'limma'))))
+        expect_true(any(stri_detect_fixed(fvars(object), '~limma')))
 })
 
 test_that(  "read_metabolon: fit = 'lm' ", {
@@ -52,7 +52,7 @@ test_that(  "read_metabolon: fit = 'lm' ", {
         object <- read_metabolon(file, fit = 'lm', block = 'Subject')
     # Test
         expect_s4_class(object, 'SummarizedExperiment')
-        expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'lm'))))
+        expect_true(any(stri_detect_fixed(fvars(object), '~lm')))
 })
 
 test_that("read_metabolon: fit = 'lme' ", {
@@ -61,7 +61,7 @@ test_that("read_metabolon: fit = 'lme' ", {
         object <- read_metabolon(file, block = 'Subject', fit = 'lme')
     # Test
         expect_s4_class(object, 'SummarizedExperiment')
-        expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'lme'))))
+        expect_true(any(stri_detect_fixed(fvars(object), '~lme')))
 })
 
 test_that("read_metabolon: fit = 'lmer' ",{
@@ -70,7 +70,7 @@ test_that("read_metabolon: fit = 'lmer' ",{
         object <- suppressWarnings(read_metabolon(file, block = 'Subject', fit = 'lmer'))
     # Test
         expect_s4_class(object, 'SummarizedExperiment')
-        expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'lmer'))))
+        expect_true(any(stri_detect_fixed(fvars(object), '~lmer')))
 })
 
 test_that("read_metabolon: fit = 'wilcoxon' ", {
@@ -79,5 +79,5 @@ test_that("read_metabolon: fit = 'wilcoxon' ", {
         object <- read_metabolon(file, block = 'Subject', fit = 'wilcoxon')
     # Test
         expect_s4_class(object, 'SummarizedExperiment')
-        expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'wilcoxon'))))
+        expect_true(any(stri_detect_fixed(fvars(object), '~wilcoxon')))
 })

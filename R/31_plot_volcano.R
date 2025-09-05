@@ -79,7 +79,7 @@ add_adjusted_pvalues.data.table <- function(
     assert_is_subset(method, stats::p.adjust.methods)
     if (is.null(pvar(object, fit = fit, coef = coefs)))  return(object)   # pca: no pvalues
 # Reset
-    fdrvars <- paste(method, coefs, fit, sep = FITSEP)
+    fdrvars <- paste(method, coefs, fit, sep = '~')
     fdrvars %<>% intersect(names(object))
     object[ , (fdrvars) := NULL ]
 # Compute
@@ -461,7 +461,7 @@ plot_coef_densities <- function(
     object,
        fit = fits(object)[1],
      coefs = autonomics::coefs(object, fit = fit),
-       sep = FITSEP,
+       sep = '~',
      label = 'feature_id'
 ){
 # Prepare

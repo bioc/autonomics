@@ -252,8 +252,8 @@ test_that( " read_proteingroups: fukuda20, fit = 'limma' ", {
     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
     object <- read_maxquant_proteingroups(file, fit = 'limma', plot = TRUE, label = NULL)
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'limma'))))
-    expect_true(any(stri_detect_fixed(fvars(object), paste0('p', FITSEP))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~limma')))
+    expect_true(any(stri_detect_fixed(fvars(object), 'p~'    )))
 })
 
 
@@ -262,7 +262,7 @@ test_that( " read_proteingroups: fukuda20, fit = 'lm' ", {
     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
     object <- read_maxquant_proteingroups(file, fit = 'lm', plot = TRUE, label = NULL)
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP,  'lm'))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~lm')))
 })
 
 
@@ -271,7 +271,7 @@ test_that( " read_proteingroups: fukuda20, fit = 'wilcoxon' ", {
     file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
     object <- read_maxquant_proteingroups(file, fit = 'wilcoxon')
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'wilcoxon'))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~wilcoxon')))
 })
 
 

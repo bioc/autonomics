@@ -35,26 +35,26 @@ test_that(  " read_somascan: fit = 'limma', block = 'Subject' ", {
     file <- system.file('extdata/atkin.somascan.adat', package = 'autonomics')
     object <- read_somascan(file, fit = 'limma', block = 'Subject')
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'limma'))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~limma')))
 })
 
 test_that(" read_somascan: fit = 'lme', block = 'Subject' ", {
     file <- system.file('extdata/atkin.somascan.adat', package = 'autonomics')
     object <- read_somascan(file, block = 'Subject', fit = 'lme')
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'lme'))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~lme')))
 })
 
 test_that("read_somascan: fit = 'lmer', block = 'Subject' ", {
     file <- system.file('extdata/atkin.somascan.adat', package = 'autonomics')
     object <- read_somascan(file, block = 'Subject', fit = 'lmer')
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'lmer'))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~lmer')))
 })
 
 test_that("read_somascan: fit = 'wilcoxon', block = 'Subject' ", {
     file <- system.file('extdata/atkin.somascan.adat', package = 'autonomics')
     object <- read_somascan(file, block = 'Subject', fit = 'wilcoxon')
     expect_s4_class(object, 'SummarizedExperiment')
-    expect_true(any(stri_detect_fixed(fvars(object), paste0(FITSEP, 'wilcoxon'))))
+    expect_true(any(stri_detect_fixed(fvars(object), '~wilcoxon')))
 })

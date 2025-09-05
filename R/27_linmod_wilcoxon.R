@@ -92,7 +92,7 @@ linmod_wilcoxon <- function(
         coefs = NULL,
     contrasts = NULL,
     weightvar = NULL, 
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, 'wilcoxon'),
       verbose = TRUE
 ){
@@ -127,7 +127,7 @@ linmod_wilcoxon <- function(
     object %<>% merge_fit(fitdt)
 # extract
     extract_quantity <- function(quantity, fitdt){
-        quantitydot <- paste0(quantity, FITSEP)
+        quantitydot <- paste0(quantity, '~')
         quantitymat <- fitdt[, stri_startswith_fixed(
                         names(fitdt), quantitydot), with = FALSE]
         quantitymat %<>% as.matrix()

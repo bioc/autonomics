@@ -27,7 +27,7 @@ LINMOD(
   coefs = contrast_coefs(object, design = design),
   contrasts = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = FITSEP,
+  sep = "~",
   suffix = paste0(sep, engine),
   verbose = TRUE,
   outdir = NULL,
@@ -48,7 +48,7 @@ linmod_limma(
   coefs = if (is.null(contrasts)) contrast_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = FITSEP,
+  sep = "~",
   suffix = paste0(sep, "limma"),
   verbose = TRUE
 )
@@ -64,7 +64,7 @@ linmod_lm(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = FITSEP,
+  sep = "~",
   suffix = paste0(sep, "lm"),
   contrasts = NULL,
   verbose = TRUE
@@ -82,7 +82,7 @@ linmod_lme(
   coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   opt = "optim",
-  sep = FITSEP,
+  sep = "~",
   suffix = paste0(sep, "lme"),
   contrasts = NULL,
   verbose = TRUE
@@ -99,7 +99,7 @@ linmod_lmer(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  sep = FITSEP,
+  sep = "~",
   suffix = paste0(sep, "lmer"),
   contrasts = NULL,
   verbose = TRUE
@@ -117,7 +117,7 @@ linmod_wilcoxon(
   coefs = NULL,
   contrasts = NULL,
   weightvar = NULL,
-  sep = FITSEP,
+  sep = "~",
   suffix = paste0(sep, "wilcoxon"),
   verbose = TRUE
 )

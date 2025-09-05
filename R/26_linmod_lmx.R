@@ -111,10 +111,10 @@
 }
 
 .extractstat <- function(fitres, quantity){
-    idx <- stri_startswith_fixed(names(fitres), paste0(quantity, FITSEP))
+    idx <- stri_startswith_fixed(names(fitres), paste0(quantity, '~'))
     mat <- as.matrix(fitres[, idx, with=FALSE])
     rownames(mat) <- fitres$feature_id
-    colnames(mat) %<>% stri_replace_first_fixed(paste0(quantity, FITSEP), '')
+    colnames(mat) %<>% stri_replace_first_fixed(paste0(quantity, '~'), '')
     mat
 }
 
@@ -233,7 +233,7 @@ lmx <- function(
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, fit),
       verbose = TRUE
 ){
@@ -305,7 +305,7 @@ linmod_lm <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, 'lm'),
     contrasts = NULL,
       verbose = TRUE
@@ -349,7 +349,7 @@ linmod_lme <- function(
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           opt = 'optim',
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, 'lme'),
     contrasts = NULL,
       verbose = TRUE
@@ -395,7 +395,7 @@ linmod_lmer <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, 'lmer'),
     contrasts = NULL,
       verbose = TRUE

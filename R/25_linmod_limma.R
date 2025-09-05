@@ -561,18 +561,6 @@ reset_fit <- function( object, fit = fits(object), verbose = TRUE ){
 }
 
 
-#' Fit results separator
-#' @examples
-#' FITSEP
-#' @export
-FITSEP <- '~'
-
-
-#' @rdname FITSEP
-#' @export
-PPATTERN <- paste0('p', FITSEP)
-
-
 # object: SumExp
 # fitres: data.table(p.contr1, p.contr2, effect.contr1, effect.contr2)
 # stat:  'p', 'effect', 'fdr', 't'
@@ -581,7 +569,7 @@ merge_fit <- function(object, fitres, statistic = NULL){
     fitresdt <- data.table::copy(fitres)   # dont change in original
     firstcols <- intersect(c('feature_id', 'Intercept'), names(fitresdt))
     fitresdt %<>% extract(,c(firstcols, setdiff(names(.), firstcols)), with = FALSE)
-    if (!is.null(statistic)) names(fitresdt)[-1] %<>% paste0(statistic,FITSEP,.)
+    if (!is.null(statistic)) names(fitresdt)[-1] %<>% paste0(statistic, '~', .)
     object %<>% merge_fdt(fitresdt)
     object
 }
@@ -716,7 +704,7 @@ LINMOD <- function(
         coefs = contrast_coefs(object, design = design),
     contrasts = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights'    else NULL,
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, engine),
       verbose = TRUE, 
        outdir = NULL,
@@ -873,7 +861,7 @@ linmod_limma <- function(
         coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-          sep = FITSEP,
+          sep = '~',
        suffix = paste0(sep, 'limma'),
       verbose = TRUE
 ){
