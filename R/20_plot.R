@@ -1138,10 +1138,7 @@ add_facetvars <- function(
     # if (!is.null(x))   object[[x]] %<>% num2char()
     dt <- sumexp_to_longdt(object, assay = assay, svars = plottedsvars, fvars = plottedfvars)
     dt[, medianvalue := median(value, na.rm = TRUE), by = c('feature_id', x)]
-    for (facetvar in facet){ 
-        names(dt) %<>% stri_replace_first_fixed(facetvar, make.names(facetvar))
-        facet %<>% stri_replace_first_fixed(facetvar, make.names(facetvar))
-    } # otherwise facet_wrap_paginate thinks `fdr~coef~limma` is a formula
+    facet %<>% paste0('`', ., '`') # otherwise * etc gets parsed
 # Initialization
     p <- ggplot(dt) + theme_bw() + xlab(xlab) + ylab(ylab) + ggtitle(title, subtitle = subtitle)
     if (!is.numeric(dt[[x]]))  p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
