@@ -471,7 +471,7 @@ contrast_coefs <- function(
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' object %<>% linmod_limma()
-#' model_coefs(object)
+#'    model_coefs(object)
 #' contrast_coefs(object)
 #' @export
 model_coefs <- function(
@@ -806,13 +806,13 @@ linmod_limma <- function(
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
     codingfun = code_control,
-       design = create_design(object, formula = formula, drop = drop, codingfun = codingfun),
+      verbose = TRUE,
+       design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = verbose),
     contrasts = NULL,
         coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-       suffix = '~limma',
-      verbose = TRUE
+       suffix = '~limma'
 ){
 # Assert
     assert_is_valid_sumexp(object)

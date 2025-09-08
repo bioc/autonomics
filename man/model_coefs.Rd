@@ -44,6 +44,6 @@ Get model coefs
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 object \%<>\% linmod_limma()
-model_coefs(object)
+   model_coefs(object)
 contrast_coefs(object)
 }
