@@ -13,8 +13,8 @@ awblinmod(
   engine,
   modelvars,
   across = TRUE,
-  within = TRUE,
-  between = TRUE,
+  within = if (length(modelvars) == 1) FALSE else TRUE,
+  between = if (length(modelvars) == 1) FALSE else TRUE,
   codingfun = code_control,
   drop = TRUE,
   ...
@@ -47,6 +47,8 @@ General Linear Modeling (across-within-between interface)
 \examples{
 object <- survobj()
 svars(object)
+awblinmod(object, 'limma', modelvars = 'age')
+
 awblinmod(object, engine = 'limma', modelvars = c('age', 'sex'))
 awblinmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
 awblinmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
