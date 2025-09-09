@@ -4,12 +4,12 @@
 \alias{plot_design}
 \title{Plot model}
 \usage{
-plot_design(object, codingfun = code_control)
+plot_design(object, coding = "code_control")
 }
 \arguments{
 \item{object}{´SummarizedExperiment}
 
-\item{codingfun}{factor coding function
+\item{coding}{string: codingfunname
 \itemize{
     \item contr.treatment:          intercept = y0,     coefi = yi - y0
     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0

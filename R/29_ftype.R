@@ -10,11 +10,11 @@ find_medoid <- function(subdt){
 
 
 #' Feature type
-#' @param object      SummarizedExperiment
-#' @param formula     model formula
-#' @param drop        TRUE or FALSE
-#' @param fit        'limma', 'lm', 'lme', 'wilcoxon'
-#' @param codingfun   coding function
+#' @param object   SummarizedExperiment
+#' @param formula  model formula
+#' @param drop     TRUE or FALSE
+#' @param fit     'limma', 'lm', 'lme', 'wilcoxon'
+#' @param coding   coding function
 #' @return SummarizedExperiment
 #' @examples
 #' file <- download_data('atkin.metabolon.xlsx')
@@ -24,20 +24,20 @@ find_medoid <- function(subdt){
 #' fdt(object)                  # because intercept is required to recreate predictions
 #' @export
 ftype <- function(
-       object, 
-      formula = default_formula(object), 
-         drop = varlevels_dont_clash(object, all.vars(formula)),
-          fit = fits(object)[1],
-    codingfun = code_control #if (fit == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment
+    object, 
+   formula = default_formula(object), 
+      drop = varlevels_dont_clash(object, all.vars(formula)),
+       fit = fits(object)[1],
+    coding = 'code_control' #if (fit == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment
 ){
 # Assert
     assert_is_valid_sumexp(object)
     assert_valid_formula(formula, object)
     assert_is_a_bool(drop)
-    assert_is_function(codingfun)
+    assert_is_function(get(coding))
     assert_scalar_subset(fit, fits(object))
 # Predict
-       xmat <- X(object, formula = formula, drop = drop, codingfun = codingfun)
+       xmat <- X(object, formula = formula, drop = drop, coding = coding)
     betamat <- beta(object, fit = fit)
     y <- xmat %*% betamat
 # Type

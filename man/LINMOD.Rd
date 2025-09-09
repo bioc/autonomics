@@ -20,9 +20,9 @@ LINMOD(
   formula = as.formula("~ subgroup"),
   engine = "limma",
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
-  design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
-    verbose = FALSE),
+  coding = "code_control",
+  design = create_design(object, formula = formula, drop = drop, coding = coding, verbose
+    = FALSE),
   block = NULL,
   coefs = contrast_coefs(object, design = design),
   contrasts = NULL,
@@ -41,10 +41,10 @@ linmod_limma(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   verbose = TRUE,
-  design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
-    verbose = verbose),
+  design = create_design(object, formula = formula, drop = drop, coding = coding, verbose
+    = verbose),
   contrasts = NULL,
   coefs = if (is.null(contrasts)) contrast_coefs(design = design) else NULL,
   block = NULL,
@@ -58,10 +58,10 @@ linmod_lm(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   design = NULL,
   block = NULL,
-  coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+  coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   suffix = "~lm",
   contrasts = NULL,
@@ -74,10 +74,10 @@ linmod_lme(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   design = NULL,
   block = NULL,
-  coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+  coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   opt = "optim",
   suffix = "~lme",
@@ -91,10 +91,10 @@ linmod_lmer(
   object,
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   design = NULL,
   block = NULL,
-  coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+  coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   suffix = "~lmer",
   contrasts = NULL,
@@ -107,7 +107,7 @@ linmod_wilcoxon(
   object,
   formula = as.formula("~ subgroup"),
   drop = NULL,
-  codingfun = code_control,
+  coding = "code_control",
   design = NULL,
   block = NULL,
   coefs = NULL,
@@ -128,18 +128,18 @@ fit_wilcoxon(...)
 
 \item{drop}{TRUE or FALSE}
 
-\item{codingfun}{factor coding function
+\item{coding}{string: codingfunname
 \itemize{
-    \item contr.treatment:          intercept = y0,     coefi = yi - y0
-    \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
-    \item code_control:             intercept = ymean,  coefi = yi - y0
-    \item contr.diff:               intercept = y0,     coefi = yi - y(i-1)
-    \item code_diff:                intercept = ymean,  coefi = yi - y(i-1)
-    \item code_diff_forward:        intercept = ymean,  coefi = yi - y(i+)
-    \item code_deviation:           intercept = ymean,  coefi = yi - ymean (drop last)
-    \item code_deviation_first:     intercept = ymean,  coefi = yi - ymean (drop first)
-    \item code_helmert:             intercept = ymean,  coefi = yi - mean(y0:(yi-1))
-    \item code_helmert_forward:     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
+    \item 'contr.treatment':          intercept = y0,     coefi = yi - y0
+    \item 'contr.treatment.explicit': intercept = y0,     coefi = yi - y0
+    \item 'code_control':             intercept = ymean,  coefi = yi - y0
+    \item 'contr.diff':               intercept = y0,     coefi = yi - y(i-1)
+    \item 'code_diff':                intercept = ymean,  coefi = yi - y(i-1)
+    \item 'code_diff_forward':        intercept = ymean,  coefi = yi - y(i+)
+    \item 'code_deviation':           intercept = ymean,  coefi = yi - ymean (drop last)
+    \item 'code_deviation_first':     intercept = ymean,  coefi = yi - ymean (drop first)
+    \item 'code_helmert':             intercept = ymean,  coefi = yi - mean(y0:(yi-1))
+    \item 'code_helmert_forward':     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
 }}
 
 \item{design}{design matrix}
@@ -192,12 +192,12 @@ General Linear Model
   linmod_wilcoxon(object, ~subgroup, block = 'Subject')  # Non-parametric
     
 # Alternative coding: backward diffs instead of baseline
-  linmod_limma(object, ~ subgroup, block = 'Subject', codingfun = code_diff)
-  linmod_lme(  object, ~ subgroup, block = 'Subject', codingfun = code_diff)
-  linmod_lmer( object, ~ subgroup, block = 'Subject', codingfun = code_diff)
+  linmod_limma(object, ~ subgroup, block = 'Subject', coding = 'code_diff')
+  linmod_lme(  object, ~ subgroup, block = 'Subject', coding = 'code_diff')
+  linmod_lmer( object, ~ subgroup, block = 'Subject', coding = 'code_diff')
     
 # Posthoc contrasts: limma-only, flexible, but sometimes approximate
-  linmod_limma(object,     ~ subgroup, block = 'Subject', codingfun = code_control)
+  linmod_limma(object,     ~ subgroup, block = 'Subject', coding = 'code_control')
   linmod_limma(object, ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
       # flexible, but only approximate
       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html

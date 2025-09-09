@@ -1,12 +1,12 @@
 
 #' Analyze
-#' @param object     SummarizedExperiment
-#' @param pca        TRUE / FALSE: perform pca ?
-#' @param pls        TRUE / FALSE: perform pls ?
-#' @param fit        linmod engine: 'limma', 'lm', 'lme(r)', 'lmer', 'wilcoxon'
-#' @param formula    model formula
-#' @param drop       TRUE / FALSE : drop varname in designmat ?
-#' @param codingfun  factor coding function
+#' @param object   SummarizedExperiment
+#' @param pca      TRUE / FALSE: perform pca ?
+#' @param pls      TRUE / FALSE: perform pls ?
+#' @param fit      linmod engine: 'limma', 'lm', 'lme(r)', 'lmer', 'wilcoxon'
+#' @param formula  model formula
+#' @param drop     TRUE / FALSE : drop varname in designmat ?
+#' @param coding   string: codingfunname
 #' \itemize{
 #'     \item contr.treatment:          intercept = y0,     coefi = yi - y0
 #'     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
@@ -40,9 +40,9 @@ analyze <- function(
           fit = 'limma',
       formula = ~ subgroup,
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control, 
+       coding = 'code_control', 
     contrasts = NULL,
-        coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+        coefs = contrast_coefs(object, formula = formula, drop = drop, coding = coding),
         block = NULL,
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL,
          plot = pca & !is.null(fit),
@@ -56,11 +56,11 @@ analyze <- function(
     if (pls)  object %<>% pls(by = all.vars(formula)[1], verbose = FALSE)
     for (curfit in fit){
         if (is.null(formula)) formula <- ~ subgroup
-        if (is.null(coefs))   coefs <- contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun)
+        if (is.null(coefs))   coefs <- contrast_coefs(object, formula = formula, drop = drop, coding = coding)
         object %<>% linmod(engine = fit,
                               formula = formula,
                                  drop = drop,
-                            codingfun = codingfun,
+                               coding = coding,
                             contrasts = contrasts,
                                 coefs = coefs,
                                 block = block,

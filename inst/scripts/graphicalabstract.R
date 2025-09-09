@@ -2,7 +2,7 @@ require(devtools)
 load_all()
 file <- download_data('atkin.somascan.adat')
 object <- read_somascan(file)
-object %<>% linmod_limma(block = 'Subject', codingfun = code_diff)
+object %<>% linmod_limma(block = 'Subject', coding = 'code_diff')
 plot_exprs(object, coef = 't1-t0', block = 'Subject', n = 2)
 
 require(ggplot2)
@@ -57,15 +57,15 @@ p + annotate('text', x = -3, y = -2.0, hjust = 0, family = 'mono', label = "obje
     annotate('text', x = -3, y = -2.9, hjust = 0, family = 'mono', label = "            linmod_wilcoxon( ~time, block = 'subject')                        # unparametric") +
     
     annotate('text', x = -3, y = -3.5, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject'                         # large-scale") + 
-    annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject', codingfun = contr.treatment.explicit   # alternative codings") + 
+    annotate('text', x = -3, y = -3.8, hjust = 0, family = 'mono', label = "     linmod_limma(    ~time, block = 'subject', coding = 'contr.treatment.explicit'   # alternative codings") + 
     annotate('text', x = -3, y = -4.1, hjust = 0, family = 'mono', label = "     linmod_limma(  ~0+time, block = 'subject', contrasts = 't1-t0')   # simplified contrasts")
 
 
 fdt(object) %<>% extract(, 1:2)
-object %<>% linmod_lm(     codingfun = contr.treatment.explicit, coefs = 't3-t0')
-object %<>% linmod_lme(     codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% linmod_lmer(    codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
-object %<>% linmod_limma(   codingfun = contr.treatment.explicit, coefs = 't3-t0', block = 'Subject')
+object %<>% linmod_lm(      coding = 'contr.treatment.explicit', coefs = 't3-t0')
+object %<>% linmod_lme(     coding = 'contr.treatment.explicit', coefs = 't3-t0', block = 'Subject')
+object %<>% linmod_lmer(    coding = 'contr.treatment.explicit', coefs = 't3-t0', block = 'Subject')
+object %<>% linmod_limma(   coding = 'contr.treatment.explicit', coefs = 't3-t0', block = 'Subject')
 object %<>% linmod_wilcoxon(block = 'Subject')
 
 

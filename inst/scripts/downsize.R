@@ -484,11 +484,11 @@ PLOT_EXPRS <- function(obj)  plot_exprs(obj, block = 'Subject', coefs = NULL, sh
         object$cell <- split_extract_fixed(object$subgroup, '_', 1)
         object$conc <- split_extract_fixed(object$subgroup, '_', 2)
         object$repl <- split_extract_fixed(object$subgroup, '_', 3)
-        object %<>% linmod_limma( ~ cell/conc, codingfun = code_control, 
+        object %<>% linmod_limma( ~ cell/conc, coding = 'code_control', 
                                coefs = c( 'Panc1-Hek',                       # cell across conc
                                           'Hek:5mM-0mM', 'Panc1:5mM-0mM'))   # conc within cell
         
-        object %<>% linmod_limma( ~ conc/cell, codingfun = code_control, coefs = c(''))
+        object %<>% linmod_limma( ~ conc/cell, coding = 'code_control', coefs = c(''))
         object %>%  linmod_limma( ~ cell*conc, coefs = )
         
 

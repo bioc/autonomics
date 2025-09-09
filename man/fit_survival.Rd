@@ -13,7 +13,7 @@
   coefs = NULL,
   engine = c("coxph", "survdiff", "logrank")[1],
   drop = TRUE,
-  codingfun = code_control,
+  coding = "code_control",
   verbose = TRUE
 )
 
@@ -22,7 +22,7 @@ fit_survival(
   formula = as.formula(sprintf("~\%s", assayNames(object)[1])),
   engine = c("coxph", "survdiff", "logrank")[1],
   drop = TRUE,
-  codingfun = code_control,
+  coding = "code_control",
   coefs = NULL,
   verbose = TRUE,
   outdir = NULL,
@@ -78,7 +78,7 @@ plot_survival(
 
 \item{drop}{TRUE or FALSE : whether to drop var in coefname}
 
-\item{codingfun}{coding function}
+\item{coding}{string: codingfunname}
 
 \item{verbose}{TRUE or FALSE}
 
@@ -145,9 +145,9 @@ Fit/Plot survival
           fit_survival(survobj(), ~ exprs2levels)                # 2-1
           fit_survival(survobj(), ~ exprs2levels, drop = FALSE)  # exprs2levels2-1
 
-    # codingfun: code_control -> contr.treatment
-          fit_survival(survobj(), ~ exprs2levels)                              # code_control
-          fit_survival(survobj(), ~ exprs2levels, codingfun = contr.treatment) # contr.treatment
+    # coding: code_control -> contr.treatment
+          fit_survival(survobj(), ~ exprs2levels)                             # code_control
+          fit_survival(survobj(), ~ exprs2levels, coding = 'contr.treatment') # contr.treatment
 
     # outdir: print to object/screen -> print to xlsx/pdf
           fit_survival(survobj(), ~ exprs2levels)                                                 # print to object/screen

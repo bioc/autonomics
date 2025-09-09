@@ -230,9 +230,9 @@ lmx <- function(
           fit, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control,
+       coding = 'code_control',
         block = NULL, 
-        coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+        coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
        suffix = paste0('~', fit),
@@ -298,22 +298,22 @@ linmod_lm <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control,
+       coding = 'code_control',
        design = NULL,  # only to make linmod(.) work!
         block = NULL, 
-        coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+        coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
        suffix = '~lm',
     contrasts = NULL,
       verbose = TRUE
 ){
     
-    sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
     lmx(    object,
                fit = 'lm', 
            formula = formula,
               drop = drop,
-         codingfun = codingfun,
+            coding = coding,
              block = block,
              coefs = coefs,
          weightvar = weightvar,
@@ -339,10 +339,10 @@ linmod_lme <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control,
+       coding = 'code_control',
        design = NULL,  # only to make linmod(.) work!
         block = NULL, 
-        coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+        coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
           opt = 'optim',
        suffix = '~lme',
@@ -353,12 +353,12 @@ linmod_lme <- function(
     . <- NULL
     if (!installed('nlme'))  return(object)
 # Fit
-    sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
     lmx(    object,
                fit = 'lme', 
            formula = formula,
               drop = drop,
-         codingfun = codingfun,
+            coding = coding,
              block = block, 
              coefs = coefs,
          weightvar = weightvar,
@@ -384,10 +384,10 @@ linmod_lmer <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control,
+       coding = 'code_control',
        design = NULL,  # only to make linmod(.) work!
         block = NULL, 
-        coefs = contrast_coefs(object, formula = formula, codingfun = codingfun, drop = drop),
+        coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
        suffix = '~lmer',
     contrasts = NULL,
@@ -398,12 +398,12 @@ linmod_lmer <- function(
     if (!installed('lme4'))      return(object)
     if (!installed('lmerTest'))  return(object)
 # Fit
-    sdt(object) %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
     lmx(    object,
                fit = 'lmer', 
            formula = formula,
               drop = drop,
-         codingfun = codingfun,
+            coding = coding,
              block = block, 
              coefs = coefs,
          weightvar = weightvar,

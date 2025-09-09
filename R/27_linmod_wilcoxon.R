@@ -92,7 +92,7 @@ linmod_wilcoxon <- function(
        object,
       formula = as.formula('~ subgroup'),
          drop = NULL,
-    codingfun = code_control, # wilcox is the only one where `contr.treatment` doesnt work
+       coding = 'code_control', # wilcox is the only one where `contr.treatment` doesnt work
        design = NULL, # only so that linmod(.) works
         block = NULL, 
         coefs = NULL,
@@ -106,7 +106,7 @@ linmod_wilcoxon <- function(
     assert_valid_formula(formula, object)
     subgroupvar <- all_vars(formula)[1]
     if (is.null(contrasts)){
-        contrasts <- colnames(create_design(object, formula = formula, drop = TRUE, codingfun = codingfun))[-1]
+        contrasts <- colnames(create_design(object, formula = formula, drop = TRUE, coding = coding))[-1]
     }
     assert_is_character(contrasts)
     if (!is.null(block))      assert_is_subset(block, svars(object))

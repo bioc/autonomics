@@ -1666,7 +1666,7 @@ plot_matrix <- function(mat){
 
 #' Plot model 
 #' @param object ´SummarizedExperiment
-#' @param codingfun  factor coding function
+#' @param coding  string: codingfunname
 #' \itemize{
 #'     \item contr.treatment:          intercept = y0,     coefi = yi - y0
 #'     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
@@ -1687,9 +1687,9 @@ plot_matrix <- function(mat){
 #' object$subgroup %<>% substr(1,3)
 #' plot_design(object)
 #' @export
-plot_design <- function(object, codingfun = code_control){
+plot_design <- function(object, coding = 'code_control'){
     coef <- y <- yend <- NULL
-    designmat <- create_design(object, subgroupvar = 'subgroup', drop = TRUE, codingfun = codingfun)
+    designmat <- create_design(object, subgroupvar = 'subgroup', drop = TRUE, coding = coding)
     rownames(designmat) <- object$subgroup
     designmat %<>% unique()
     subgroups <- subgroup_levels(object)

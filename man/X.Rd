@@ -9,7 +9,7 @@ X(
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control
+  coding = "code_control"
 )
 
 beta(object, fit = fits(object)[1])
@@ -21,7 +21,7 @@ beta(object, fit = fits(object)[1])
 
 \item{drop}{TRUE or FALSE}
 
-\item{codingfun}{function}
+\item{coding}{string: codingfunname}
 
 \item{fit}{'limma', 'lm', 'lme', 'wilcoxon'}
 }

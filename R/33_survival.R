@@ -240,7 +240,7 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
 # @param bintype  'factor' or 'numeric'
 # @param engine   'coxph', 'survdiff', or 'logrank'
 # @param drop      Whether to drop factor varname in coefnames
-# @param codingfun (factor) coding function
+# @param coding   string: codingfunname
 # @param verbose   TRUE or FALSE
 # @examples
 # # Load/Transform
@@ -267,7 +267,7 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
          coefs = NULL, 
         engine = c('coxph', 'survdiff', 'logrank')[1],
           drop = TRUE,
-     codingfun = code_control,
+        coding = 'code_control',
        verbose = TRUE
 ){
 # Assert
@@ -277,7 +277,7 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
     assert_is_subset(all.vars(formula), c(assayNames(object), svars(object)))
     assert_scalar_subset(engine, c('coxph', 'survdiff', 'logrank'))
     assert_is_a_bool(drop)
-    assert_is_function(codingfun)
+    assert_is_function(get(coding))
     assert_is_a_bool(verbose)
     if (engine == 'logrank')  if (!installed('coin'))  return(NULL)
     event <- timetoevent <- NULL
@@ -298,7 +298,7 @@ setMethod( 'factor.vars', signature(formula = 'formula', object = 'data.table'),
         charactercols %<>% names()
         for (col in charactercols)   dt[ , (col) := factor(get(col)) ]  # this ensures level order
     }
-    dt %<>% code(codingfun = codingfun, vars = c(assayvar, samplevars), verbose = verbose)
+    dt %<>% code(coding = coding, vars = c(assayvar, samplevars), verbose = verbose)
 # Fit
     twosideformula <- formula
     twosideformula %<>% formula2str()
@@ -364,7 +364,7 @@ all_non_numeric <- function(object, formula){
 #' @param assaylevels   NULL or vector: assaylevels to be used (for plotting)
 #' @param engine       'coxph', 'survdiff' or 'logrank'
 #' @param drop          TRUE or FALSE : whether to drop var in coefname
-#' @param codingfun     coding function
+#' @param coding        string: codingfunname
 #' @param coefs         NULL or character (coefs to be stored in object)
 #' @param verbose       TRUE or FALSE
 #' @param outdir        output directory
@@ -410,9 +410,9 @@ all_non_numeric <- function(object, formula){
 #'           fit_survival(survobj(), ~ exprs2levels)                # 2-1
 #'           fit_survival(survobj(), ~ exprs2levels, drop = FALSE)  # exprs2levels2-1
 #' 
-#'     # codingfun: code_control -> contr.treatment
-#'           fit_survival(survobj(), ~ exprs2levels)                              # code_control
-#'           fit_survival(survobj(), ~ exprs2levels, codingfun = contr.treatment) # contr.treatment
+#'     # coding: code_control -> contr.treatment
+#'           fit_survival(survobj(), ~ exprs2levels)                             # code_control
+#'           fit_survival(survobj(), ~ exprs2levels, coding = 'contr.treatment') # contr.treatment
 #'
 #'     # outdir: print to object/screen -> print to xlsx/pdf
 #'           fit_survival(survobj(), ~ exprs2levels)                                                 # print to object/screen
@@ -448,7 +448,7 @@ fit_survival <- function(
        formula = as.formula(sprintf('~%s', assayNames(object)[1])),
         engine = c('coxph', 'survdiff', 'logrank')[1],
           drop = TRUE,
-     codingfun = code_control,
+        coding = 'code_control',
          coefs = NULL,
        verbose = TRUE,
         outdir = NULL,
@@ -471,7 +471,7 @@ fit_survival <- function(
                                   coefs = coefs,
                                  engine = engine,
                                    drop = drop,
-                              codingfun = codingfun,
+                                 coding = coding,
                                 verbose = verbose )
         if (all(all.vars(formula) %in% svars(object))){  metadata(object)$survival <-  fitdt
         } else {                                         object %<>% merge_fdt(fitdt)  }

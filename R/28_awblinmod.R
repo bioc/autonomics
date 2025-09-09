@@ -5,11 +5,13 @@
 #' @param across    TRUE/FALSE: fit across  model (additive)    ?
 #' @param within    TRUE/FALSE: fit within  model (nested)      ?
 #' @param between   TRUE/FALSE: fit between model (interaction) ?
+#' @param coding    character: codingfunname
+#' @param drop      TRUE or FALSE
+#' @param ...       passed to linmod
 #' @examples
 #' object <- survobj()
 #' svars(object)
 #' awblinmod(object, engine = 'limma', modelvars = 'age')
-#' 
 #' awblinmod(object, engine = 'limma', modelvars = c('age', 'sex'))
 #' awblinmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
 #' awblinmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
@@ -22,7 +24,7 @@ awblinmod <- function(
     across = TRUE,
     within = if (length(modelvars)==1) FALSE else TRUE,
    between = if (length(modelvars)==1) FALSE else TRUE,
- codingfun = code_control,
+    coding = 'code_control',
       drop = TRUE, 
           ...
 ){
@@ -36,35 +38,35 @@ awblinmod <- function(
         formula  <- paste0(modelvars, collapse = '+')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs  <- colnames(create_design(object,  formula, codingfun = codingfun, drop = drop, verbose = FALSE))
+        coefs  <- colnames(create_design(object,  formula, coding = coding, drop = drop, verbose = FALSE))
         coefs %<>% setdiff('Intercept')
-        object %<>% modelfun(formula,  codingfun = codingfun, drop = drop, coefs =  coefs, verbose = FALSE, ...)
+        object %<>% modelfun(formula,  coding = coding, drop = drop, coefs =  coefs, verbose = FALSE, ...)
     }
     if (within){
         formula <- paste0(modelvars, collapse = '/')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs <- colnames(create_design(object, formula, codingfun = codingfun, drop = drop, verbose = FALSE))
+        coefs <- colnames(create_design(object, formula, coding = coding, drop = drop, verbose = FALSE))
         coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% modelfun(formula, codingfun = codingfun, drop = drop, coefs = coefs, verbose = FALSE, ...)
+        object %<>% modelfun(formula, coding = coding, drop = drop, coefs = coefs, verbose = FALSE, ...)
         fvars(object) %<>% stri_replace_first_fixed(':', '/')
     }
     if (within){
         formula <- paste0(rev(modelvars), collapse = '/')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs <- colnames(create_design(object, formula, codingfun = codingfun, drop = drop, verbose = FALSE))
+        coefs <- colnames(create_design(object, formula, coding = coding, drop = drop, verbose = FALSE))
         coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% modelfun(formula, codingfun = codingfun, drop = drop, coefs = coefs, verbose = FALSE, ...)
+        object %<>% modelfun(formula, coding = coding, drop = drop, coefs = coefs, verbose = FALSE, ...)
         fvars(object) %<>% stri_replace_first_fixed(':', '/')
     }
     if (between){
         formula <- paste0(modelvars, collapse = '*')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs <- colnames(create_design(object, formula, codingfun = codingfun, drop = drop, verbose = FALSE))
+        coefs <- colnames(create_design(object, formula, coding = coding, drop = drop, verbose = FALSE))
         coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% modelfun(formula, codingfun = codingfun, drop = drop, coefs = coefs, verbose = FALSE, ...)
+        object %<>% modelfun(formula, coding = coding, drop = drop, coefs = coefs, verbose = FALSE, ...)
         fvars(object) %<>% stri_replace_first_fixed(':', '*')
     }
 # Return

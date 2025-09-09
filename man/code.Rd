@@ -20,15 +20,15 @@
 \usage{
 code(object, ...)
 
-\method{code}{factor}(object, codingfun, verbose = TRUE, ...)
+\method{code}{factor}(object, coding, verbose = TRUE, ...)
 
-\method{code}{character}(object, codingfun, verbose = TRUE, ...)
+\method{code}{character}(object, coding, verbose = TRUE, ...)
 
-\method{code}{logical}(object, codingfun, verbose = TRUE, ...)
+\method{code}{logical}(object, coding, verbose = TRUE, ...)
 
-\method{code}{numeric}(object, codingfun, verbose = TRUE, ...)
+\method{code}{numeric}(object, coding, verbose = TRUE, ...)
 
-\method{code}{data.table}(object, codingfun, vars = names(object), verbose = TRUE, ...)
+\method{code}{data.table}(object, coding, vars = names(object), verbose = TRUE, ...)
 
 contr.treatment.explicit(n)
 
@@ -53,7 +53,7 @@ code_helmert_forward(n)
 
 \item{...}{used for s3 dispatch}
 
-\item{codingfun}{factor coding function
+\item{coding}{string: codingfunname
 \itemize{
     \item contr.treatment:          intercept = y0,     coefi = yi - y0
     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
@@ -109,28 +109,28 @@ A General Linear Model contains:                                                
     code_helmert_forward(    xlevels)
 
 # Code
-    x \%<>\% code(contr.treatment)
-    x \%<>\% code(contr.treatment.explicit)
-    x \%<>\% code(contr.diff)
-    x \%<>\% code(code_control)
-    x \%<>\% code(code_diff)
-    x \%<>\% code(code_diff_forward)
-    x \%<>\% code(code_deviation)
-    x \%<>\% code(code_deviation_first)
-    x \%<>\% code(code_helmert)
-    x \%<>\% code(code_helmert_forward)
+    x \%<>\% code('contr.treatment')
+    x \%<>\% code('contr.treatment.explicit')
+    x \%<>\% code('contr.diff')
+    x \%<>\% code('code_control')
+    x \%<>\% code('code_diff')
+    x \%<>\% code('code_diff_forward')
+    x \%<>\% code('code_deviation')
+    x \%<>\% code('code_deviation_first')
+    x \%<>\% code('code_helmert')
+    x \%<>\% code('code_helmert_forward')
 
 # Model
     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
     object <- read_metabolon(file)
-    object \%<>\% linmod_limma(codingfun = contr.treatment) # default
-    object \%<>\% linmod_limma(codingfun = contr.treatment.explicit)
-    object \%<>\% linmod_limma(codingfun = contr.diff)
-    object \%<>\% linmod_limma(codingfun = code_control)
-    object \%<>\% linmod_limma(codingfun = code_diff)
-    object \%<>\% linmod_limma(codingfun = code_diff_forward)
-    object \%<>\% linmod_limma(codingfun = code_deviation)
-    object \%<>\% linmod_limma(codingfun = code_deviation_first)
-    object \%<>\% linmod_limma(codingfun = code_helmert)
-    object \%<>\% linmod_limma(codingfun = code_helmert_forward)
+    object \%<>\% linmod_limma(coding = 'contr.treatment') # default
+    object \%<>\% linmod_limma(coding = 'contr.treatment.explicit')
+    object \%<>\% linmod_limma(coding = 'contr.diff')
+    object \%<>\% linmod_limma(coding = 'code_control')
+    object \%<>\% linmod_limma(coding = 'code_diff')
+    object \%<>\% linmod_limma(coding = 'code_diff_forward')
+    object \%<>\% linmod_limma(coding = 'code_deviation')
+    object \%<>\% linmod_limma(coding = 'code_deviation_first')
+    object \%<>\% linmod_limma(coding = 'code_helmert')
+    object \%<>\% linmod_limma(coding = 'code_helmert_forward')
 }

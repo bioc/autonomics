@@ -11,9 +11,9 @@ analyze(
   fit = "limma",
   formula = ~subgroup,
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   contrasts = NULL,
-  coefs = contrast_coefs(object, formula = formula, drop = drop, codingfun = codingfun),
+  coefs = contrast_coefs(object, formula = formula, drop = drop, coding = coding),
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
   plot = pca & !is.null(fit),
@@ -35,7 +35,7 @@ analyze(
 
 \item{drop}{TRUE / FALSE : drop varname in designmat ?}
 
-\item{codingfun}{factor coding function
+\item{coding}{string: codingfunname
 \itemize{
     \item contr.treatment:          intercept = y0,     coefi = yi - y0
     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0

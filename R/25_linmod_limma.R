@@ -62,10 +62,10 @@ character2factor <- function(x)  if (is.character(x)) factor(x) else x
 #'
 #' Create design matrix for statistical analysis
 #'
-#' @param object       SummarizedExperiment or data.frame
-#' @param formula      formula with svars
-#' @param drop         whether to drop predictor names
-#' @param codingfun  factor coding function
+#' @param object   SummarizedExperiment or data.frame
+#' @param formula  formula with svars
+#' @param drop     whether to drop predictor names
+#' @param coding   string: codingfunname
 #' \itemize{
 #'     \item contr.treatment:          intercept = y0,     coefi = yi - y0
 #'     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
@@ -86,8 +86,8 @@ character2factor <- function(x)  if (is.character(x)) factor(x) else x
 #' object <- read_metabolon(file)
 #' unique(create_design(object))
 #' unique(create_design(object, ~ Time))
-#' unique(create_design(object, ~ Time, codingfun = code_control))
-#' unique(create_design(object, ~ Time, codingfun = code_diff))
+#' unique(create_design(object, ~ Time, coding = 'code_control'))
+#' unique(create_design(object, ~ Time, coding = 'code_diff'))
 #' unique(create_design(object, ~ Time + Diabetes))
 #' unique(create_design(object, ~ Time / Diabetes))
 #' unique(create_design(object, ~ Time * Diabetes))
@@ -99,34 +99,34 @@ create_design <- function(object, ...) UseMethod('create_design')
 #' @export
 create_design.SummarizedExperiment <- function(
     object, 
-    formula   = default_formula(object),
-    drop      = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = code_control,
-    verbose   = TRUE, 
+    formula = default_formula(object),
+    drop    = varlevels_dont_clash(object, all.vars(formula)), 
+    coding  = 'code_control',
+    verbose = TRUE, 
     ...
 ){
     create_design.data.table(sdt(object), 
-                            formula   = formula,
-                            codingfun = codingfun,
-                            drop      = drop,
-                            verbose   = verbose)
+                            formula = formula,
+                            coding  = coding,
+                            drop    = drop,
+                            verbose = verbose)
 }
 
 #' @rdname create_design
 #' @export
 create_design.data.table <- function(
     object, 
-    formula   = default_formula(object),
-    drop      = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = code_control,
-    verbose   = TRUE, 
+    formula  = default_formula(object),
+    drop     = varlevels_dont_clash(object, all.vars(formula)), 
+    coding   = 'code_control',
+    verbose  = TRUE, 
     ...
 ){
 # Assert
     assert_is_subset(all.vars(formula), names(object))
     . <- NULL
 # Contrast Code Factors
-    object %<>% code(codingfun = codingfun, vars = all.vars(formula), verbose = verbose)
+    object %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
 # Create design matrix
     #if (verbose)   message('\t\tDesign: ', formula2str(formula))
     object %<>% data.frame(row.names = .$sample_id)
@@ -150,11 +150,11 @@ create_design.data.table <- function(
 
 #' Model based prediction
 #'
-#' @param object     SummarizedExperiment or data.frame
-#' @param fit        'limma', 'lm', 'lme', 'wilcoxon'
-#' @param formula    formula
-#' @param drop       TRUE or FALSE
-#' @param codingfun  function
+#' @param object   SummarizedExperiment or data.frame
+#' @param fit     'limma', 'lm', 'lme', 'wilcoxon'
+#' @param formula  formula
+#' @param drop     TRUE or FALSE
+#' @param coding   string: codingfunname
 #' @return beta matrix (nlevel x nfeature)
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
@@ -166,11 +166,11 @@ create_design.data.table <- function(
 #' @export
 X <- function(
     object, 
-    formula   = default_formula(object),
-    drop      = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = code_control
+    formula = default_formula(object),
+    drop    = varlevels_dont_clash(object, all.vars(formula)), 
+    coding  = 'code_control'
 ){
-    design <- create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE)
+    design <- create_design(object, formula = formula, drop = drop, coding = coding, verbose = FALSE)
     X <- unique(design)
     cols <- unique(c('sample_id', all.vars(formula)))
     rownamedt <- data.table(sample_id = rownames(X))
@@ -200,8 +200,8 @@ beta <- function( object, fit = fits(object)[1] ){
 #' Contrast Code Factor for General Linear Model
 #'
 #' @param object  factor vector
-#' @param vars svars
-#' @param codingfun  factor coding function
+#' @param vars    svars
+#' @param coding  string: codingfunname
 #' \itemize{
 #'     \item contr.treatment:          intercept = y0,     coefi = yi - y0
 #'     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
@@ -247,43 +247,43 @@ beta <- function( object, fit = fits(object)[1] ){
 #'     code_helmert_forward(    xlevels)
 #' 
 #' # Code
-#'     x %<>% code(contr.treatment)
-#'     x %<>% code(contr.treatment.explicit)
-#'     x %<>% code(contr.diff)
-#'     x %<>% code(code_control)
-#'     x %<>% code(code_diff)
-#'     x %<>% code(code_diff_forward)
-#'     x %<>% code(code_deviation)
-#'     x %<>% code(code_deviation_first)
-#'     x %<>% code(code_helmert)
-#'     x %<>% code(code_helmert_forward)
+#'     x %<>% code('contr.treatment')
+#'     x %<>% code('contr.treatment.explicit')
+#'     x %<>% code('contr.diff')
+#'     x %<>% code('code_control')
+#'     x %<>% code('code_diff')
+#'     x %<>% code('code_diff_forward')
+#'     x %<>% code('code_deviation')
+#'     x %<>% code('code_deviation_first')
+#'     x %<>% code('code_helmert')
+#'     x %<>% code('code_helmert_forward')
 #'
 #' # Model
 #'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #'     object <- read_metabolon(file)
-#'     object %<>% linmod_limma(codingfun = contr.treatment) # default
-#'     object %<>% linmod_limma(codingfun = contr.treatment.explicit)
-#'     object %<>% linmod_limma(codingfun = contr.diff)
-#'     object %<>% linmod_limma(codingfun = code_control)
-#'     object %<>% linmod_limma(codingfun = code_diff)
-#'     object %<>% linmod_limma(codingfun = code_diff_forward)
-#'     object %<>% linmod_limma(codingfun = code_deviation)
-#'     object %<>% linmod_limma(codingfun = code_deviation_first)
-#'     object %<>% linmod_limma(codingfun = code_helmert)
-#'     object %<>% linmod_limma(codingfun = code_helmert_forward)
+#'     object %<>% linmod_limma(coding = 'contr.treatment') # default
+#'     object %<>% linmod_limma(coding = 'contr.treatment.explicit')
+#'     object %<>% linmod_limma(coding = 'contr.diff')
+#'     object %<>% linmod_limma(coding = 'code_control')
+#'     object %<>% linmod_limma(coding = 'code_diff')
+#'     object %<>% linmod_limma(coding = 'code_diff_forward')
+#'     object %<>% linmod_limma(coding = 'code_deviation')
+#'     object %<>% linmod_limma(coding = 'code_deviation_first')
+#'     object %<>% linmod_limma(coding = 'code_helmert')
+#'     object %<>% linmod_limma(coding = 'code_helmert_forward')
 #' @export
 code <- function(object, ...)  UseMethod('code')
 
 
 #' @rdname code
 #' @export
-code.factor <- function(object, codingfun, verbose = TRUE, ...){
+code.factor <- function(object, coding, verbose = TRUE, ...){
 # Assert
-    if (is.null(codingfun))  return(object)
-    assert_is_function(codingfun)
+    if (is.null(coding))  return(object)
+    assert_is_function(get(coding))
 # Code
     k <- length(levels(object))
-    contrasts(object) <- codingfun(levels(object))
+    contrasts(object) <- get(coding)(levels(object))
     if (verbose){
         contrastmat <- codingMatrices::mean_contrasts(contrasts(object))
         colnames(contrastmat) <- levels(object)
@@ -298,35 +298,35 @@ code.factor <- function(object, codingfun, verbose = TRUE, ...){
 
 #' @rdname code
 #' @export
-code.character <- function(object, codingfun, verbose = TRUE, ...){
-    code.factor(factor(object), codingfun = codingfun, verbose = verbose, ...)
+code.character <- function(object, coding, verbose = TRUE, ...){
+    code.factor(factor(object), coding = coding, verbose = verbose, ...)
 }
 
 
 #' @rdname code
 #' @export
-code.logical <- function(object, codingfun, verbose = TRUE, ...){
-    code.factor(factor(object, codingfun = codingfun, verbose = verbose, ...))
+code.logical <- function(object, coding, verbose = TRUE, ...){
+    code.factor(factor(object, coding = coding, verbose = verbose, ...))
 }
 
 
 #' @rdname code
 #' @export
-code.numeric <- function(object, codingfun, verbose = TRUE, ...){
+code.numeric <- function(object, coding, verbose = TRUE, ...){
     object
 }
     
 
 #' @rdname code
 #' @export
-code.data.table <- function(object, codingfun, vars = names(object), verbose = TRUE, ...){
+code.data.table <- function(object, coding, vars = names(object), verbose = TRUE, ...){
 # Assert
     if ( length(vars)==0)   return(object)      # when formula = ~1 
-    if (is.null(codingfun)) return(object)
+    if (is.null(coding)) return(object)
 # Code
     for (var in vars){
         if (verbose)  cmessage('              Code `%s`', var)  # varname only at this level !
-        object[[var]] %<>% code(codingfun, verbose = verbose)
+        object[[var]] %<>% code(coding, verbose = verbose)
     }
 # Return
     object
@@ -450,8 +450,8 @@ contrast_coefs <- function(
        object, 
       formula = default_formula(object), 
          drop = varlevels_dont_clash(object, all.vars(formula)), 
-    codingfun = code_control, 
-       design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE)
+       coding = 'code_control', 
+       design = create_design(object, formula = formula, drop = drop, coding = coding, verbose = FALSE)
 ){
     
     if (ncol(design)==1)  colnames(design) else setdiff(colnames(design), 'Intercept')
@@ -461,11 +461,11 @@ contrast_coefs <- function(
 
 
 #' Get model coefs
-#' @param object     SummarizedExperiment
-#' @param formula    formula
-#' @param drop       TRUE or FALSE
-#' @param codingfun  coding function (e.g. contr.treatment)
-#' @param design     design matrix
+#' @param object   SummarizedExperiment
+#' @param formula  formula
+#' @param drop     TRUE or FALSE
+#' @param coding   string: codingfunname
+#' @param design   design matrix
 #' @return SummarizedExperiment
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
@@ -478,8 +478,8 @@ model_coefs <- function(
     object, 
     formula = default_formula(object), 
        drop = varlevels_dont_clash(object, all.vars(formula)), 
-  codingfun = code_control, 
-     design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE)
+     coding = 'code_control', 
+     design = create_design(object, formula = formula, drop = drop, coding = coding, verbose = FALSE)
 ){
     colnames(design)
 }
@@ -580,22 +580,22 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 
 #' General Linear Model
 #'
-#' @param object    SummarizedExperiment
-#' @param formula   model formula
-#' @param engine    'limma', 'lm', 'lme', 'lmer', or 'wilcoxon'
-#' @param drop      TRUE or FALSE
-#' @param codingfun  factor coding function
+#' @param object   SummarizedExperiment
+#' @param formula  model formula
+#' @param engine  'limma', 'lm', 'lme', 'lmer', or 'wilcoxon'
+#' @param drop     TRUE or FALSE
+#' @param coding   string: codingfunname
 #' \itemize{
-#'     \item contr.treatment:          intercept = y0,     coefi = yi - y0
-#'     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
-#'     \item code_control:             intercept = ymean,  coefi = yi - y0
-#'     \item contr.diff:               intercept = y0,     coefi = yi - y(i-1)
-#'     \item code_diff:                intercept = ymean,  coefi = yi - y(i-1)
-#'     \item code_diff_forward:        intercept = ymean,  coefi = yi - y(i+)
-#'     \item code_deviation:           intercept = ymean,  coefi = yi - ymean (drop last)
-#'     \item code_deviation_first:     intercept = ymean,  coefi = yi - ymean (drop first)
-#'     \item code_helmert:             intercept = ymean,  coefi = yi - mean(y0:(yi-1))
-#'     \item code_helmert_forward:     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
+#'     \item 'contr.treatment':          intercept = y0,     coefi = yi - y0
+#'     \item 'contr.treatment.explicit': intercept = y0,     coefi = yi - y0
+#'     \item 'code_control':             intercept = ymean,  coefi = yi - y0
+#'     \item 'contr.diff':               intercept = y0,     coefi = yi - y(i-1)
+#'     \item 'code_diff':                intercept = ymean,  coefi = yi - y(i-1)
+#'     \item 'code_diff_forward':        intercept = ymean,  coefi = yi - y(i+)
+#'     \item 'code_deviation':           intercept = ymean,  coefi = yi - ymean (drop last)
+#'     \item 'code_deviation_first':     intercept = ymean,  coefi = yi - ymean (drop first)
+#'     \item 'code_helmert':             intercept = ymean,  coefi = yi - mean(y0:(yi-1))
+#'     \item 'code_helmert_forward':     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
 #' }
 #' @param design    design matrix
 #' @param block     block svar (or NULL)
@@ -628,12 +628,12 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #'   linmod_wilcoxon(object, ~subgroup, block = 'Subject')  # Non-parametric
 #'     
 #' # Alternative coding: backward diffs instead of baseline
-#'   linmod_limma(object, ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   linmod_lme(  object, ~ subgroup, block = 'Subject', codingfun = code_diff)
-#'   linmod_lmer( object, ~ subgroup, block = 'Subject', codingfun = code_diff)
+#'   linmod_limma(object, ~ subgroup, block = 'Subject', coding = 'code_diff')
+#'   linmod_lme(  object, ~ subgroup, block = 'Subject', coding = 'code_diff')
+#'   linmod_lmer( object, ~ subgroup, block = 'Subject', coding = 'code_diff')
 #'     
 #' # Posthoc contrasts: limma-only, flexible, but sometimes approximate
-#'   linmod_limma(object,     ~ subgroup, block = 'Subject', codingfun = code_control)
+#'   linmod_limma(object,     ~ subgroup, block = 'Subject', coding = 'code_control')
 #'   linmod_limma(object, ~ 0 + subgroup, block = 'Subject', contrasts = 't1-t0')
 #'       # flexible, but only approximate
 #'       # stat.ethz.ch/pipermail/bioconductor/2014-February/057682.html
@@ -650,8 +650,8 @@ LINMOD <- function(
       formula = as.formula('~ subgroup'),
        engine = 'limma', 
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control, # if (engine == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment , 
-       design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = FALSE),
+       coding = 'code_control', # if (engine == 'wilcoxon')  contr.treatment.explicit  else  contr.treatment , 
+       design = create_design(object, formula = formula, drop = drop, coding = coding, verbose = FALSE),
         block = NULL,
         coefs = contrast_coefs(object, design = design),
     contrasts = NULL,
@@ -680,7 +680,7 @@ LINMOD <- function(
     fitfun <- paste0('linmod_', engine)
     object %<>%  get(fitfun)( formula = formula,
                                  drop = drop,
-                            codingfun = codingfun, 
+                               coding = coding, 
                                design = design,
                                 block = block, 
                                 coefs = coefs,
@@ -805,9 +805,9 @@ linmod_limma <- function(
        object, 
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
-    codingfun = code_control,
+       coding = 'code_control',
       verbose = TRUE,
-       design = create_design(object, formula = formula, drop = drop, codingfun = codingfun, verbose = verbose),
+       design = create_design(object, formula = formula, drop = drop, coding = coding, verbose = verbose),
     contrasts = NULL,
         coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL, 

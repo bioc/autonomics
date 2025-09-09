@@ -15,7 +15,7 @@ awblinmod(
   across = TRUE,
   within = if (length(modelvars) == 1) FALSE else TRUE,
   between = if (length(modelvars) == 1) FALSE else TRUE,
-  codingfun = code_control,
+  coding = "code_control",
   drop = TRUE,
   ...
 )
@@ -40,6 +40,12 @@ awblinmod_lmer(object, ...)
 \item{within}{TRUE/FALSE: fit within  model (nested)      ?}
 
 \item{between}{TRUE/FALSE: fit between model (interaction) ?}
+
+\item{coding}{character: codingfunname}
+
+\item{drop}{TRUE or FALSE}
+
+\item{...}{passed to linmod}
 }
 \description{
 General Linear Modeling (across-within-between interface)
@@ -48,7 +54,6 @@ General Linear Modeling (across-within-between interface)
 object <- survobj()
 svars(object)
 awblinmod(object, engine = 'limma', modelvars = 'age')
-
 awblinmod(object, engine = 'limma', modelvars = c('age', 'sex'))
 awblinmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
 awblinmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')

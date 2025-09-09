@@ -12,7 +12,7 @@ create_design(object, ...)
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   verbose = TRUE,
   ...
 )
@@ -21,7 +21,7 @@ create_design(object, ...)
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
+  coding = "code_control",
   verbose = TRUE,
   ...
 )
@@ -35,7 +35,7 @@ create_design(object, ...)
 
 \item{drop}{whether to drop predictor names}
 
-\item{codingfun}{factor coding function
+\item{coding}{string: codingfunname
 \itemize{
     \item contr.treatment:          intercept = y0,     coefi = yi - y0
     \item contr.treatment.explicit: intercept = y0,     coefi = yi - y0
@@ -62,8 +62,8 @@ file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 unique(create_design(object))
 unique(create_design(object, ~ Time))
-unique(create_design(object, ~ Time, codingfun = code_control))
-unique(create_design(object, ~ Time, codingfun = code_diff))
+unique(create_design(object, ~ Time, coding = 'code_control'))
+unique(create_design(object, ~ Time, coding = 'code_diff'))
 unique(create_design(object, ~ Time + Diabetes))
 unique(create_design(object, ~ Time / Diabetes))
 unique(create_design(object, ~ Time * Diabetes))

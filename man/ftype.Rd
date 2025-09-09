@@ -9,7 +9,7 @@ ftype(
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
   fit = fits(object)[1],
-  codingfun = code_control
+  coding = "code_control"
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ ftype(
 
 \item{fit}{'limma', 'lm', 'lme', 'wilcoxon'}
 
-\item{codingfun}{coding function}
+\item{coding}{coding function}
 }
 \value{
 SummarizedExperiment

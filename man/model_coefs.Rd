@@ -9,18 +9,18 @@ contrast_coefs(
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
-  design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
-    verbose = FALSE)
+  coding = "code_control",
+  design = create_design(object, formula = formula, drop = drop, coding = coding, verbose
+    = FALSE)
 )
 
 model_coefs(
   object,
   formula = default_formula(object),
   drop = varlevels_dont_clash(object, all.vars(formula)),
-  codingfun = code_control,
-  design = create_design(object, formula = formula, drop = drop, codingfun = codingfun,
-    verbose = FALSE)
+  coding = "code_control",
+  design = create_design(object, formula = formula, drop = drop, coding = coding, verbose
+    = FALSE)
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ model_coefs(
 
 \item{drop}{TRUE or FALSE}
 
-\item{codingfun}{coding function (e.g. contr.treatment)}
+\item{coding}{string: codingfunname}
 
 \item{design}{design matrix}
 }
