@@ -842,11 +842,13 @@ linmod_limma <- function(
                     assert_is_subset(weightvar, assayNames(object))
                     assays(object)[[weightvar]][, rownames(design)] }
 # Fit
-    if (verbose)  cmessage('%slmFit(%s%s%s)', 
-                    spaces(14),
-                    formula2str(formula),
-                    if(is.null(blockvar))  '' else paste0(' | ',blockvar),
-                    if(is.null(weightvar)) '' else paste0(', weights = assays(object)$', weightvar))
+    if (verbose)  cmessage("\n%slinmod_limma( %s %s%s%s, coding = '%s')", 
+                      spaces(14),
+                      assayNames(object)[1],
+                      formula2str(formula),
+                      if(is.null(blockvar))  '' else paste0(' | ',blockvar),
+                      if(is.null(weightvar)) '' else paste0(', weights = assays(object)$', weightvar),
+                      coding )
     limmafit <- suppressWarnings(lmFit( object = exprmat, design = design, 
                     block = block, correlation = metadata(object)$dupcor, weights = weightmat))
     if (is.null(contrasts)){  limmafit %<>% contrasts.fit(coefficients = model_coefs(design = design))
@@ -871,7 +873,8 @@ linmod_limma <- function(
     if (is.null(coefs))  coefs <- contrasts
     fitdt %<>% extract(, c(1, which(split_extract_fixed(names(fitdt), '~', 2) %in% coefs)), with = FALSE)
     sumdt <- summarize_fit(fitdt, fit = 'limma', coefs = coefs)
-    if (verbose)  message_df('                  %s', sumdt)
+    #if (verbose)  message('')
+    if (verbose)  message_df('                          %s', sumdt)
 # Return    
   # fdt(object)$F.limma   <- limmafit$F
   # fdt(object)$F.p.limma <- limmafit$F.p

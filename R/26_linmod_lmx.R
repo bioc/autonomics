@@ -251,27 +251,22 @@ lmx <- function(
     if (length(coefs)==0)  return(object)    # awblinmod relies on this
     if (reset)  object %<>% reset_fit(fit = fit, verbose = verbose)
 # Filter / Customize
+    if (verbose & fit == 'lm'  )  cmessage(  "\n%slinmod_lm( %s %s, coding = '%s')",               spaces(14), assayNames(object)[1],  formula2str(formula), coding)
+    if (verbose & fit == 'lme' )  cmessage( "\n%slinmod_lme( %s %s, random = %s, coding = '%s')",  spaces(14), assayNames(object)[1],  formula2str(formula), capture.output(dput(block)), coding)
+    if (verbose & fit == 'lmer')  cmessage("\n%slinmod_lmer( %s %s, coding = '%s')",               spaces(14), assayNames(object)[1],  formula2str(formula), coding)
     obj <- object
-    if (verbose)  cmessage('%sFilter', spaces(14))
     obj %<>% keep_replicated_features( formula, verbose = verbose)
     obj %<>% keep_connected_blocks(    block,   verbose = verbose)  # keep samples from fully connected blocks (in sdt, feature-specific NA values not considered)
     obj %<>% keep_connected_features(  block,   verbose = verbose)  # keep features with 2+ connected blocks
-# Prepare
-   #object %<>% reset_fit(fit)  # Dont wipe - often desirable to run multiple models sequentially
     if ( fit == 'lme'  ){     block %<>% block2lme(); mdlvars <-  unique(c(all.vars(formula), names(block)))   }
     if ( fit == 'lmer' ){   formula %<>% formula2lmer(block); mdlvars <- all.vars(formula)                     }
     if ( fit == 'lm'   ){   formula %<>% formula2lm(  block); mdlvars <- all.vars(formula)                     }
-    fstr <- formula2str(formula)
-    if (verbose)                  cmessage('%s%s',           spaces(14), R.utils::capitalize(fit))
-    if (verbose & fit == 'lme' )  cmessage('%s%s, random = %s', spaces(22), fstr, capture.output(dput(block)))
-    if (verbose & fit == 'lmer')  cmessage('%s%s',           spaces(21), fstr)
-    if (verbose & fit == 'lm'  )  cmessage('%s%s',           spaces(21), fstr)
+# Fit
     fitmethod <- get(paste0('.', fit))
     if (is.null(weightvar)){ weightvar <- 'weights'; weights <- NULL }
     assays <- assayNames(object) %>% intersect(c(.[1], 'weights'))
     dt <- sumexp_to_longdt(obj, svars = mdlvars, assay = assays)
     lhsformula <- addlhs(formula)
-# Fit
     fitdt <- dt[, fitmethod( .SD,   formula = lhsformula, 
                                        block = block, 
                                      weights = get(weightvar),
@@ -283,7 +278,8 @@ lmx <- function(
                     names(fitdt) %<>% stri_replace_first_regex(pat, '$1') }
 # Extract
     names(fitdt)[-1] %<>% paste0(suffix)
-    if (verbose)  message_df('                      %s', summarize_fit(fitdt, fit = fit))
+    #if (verbose)  message('')
+    if (verbose)  message_df('                          %s', summarize_fit(fitdt, fit = fit, coefs = coefs))
     fitdt %<>% extract(, c(1, which(split_extract_fixed(names(.), '~', 2) %in% coefs)), with = FALSE)
 # Merge back
     object %<>% merge_fit(fitdt)
@@ -312,7 +308,7 @@ linmod_lm <- function(
       verbose = TRUE
 ){
     
-    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = FALSE)
     lmx(    object,
                fit = 'lm', 
            formula = formula,
@@ -359,7 +355,7 @@ linmod_lme <- function(
     . <- NULL
     if (!installed('nlme'))  return(object)
 # Fit
-    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = FALSE)
     lmx(    object,
                fit = 'lme', 
            formula = formula,
@@ -406,7 +402,7 @@ linmod_lmer <- function(
     if (!installed('lme4'))      return(object)
     if (!installed('lmerTest'))  return(object)
 # Fit
-    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = FALSE)
     lmx(    object,
                fit = 'lmer', 
            formula = formula,
