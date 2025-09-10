@@ -42,14 +42,15 @@ linmod_limma(
   formula = as.formula("~ subgroup"),
   drop = varlevels_dont_clash(object, all.vars(formula)),
   coding = "code_control",
-  verbose = TRUE,
   design = create_design(object, formula = formula, drop = drop, coding = coding, verbose
-    = verbose),
+    = FALSE),
   contrasts = NULL,
   coefs = if (is.null(contrasts)) contrast_coefs(design = design) else NULL,
   block = NULL,
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
-  suffix = "~limma"
+  reset = TRUE,
+  suffix = "~limma",
+  verbose = TRUE
 )
 
 fit_limma(...)
@@ -63,6 +64,7 @@ linmod_lm(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
+  reset = TRUE,
   suffix = "~lm",
   contrasts = NULL,
   verbose = TRUE
@@ -79,6 +81,7 @@ linmod_lme(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
+  reset = TRUE,
   opt = "optim",
   suffix = "~lme",
   contrasts = NULL,
@@ -96,6 +99,7 @@ linmod_lmer(
   block = NULL,
   coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
   weightvar = if ("weights" \%in\% assayNames(object)) "weights" else NULL,
+  reset = TRUE,
   suffix = "~lmer",
   contrasts = NULL,
   verbose = TRUE
@@ -113,6 +117,7 @@ linmod_wilcoxon(
   coefs = NULL,
   contrasts = NULL,
   weightvar = NULL,
+  reset = TRUE,
   suffix = "~wilcoxon",
   verbose = TRUE
 )
@@ -167,6 +172,8 @@ fit_wilcoxon(...)
 \item{argsvolcano}{list: volcano args}
 
 \item{argsexprs}{list:  expr   args}
+
+\item{reset}{TRUE/FALSE whether to wipe earlier modeling results}
 
 \item{opt}{lme options}
 }

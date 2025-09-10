@@ -98,10 +98,11 @@ linmod_wilcoxon <- function(
         coefs = NULL,
     contrasts = NULL,
     weightvar = NULL, 
+        reset = TRUE, 
        suffix = '~wilcoxon',
       verbose = TRUE
 ){
-# assert
+# Assert
     assert_is_valid_sumexp(object)
     assert_valid_formula(formula, object)
     subgroupvar <- all_vars(formula)[1]
@@ -111,7 +112,7 @@ linmod_wilcoxon <- function(
     assert_is_character(contrasts)
     if (!is.null(block))      assert_is_subset(block, svars(object))
     if (verbose)  cmessage('%sFeatures', spaces(14))
-    object %<>% reset_fit('wilcoxon')
+    if (reset)  object %<>% reset_fit('wilcoxon', verbose = verbose)
     obj <- object
     obj %<>% keep_replicated_features(formula, n = 1, verbose = verbose)
     # connected block filtering not required, .wilcoxon doesnt break there

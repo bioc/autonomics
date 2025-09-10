@@ -235,6 +235,7 @@ lmx <- function(
         coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
           opt = 'optim',
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
+        reset = TRUE,
        suffix = paste0('~', fit),
       verbose = TRUE
 ){
@@ -247,6 +248,7 @@ lmx <- function(
                                 assert_is_subset(weightvar, assayNames(object)) 
                                 message('\t\t\tweights = assays(object)$', weightvar)  }
     N <- value <- V1 <- NULL
+    if (reset)  object %<>% reset_fit(fit = fit, verbose = verbose)
 # Filter / Customize
     obj <- object
     if (verbose)  cmessage('%sFilter', spaces(14))
@@ -303,6 +305,7 @@ linmod_lm <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
+        reset = TRUE,
        suffix = '~lm',
     contrasts = NULL,
       verbose = TRUE
@@ -317,6 +320,7 @@ linmod_lm <- function(
              block = block,
              coefs = coefs,
          weightvar = weightvar,
+             reset = reset,
             suffix = suffix,
            verbose = verbose )
 }
@@ -344,6 +348,7 @@ linmod_lme <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
+        reset = TRUE,
           opt = 'optim',
        suffix = '~lme',
     contrasts = NULL,
@@ -362,6 +367,7 @@ linmod_lme <- function(
              block = block, 
              coefs = coefs,
          weightvar = weightvar,
+             reset = reset,
             suffix = suffix,
                opt = opt,
            verbose = verbose )
@@ -389,6 +395,7 @@ linmod_lmer <- function(
         block = NULL, 
         coefs = contrast_coefs(object, formula = formula, coding = coding, drop = drop),
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
+        reset = TRUE,
        suffix = '~lmer',
     contrasts = NULL,
       verbose = TRUE
@@ -407,6 +414,7 @@ linmod_lmer <- function(
              block = block, 
              coefs = coefs,
          weightvar = weightvar,
+             reset = reset,
             suffix = suffix,
            verbose = verbose )
 }

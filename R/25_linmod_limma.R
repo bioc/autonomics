@@ -602,6 +602,7 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param coefs     NULL or character vector: model coefs to record
 #' @param contrasts NULL or character vector: posthoc contrasts to record
 #' @param weightvar NULL or name of weight matrix in assays(object)
+#' @param reset     TRUE/FALSE whether to wipe earlier modeling results
 #' @param suffix    string: pvar suffix ("limma" in "p~t2~limma")
 #' @param verbose   whether to msg
 #' @param outdir    NULL or dir
@@ -806,13 +807,14 @@ linmod_limma <- function(
       formula = as.formula('~ subgroup'),
          drop = varlevels_dont_clash(object, all.vars(formula)),
        coding = 'code_control',
-      verbose = TRUE,
-       design = create_design(object, formula = formula, drop = drop, coding = coding, verbose = verbose),
+       design = create_design(object, formula = formula, drop = drop, coding = coding, verbose = FALSE),
     contrasts = NULL,
         coefs = if (is.null(contrasts))  contrast_coefs(design = design) else NULL,
         block = NULL, 
     weightvar = if ('weights' %in% assayNames(object)) 'weights' else NULL, 
-       suffix = '~limma'
+        reset = TRUE,
+       suffix = '~limma',
+      verbose = TRUE
 ){
 # Assert
     assert_is_valid_sumexp(object)
@@ -821,6 +823,7 @@ linmod_limma <- function(
     assert_is_matrix(design)
     if (!is.null(block))      assert_is_subset(block, svars(object))
     if (!is.null(weightvar))  assert_scalar_subset(weightvar, assayNames(object))
+    if (reset)  object %<>% reset_fit(fit = 'limma', verbose = verbose)
 # Design/contrasts/block/weights
     . <- NULL
     blockvar <- NULL
