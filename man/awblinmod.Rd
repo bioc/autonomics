@@ -15,7 +15,7 @@ awblinmod(
   across = TRUE,
   within = if (length(modelvars) == 1) FALSE else TRUE,
   between = if (length(modelvars) == 1) FALSE else TRUE,
-  coding = "code_control",
+  coding = c("code_control", "code_diff"),
   drop = TRUE,
   ...
 )
@@ -51,12 +51,13 @@ awblinmod_lmer(object, ...)
 General Linear Modeling (across-within-between interface)
 }
 \examples{
-object <- survobj()
+file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+object <- read_metabolon(file)
 svars(object)
-awblinmod(object, engine = 'limma', modelvars = 'age')
-awblinmod(object, engine = 'limma', modelvars = c('age', 'sex'))
-awblinmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
-awblinmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
-awblinmod_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
-awblinmod_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
+awblinmod_limma(object, modelvars = c('Diabetes', 'Time'), block = 'Subject')
+awblinmod_lme(  object, modelvars = c('Diabetes', 'Time'), block = 'Subject')
+awblinmod_lmer( object, modelvars = c('Diabetes', 'Time'), block = 'Subject')
+awblinmod_lm(   object, modelvars = c('Diabetes', 'Time'))
+awblinmod(object, engine = 'limma', modelvars = 'Time')
+awblinmod(object, engine = 'limma', modelvars = c('Diabetes', 'Time'))
 }

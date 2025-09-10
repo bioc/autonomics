@@ -9,14 +9,15 @@
 #' @param drop      TRUE or FALSE
 #' @param ...       passed to linmod
 #' @examples
-#' object <- survobj()
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
 #' svars(object)
-#' awblinmod(object, engine = 'limma', modelvars = 'age')
-#' awblinmod(object, engine = 'limma', modelvars = c('age', 'sex'))
-#' awblinmod_limma(object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awblinmod_lm(   object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awblinmod_lme(  object, modelvars = c('age', 'sex'), block = 'replicate')
-#' awblinmod_lmer( object, modelvars = c('age', 'sex'), block = 'replicate')
+#' awblinmod_limma(object, modelvars = c('Diabetes', 'Time'), block = 'Subject')
+#' awblinmod_lme(  object, modelvars = c('Diabetes', 'Time'), block = 'Subject')
+#' awblinmod_lmer( object, modelvars = c('Diabetes', 'Time'), block = 'Subject')
+#' awblinmod_lm(   object, modelvars = c('Diabetes', 'Time'))
+#' awblinmod(object, engine = 'limma', modelvars = 'Time')
+#' awblinmod(object, engine = 'limma', modelvars = c('Diabetes', 'Time'))
 awblinmod <- function(
     object, 
     engine,
@@ -24,7 +25,7 @@ awblinmod <- function(
     across = TRUE,
     within = if (length(modelvars)==1) FALSE else TRUE,
    between = if (length(modelvars)==1) FALSE else TRUE,
-    coding = 'code_control',
+    coding = c('code_control', 'code_diff'),
       drop = TRUE, 
           ...
 ){
@@ -33,40 +34,50 @@ awblinmod <- function(
     assert_is_subset(modelvars, svars(object))
 
 # Model
-    modelfun <- switch(engine, limma = linmod_limma, lm = linmod_lm, lme = linmod_lme, lmer = linmod_lmer)
+    modelfun <- get(sprintf('linmod_%s', engine))
     if (across){
         formula  <- paste0(modelvars, collapse = '+')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs  <- colnames(create_design(object,  formula, coding = coding, drop = drop, verbose = FALSE))
-        coefs %<>% setdiff('Intercept')
-        object %<>% modelfun(formula,  coding = coding, drop = drop, coefs =  coefs, verbose = FALSE, ...)
+        for (codi in coding){
+            coefs  <- contrast_coefs(object,  formula, coding = codi, drop = drop)
+            coefs %<>% setdiff(autonomics::coefs(object, fit = engine))
+            object %<>% modelfun(formula,  coding = codi, drop = drop, coefs =  coefs, verbose = TRUE, reset = FALSE, ...)
+        }
     }
     if (within){
         formula <- paste0(modelvars, collapse = '/')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs <- colnames(create_design(object, formula, coding = coding, drop = drop, verbose = FALSE))
-        coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% modelfun(formula, coding = coding, drop = drop, coefs = coefs, verbose = FALSE, ...)
-        fvars(object) %<>% stri_replace_first_fixed(':', '/')
+        for (codi in coding){
+            coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
+            coefs %<>% extract(stri_detect_fixed(., ':'))
+            coefs %<>% setdiff(autonomics::coefs(object, fit = engine))
+            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = TRUE, reset = FALSE, ...)
+        }
+        fvars(object) %<>% stri_replace_first_fixed(':', '/') # needs to be out of the loop !
     }
     if (within){
         formula <- paste0(rev(modelvars), collapse = '/')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs <- colnames(create_design(object, formula, coding = coding, drop = drop, verbose = FALSE))
-        coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% modelfun(formula, coding = coding, drop = drop, coefs = coefs, verbose = FALSE, ...)
+        for (codi in coding){
+            coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
+            coefs %<>% extract(stri_detect_fixed(., ':'))
+            coefs %<>% setdiff(autonomics::coefs(object, fit = engine))
+            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = TRUE, reset = FALSE, ...)
+        }
         fvars(object) %<>% stri_replace_first_fixed(':', '/')
     }
     if (between){
         formula <- paste0(modelvars, collapse = '*')
         formula %<>% paste0('~', .)
         formula %<>% as.formula()
-        coefs <- colnames(create_design(object, formula, coding = coding, drop = drop, verbose = FALSE))
-        coefs %<>% extract(stri_detect_fixed(., ':'))
-        object %<>% modelfun(formula, coding = coding, drop = drop, coefs = coefs, verbose = FALSE, ...)
+        for (codi in coding){
+            coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
+            coefs %<>% extract(stri_detect_fixed(., ':'))
+            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = TRUE, reset = FALSE, ...)
+        }
         fvars(object) %<>% stri_replace_first_fixed(':', '*')
     }
 # Return
