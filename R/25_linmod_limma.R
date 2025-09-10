@@ -823,6 +823,7 @@ linmod_limma <- function(
     assert_is_matrix(design)
     if (!is.null(block))      assert_is_subset(block, svars(object))
     if (!is.null(weightvar))  assert_scalar_subset(weightvar, assayNames(object))
+    if (length(contrasts)==0 & length(coefs)==0)  return(object)  # awblinmod relies on this
     if (reset)  object %<>% reset_fit(fit = 'limma', verbose = verbose)
 # Design/contrasts/block/weights
     . <- NULL

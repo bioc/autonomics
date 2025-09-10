@@ -248,6 +248,7 @@ lmx <- function(
                                 assert_is_subset(weightvar, assayNames(object)) 
                                 message('\t\t\tweights = assays(object)$', weightvar)  }
     N <- value <- V1 <- NULL
+    if (length(coefs)==0)  return(object)    # awblinmod relies on this
     if (reset)  object %<>% reset_fit(fit = fit, verbose = verbose)
 # Filter / Customize
     obj <- object
