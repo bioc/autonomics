@@ -251,9 +251,6 @@ lmx <- function(
     if (length(coefs)==0)  return(object)    # awblinmod relies on this
     if (reset)  object %<>% reset_fit(fit = fit, verbose = verbose)
 # Filter / Customize
-    if (verbose & fit == 'lm'  )  cmessage(  "%slinmod_lm( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
-    if (verbose & fit == 'lme' )  cmessage( "%slinmod_lme( %s, random = %s, coding = '%s')",  spaces(14), formula2str(formula), capture.output(dput(block)), coding)
-    if (verbose & fit == 'lmer')  cmessage("%slinmod_lmer( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
     obj <- object
     obj %<>% keep_replicated_features( formula, verbose = verbose)
     obj %<>% keep_connected_blocks(    block,   verbose = verbose)  # keep samples from fully connected blocks (in sdt, feature-specific NA values not considered)
@@ -262,6 +259,9 @@ lmx <- function(
     if ( fit == 'lmer' ){   formula %<>% formula2lmer(block); mdlvars <- all.vars(formula)                     }
     if ( fit == 'lm'   ){   formula %<>% formula2lm(  block); mdlvars <- all.vars(formula)                     }
 # Fit
+    if (verbose & fit == 'lm'  )  cmessage(  "%slinmod_lm( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
+    if (verbose & fit == 'lme' )  cmessage( "%slinmod_lme( %s, random = %s, coding = '%s')",  spaces(14), formula2str(formula), capture.output(dput(block)), coding)
+    if (verbose & fit == 'lmer')  cmessage("%slinmod_lmer( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
     fitmethod <- get(paste0('.', fit))
     if (is.null(weightvar)){ weightvar <- 'weights'; weights <- NULL }
     assays <- assayNames(object) %>% intersect(c(.[1], 'weights'))
