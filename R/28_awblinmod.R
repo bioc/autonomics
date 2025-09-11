@@ -39,8 +39,8 @@ awblinmod <- function(
     if (across){
         formula  <- paste0(modelvars, collapse = '+')
         formula %<>% paste0('~', .)
-        if (verbose) cmessage('%s%s: %s effect across %s', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
-        if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect across %s', spaces(6+nchar(formula)+2), 
+        if (verbose) cmessage('%s%s: %s effect ACROSS %s', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
+        if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect ACROSS %s', spaces(6+nchar(formula)+2), 
                                                                    modelvars[i], paste0(modelvars[-i], collapse = ','))
         formula %<>% as.formula()
         for (codi in coding){
@@ -52,7 +52,7 @@ awblinmod <- function(
     if (within){
         formula <- paste0(modelvars, collapse = '/')
         formula %<>% paste0('~', .)
-        if (verbose) cmessage('\n%s%s: %s effect within %s', spaces(6), formula, rev(modelvars)[1], paste0(rev(rev(modelvars)[-1]), collapse = '/'))
+        if (verbose) cmessage('\n%s%s: %s effect WITHIN %s', spaces(6), formula, rev(modelvars)[1], paste0(rev(rev(modelvars)[-1]), collapse = '/'))
         formula %<>% as.formula()
         for (codi in coding){
             coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
@@ -65,7 +65,7 @@ awblinmod <- function(
     if (within){
         formula <- paste0(rev(modelvars), collapse = '/')
         formula %<>% paste0('~', .)
-        if (verbose) cmessage('\n%s%s: %s effect within %s', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = '/'))
+        if (verbose) cmessage('\n%s%s: %s effect WITHIN %s', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = '/'))
         formula %<>% as.formula()
         for (codi in coding){
             coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
@@ -78,8 +78,8 @@ awblinmod <- function(
     if (between){
         formula <- paste0(modelvars, collapse = '*')
         formula %<>% paste0('~', .)
-        if (verbose) cmessage('\n%s%s: %s effect differences between %s levels', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
-        if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect difference between %s levels', 
+        if (verbose) cmessage('\n%s%s: %s effect differences BETWEEN %s levels', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
+        if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect difference BETWEEN %s levels', 
                                                                spaces(6+nchar(formula)+2), modelvars[i], paste0(modelvars[-i], collapse = ','))
         if (verbose) message('')
         formula %<>% as.formula()
