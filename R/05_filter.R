@@ -161,7 +161,7 @@ keep_replicated_features <- function(
     dt %<>% extract(!is.na(value))
     dt %<>% extract(, .SD[.N>=n], by = 'feature_id')
     n1 <- length(unique(dt$feature_id))
-    if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features with %d+ values', spaces(22), n1, n0, n)
+    if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features with %d+ values', spaces(14), n1, n0, n)
 # Feature covers each slevel
     for (var in all.vars(formula)){
         # must span all slevels
@@ -169,13 +169,13 @@ keep_replicated_features <- function(
         n0 <- length(unique(dt$feature_id))
         dt %<>% extract(, .SD[length(unique(get(var))) == nlevels], by = 'feature_id')
         n1 <- length(unique(dt$feature_id))
-        if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features spanning all %s levels', spaces(22), n1, n0, var)
+        if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features spanning all %s levels', spaces(14), n1, n0, var)
 
         # must have n+ obs per slevel
         n0 <- length(unique(dt$feature_id))
         dt %<>% extract(, .SD[.N>=n], by = c('feature_id', var))
         n1 <- length(unique(dt$feature_id))
-        if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features with %d+ values per %s', spaces(22), n1, n0, n, var)
+        if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features with %d+ values per %s', spaces(14), n1, n0, n, var)
     }
 # Return
     idx <- fnames(object) %in% as.character(unique(dt$feature_id))
@@ -199,7 +199,7 @@ keep_connected_blocks <- function(object, block, verbose = TRUE){
     idx <- object[[block]] %in% full_blocks
     if (sum(idx) < length(idx)){
         if (verbose)  cmessage('%sKeep %d/%d fully connected blocks with %d/%d samples',
-                         spaces(22), length(full_blocks), length(all_blocks), sum(idx), length(idx))
+                         spaces(14), length(full_blocks), length(all_blocks), sum(idx), length(idx))
         object %<>% extract(, idx)
     }
     object
