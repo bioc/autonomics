@@ -81,7 +81,6 @@ awblinmod <- function(
         if (verbose) cmessage('\n%s%s: %s effect differences BETWEEN %s levels', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
         if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect difference BETWEEN %s levels', 
                                                                spaces(6+nchar(formula)+2), modelvars[i], paste0(modelvars[-i], collapse = ','))
-        if (verbose) message('')
         formula %<>% as.formula()
         for (codi in coding){
             coefs  <- contrast_coefs(object, as.formula(formula), coding = codi, drop = drop)
