@@ -842,9 +842,8 @@ linmod_limma <- function(
                     assert_is_subset(weightvar, assayNames(object))
                     assays(object)[[weightvar]][, rownames(design)] }
 # Fit
-    if (verbose)  cmessage("\n%slinmod_limma( %s %s%s%s, coding = '%s')", 
+    if (verbose)  cmessage("%slinmod_limma( %s%s%s, coding = '%s' )", 
                       spaces(14),
-                      assayNames(object)[1],
                       formula2str(formula),
                       if(is.null(blockvar))  '' else paste0(' | ',blockvar),
                       if(is.null(weightvar)) '' else paste0(', weights = assays(object)$', weightvar),

@@ -17,6 +17,7 @@ awblinmod(
   between = if (length(modelvars) == 1) FALSE else TRUE,
   coding = c("code_control", "code_diff"),
   drop = TRUE,
+  verbose = TRUE,
   ...
 )
 

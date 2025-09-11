@@ -27,6 +27,7 @@ awblinmod <- function(
    between = if (length(modelvars)==1) FALSE else TRUE,
     coding = c('code_control', 'code_diff'),
       drop = TRUE, 
+   verbose = TRUE,
           ...
 ){
 # Assert
@@ -38,45 +39,54 @@ awblinmod <- function(
     if (across){
         formula  <- paste0(modelvars, collapse = '+')
         formula %<>% paste0('~', .)
+        if (verbose) cmessage('%s%s: %s effect across %s', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
+        if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect across %s', spaces(6+nchar(formula)+2), 
+                                                                   modelvars[i], paste0(modelvars[-i], collapse = ','))
         formula %<>% as.formula()
         for (codi in coding){
-            coefs  <- contrast_coefs(object,  formula, coding = codi, drop = drop)
+            coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
             coefs %<>% setdiff(autonomics::coefs(object, fit = engine))
-            object %<>% modelfun(formula,  coding = codi, drop = drop, coefs =  coefs, verbose = TRUE, reset = FALSE, ...)
+            object %<>% modelfun(formula,  coding = codi, drop = drop, coefs =  coefs, verbose = verbose, reset = FALSE, ...)
         }
     }
     if (within){
         formula <- paste0(modelvars, collapse = '/')
         formula %<>% paste0('~', .)
+        if (verbose) cmessage('\n%s%s: %s effect within %s', spaces(6), formula, rev(modelvars)[1], paste0(rev(rev(modelvars)[-1]), collapse = '/'))
         formula %<>% as.formula()
         for (codi in coding){
             coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
             coefs %<>% extract(stri_detect_fixed(., ':'))
             coefs %<>% setdiff(autonomics::coefs(object, fit = engine))
-            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = TRUE, reset = FALSE, ...)
+            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = verbose, reset = FALSE, ...)
         }
         fvars(object) %<>% stri_replace_first_fixed(':', '/') # needs to be out of the loop !
     }
     if (within){
         formula <- paste0(rev(modelvars), collapse = '/')
         formula %<>% paste0('~', .)
+        if (verbose) cmessage('\n%s%s: %s effect within %s', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = '/'))
         formula %<>% as.formula()
         for (codi in coding){
             coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
             coefs %<>% extract(stri_detect_fixed(., ':'))
             coefs %<>% setdiff(autonomics::coefs(object, fit = engine))
-            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = TRUE, reset = FALSE, ...)
+            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = verbose, reset = FALSE, ...)
         }
         fvars(object) %<>% stri_replace_first_fixed(':', '/')
     }
     if (between){
         formula <- paste0(modelvars, collapse = '*')
         formula %<>% paste0('~', .)
+        if (verbose) cmessage('\n%s%s: %s effect differences between %s levels', spaces(6), formula, modelvars[1], paste0(modelvars[-1], collapse = ','))
+        if (verbose) for (i in seq_along(modelvars)[-1])  cmessage('%s%s effect difference between %s levels', 
+                                                               spaces(6+nchar(formula)+2), modelvars[i], paste0(modelvars[-i], collapse = ','))
+        if (verbose) message('')
         formula %<>% as.formula()
         for (codi in coding){
-            coefs  <- contrast_coefs(object, formula, coding = codi, drop = drop)
+            coefs  <- contrast_coefs(object, as.formula(formula), coding = codi, drop = drop)
             coefs %<>% extract(stri_detect_fixed(., ':'))
-            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = TRUE, reset = FALSE, ...)
+            object %<>% modelfun(formula, coding = codi, drop = drop, coefs = coefs, verbose = verbose, reset = FALSE, ...)
         }
         fvars(object) %<>% stri_replace_first_fixed(':', '*')
     }
