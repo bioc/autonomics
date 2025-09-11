@@ -19,5 +19,6 @@ Keep fully connected blocks
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% keep_connected_blocks(  block = 'Subject')
+keep_connected_blocks(object, block = 'Subject')          # autonomics format
+keep_connected_blocks(object, block = list(Subject = ~1)) # lme format
 }

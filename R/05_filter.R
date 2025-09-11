@@ -190,10 +190,12 @@ keep_replicated_features <- function(
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% keep_connected_blocks(  block = 'Subject')
+#' keep_connected_blocks(object, block = 'Subject')          # autonomics format
+#' keep_connected_blocks(object, block = list(Subject = ~1)) # lme format
 #' @export
 keep_connected_blocks <- function(object, block, verbose = TRUE){
     if (is.null(block))  return(object)
+    if (is.list(block)) block <- names(block)  # linmod_lme(object, ~ Diabetes + Time, block = list(Subject = ~1))
     all_blocks <- unique(object[[block]])
     full_blocks <- sdt(object)[, .N, by = block][N==max(N)][[block]]
     idx <- object[[block]] %in% full_blocks
@@ -214,11 +216,12 @@ keep_connected_blocks <- function(object, block, verbose = TRUE){
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' object %<>% keep_connected_blocks(  block = 'Subject')
-#' object %<>% keep_connected_features(block = 'Subject')
+#' keep_connected_features(object, block = 'Subject')
+#' keep_connected_features(object, block = list(Subject = ~1))
 #' @export
 keep_connected_features <- function(object, block, n = 2, verbose = TRUE){
     if (is.null(block))  return(object)
+    if (is.list(block)) block <- names(block)  # linmod_lme(object, ~ Diabetes + Time, block = list(Subject = ~1))
     dt <- sumexp_to_longdt(object, svars = block)
     nperblock <- dt[, .N, by = c('feature_id', block)][, max(N)]
     n0 <- length(unique(dt$feature_id))

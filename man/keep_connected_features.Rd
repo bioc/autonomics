@@ -21,6 +21,6 @@ Keep features with n+ connected blocks
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-object \%<>\% keep_connected_blocks(  block = 'Subject')
-object \%<>\% keep_connected_features(block = 'Subject')
+keep_connected_features(object, block = 'Subject')
+keep_connected_features(object, block = list(Subject = ~1))
 }
