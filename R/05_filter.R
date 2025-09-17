@@ -219,9 +219,11 @@ coefs_estimable <- function(formula, data){
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' keep_estimable_features(object, ~ subgroup)
+#' keep_estimable_features(object, ~ subgroup + (1|Subject))
 #' @export
 keep_estimable_features <- function(object, formula = ~1, coding = 'code_control', verbose = TRUE){
-    sdt(object) %<>% code(coding = coding, vars = all.vars(formula))
+    formula %<>% lme4::nobars()
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
     estimdt <- sumexp_to_longdt(object, svars = all.vars(formula))
     estimdt <- estimdt[, .(estimable = pvalues_estimable(formula, .SD)), by = 'feature_id']
     object %<>% merge_fdt(estimdt)

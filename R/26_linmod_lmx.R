@@ -399,7 +399,7 @@ linmod_lmer <- function(
 ){
 # Assert
     . <- NULL
-    if (!installed('lme4'))      return(object)
+  # if (!installed('lme4'))      return(object)    # currently in imports (lme4::nobars)
     if (!installed('lmerTest'))  return(object)
 # Fit
     sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = FALSE)
