@@ -193,6 +193,7 @@ filter_exprs_replicated_in_some_subgroup <- function(
 #'             coefs_estimable(~time+diabetes, data = dt)
 #'           pvalues_estimable(~time+diabetes, data = dt)
 #'             summary(lm(value~time+diabetes, data = dt))
+#' @export
 pvalues_estimable <- function(formula, data){
     data %<>% extract(!is.na(value))
     design <- model.matrix(formula, data = data)
@@ -214,6 +215,11 @@ coefs_estimable <- function(formula, data){
 #' @param formula model formula
 #' @param coding  coding function name 
 #' @param verbose TRUE or FALSE
+#' @examples
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' keep_estimable_features(object, ~ subgroup)
+#' @export
 keep_estimable_features <- function(object, formula = ~1, coding = 'code_control', verbose = TRUE){
     sdt(object) %<>% code(coding = coding, vars = all.vars(formula))
     estimdt <- sumexp_to_longdt(object, svars = all.vars(formula))
@@ -221,7 +227,7 @@ keep_estimable_features <- function(object, formula = ~1, coding = 'code_control
     object %<>% merge_fdt(estimdt)
     object %<>% filter_features(estimable == TRUE, verbose = verbose)
     object
-}
+}#
 
 
 #' Keep fully connected blocks
