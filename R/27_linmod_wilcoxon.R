@@ -114,7 +114,7 @@ linmod_wilcoxon <- function(
     if (verbose)  cmessage('%sFeatures', spaces(14))
     if (reset)  object %<>% reset_fit('wilcoxon', verbose = verbose)
     obj <- object
-    obj %<>% keep_replicated_features(formula, n = 1, verbose = verbose)
+    obj %<>% keep_estimable_features(formula, coding = coding, verbose = verbose)
     # connected block filtering not required, .wilcoxon doesnt break there
 # fit
     . <- NULL

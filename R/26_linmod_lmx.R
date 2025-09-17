@@ -252,7 +252,7 @@ lmx <- function(
     if (reset)  object %<>% reset_fit(fit = fit, verbose = verbose)
 # Filter / Customize
     obj <- object
-    obj %<>% keep_replicated_features( formula, verbose = verbose)
+    obj %<>% keep_estimable_features(formula, coding = coding, verbose = verbose)
     obj %<>% keep_connected_blocks(    block,   verbose = verbose)  # keep samples from fully connected blocks (in sdt, feature-specific NA values not considered)
     obj %<>% keep_connected_features(  block,   verbose = verbose)  # keep features with 2+ connected blocks
     if ( fit == 'lme'  ){     block %<>% block2lme(); mdlvars <-  unique(c(all.vars(formula), names(block)))   }

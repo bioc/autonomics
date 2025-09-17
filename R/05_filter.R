@@ -209,50 +209,18 @@ coefs_estimable <- function(formula, data){
     qr(design)$rank == ncol(design)   # Full rank desing (coefficient estimation)
 }
 
-
-#' Keep replicated features
-#'
-#' Keep features replicated for each slevel
-#'
-#' @param object   SummarizedExperiment
-#' @param formula  formula
-#' @param n        min replications required
-#' @param verbose  TRUE or FALSE
-#' @examples
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' object %<>% keep_replicated_features()
-#' object %<>% keep_replicated_features(~ subgroup)
-#' @export
-keep_replicated_features <- function(
-    object, formula = ~ 1, n = 3, verbose = TRUE
-){
-# Drop NA values
-    dt <- sumexp_to_longdt(object, svars = c(all.vars(formula)), assay = assayNames(object)[1])
-    n0 <- length(unique(dt$feature_id))
-    value <- NULL
-    dt %<>% extract(!is.na(value))
-    dt %<>% extract(, .SD[.N>=n], by = 'feature_id')
-    n1 <- length(unique(dt$feature_id))
-    if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features with %d+ values', spaces(14), n1, n0, n)
-# Feature covers each slevel
-    for (var in all.vars(formula)){
-        # must span all slevels
-        nlevels <- length(unique(dt[[var]]))
-        n0 <- length(unique(dt$feature_id))
-        dt %<>% extract(, .SD[length(unique(get(var))) == nlevels], by = 'feature_id')
-        n1 <- length(unique(dt$feature_id))
-        if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features spanning all %s levels', spaces(14), n1, n0, var)
-
-        # must have n+ obs per slevel
-        n0 <- length(unique(dt$feature_id))
-        dt %<>% extract(, .SD[.N>=n], by = c('feature_id', var))
-        n1 <- length(unique(dt$feature_id))
-        if (n1<n0 & verbose)  cmessage('%sKeep %d/%d features with %d+ values per %s', spaces(14), n1, n0, n, var)
-    }
-# Return
-    idx <- fnames(object) %in% as.character(unique(dt$feature_id))
-    object[idx, ]
+#' Keep estimable features
+#' @param object  SummarizedExperiment
+#' @param formula model formula
+#' @param coding  coding function name 
+#' @param verbose TRUE or FALSE
+keep_estimable_features <- function(object, formula = ~1, coding = 'code_control', verbose = TRUE){
+    sdt(object) %<>% code(coding = coding, vars = all.vars(formula))
+    estimdt <- sumexp_to_longdt(object, svars = all.vars(formula))
+    estimdt <- estimdt[, .(estimable = pvalues_estimable(formula, .SD)), by = 'feature_id']
+    object %<>% merge_fdt(estimdt)
+    object %<>% filter_features(estimable == TRUE, verbose = verbose)
+    object
 }
 
 
