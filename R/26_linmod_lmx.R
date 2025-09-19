@@ -136,28 +136,30 @@ droplhs <- function(formula)  as.formula(stri_replace_first_regex(
 
 
 
-#' block2list
+#' block2lme
 #' @param block    block: charactervector or formula
 #' @param ...      required for s3 dispatch
 #' @examples
-#' block2list( block = c(     'subject',      'batch'))
-#' block2list( block = c(`1`= 'subject', `1`= 'batch'))
-#' block2list( block =   ~1|subject + 1|batch         )
-#' block2list( block = list(subject = ~1, batch = ~1 ))
+#' block2lme( block = c(     'subject',      'batch'))
+#' block2lme( block = c(`1`= 'subject', `1`= 'batch'))
+#' block2lme( block =   ~(1|subject) + (1|batch)     )
+#' block2lme( block = list(subject = ~1, batch = ~1 ))
 #' @export
-block2list <- function(block, ...)  UseMethod('block2list')
+block2lme <- function(block, ...)  UseMethod('block2lme')
 
-#' @rdname block2list
+#' @rdname block2lme
 #' @export
-block2list.list <- function(block, ...)   block
+block2lme.list <- function(block, ...)   block
 
-#' @rdname block2list
+#' @rdname block2lme
 #' @export
-block2list.formula <- function(block, ...){
+block2lme.formula <- function(block, ...){
             block0 <- block
             block <- formula2str(block0)
             block %<>% substr(2,nchar(.)) %>% trimws()  # rm ~
             block %<>% stri_split_fixed('+') %>% unlist() %>% trimws()
+            block %<>% stri_replace_all_fixed('(', '')
+            block %<>% stri_replace_all_fixed(')', '')
        blocknames <- trimws(split_extract_fixed( block, '|', 2 ))
             block <- trimws(split_extract_fixed( block, '|', 1 ))
             block %<>% paste0('~', .)
@@ -166,9 +168,9 @@ block2list.formula <- function(block, ...){
      return(block)
 }
 
-#' @rdname block2list
+#' @rdname block2lme
 #' @export
-block2list.character <- function(block, ...){
+block2lme.character <- function(block, ...){
     block0 <- block
     block <- rep('~1', length(block0))
     names(block) <- block0
@@ -182,109 +184,93 @@ block2list.character <- function(block, ...){
 
 
 
-#' block2formula
+#' block2lmer
 #' @param block    block: charactervector or formula
 #' @param verbose  TRUE or FALSE
 #' @param ...      required for s3 dispatch
 #' @examples
-#' block2formula( block = c(     'subject',      'batch'))
-#' block2formula( block = c(`1`= 'subject', `1`= 'batch'))
-#' block2formula( block =   ~1|subject + 1|batch         )
-#' block2formula( block = list(subject = ~1, batch = ~1 ))
+#' block2lmer( block = c('subject', 'batch'))
+#' block2lmer( block = c('subject', 'batch'), formula = ~ subgroup)
+#' 
+#' block2lmer( block = c(`1`= 'subject', `1`= 'batch'))
+#' block2lmer( block = c(`1`= 'subject', `1`= 'batch'),   formula = ~ subgroup)
+#' 
+#' block2lmer( block = ~(1|subject)  +  (1|batch))
+#' block2lmer( block = ~(1|subject)  +  (1|batch),        formula = ~ subgroup)
+#' 
+#' block2lmer( block = list(subject = ~1,   batch = ~1 ))
+#' block2lmer( block = list(subject = ~1,   batch = ~1 ), formula = ~ subgroup)
 #' @export
-block2formula <- function(block, ...)  UseMethod('block2formula')
+block2lmer <- function(block, ...)  UseMethod('block2lmer')
 
 
-#' @rdname block2formula
+#' @rdname block2lmer
 #' @export
-block2formula.formula <- function(block, ...)  block
-
-
-#' @rdname block2formula
-#' @export
-block2formula.character <- function(block, ...){
-    if (!has_names(block))  names(block) <- rep('1', length(block))
-    block <- paste0( names(block) , '|', block )
-    block %<>% paste0(collapse = ' + ')
-    block %<>% paste0('~', .)
-    block %<>% as.formula()
-    block
+block2lmer.formula <- function(block, formula = NULL, ...){
+    if (is.null(formula)){  formula <- block
+    } else {                block %<>% formula2str()
+                            block %<>% substr(2, nchar(.))
+                            formula %<>% formula2str()
+                            formula %<>% paste0(' + ', block)
+    }
+    as.formula(formula)
 }
 
 
-#' @rdname block2formula
+#' @rdname block2lmer
 #' @export
-block2formula.list <- function(block, ...){
+block2lmer.character <- function(block, formula = NULL, ...){
+    if (!has_names(block))  names(block) <- rep('1', length(block))
+    block <- paste0( names(block) , '|', block )
+    block %<>% paste0('(', ., ')')
+    block %<>% paste0(collapse = ' + ')
+    if (is.null(formula)){  formula <- paste0('~', block)
+    } else {                formula %<>% formula2str()
+                            formula %<>% paste0(' + ', block)
+    }
+    as.formula(formula)
+}
+
+
+#' @rdname block2lmer
+#' @export
+block2lmer.list <- function(block, formula = NULL, ...){
     block %<>% lapply(formula2str)
     block %<>% lapply(split_extract_fixed, '~', 2)
     block <- paste0(  unlist(unname(block)) , '|', names(block) )
+    block %<>% paste0('(', ., ')')
     block %<>% paste0(collapse = ' + ')
-    block %<>% paste0('~ ', .)
-    block %<>% as.formula()
-    block
+    if (is.null(formula)){ formula <- paste0('~', block) 
+    } else {               formula %<>% formula2str()
+                           formula %<>% paste0(' + ', block)
+    }
+    as.formula(formula)
 }
 
 
 
-#---------------------------------------------------------
-
-
-
-#' block2character
+#' block2lm
 #' @param block    block: charactervector or formula
 #' @param verbose  TRUE or FALSE
 #' @param ...      required for s3 dispatch
 #' @examples
-#' block2character( block = c(     'subject',          'batch'     ))
-#' block2character( block = c(`1`= 'subject',     `1`= 'batch'     ))
-#' block2character( block = list(   subject = ~1,       batch = ~1 ))
-#' block2character( block =      ~1|subject         + 1|batch       )
+#' block2lm( block = NULL,                              formula = ~ subgroup)
+#' block2lm( block = c('subject', 'batch'),             formula = ~ subgroup)
+#' block2lm( block = c(`1`= 'subject', `1`= 'batch'),   formula = ~ subgroup)
+#' block2lm( block = ~(1|subject)  +  (1|batch),        formula = ~ subgroup)
+#' block2lm( block = list(subject = ~1,   batch = ~1 ), formula = ~ subgroup)
 #' @export
-block2character <- function(block, ...)  UseMethod('block2character')
+block2lm <- function(block, ...)  UseMethod('block2lm')
 
 
-#' @rdname block2character
+#' @rdname block2lm
 #' @export
-block2character.NULL <- function(block, ...)  character(0)
+block2lm.NULL <- function(block, formula)  formula
 
-    
-#' @rdname block2character
+
+#' @rdname block2lm
 #' @export
-block2character.character <- function(block, ...){
-    if (!has_names(block))  names(block) <- rep('1', length(block))
-    block
-}
-
-
-#' @rdname block2character
-#' @export
-block2character.list <- function(block, ...){
-    block %<>% lapply(formula2str)
-    block %<>% lapply(function(x)substr(x, 2, nchar(x)))
-    set_names(names(block), block)
-}
-
-
-#' @rdname block2character
-#' @export
-block2character.formula <- function(block, ...){
-    block %<>% formula2str()
-    block %<>% trimws()
-    block %<>% substr(2, nchar(.))
-    block %<>% stri_split_fixed('+') %>% unlist()
-    set_names(trimws(split_extract_fixed(block, '|', 2)), 
-              trimws(split_extract_fixed(block, '|', 1)))
-}
-
-
-
-#---------------------------------------------------------
-
-
-
-#' @rdname block2lme
-#' @export
-block2lm <- function(formula, block){
+block2lm.character <- function(block, formula){
     if (is.null(block))  return(formula)
     formula %<>% formula2str()
     formula %<>% substr(2,nchar(.))
@@ -296,19 +282,75 @@ block2lm <- function(formula, block){
 }
 
 
-#' @rdname block2lme
+#' @rdname block2lm
 #' @export
-block_vars <- function(formula){
-    formula %<>% formula2str()
-    formula %<>% stri_replace_first_regex('^[~][ ]*', '')
-    formula %<>% stri_split_regex('[ ]*[+][ ]*')
-    formula %<>% extract2(1)
-    formula %<>% extract(stri_detect_fixed(., '|'))
-    formula %<>% stri_replace_first_regex('[ ]*[(][ ]*', '') # lmer
-    formula %<>% stri_replace_first_regex('[ ]*[)][ ]*', '') # lmer
-    formula %<>% split_extract_regex('[ ]*[|][ ]*', 2)
-    formula
+block2lm.list <- function(block, formula){
+    block %>% block2limma %>% block2lm(formula)
 }
+
+
+#' @rdname block2lm
+#' @export
+block2lm.formula <- function(block, formula){
+    block %>% block2limma %>% block2lm(formula)
+}
+
+
+#---------------------------------------------------------
+
+
+
+#' block2limma
+#' @param block    block: charactervector or formula
+#' @param verbose  TRUE or FALSE
+#' @param ...      required for s3 dispatch
+#' @examples
+#' block2limma( block = c(     'subject',          'batch'     ))
+#' block2limma( block = c(`1`= 'subject',     `1`= 'batch'     ))
+#' block2limma( block = list(   subject = ~1,       batch = ~1 ))
+#' block2limma( block =      ~(1|subject)         + (1|batch)   )
+#' @export
+block2limma <- function(block, ...)  UseMethod('block2limma')
+
+
+#' @rdname block2limma
+#' @export
+block2limma.NULL <- function(block, ...)  character(0)
+
+    
+#' @rdname block2limma
+#' @export
+block2limma.character <- function(block, ...){
+    if (!has_names(block))  names(block) <- rep('1', length(block))
+    block
+}
+
+
+#' @rdname block2limma
+#' @export
+block2limma.list <- function(block, ...){
+    block %<>% lapply(formula2str)
+    block %<>% lapply(function(x)substr(x, 2, nchar(x)))
+    set_names(names(block), block)
+}
+
+
+#' @rdname block2limma
+#' @export
+block2limma.formula <- function(block, ...){
+    block %<>% formula2str()
+    block %<>% trimws()
+    block %<>% substr(2, nchar(.))
+    block %<>% stri_split_fixed('+') %>% unlist()
+    block %<>% stri_replace_all_fixed('(', '')
+    block %<>% stri_replace_all_fixed(')', '')
+    set_names(trimws(split_extract_fixed(block, '|', 2)), 
+              trimws(split_extract_fixed(block, '|', 1)))
+}
+
+
+
+#---------------------------------------------------------
 
 
 
@@ -339,16 +381,16 @@ lmx <- function(
     if (reset)  object %<>% reset_fit(fit = fit, verbose = verbose)
 # Filter / Customize
     obj <- object
-    obj %<>% keep_estimable_features(formula, coding = coding, verbose = verbose)
-    obj %<>% keep_connected_blocks(    block,   verbose = verbose)  # keep samples from fully connected blocks (in sdt, feature-specific NA values not considered)
-    obj %<>% keep_connected_features(  block,   verbose = verbose)  # keep features with 2+ connected blocks
-    if ( fit == 'lme'  ){     block %<>% block2lme(); mdlvars <-  unique(c(all.vars(formula), names(block)))   }
-    if ( fit == 'lmer' ){   formula %<>% block2formula(block); mdlvars <- all.vars(formula)                     }
-    if ( fit == 'lm'   ){   formula %<>% block2lm(  block); mdlvars <- all.vars(formula)                     }
+    obj %<>% keep_estimable_features(formula, block, coding = coding, verbose = verbose)
+  # obj %<>% keep_connected_blocks(    block,   verbose = verbose)  # keep samples from fully connected blocks (in sdt, feature-specific NA values not considered)
+  # obj %<>% keep_connected_features(  block,   verbose = verbose)  # keep features with 2+ connected blocks
+    if ( fit == 'lme'  ){   block %<>% block2lme();                   mdlvars <-  unique(c(all.vars(formula), block2limma(block)))   }
+    if ( fit == 'lmer' ){   formula <- block2lmer(block, formula);    mdlvars <- all.vars(formula)                     }
+    if ( fit == 'lm'   ){   formula <- block2lm(     block, formula); mdlvars <- all.vars(formula)                     }
 # Fit
-    if (verbose & fit == 'lm'  )  cmessage(  "%slinmod_lm( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
-    if (verbose & fit == 'lme' )  cmessage( "%slinmod_lme( %s, random = %s, coding = '%s')",  spaces(14), formula2str(formula), capture.output(dput(block)), coding)
-    if (verbose & fit == 'lmer')  cmessage("%slinmod_lmer( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
+    if (verbose & fit == 'lm'  )  cmessage("%slinmod_lm( %s, coding = '%s')",               spaces(14), formula2str(formula), coding)
+    if (verbose & fit == 'lme' )  cmessage("%slinmod_lme( %s, random = %s, coding = '%s')", spaces(14), formula2str(formula), capture.output(dput(block)), coding)
+    if (verbose & fit == 'lmer')  cmessage("%slinmod_lmer( %s, coding = '%s')",             spaces(14), formula2str(formula), coding)
     fitmethod <- get(paste0('.', fit))
     if (is.null(weightvar)){ weightvar <- 'weights'; weights <- NULL }
     assays <- assayNames(object) %>% intersect(c(.[1], 'weights'))

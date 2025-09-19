@@ -7,8 +7,8 @@
 keep_estimable_features(
   object,
   formula = ~1,
-  coding = "code_control",
   block = NULL,
+  coding = "code_control",
   verbose = TRUE
 )
 }

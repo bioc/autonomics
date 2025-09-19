@@ -622,13 +622,13 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #'   LINMOD(object, ~subgroup, block = 'Subject')  # Block effect
 #'   
 #' # Alternative engines: argument 'engine' or dedicated function
-#'   linmod_limma(   object, ~subgroup, block = 'Subject')           # Default engine
-#'   linmod_lm(      object, ~subgroup, block = 'Subject')           # Traditional
-#'   linmod_lme(     object, ~subgroup, block = 'Subject')           # Powerful random effects
+#'   linmod_limma(   object, ~subgroup, block =     'Subject'     )  # Default engine
+#'   linmod_lm(      object, ~subgroup, block =     'Subject'     )  # Traditional
+#'   linmod_lme(     object, ~subgroup, block =     'Subject'     )  # Powerful random effects
 #'   linmod_lme(     object, ~subgroup, block = list(Subject = ~1))  #     using lme formula
-#'   linmod_lmer(    object, ~subgroup, block = 'Subject')           # Yet more powerful random effects
-#'   linmod_lmer(    object, ~subgroup, block = 'Subject')           #     using lmer formula
-#'   linmod_wilcoxon(object, ~subgroup, block = 'Subject')           # Non-parametric
+#'   linmod_lmer(    object, ~subgroup, block =     'Subject'     )  # Yet more powerful random effects
+#'   linmod_lmer(    object, ~subgroup, block =  ~ (1|Subject)    )  #     using lmer formula
+#'   linmod_wilcoxon(object, ~subgroup, block =     'Subject'     )  # Non-parametric
 #'     
 #' # Alternative coding: backward diffs instead of baseline
 #'   linmod_limma(object, ~ subgroup, block = 'Subject', coding = 'code_diff')

@@ -240,11 +240,11 @@ block_has_two_levels <- function(block, data){
 #' keep_estimable_features(object, ~ subgroup + (1|Subject))
 #' @export
 keep_estimable_features <- function(
-    object, formula = ~1, coding = 'code_control', block = NULL, verbose = TRUE
+    object, formula = ~1, block = NULL, coding = 'code_control', verbose = TRUE
 ){
-    # Fixed effect design
+    # Designvars
     sdt(object) %<>% code(coding = coding, vars = c(all.vars(formula)), verbose = verbose)
-    block %<>% block2character()
+    block %<>% block2limma()
     longdt <- sumexp_to_longdt(object, svars = c(all.vars(formula), block))
     testdt <- longdt[, .(testok = pvalues_estimable(formula, .SD)), by = 'feature_id']
     idx <- fdt(object)$feature_id %in% testdt[testok==TRUE]$feature_id
@@ -253,7 +253,7 @@ keep_estimable_features <- function(
         object %<>% extract(idx, )
     }
     
-    # Random effect blocks
+    # Blockvars
     for (blo in block){
         testdt <- longdt[, .(testok = block_has_two_levels(blo, .SD)), by = 'feature_id']
         idx <- fdt(object)$feature_id %in% testdt[testok==TRUE]$feature_id
@@ -268,64 +268,64 @@ keep_estimable_features <- function(
 }#
 
 
-#' Keep fully connected blocks
-#' @param object  SummarizedExperiment
-#' @param block   svar
-#' @param verbose TRUE or FALSE
-#' @examples
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' keep_connected_blocks(object, block = 'Subject')          # autonomics format
-#' keep_connected_blocks(object, block = list(Subject = ~1)) # lme format
-#' @export
-keep_connected_blocks <- function(object, block, verbose = TRUE){
-    if (is.null(block))  return(object)
-    if (is.list(block)) block <- names(block)  # linmod_lme(object, ~ Diabetes + Time, block = list(Subject = ~1))
-    all_blocks <- unique(object[[block]])
-    full_blocks <- sdt(object)[, .N, by = block][N==max(N)][[block]]
-    idx <- object[[block]] %in% full_blocks
-    if (sum(idx) < length(idx)){
-        if (verbose)  cmessage('%sKeep %d/%d fully connected blocks with %d/%d samples',
-                         spaces(14), length(full_blocks), length(all_blocks), sum(idx), length(idx))
-        object %<>% extract(, idx)
-    }
-    object
-}
+# Keep fully connected blocks
+# @param object  SummarizedExperiment
+# @param block   svar
+# @param verbose TRUE or FALSE
+# @examples
+# file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+# object <- read_metabolon(file)
+# keep_connected_blocks(object, block = 'Subject')          # autonomics format
+# keep_connected_blocks(object, block = list(Subject = ~1)) # lme format
+# @export
+# keep_connected_blocks <- function(object, block, verbose = TRUE){
+#     if (is.null(block))  return(object)
+#     if (is.list(block)) block <- names(block)  # linmod_lme(object, ~ Diabetes + Time, block = list(Subject = ~1))
+#     all_blocks <- unique(object[[block]])
+#     full_blocks <- sdt(object)[, .N, by = block][N==max(N)][[block]]
+#     idx <- object[[block]] %in% full_blocks
+#     if (sum(idx) < length(idx)){
+#         if (verbose)  cmessage('%sKeep %d/%d fully connected blocks with %d/%d samples',
+#                          spaces(14), length(full_blocks), length(all_blocks), sum(idx), length(idx))
+#         object %<>% extract(, idx)
+#     }
+#     object
+# }
 
 
-#' Keep features with n+ connected blocks
-#' @param object   SummarizedExperiment
-#' @param block    svar
-#' @param n        number
-#' @param verbose  TRUE or FALSE
-#' @examples
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' keep_connected_features(object, block = 'Subject')
-#' keep_connected_features(object, block = list(Subject = ~1))
-#' @export
-keep_connected_features <- function(object, block, n = 2, verbose = TRUE){
-    if (is.null(block))  return(object)
-    if (is.list(block)) block <- names(block)  # linmod_lme(object, ~ Diabetes + Time, block = list(Subject = ~1))
-    dt <- sumexp_to_longdt(object, svars = block)
-    nperblock <- dt[, .N, by = c('feature_id', block)][, max(N)]
-    n0 <- length(unique(dt$feature_id))
-
-    idx  <- dt[, .N, by = c('feature_id', block)]                    #   nobs per feature per block
-    idx %<>% extract(, .(N = sum(N==nperblock)), by = 'feature_id')  #   n completeblocks per feature 
-    idx %<>% extract(N>=n)                                           #   2 completeblocks per feature
-    idx %<>% extract(, feature_id)
-
-    if (length(idx) < length(unique(dt$feature_id))){
-        if (verbose)  cmessage('\t\t\tRetain %d/%d features: 2+ fully connected blocks',
-                                length(idx), length(unique(dt$feature_id)))
-        object %<>% extract(feature_id %in% idx, )
-    }
-    object
-    # This earlier approach fails in ~ Time / Diabetes
-    # Because a subject cannot be both diabetic AND control
-    # obj %<>% extract_connected_features(formula = formula, blockvars = block, verbose = verbose) # doesnt work for complex models
-}
+# Keep features with n+ connected blocks
+# @param object   SummarizedExperiment
+# @param block    svar
+# @param n        number
+# @param verbose  TRUE or FALSE
+# @examples
+# file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+# object <- read_metabolon(file)
+# keep_connected_features(object, block = 'Subject')
+# keep_connected_features(object, block = list(Subject = ~1))
+# @export
+# keep_connected_features <- function(object, block, n = 2, verbose = TRUE){
+#     if (is.null(block))  return(object)
+#     if (is.list(block)) block <- names(block)  # linmod_lme(object, ~ Diabetes + Time, block = list(Subject = ~1))
+#     dt <- sumexp_to_longdt(object, svars = block)
+#     nperblock <- dt[, .N, by = c('feature_id', block)][, max(N)]
+#     n0 <- length(unique(dt$feature_id))
+# 
+#     idx  <- dt[, .N, by = c('feature_id', block)]                    #   nobs per feature per block
+#     idx %<>% extract(, .(N = sum(N==nperblock)), by = 'feature_id')  #   n completeblocks per feature 
+#     idx %<>% extract(N>=n)                                           #   2 completeblocks per feature
+#     idx %<>% extract(, feature_id)
+# 
+#     if (length(idx) < length(unique(dt$feature_id))){
+#         if (verbose)  cmessage('\t\t\tRetain %d/%d features: 2+ fully connected blocks',
+#                                 length(idx), length(unique(dt$feature_id)))
+#         object %<>% extract(feature_id %in% idx, )
+#     }
+#     object
+#     # This earlier approach fails in ~ Time / Diabetes
+#     # Because a subject cannot be both diabetic AND control
+#     # obj %<>% extract_connected_features(formula = formula, blockvars = block, verbose = verbose) # doesnt work for complex models
+# }
 
 
 #' Tag features
