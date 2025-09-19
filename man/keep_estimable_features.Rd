@@ -8,6 +8,7 @@ keep_estimable_features(
   object,
   formula = ~1,
   coding = "code_control",
+  block = NULL,
   verbose = TRUE
 )
 }
@@ -26,6 +27,6 @@ Keep estimable features
 \examples{
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
-keep_estimable_features(object, ~ subgroup)
+keep_estimable_features(object, formula = ~ subgroup, block = 'Subject')
 keep_estimable_features(object, ~ subgroup + (1|Subject))
 }

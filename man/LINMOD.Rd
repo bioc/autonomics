@@ -149,7 +149,7 @@ fit_wilcoxon(...)
 
 \item{design}{design matrix}
 
-\item{block}{block svar (or NULL)}
+\item{block}{block svar. Formated as string ('Subject') - all engines), list(Subject = ~ 1) -lme, or formula () ~ (1|Subject)) - lmer.}
 
 \item{coefs}{NULL or character vector: model coefs to record}
 

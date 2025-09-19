@@ -598,7 +598,7 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #'     \item 'code_helmert_forward':     intercept = ymean,  coefi = yi - mean(y(i+1):yp)
 #' }
 #' @param design    design matrix
-#' @param block     block svar (or NULL)
+#' @param block     block svar. Formated as string ('Subject') - all engines), list(Subject = ~ 1) -lme, or formula () ~ (1|Subject)) - lmer.
 #' @param coefs     NULL or character vector: model coefs to record
 #' @param contrasts NULL or character vector: posthoc contrasts to record
 #' @param weightvar NULL or name of weight matrix in assays(object)
@@ -823,7 +823,7 @@ linmod_limma <- function(
     assert_valid_formula(formula, object)
     assert_is_a_bool(drop)
     assert_is_matrix(design)
-    if (!is.null(block))      assert_is_subset(block, svars(object))
+    if (!is.null(block))      assert_scalar_subset(block, svars(object))
     if (!is.null(weightvar))  assert_scalar_subset(weightvar, assayNames(object))
     if (length(contrasts)==0 & length(coefs)==0)  return(object)  # awblinmod relies on this
     if (reset)  object %<>% reset_fit(fit = 'limma', verbose = verbose)
@@ -831,9 +831,8 @@ linmod_limma <- function(
     . <- NULL
     blockvar <- NULL
     if (!is.null(block)){
-        assert_is_subset(block, svars(object))
         blockvar <- block
-        block <- sdata(object)[[block]]
+        block <- sdt(object)[[block]]
         if (is.null(metadata(object)$dupcor)){
             if (verbose)  cmessage('%sDupcor `%s`', spaces(14), blockvar)
             metadata(object)$dupcor <- duplicateCorrelation(values(object), design = design, block = block)$consensus.correlation }

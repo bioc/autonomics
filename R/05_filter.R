@@ -210,6 +210,24 @@ coefs_estimable <- function(formula, data){
     qr(design)$rank == ncol(design)   # Full rank desing (coefficient estimation)
 }
 
+
+#' Block has two levels
+#' @param block string
+#' @param data data.table
+#' @examples
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' data <- sumexp_to_longdt(object, svars = 'Subject')
+#' data %<>% extract(feature_id == feature_id[1])
+#' block_has_two_levels(block = 'Subject', data)
+#' @export
+block_has_two_levels <- function(block, data){
+    data %<>% extract(!is.na(value))
+    data %<>% extract(!is.na(get(block)))
+    data[, length(unique(get(block)))] >= 2
+}
+
+
 #' Keep estimable features
 #' @param object  SummarizedExperiment
 #' @param formula model formula
@@ -218,16 +236,34 @@ coefs_estimable <- function(formula, data){
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
-#' keep_estimable_features(object, ~ subgroup)
+#' keep_estimable_features(object, formula = ~ subgroup, block = 'Subject')
 #' keep_estimable_features(object, ~ subgroup + (1|Subject))
 #' @export
-keep_estimable_features <- function(object, formula = ~1, coding = 'code_control', verbose = TRUE){
-    formula %<>% lme4::nobars()
-    sdt(object) %<>% code(coding = coding, vars = all.vars(formula), verbose = verbose)
-    estimdt <- sumexp_to_longdt(object, svars = all.vars(formula))
-    estimdt <- estimdt[, .(estimable = pvalues_estimable(formula, .SD)), by = 'feature_id']
-    object %<>% merge_fdt(estimdt)
-    object %<>% filter_features(estimable == TRUE, verbose = verbose)
+keep_estimable_features <- function(
+    object, formula = ~1, coding = 'code_control', block = NULL, verbose = TRUE
+){
+    # Fixed effect design
+    sdt(object) %<>% code(coding = coding, vars = c(all.vars(formula)), verbose = verbose)
+    block %<>% block2character()
+    longdt <- sumexp_to_longdt(object, svars = c(all.vars(formula), block))
+    testdt <- longdt[, .(testok = pvalues_estimable(formula, .SD)), by = 'feature_id']
+    idx <- fdt(object)$feature_id %in% testdt[testok==TRUE]$feature_id
+    if (sum(idx)<length(idx)){
+        if (verbose)  cmessage('%sKeep %d/%d features: fullrank design AND residual dof', spaces(14), sum(idx), length(idx))
+        object %<>% extract(idx, )
+    }
+    
+    # Random effect blocks
+    for (blo in block){
+        testdt <- longdt[, .(testok = block_has_two_levels(blo, .SD)), by = 'feature_id']
+        idx <- fdt(object)$feature_id %in% testdt[testok==TRUE]$feature_id
+        if (sum(idx)<length(idx)){
+            if (verbose)  cmessage('Keep %d/%d features: %ss >= 2', sum(idx), length(idx), block)
+            object %<>% extract(idx, )
+        }
+    }
+    
+    # Return
     object
 }#
 
