@@ -34,6 +34,7 @@ read_diann_phosphosites <- function(dir){
     object <- fread(file)
     cols <- c('Protein', 'Protein.Names', 'Gene.Names', 'Residue', 'Site', 'Sequence')
     fdt0 <- object[, cols, with = FALSE]
+    Protein.Names <- Residue <- Site <- NULL
     fdt0[, feature_id := paste0(Protein.Names, '.', Residue, Site) ]
     fdt0 %<>% pull_columns('feature_id')
     setnames(fdt0, 'Protein',       'uniprot' )
@@ -78,6 +79,7 @@ read_diann_phosphodiffs <- function(dir){
     proteinfeatures <- setdiff(fdt(proteingroups)$uniprot, fdt(phosphosites )$uniprot)
     phosphofeatures <- setdiff(fdt(phosphosites )$uniprot, fdt(proteingroups)$uniprot)
     if (length(phosphofeatures)>0)  cmessage('Retain %d/%d phospho features with protein counterpart', nrow(phosphosites ) - length(phosphofeatures), nrow(phosphosites ))
+    uniprot <- NULL
     proteingroups %<>% filter_features(uniprot %in% commonfeatures, verbose = FALSE)
     phosphosites  %<>% filter_features(uniprot %in% commonfeatures, verbose = FALSE)
     assert_has_no_duplicates(proteingroups$uniprot)
