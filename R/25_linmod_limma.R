@@ -306,7 +306,7 @@ code.character <- function(object, coding, verbose = TRUE, ...){
 #' @rdname code
 #' @export
 code.logical <- function(object, coding, verbose = TRUE, ...){
-    code.factor(factor(object, coding = coding, verbose = verbose, ...))
+    code.factor(factor(object), coding = coding, verbose = verbose, ...)
 }
 
 
