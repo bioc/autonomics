@@ -22,8 +22,6 @@ block2limma(block, ...)
 \item{block}{block: charactervector or formula}
 
 \item{...}{required for s3 dispatch}
-
-\item{verbose}{TRUE or FALSE}
 }
 \description{
 block2limma

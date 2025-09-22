@@ -11,6 +11,8 @@ stepauc(x, y, color = "group1", plot = FALSE)
 
 \item{y}{numeric vector}
 
+\item{color}{string}
+
 \item{plot}{TRUE or FALSE}
 }
 \value{

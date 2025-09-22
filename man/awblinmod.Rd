@@ -46,6 +46,8 @@ awblinmod_lmer(object, ...)
 
 \item{drop}{TRUE or FALSE}
 
+\item{verbose}{TRUE or FALSE}
+
 \item{...}{passed to linmod}
 }
 \description{

@@ -7,7 +7,7 @@
 \alias{block2lmer.list}
 \title{block2lmer}
 \usage{
-block2lmer(block, ...)
+block2lmer(block, formula, ...)
 
 \method{block2lmer}{formula}(block, formula = NULL, ...)
 
@@ -18,9 +18,9 @@ block2lmer(block, ...)
 \arguments{
 \item{block}{block: charactervector or formula}
 
-\item{...}{required for s3 dispatch}
+\item{formula}{model formula}
 
-\item{verbose}{TRUE or FALSE}
+\item{...}{required for s3 dispatch}
 }
 \description{
 block2lmer

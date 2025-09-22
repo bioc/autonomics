@@ -17,7 +17,9 @@ keep_estimable_features(
 
 \item{formula}{model formula}
 
-\item{coding}{coding function name}
+\item{block}{blockvar specification as string/character, list or formula}
+
+\item{coding}{coding function name (string)}
 
 \item{verbose}{TRUE or FALSE}
 }
@@ -28,5 +30,4 @@ Keep estimable features
 file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 object <- read_metabolon(file)
 keep_estimable_features(object, formula = ~ subgroup, block = 'Subject')
-keep_estimable_features(object, ~ subgroup + (1|Subject))
 }

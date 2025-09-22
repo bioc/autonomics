@@ -622,6 +622,7 @@ prep_survival <- function(
 #' Compute step auc
 #' @param x    numeric vector
 #' @param y    numeric vector
+#' @param color string
 #' @param plot TRUE or FALSE
 #' @return number
 #' @examples

@@ -186,7 +186,7 @@ block2lme.character <- function(block, ...){
 
 #' block2lmer
 #' @param block    block: charactervector or formula
-#' @param verbose  TRUE or FALSE
+#' @param formula  model formula
 #' @param ...      required for s3 dispatch
 #' @examples
 #' block2lmer( block = c('subject', 'batch'))
@@ -201,7 +201,7 @@ block2lme.character <- function(block, ...){
 #' block2lmer( block = list(subject = ~1,   batch = ~1 ))
 #' block2lmer( block = list(subject = ~1,   batch = ~1 ), formula = ~ subgroup)
 #' @export
-block2lmer <- function(block, ...)  UseMethod('block2lmer')
+block2lmer <- function(block, formula, ...)  UseMethod('block2lmer')
 
 
 #' @rdname block2lmer
@@ -251,7 +251,7 @@ block2lmer.list <- function(block, formula = NULL, ...){
 
 #' block2lm
 #' @param block    block: charactervector or formula
-#' @param verbose  TRUE or FALSE
+#' @param formula  model formula
 #' @param ...      required for s3 dispatch
 #' @examples
 #' block2lm( block = NULL,                              formula = ~ subgroup)

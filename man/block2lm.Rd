@@ -21,9 +21,9 @@ block2lm(block, formula, ...)
 \arguments{
 \item{block}{block: charactervector or formula}
 
-\item{...}{required for s3 dispatch}
+\item{formula}{model formula}
 
-\item{verbose}{TRUE or FALSE}
+\item{...}{required for s3 dispatch}
 }
 \description{
 block2lm

@@ -234,13 +234,13 @@ block_has_two_levels <- function(block, data){
 #' Keep estimable features
 #' @param object  SummarizedExperiment
 #' @param formula model formula
-#' @param coding  coding function name 
+#' @param block   blockvar specification as string/character, list or formula
+#' @param coding  coding function name (string)
 #' @param verbose TRUE or FALSE
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
 #' object <- read_metabolon(file)
 #' keep_estimable_features(object, formula = ~ subgroup, block = 'Subject')
-#' keep_estimable_features(object, ~ subgroup + (1|Subject))
 #' @export
 keep_estimable_features <- function(
     object, formula = ~1, block = NULL, coding = 'code_control', verbose = TRUE
