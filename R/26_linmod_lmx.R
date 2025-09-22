@@ -302,7 +302,6 @@ block2lm.formula <- function(block, formula){
 
 #' block2limma
 #' @param block    block: charactervector or formula
-#' @param verbose  TRUE or FALSE
 #' @param ...      required for s3 dispatch
 #' @examples
 #' block2limma( block = c(     'subject',          'batch'     ))
