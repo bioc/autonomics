@@ -34,7 +34,8 @@ LINMOD(
   plotvolcano = FALSE,
   plotexprs = FALSE,
   argsvolcano = list(),
-  argsexprs = list()
+  argsexprs = list(),
+  ...
 )
 
 linmod_limma(
@@ -172,6 +173,8 @@ fit_wilcoxon(...)
 \item{argsvolcano}{list: volcano args}
 
 \item{argsexprs}{list:  expr   args}
+
+\item{...}{used for s3 dispatch}
 
 \item{reset}{TRUE/FALSE whether to wipe earlier modeling results}
 

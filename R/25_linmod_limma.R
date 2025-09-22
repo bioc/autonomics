@@ -612,6 +612,7 @@ mat2sdt <- function(mat)  mat2dt(mat, 'sample_id')
 #' @param argsvolcano  list: volcano args
 #' @param argsexprs    list:  expr   args
 #' @param opt          lme options
+#' @param ...          used for s3 dispatch
 #' @return Updated SummarizedExperiment
 #' @examples
 #' # Standard usage
@@ -666,7 +667,8 @@ LINMOD <- function(
   plotvolcano = FALSE, 
     plotexprs = FALSE, 
   argsvolcano = list(),
-    argsexprs = list()
+    argsexprs = list(),
+             ...
 ){
 # Assert
     assert_scalar_subset(engine, c('limma', 'lme', 'lmer', 'wilcoxon', 'lm'))
