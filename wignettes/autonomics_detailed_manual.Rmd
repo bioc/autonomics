@@ -157,12 +157,12 @@ The NA structure can also be summarized graphically with either of the two funct
 
 ```{r, echo = TRUE, results = 'hide', message = FALSE, fig.width = 6, fig.height = 3, out.width = '100%', out.height = '100%'}
 p1 <- plot_sample_nas(object) + ggplot2::guides(fill = 'none')
-p2 <- plot_subgroup_nas(object)
+p2 <- plot_summarized_detections(object)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
 
 `plot_sample_nas` shows NA structure at **sample** resolution, plotting systematic and random NAs (white) as well as full detections (bright color).\
-`plot_subgroup_nas` summarizes NA structure at the **subgroup** level, differentiating systematic NA values (white) from random NA values and full detections (color).
+`plot_summarized_detections` summarizes NA structure at the **subgroup** level, differentiating systematic NA values (white) from random NA values and full detections (color).
 
 ## Imputing systematic NAs
 

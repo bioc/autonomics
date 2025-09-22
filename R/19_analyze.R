@@ -57,15 +57,14 @@ analyze <- function(
     for (curfit in fit){
         if (is.null(formula)) formula <- ~ subgroup
         if (is.null(coefs))   coefs <- contrast_coefs(object, formula = formula, drop = drop, coding = coding)
-        object %<>% linmod(engine = fit,
-                              formula = formula,
-                                 drop = drop,
-                               coding = coding,
-                            contrasts = contrasts,
-                                coefs = coefs,
-                                block = block,
-                            weightvar = weightvar,
-                              verbose = verbose )
+        object %<>% get(sprintf('linmod_%s', fit))(formula = formula,
+                                                      drop = drop,
+                                                    coding = coding,
+                                                 contrasts = contrasts,
+                                                     coefs = coefs,
+                                                     block = block,
+                                                 weightvar = weightvar,
+                                                   verbose = verbose )
     }
     # Plot/Return
     if (plot)  plot_summary( object, 
@@ -113,7 +112,7 @@ plot_summary <- function(
     assert_is_formula(formula)
 # Plot
     svar <- all.vars(formula)[1]
-    detections <- plot_subgroup_nas(object, by = svar,
+    detections <- plot_summarized_detections(object, by = svar,
                     palette  = palette) + ggtitle('Detections') + xlab(NULL) + 
                     theme(plot.title = element_text(hjust = 0.5))
     pcaplot <- biplot(object, method = 'pca', color = svar, colorpalette = palette) + 
