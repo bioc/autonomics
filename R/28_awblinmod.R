@@ -7,6 +7,7 @@
 #' @param between   TRUE/FALSE: fit between model (interaction) ?
 #' @param coding    character: codingfunname
 #' @param drop      TRUE or FALSE
+#' @param verbose   TRUE or FALSE
 #' @param ...       passed to linmod
 #' @examples
 #' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
