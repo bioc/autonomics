@@ -395,16 +395,6 @@ read_rectangles <- function(
 }
 
 
-
-split_values <- function(x){
-    sep <- guess_sep(x)
-    dt <- data.table::data.table(x = x)
-    dt[, data.table::tstrsplit(x, sep) ]
-}
-
-
-
-
 #' Merge sample/feature dt
 #' @param object          SummarizedExperiment
 #' @param dt              data.frame, data.table, DataFrame

@@ -1,7 +1,93 @@
 #=============================================================================
 #
-#                   contrast_subgroup_cols
-#                   contrast_subgroup_rows
+#               subgroup_matrix
+#                   split_subgroup_levels
+#                       split_subgroup_values
+#                           split_values
+#
+#=============================================================================
+
+split_values <- function(x){
+    sep <- guess_sep(x)
+    dt <- data.table::data.table(x = x)
+    dt[, data.table::tstrsplit(x, sep) ]
+}
+
+
+split_subgroup_values <- function(object, subgroupvar){
+    subgroupvalues <- svalues(object, subgroupvar)
+    cbind(subgroup = subgroupvalues, split_values(subgroupvalues))
+}
+
+
+split_subgroup_levels <- function(object, subgroupvar){
+    subgrouplevels <- slevels(object, subgroupvar)
+    cbind(subgroup = subgrouplevels, split_values(subgrouplevels))
+}
+
+
+#' @rdname subgroup_matrix
+#' @export
+subgroup_array <- function(object, subgroupvar){
+    . <- NULL
+    x <- slevels(object, subgroupvar)
+    sep <- guess_sep(object)
+    #x %<>% sort()
+    dt <- data.table(subgroup = factor(x, x))
+    components <- dt[, tstrsplit(subgroup, sep, fixed=TRUE)]
+    for (i in seq_len(ncol(components)))   components[[i]] %<>%
+                                    factor(., levels=unique(.))
+    dt %<>% cbind(components)
+    data.table::setorderv(dt, rev(names(components)))
+    levels  <- dt[, -1] %>% lapply(unique)
+    #levels[1:2] %<>% rev()
+    nlevels <- levels %>% vapply(length, integer(1))
+    array(dt$subgroup, dim = nlevels, dimnames = levels)
+}
+
+
+#' Get subgroup matrix
+#'
+#' Arrange (subgroup)levels in matrix
+#'
+#' @param object SummarizedExperiment
+#' @param subgroupvar subgroup svar
+#' @return matrix
+#' @examples
+#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#' object <- read_metabolon(file)
+#' object$subgroup <- paste0(object$Diabetes, '.', object$subgroup)
+#' subgroup_matrix(object, 'subgroup')
+#' @export
+subgroup_matrix <- function(object, subgroupvar){
+    . <- NULL
+    subgroup_array <- subgroup_array(object, subgroupvar)
+    if (length(dim(subgroup_array)) == 1){
+        return(matrix(subgroup_array, 
+                      byrow = TRUE, 
+                      nrow = 1, 
+                      dimnames = list(NULL, subgroup_array)))  
+    }
+    otherdims <- names(dim(subgroup_array)) %>% setdiff('V1')
+    ncol1   <- Reduce('*', dim(subgroup_array)[otherdims])
+    colnames1 <- dimnames(subgroup_array)[otherdims] %>%
+                 expand.grid()                       %>%
+                 apply(1, paste0, collapse = '.')
+    subgroupmat <- matrix(subgroup_array,
+                        nrow = nrow(subgroup_array), ncol = ncol1,
+                        dimnames=list(rownames(subgroup_array), colnames1))
+    subgroupmat %>% extract(nrow(.):1, )
+    #dt <- split_subgroup_levels(object)
+    #subgroupmat <- as.matrix(data.table::dcast(
+    #    dt, V1 ~ V2, value.var = 'subgroup'), rownames = 'V1')
+    #subgroupmat %>% extract(rev(order(rownames(.))), order(colnames(.)))
+}
+
+
+#=============================================================================
+#
+#           contrast_subgroup_cols
+#           contrast_subgroup_rows
 #
 #==============================================================================
 
