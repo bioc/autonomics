@@ -634,7 +634,7 @@ stepauc <- function(x, y, color = 'group1', plot = FALSE){
           x <- x[ord]
           y <- y[ord]
          dx <- diff(x)
-    heights <- tail(y, -1)
+    heights <- utils::tail(y, -1)
     auc <- sum(dx*heights)
     if (plot){   p <- ggplot(data = data.table(x = x, y = y, color = color))
                  p <- p + theme_bw() + theme(panel.grid = element_blank())
