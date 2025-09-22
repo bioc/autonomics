@@ -710,8 +710,8 @@ plot_violins_transforms <- function(
     by         <- biplot_by(tmp_object, method)[1]
     methodname <- methodname(method, by)
     sep        <- guess_fitsep(fdt(tmp_object))
-    x          <- scorenames(method, by = by, dims = dims[[1]], sep = sep)
-    y          <- scorenames(method, by = by, dims = dims[[2]], sep = sep)
+    x          <- scorenames(method, by = by, dims = dims[[1]])
+    y          <- scorenames(method, by = by, dims = dims[[2]])
     c(
       by         = by,
       methodname = methodname,
