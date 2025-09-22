@@ -246,6 +246,7 @@ keep_estimable_features <- function(
     object, formula = ~1, block = NULL, coding = 'code_control', verbose = TRUE
 ){
     # Designvars
+    testok <- NULL
     sdt(object) %<>% code(coding = coding, vars = c(all.vars(formula)), verbose = verbose)
     block %<>% block2limma()
     longdt <- sumexp_to_longdt(object, svars = c(all.vars(formula), block))
