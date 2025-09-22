@@ -222,6 +222,7 @@ coefs_estimable <- function(formula, data){
 #' block_has_two_levels(block = 'Subject', data)
 #' @export
 block_has_two_levels <- function(block, data){
+    value <- NULL
     data %<>% extract(!is.na(value))
     data %<>% extract(!is.na(get(block)))
     data[, length(unique(get(block)))] >= 2
