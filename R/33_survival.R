@@ -674,9 +674,9 @@ plot_survival <- function(
 # Plot
     plotdt <- prep_survival(object = object, formula = formula, assaylevels = assaylevels, 
                             engine = engine, order = order, stats = stats, n = n)
-    maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("°")   # \u00b0
-    maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("†")   # \u2020
-    maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("•")   # \u2022
+    maxtime <- max(plotdt$timetoevent)     # stringi::stri_escape_unicode("\u00b0")   # star
+    maxsurvival <- max(plotdt$survival)    # stringi::stri_escape_unicode("\u2020")   # dagger
+    maxtotal <- max(plotdt$totObs)         # stringi::stri_escape_unicode("\u2022")   # dot
     maxdigits <- ceiling(log10(maxtotal))
     ndt <- plotdt[, .(totObs  = totObs[1], 
                       totDead = totDead[.N], 
@@ -725,7 +725,7 @@ plot_survival <- function(
             labeldt <- plotdt[ , .( x = max(timetoevent), 
                                     y = max(survival), 
                                   auc = stepauc(timetoevent,survival),
-                                label = sprintf('%s%s: %s*  %s†  %s•', 
+                                label = sprintf('%s%s: %s\u00b0  %s\u2020  %s\u2022', 
                                                               get(colorvar), 
                                                               if (is.null(alphavar)) '' else  paste0('.', get(alphavar)), 
                                                               totObs[.N]-totDead[.N], 
