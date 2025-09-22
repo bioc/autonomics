@@ -31,7 +31,7 @@ sumexp_to_widedt <- function(
 #' @details
 #' \itemize{
 #'    \item \code{sumexp_to_widedt}:    feature          x sample
-#'    \item \code{sumexp_to_subrep_dt}: feature.subgroup x replicate
+#'    \item \code{sumexp_to_groupdt}: feature.subgroup x replicate
 #'    \item \code{sumexp_to_longdt}:    feature.sample
 #' }
 #' @param object sumexp
@@ -47,7 +47,7 @@ sumexp_to_widedt <- function(
 #'    object <- read_metabolon(file)
 #'    sumexp_to_widedt(object)
 #'    sumexp_to_longdt(object)
-#'    sumexp_to_subrep_dt(object)
+#'    sumexp_to_groupdt(object)
 #'
 #' # Fukuda
 #'    file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
@@ -107,7 +107,7 @@ sumexp_to_longdt <- function(
 
 #' @export
 #' @rdname sumexp_to_longdt
-sumexp_to_subrep_dt <- function(object, subgroup=subgroup){
+sumexp_to_groupdt <- function(object, subgroup=subgroup){
     subgroup <- enquo(subgroup)
     subgroupvar <- as_name(subgroup)
 

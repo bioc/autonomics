@@ -3,7 +3,7 @@
 \name{sumexp_to_widedt}
 \alias{sumexp_to_widedt}
 \alias{sumexp_to_longdt}
-\alias{sumexp_to_subrep_dt}
+\alias{sumexp_to_groupdt}
 \title{SummarizedExperiment to data.table}
 \usage{
 sumexp_to_widedt(
@@ -20,7 +20,7 @@ sumexp_to_longdt(
   value.name = "value"
 )
 
-sumexp_to_subrep_dt(object, subgroup = subgroup)
+sumexp_to_groupdt(object, subgroup = subgroup)
 }
 \arguments{
 \item{object}{sumexp}
@@ -44,7 +44,7 @@ SummarizedExperiment to data.table
 \details{
 \itemize{
    \item \code{sumexp_to_widedt}:    feature          x sample
-   \item \code{sumexp_to_subrep_dt}: feature.subgroup x replicate
+   \item \code{sumexp_to_groupdt}: feature.subgroup x replicate
    \item \code{sumexp_to_longdt}:    feature.sample
 }
 }
@@ -54,7 +54,7 @@ SummarizedExperiment to data.table
    object <- read_metabolon(file)
    sumexp_to_widedt(object)
    sumexp_to_longdt(object)
-   sumexp_to_subrep_dt(object)
+   sumexp_to_groupdt(object)
 
 # Fukuda
    file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')

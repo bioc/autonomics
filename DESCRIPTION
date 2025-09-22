@@ -1,7 +1,7 @@
 Package: autonomics
 Type: Package
 Title: Unified Statistical Modeling of Omics Data
-Version: 1.15.433
+Version: 1.15.434
 Authors@R: c(person('Aditya',   'Bhagwat',      email = 'aditya.bhagwat@uni-marburg.de',    role = c('aut', 'cre')), 
              person('Richard',  'Cotton',       email = 'richierocks@gmail.com',            role = c('aut')),
              person('Vanessa',  'Beutgen',      email = 'vanessa.beutgen@uni-marburg.de',   role = c('ctb')),
@@ -31,7 +31,7 @@ biocViews: Software, DataImport, Preprocessing,
             Transcriptomics, Transcription, GeneExpression, RNASeq, Microarray,
             Proteomics, Metabolomics, MassSpectrometry,
 BugReports: https://gitlab.uni-marburg.de/fb20/ag-graumann/software/autonomics/issues
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Depends:
     R (>= 4.0)
 Imports: 
