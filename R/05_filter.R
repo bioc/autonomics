@@ -195,6 +195,7 @@ filter_exprs_replicated_in_some_subgroup <- function(
 #'             summary(lm(value~time+diabetes, data = dt))
 #' @export
 pvalues_estimable <- function(formula, data){
+    value <- NULL
     data %<>% extract(!is.na(value))
     design <- model.matrix(formula, data = data)
     qr(design)$rank == ncol(design) &   # Full rank design (coefficient estimation)
@@ -205,6 +206,7 @@ pvalues_estimable <- function(formula, data){
 #' @rdname pvalues_estimable
 #' @export
 coefs_estimable <- function(formula, data){
+    value <- NULL
     data %<>% extract(!is.na(value))
     design <- model.matrix(formula, data = data)
     qr(design)$rank == ncol(design)   # Full rank desing (coefficient estimation)
