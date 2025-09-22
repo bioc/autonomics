@@ -260,7 +260,7 @@ block2lmer.list <- function(block, formula = NULL, ...){
 #' block2lm( block = ~(1|subject)  +  (1|batch),        formula = ~ subgroup)
 #' block2lm( block = list(subject = ~1,   batch = ~1 ), formula = ~ subgroup)
 #' @export
-block2lm <- function(block, ...)  UseMethod('block2lm')
+block2lm <- function(block, formula, ...)  UseMethod('block2lm')
 
 
 #' @rdname block2lm

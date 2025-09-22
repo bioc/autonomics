@@ -8,7 +8,7 @@
 \alias{block2lm.formula}
 \title{block2lm}
 \usage{
-block2lm(block, ...)
+block2lm(block, formula, ...)
 
 \method{block2lm}{`NULL`}(block, formula)
 
