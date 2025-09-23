@@ -244,14 +244,10 @@ default_sfile <- function(file){
 #' @examples 
 #' object <- survobj()
 #' object %<>% linmod_limma(~sex+age)
-#' 
 #' fits(object)
-#'
-#' coefs(object)                                   # sumexp
-#' coefs(object, intercept = TRUE)
-#' coefs(fdt(object))                              # data.table
-#' coefs(code(factor(object$age), code_control))   # factor
-#' 
+#' coefs(object)                                    # sumexp
+#' coefs(fdt(object))                               # data.table
+#' coefs(code(factor(object$age), 'code_control'))  # factor
 #' fitcoefs(object)
 #' @export
 fits <- function(object, ...)  UseMethod('fits')
