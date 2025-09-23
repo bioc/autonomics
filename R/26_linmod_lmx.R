@@ -265,12 +265,12 @@ block2lm <- function(block, formula, ...)  UseMethod('block2lm')
 
 #' @rdname block2lm
 #' @export
-block2lm.NULL <- function(block, formula)  formula
+block2lm.NULL <- function(block, formula, ...)  formula
 
 
 #' @rdname block2lm
 #' @export
-block2lm.character <- function(block, formula){
+block2lm.character <- function(block, formula, ...){
     if (is.null(block))  return(formula)
     formula %<>% formula2str()
     formula %<>% substr(2,nchar(.))
@@ -284,14 +284,14 @@ block2lm.character <- function(block, formula){
 
 #' @rdname block2lm
 #' @export
-block2lm.list <- function(block, formula){
+block2lm.list <- function(block, formula, ...){
     block %>% block2limma %>% block2lm(formula)
 }
 
 
 #' @rdname block2lm
 #' @export
-block2lm.formula <- function(block, formula){
+block2lm.formula <- function(block, formula, ...){
     block %>% block2limma %>% block2lm(formula)
 }
 

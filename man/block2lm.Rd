@@ -10,13 +10,13 @@
 \usage{
 block2lm(block, formula, ...)
 
-\method{block2lm}{`NULL`}(block, formula)
+\method{block2lm}{`NULL`}(block, formula, ...)
 
-\method{block2lm}{character}(block, formula)
+\method{block2lm}{character}(block, formula, ...)
 
-\method{block2lm}{list}(block, formula)
+\method{block2lm}{list}(block, formula, ...)
 
-\method{block2lm}{formula}(block, formula)
+\method{block2lm}{formula}(block, formula, ...)
 }
 \arguments{
 \item{block}{block: charactervector or formula}
