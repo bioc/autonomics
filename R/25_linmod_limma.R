@@ -727,44 +727,6 @@ LINMOD <- function(
 
 
 
-#' Get all variables from formulas or formula strings
-#'
-#' An extended version of \code{base::all.vars()} that also accepts character
-#' strings (representing formulas), including vectors of such strings.
-#' 
-#' @param x   formula: scalar/vector with formula/string objects
-#' @param ... additional arguments
-#' @return    character vector
-#' @examples
-#' all.vars(   ~Time + Diabetes )
-#' all.vars(  '~Time + Diabetes')
-#' all.vars(c('~Time + Diabetes', '~Time'))
-#' @export
-all.vars <- function(x, ...)   UseMethod('all.vars')
-
-
-# The @method tag is needed ! 
-# To ensure dispatch of the function all.vars to class formula
-# Rather than dispatching a function all to class vars.formula
-#' @rdname all.vars
-#' @method all.vars formula
-#' @export
-all.vars.formula <- function(x, ...)   base::all.vars(x, ...)
-
-
-# The @method tag is needed ! 
-# To ensure dispatch of the function all.vars to class character
-# Rather than dispatching a function all to class vars.character
-#' @rdname all.vars
-#' @method all.vars character
-#' @export
-all.vars.character <- function(x, ...){
-    formulas <- lapply(x, as.formula)
-    vars <- lapply(formulas, base::all.vars)
-    unique(unlist(vars))
-}
-
-
 #' Are varlevels unique
 #' 
 #' @param object SummarizedExperiment or data.table
