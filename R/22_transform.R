@@ -846,10 +846,8 @@ biplot_transforms_assays <- function(
 .sdata_biplot <- function(
     sdata,
     assay,
-    x        = scorenames(
-                 method, by = by, dims = dims[[1]], sep = guess_fitsep(sdata)),
-    y        = scorenames(
-                 method, by = by, dims = dims[[2]], sep = guess_fitsep(sdata)),
+    x        = scorenames(method, by = by, dims = dims[[1]]),
+    y        = scorenames(method, by = by, dims = dims[[2]]),
     method   = DIMREDENGINES[1], # 'pca'
     dims     = 1:2,
     color    = if (method %in% DIMREDSUPER) by else 'subgroup', 
