@@ -24,9 +24,9 @@ Fit onefeature survival
 # Dataset
      sd <- survobj()
      sd \%<>\% sumexp_to_longdt( svars = c('timetoevent', 'event', 'age', 'sex'), assay = 'exprs2levels')
-     sd[, value := code(factor(value), code_control)]
-     sd[,   age := code(factor(age  ), code_control)]
-     sd[,   sex := code(factor(sex  ), code_control)]
+     sd[, value := code(factor(value), 'code_control')]
+     sd[,   age := code(factor(age  ), 'code_control')]
+     sd[,   sex := code(factor(sex  ), 'code_control')]
      
 # Singlefactor - coxph, survdiff, logrank
     .survdiff(sd, survival::Surv(timetoevent, event) ~ value)
