@@ -19,6 +19,7 @@
 #' awblinmod_lm(   object, modelvars = c('Diabetes', 'Time'))
 #' awblinmod(object, engine = 'limma', modelvars = 'Time')
 #' awblinmod(object, engine = 'limma', modelvars = c('Diabetes', 'Time'))
+#' @export
 awblinmod <- function(
     object, 
     engine,

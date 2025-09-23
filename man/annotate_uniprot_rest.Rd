@@ -21,6 +21,7 @@ data.table(dbid, uniprot, reviewed, protein, gene, canonical,
 Annotate uniprot/ensp
 }
 \examples{
+# works, but sometimes fails during check
 annotate_uniprot_rest( x = c('P00761', 'Q32MB2') )
 annotate_uniprot_rest( x = c('ENSBTAP00000006074', 'ENSP00000377550') )
 }
