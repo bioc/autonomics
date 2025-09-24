@@ -186,24 +186,11 @@ uniprot2isoforms <- function(x){
     uniprot    <- NULL
 # Read
     format <- tools::file_ext(file)
-    if (format == 'tsv')
-    {
-      anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
-                 'Precursor.Id', 'Q.Value', 'Lib.PG.Q.Value',
-                 'Stripped.Sequence')
-      numcols <- c('Precursor.Quantity', 'PG.Quantity', 'PG.MaxLFQ')
-    } else if (format == 'parquet')
-    {
-      anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
-                 'Precursor.Id', 'Global.Q.Value', 'Q.Value', 
-                 'Global.PG.Q.Value', 'PG.Q.Value',
-                 'Global.Peptidoform.Q.Value', 'Peptidoform.Q.Value',
-                 'Lib.Q.Value', 'Lib.PG.Q.Value', 'Lib.Peptidoform.Q.Value', 
-                 'Stripped.Sequence')
-      numcols <- c('Precursor.Quantity', 'PG.TopN', 'PG.MaxLFQ')
-    } else {
-      stop("Not implemented DIA-NN output format: ", format)
-    }
+    anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group', 'Precursor.Id', 'Q.Value', 'Lib.PG.Q.Value', 'Stripped.Sequence')
+    numcols <- c('Precursor.Quantity', 'PG.MaxLFQ')
+    numcols %<>% c(if (format == 'tsv')  'PG.Quantity' else   'PG.TopN')
+    anncols %<>% c(if (format == 'tsv')  character(0)  else c('Global.Q.Value', 'Global.PG.Q.Value', 'PG.Q.Value', 'Global.Peptidoform.Q.Value', 
+                                                              'Peptidoform.Q.Value', 'Lib.Q.Value', 'Lib.Peptidoform.Q.Value'))
     cols <- c(anncols, numcols)
     if (format == 'tsv')
     {
@@ -427,7 +414,7 @@ read_diann_proteingroups <- function(
                      pca = plot, 
                      pls = plot, 
                      fit = if (plot) 'limma' else NULL,
-                 formula = as.formula('~ subgroup'),
+                 formula = ~ subgroup,
                    block = NULL,
                    coefs = NULL,
                contrasts = NULL,

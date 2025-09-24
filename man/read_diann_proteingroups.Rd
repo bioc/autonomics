@@ -53,7 +53,7 @@ read_diann_proteingroups(
   pca = plot,
   pls = plot,
   fit = if (plot) "limma" else NULL,
-  formula = as.formula("~ subgroup"),
+  formula = ~subgroup,
   block = NULL,
   coefs = NULL,
   contrasts = NULL,
