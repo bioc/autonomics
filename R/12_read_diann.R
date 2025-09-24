@@ -179,10 +179,9 @@ uniprot2isoforms <- function(x){
     assert_is_fraction(Lib.PG.Q)
     assert_is_fraction(Lib.Peptidoform.Q)
     assert_is_a_string(format)
-    switch(format,
-      'tsv'     = assert_diann_report(file),
-      'parquet' = assert_diann_parquet_report(file),
-      stop("Not implemented DIA-NN output format: ", format))
+    switch(format, 'tsv'     = assert_diann_report(file),
+                   'parquet' = assert_diann_parquet_report(file),
+                   stop("Not implemented DIA-NN output format: ", format))
     assert_is_a_bool(verbose)
     iprecursor <- isoform    <- NULL
     log2maxlfq <- maxlfq     <- organism     <- pepcounts <- NULL
@@ -348,6 +347,52 @@ uniprot2isoforms <- function(x){
     dt
 }
 
+
+.guess_diann_format <- function (x){
+  assert_is_a_string(x)
+  assert_all_are_existing_files(x)
+  
+  parquet_magic <- charToRaw("PAR1")
+  con_bin <- file(x, "rb")
+  on.exit(close(con_bin), add = TRUE)
+  header <- readBin(con_bin, what = "raw", n = 4)
+  
+  if (identical(header, parquet_magic)) {
+    seek(con_bin, where = -4, origin = "end")
+    footer <- readBin(con_bin, what = "raw", n = 4)
+    if (identical(footer, parquet_magic)) return("parquet")
+  }
+  
+  con_text <- file(x, "r")
+  lines <- readLines(con_text, n = 5)
+  close(con_text)
+  if (length(lines) == 0) stop("File empty or cannot be read: ", x)
+
+  tc <- textConnection(lines)
+  tab_counts <- count.fields(tc, sep = "\t")
+  close(tc)
+  if (all(tab_counts >= 2) && length(unique(tab_counts)) == 1) return("tsv")
+  
+  stop("Not a file in a supported DIA-NN format: ", x)
+}
+
+
+# file <- download_data('dilution.report.tsv')
+# dt <- .read_diann_proteingroups(file)
+# dcast_diann(dt, quantity = 'maxlfq',    fill = NA, log2 = TRUE )[1:3, 1:3]
+# dcast_diann(dt, quantity = 'precounts', fill = 0               )[1:3, 1:3]
+# dcast_diann(dt, quantity = 'pepcounts', fill = 0               )[1:3, 1:3]
+# dcast_diann(dt, quantity = 'sequence',  fill = ''              )[1:3, 1:3]
+dcast_diann <- function(dt, quantity, fill, log2 = FALSE){
+    mat <- data.table::dcast(dt, feature_id ~ run, value.var = quantity, fill = fill)
+    mat %<>% dt2mat()
+    mat %<>% extract(unique(dt$feature_id), ) # preserve original order
+    if (is.na(fill))  mat %<>% zero_to_na() %>% nan_to_na()
+    if (log2)         mat %<>% log2()
+    mat
+}
+
+
 #' Read diann
 #'
 #' @param file                    DIA-NN report file
@@ -426,35 +471,32 @@ read_diann_proteingroups <- function(
                  verbose = TRUE
 ){
 # SumExp
-    dt <- .read_diann_proteingroups(
-      file,
-      format               = format,
-      Global.Q             = Global.Q, 
-      Q                    = Q,
-      Global.PG.Q          = Global.PG.Q,
-      PG.Q                 = PG.Q,
-      Global.Peptidoform.Q = Global.Peptidoform.Q,
-      Peptidoform.Q        = Peptidoform.Q,
-      Lib.Q                = Lib.Q,
-      Lib.PG.Q             = Lib.PG.Q,
-      Lib.Peptidoform.Q    = Lib.Peptidoform.Q,
-      verbose              = verbose)
+    dt <- .read_diann_proteingroups( file,
+                                   format = format,
+                                 Global.Q = Global.Q, 
+                                        Q = Q,
+                              Global.PG.Q = Global.PG.Q,
+                                     PG.Q = PG.Q,
+                     Global.Peptidoform.Q = Global.Peptidoform.Q,
+                            Peptidoform.Q = Peptidoform.Q,
+                                    Lib.Q = Lib.Q,
+                                 Lib.PG.Q = Lib.PG.Q,
+                        Lib.Peptidoform.Q = Lib.Peptidoform.Q,
+                                  verbose = verbose )
     assert_is_identical_to_true(length(unique(dt$run)) > 1) # SumExp generation fails on single run case
-    object <- SummarizedExperiment(list(
-        log2maxlfq    = dcast_diann(dt, 'maxlfq',    fill = NA, log2 = TRUE),
-        log2intensity = dcast_diann(dt, 'intensity', fill = NA, log2 = TRUE),
-        log2top1      = dcast_diann(dt, 'top1',      fill = NA, log2 = TRUE),
-        log2top3      = dcast_diann(dt, 'top3',      fill = NA, log2 = TRUE),
-        log2total     = dcast_diann(dt, 'total',     fill = NA, log2 = TRUE),
-        pepcounts     = dcast_diann(dt, 'pepcounts', fill = 0              ),
-        precounts     = dcast_diann(dt, 'precounts', fill = 0              ),
-        sequence      = dcast_diann(dt, 'sequence',  fill = '')))
+    object <- SummarizedExperiment(list(log2maxlfq    = dcast_diann(dt, 'maxlfq',    fill = NA, log2 = TRUE),
+                                        log2intensity = dcast_diann(dt, 'intensity', fill = NA, log2 = TRUE),
+                                        log2top1      = dcast_diann(dt, 'top1',      fill = NA, log2 = TRUE),
+                                        log2top3      = dcast_diann(dt, 'top3',      fill = NA, log2 = TRUE),
+                                        log2total     = dcast_diann(dt, 'total',     fill = NA, log2 = TRUE),
+                                        pepcounts     = dcast_diann(dt, 'pepcounts', fill = 0              ),
+                                        precounts     = dcast_diann(dt, 'precounts', fill = 0              ),
+                                        sequence      = dcast_diann(dt, 'sequence',  fill = ''             )))
     sdt(object)$sample_id  <- snames(object)
     fdt(object)$feature_id <- fnames(object)
     analysis(object)$nfeatures <- nrow(object)
 # fdt
-    cols <- c('maxlfq', 'intensity', 'top1', 'top3', 'total', 
-              'sequence', 'run', 'pepcounts', 'precounts')
+    cols <- c('maxlfq', 'intensity', 'top1', 'top3', 'total', 'sequence', 'run', 'pepcounts', 'precounts')
     dt[, (cols) := NULL]
     dt %<>% unique()
     assert_are_identical(nrow(dt), nrow(object)) # if not more fields need to be NULLed
@@ -468,44 +510,16 @@ read_diann_proteingroups <- function(
     if (rm_contaminants)  object %<>% rm_diann_contaminants(verbose = verbose)
     object %<>% rm_missing_in_all_samples(verbose = verbose)
     object %<>% extract(order(rowVars(values(.), na.rm = TRUE)), )
-  # object %<>% filter_exprs_replicated_in_some_subgroup(verbose = verbose)
+                                            # object %<>% filter_exprs_replicated_in_some_subgroup(verbose = verbose)
     if ({{impute}})   object %<>% impute()  # above breaks when all subgroups are singletons
-    object %<>% analyze( pca         = pca,           pls         = pls,
-                         fit         = fit,           formula     = formula,
-                         block       = block,         coefs       = coefs,
-                         contrasts   = contrasts,     verbose     = verbose,
-                         plot        = plot,          palette     = palette )
+    object %<>% analyze(  pca = pca,           pls = pls,
+                          fit = fit,       formula = formula,
+                        block = block,       coefs = coefs,
+                    contrasts = contrasts, verbose = verbose,
+                         plot = plot,      palette = palette  )
     object
 }
 
-.guess_diann_format <- function (x)
-{
-  assert_is_a_string(x)
-  assert_all_are_existing_files(x)
-  
-  parquet_magic <- charToRaw("PAR1")
-  con_bin <- file(x, "rb")
-  on.exit(close(con_bin), add = TRUE)
-  header <- readBin(con_bin, what = "raw", n = 4)
-  
-  if (identical(header, parquet_magic)) {
-    seek(con_bin, where = -4, origin = "end")
-    footer <- readBin(con_bin, what = "raw", n = 4)
-    if (identical(footer, parquet_magic)) return("parquet")
-  }
-  
-  con_text <- file(x, "r")
-  lines <- readLines(con_text, n = 5)
-  close(con_text)
-  if (length(lines) == 0) stop("File empty or cannot be read: ", x)
-
-  tc <- textConnection(lines)
-  tab_counts <- count.fields(tc, sep = "\t")
-  close(tc)
-  if (all(tab_counts >= 2) && length(unique(tab_counts)) == 1) return("tsv")
-  
-  stop("Not a file in a supported DIA-NN format: ", x)
-}
 
 #' @rdname read_diann_proteingroups
 #' @export
@@ -514,20 +528,6 @@ read_diann <- function(...){
     read_diann_proteingroups(...)
 }
 
-# file <- download_data('dilution.report.tsv')
-# dt <- .read_diann_proteingroups(file)
-# dcast_diann(dt, quantity = 'maxlfq',    fill = NA, log2 = TRUE )[1:3, 1:3]
-# dcast_diann(dt, quantity = 'precounts', fill = 0               )[1:3, 1:3]
-# dcast_diann(dt, quantity = 'pepcounts', fill = 0               )[1:3, 1:3]
-# dcast_diann(dt, quantity = 'sequence',  fill = ''              )[1:3, 1:3]
-dcast_diann <- function(dt, quantity, fill, log2 = FALSE){
-    mat <- data.table::dcast(dt, feature_id ~ run, value.var = quantity, fill = fill)
-    mat %<>% dt2mat()
-    mat %<>% extract(unique(dt$feature_id), ) # preserve original order
-    if (is.na(fill))  mat %<>% zero_to_na() %>% nan_to_na()
-    if (log2)         mat %<>% log2()
-    mat
-}
 
 # No longer publicly accessibly (14.01.2025 )
 CONTAMINANTSURL <- paste0(
