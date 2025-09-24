@@ -349,31 +349,33 @@ uniprot2isoforms <- function(x){
 
 
 .guess_diann_format <- function (x){
-  assert_is_a_string(x)
-  assert_all_are_existing_files(x)
-  
-  parquet_magic <- charToRaw("PAR1")
-  con_bin <- file(x, "rb")
-  on.exit(close(con_bin), add = TRUE)
-  header <- readBin(con_bin, what = "raw", n = 4)
-  
-  if (identical(header, parquet_magic)) {
-    seek(con_bin, where = -4, origin = "end")
-    footer <- readBin(con_bin, what = "raw", n = 4)
-    if (identical(footer, parquet_magic)) return("parquet")
-  }
-  
-  con_text <- file(x, "r")
-  lines <- readLines(con_text, n = 5)
-  close(con_text)
-  if (length(lines) == 0) stop("File empty or cannot be read: ", x)
+    
+    # Diann parquet: starts/ends with 'PAR1'
+        assert_is_a_string(x)
+        assert_all_are_existing_files(x)
+        parquet_magic <- charToRaw("PAR1")
+        con_bin <- file(x, "rb")
+        on.exit(close(con_bin), add = TRUE)
+        header <- readBin(con_bin, what = "raw", n = 4)
+        if (identical(header, parquet_magic)) {
+            seek(con_bin, where = -4, origin = "end")
+            footer <- readBin(con_bin, what = "raw", n = 4)
+            if (identical(footer, parquet_magic)) return("parquet")
+        }
 
-  tc <- textConnection(lines)
-  tab_counts <- count.fields(tc, sep = "\t")
-  close(tc)
-  if (all(tab_counts >= 2) && length(unique(tab_counts)) == 1) return("tsv")
-  
-  stop("Not a file in a supported DIA-NN format: ", x)
+    # Diann tsv
+        con_text <- file(x, "r")
+        lines <- readLines(con_text, n = 5)
+        close(con_text)
+        if (length(lines) == 0) stop("File empty or cannot be read: ", x)
+        tc <- textConnection(lines)
+        tab_counts <- count.fields(tc, sep = "\t")
+        close(tc)
+        if (all(tab_counts >= 2) && length(unique(tab_counts)) == 1) return("tsv")
+    
+    # Unknown file
+        stop("Not a file in a supported DIA-NN format: ", x)
+    
 }
 
 
