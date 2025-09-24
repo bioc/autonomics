@@ -192,47 +192,39 @@ uniprot2isoforms <- function(x){
     anncols %<>% c(if (format == 'tsv')  character(0)  else c('Global.Q.Value', 'Global.PG.Q.Value', 'PG.Q.Value', 'Global.Peptidoform.Q.Value', 
                                                               'Peptidoform.Q.Value', 'Lib.Q.Value', 'Lib.Peptidoform.Q.Value'))
     cols <- c(anncols, numcols)
-    if (format == 'tsv')
-    {
-      dt <- fread(file, select = cols)                  # 1977.16 but 1,35E+11
-      for (col in numcols){ dt[, (col) := stri_replace_first_fixed(get(col), ',', '.') ] 
-        dt[, (col) := as.numeric(get(col))  ] }
-    } else if (format == 'parquet') {
-      dt <- read_parquet(file, col_select = cols) %>%
-        as.data.table()
-    } else stop("Not implemented DIA-NN output format: ", format)
-    setnames(dt, 'Run',                'run')
-    setnames(dt, 'Genes',              'gene')
-    setnames(dt, 'Protein.Names',      'protein')
-    setnames(dt, 'Protein.Group',      'uniprot')
-    setnames(dt, 'Precursor.Id',       'precursor')
-    if (format == 'parquet')
-    {
-      setnames(dt, 'Global.Q.Value',             'Global.Q')
-      setnames(dt, 'Q.Value',                    'Q')
-      setnames(dt, 'Global.PG.Q.Value',          'Global.PG.Q')
-      setnames(dt, 'PG.Q.Value',                 'PG.Q')
-      setnames(dt, 'Global.Peptidoform.Q.Value', 'Global.Peptidoform.Q')
-      setnames(dt, 'Peptidoform.Q.Value',        'Peptidoform.Q')
-      setnames(dt, 'Lib.Q.Value',                'Lib.Q')
-      # setnames(dt, 'Lib.PG.Q.Value',             'Lib.PG.Q')
-      setnames(dt, 'Lib.Peptidoform.Q.Value',    'Lib.Peptidoform.Q')
+    if (format == 'tsv'){              dt <- fread(file, select = cols)   # 1977.16 but 1,35E+11
+           for (col in numcols){       dt[, (col) := stri_replace_first_fixed(get(col), ',', '.') ] 
+                                       dt[, (col) := as.numeric(get(col))  ] }
+    } else if (format == 'parquet') {  dt <- read_parquet(file, col_select = cols)
+                                       dt %<>% as.data.table()
     }
-    setnames(dt, 'Lib.PG.Q.Value',     'Lib.PG.Q')
-    setnames(dt, 'Stripped.Sequence',  'sequence')
-    setnames(dt, 'PG.MaxLFQ',          'maxlfq')
-    setnames(
-      dt,
-      switch(format,
-        'tsv'     = 'PG.Quantity',
-        'parquet' = 'PG.TopN',
-        stop("Not implemented DIA-NN output format: ", format)),
-      'intensity')
-    setnames(dt, 'Precursor.Quantity', 'preintensity')
+# Rename
+    if (format == 'tsv'){   setnames(dt, 'PG.Quantity',                'intensity'           )
+        
+    } else {                setnames(dt, 'PG.TopN',                    'intensity'           )
+                            setnames(dt, 'Global.Q.Value',             'Global.Q'            )
+                            setnames(dt, 'Q.Value',                    'Q'                   )
+                            setnames(dt, 'Global.PG.Q.Value',          'Global.PG.Q'         )
+                            setnames(dt, 'PG.Q.Value',                 'PG.Q'                )
+                            setnames(dt, 'Global.Peptidoform.Q.Value', 'Global.Peptidoform.Q')
+                            setnames(dt, 'Peptidoform.Q.Value',        'Peptidoform.Q'       )
+                            setnames(dt, 'Lib.Q.Value',                'Lib.Q'               )
+                          # setnames(dt, 'Lib.PG.Q.Value',             'Lib.PG.Q'            )
+                            setnames(dt, 'Lib.Peptidoform.Q.Value',    'Lib.Peptidoform.Q'   )
+    }
+                            setnames(dt, 'Run',                        'run'                 )
+                            setnames(dt, 'Genes',                      'gene'                )
+                            setnames(dt, 'Protein.Names',              'protein'             )
+                            setnames(dt, 'Protein.Group',              'uniprot'             )
+                            setnames(dt, 'Precursor.Id',               'precursor'           )
+                            setnames(dt, 'Lib.PG.Q.Value',             'Lib.PG.Q'            )
+                            setnames(dt, 'Stripped.Sequence',          'sequence'            )
+                            setnames(dt, 'PG.MaxLFQ',                  'maxlfq'              )
+                            setnames(dt, 'Precursor.Quantity',         'preintensity'        )
 # Filter
-    if (format == 'parquet') dt %<>% .filter_dianne_proteingroups(
-      Global.Q, Q, Global.PG.Q, PG.Q, Global.Peptidoform.Q, Peptidoform.Q,
-      Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
+    if (format == 'parquet') dt %<>% .filter_dianne_proteingroups(Global.Q, Q, Global.PG.Q, PG.Q, 
+                                                                  Global.Peptidoform.Q, Peptidoform.Q, 
+                                                                  Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
     dt %<>% .filter_dianne_proteingroups(Lib.PG.Q)
 # Order precursors
     dt <- dt[, .SD[rev(order(preintensity))], by = c('uniprot', 'run')]
