@@ -18,13 +18,11 @@
   Lib.Q = 0.01,
   Lib.PG.Q = 0.01,
   Lib.Peptidoform.Q = 0.01,
-  format = c("tsv", "parquet")[1],
   verbose = TRUE
 )
 
 .read_diann_proteingroups(
   file,
-  format = c("tsv", "parquet")[1],
   Global.Q = 0.01,
   Q = 0.01,
   Global.PG.Q = 0.01,
@@ -39,7 +37,6 @@
 
 read_diann_proteingroups(
   file,
-  format = .guess_diann_format(file),
   Global.Q = 0.01,
   Q = 0.01,
   Global.PG.Q = 0.01,
@@ -67,7 +64,7 @@ read_diann_proteingroups(
 read_diann(...)
 }
 \arguments{
-\item{file}{DIA-NN report file}
+\item{file}{DIA-NN report file (tsv or parquet)}
 
 \item{Global.Q}{Global.Q cutoff}
 
@@ -86,8 +83,6 @@ read_diann(...)
 \item{Lib.PG.Q}{Lib.PG.Q cutoff}
 
 \item{Lib.Peptidoform.Q}{Lib.Peptidoform.Q cutoff}
-
-\item{format}{Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')}
 
 \item{verbose}{TRUE or FALSE}
 

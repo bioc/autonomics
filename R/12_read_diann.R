@@ -165,7 +165,6 @@ uniprot2isoforms <- function(x){
     Lib.Q                = 0.01,
     Lib.PG.Q             = 0.01,
     Lib.Peptidoform.Q    = 0.01, 
-    format               = c("tsv", "parquet")[1],
     verbose              = TRUE)
 {
 # Assert
@@ -178,10 +177,7 @@ uniprot2isoforms <- function(x){
     assert_is_fraction(Lib.Q)
     assert_is_fraction(Lib.PG.Q)
     assert_is_fraction(Lib.Peptidoform.Q)
-    assert_is_a_string(format)
-    switch(format, 'tsv'     = assert_diann_report(file),
-                   'parquet' = assert_diann_parquet_report(file),
-                   stop("Not implemented DIA-NN output format: ", format))
+    assert_diann_report(file)
     assert_is_a_bool(verbose)
     iprecursor <- isoform    <- NULL
     log2maxlfq <- maxlfq     <- organism     <- pepcounts <- NULL
@@ -189,6 +185,7 @@ uniprot2isoforms <- function(x){
     run        <- top1       <- top3         <- total     <- NULL
     uniprot    <- NULL
 # Read
+    format <- tools::file_ext(file)
     if (format == 'tsv')
     {
       anncols <- c('Run', 'Genes', 'Protein.Names', 'Protein.Group',
@@ -311,7 +308,6 @@ uniprot2isoforms <- function(x){
 #' @export
 .read_diann_proteingroups <- function(
     file,
-    format               = c("tsv", "parquet")[1],
     Global.Q             = 0.01, 
     Q                    = 0.01,
     Global.PG.Q          = 0.01,
@@ -325,7 +321,6 @@ uniprot2isoforms <- function(x){
 ){
     dt <- .read_diann_precursors(
       file,
-      format               = format,
       Global.Q             = Global.Q, 
       Q                    = Q,
       Global.PG.Q          = Global.PG.Q,
@@ -348,37 +343,6 @@ uniprot2isoforms <- function(x){
 }
 
 
-.guess_diann_format <- function (x){
-    
-    # Diann parquet: starts/ends with 'PAR1'
-        assert_is_a_string(x)
-        assert_all_are_existing_files(x)
-        parquet_magic <- charToRaw("PAR1")
-        con_bin <- file(x, "rb")
-        on.exit(close(con_bin), add = TRUE)
-        header <- readBin(con_bin, what = "raw", n = 4)
-        if (identical(header, parquet_magic)) {
-            seek(con_bin, where = -4, origin = "end")
-            footer <- readBin(con_bin, what = "raw", n = 4)
-            if (identical(footer, parquet_magic)) return("parquet")
-        }
-
-    # Diann tsv
-        con_text <- file(x, "r")
-        lines <- readLines(con_text, n = 5)
-        close(con_text)
-        if (length(lines) == 0) stop("File empty or cannot be read: ", x)
-        tc <- textConnection(lines)
-        tab_counts <- count.fields(tc, sep = "\t")
-        close(tc)
-        if (all(tab_counts >= 2) && length(unique(tab_counts)) == 1) return("tsv")
-    
-    # Unknown file
-        stop("Not a file in a supported DIA-NN format: ", x)
-    
-}
-
-
 # file <- download_data('dilution.report.tsv')
 # dt <- .read_diann_proteingroups(file)
 # dcast_diann(dt, quantity = 'maxlfq',    fill = NA, log2 = TRUE )[1:3, 1:3]
@@ -397,8 +361,7 @@ dcast_diann <- function(dt, quantity, fill, log2 = FALSE){
 
 #' Read diann
 #'
-#' @param file                    DIA-NN report file
-#' @param format                  Format of the report ('tsv' DIA-NN < v.2.0; 'parquet')
+#' @param file                    DIA-NN report file (tsv or parquet)
 #' @param Q                       Q cutoff
 #' @param Lib.Q                   Lib.Q cutoff
 #' @param Global.Q                Global.Q cutoff
@@ -448,7 +411,6 @@ dcast_diann <- function(dt, quantity, fill, log2 = FALSE){
 #' @export
 read_diann_proteingroups <- function(
                     file,
-                  format = .guess_diann_format(file),
                 Global.Q = 0.01, 
                        Q = 0.01,
              Global.PG.Q = 0.01,
@@ -474,7 +436,6 @@ read_diann_proteingroups <- function(
 ){
 # SumExp
     dt <- .read_diann_proteingroups( file,
-                                   format = format,
                                  Global.Q = Global.Q, 
                                         Q = Q,
                               Global.PG.Q = Global.PG.Q,

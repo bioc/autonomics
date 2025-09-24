@@ -125,82 +125,72 @@ assert_is_valid_sumexp <- function(x, .xname = get_name_in_parent(x)){
     assert_engine(is_valid_sumexp, x, .xname = get_name_in_parent(x))
 }
 
-#' Is diann, fragpipe, proteingroups, phosphosites file?
+
+#' Is diann report ?
+#' @param  x      file
+#' @param .xname  name of x
+#' @return NULL
+#' @examples
+#' file <- NULL;                                                                      is_diann_report(file)
+#' file <- 3;                                                                         is_diann_report(file)
+#' file <- 'blabla.tsv';                                                              is_diann_report(file)
+#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics'); is_diann_report(file)
+#' file <- system.file('extdata/billing19.phosphosites.txt', package = 'autonomics'); is_diann_report(file)
+#' file <- download_data('multiorganism.combined_protein.tsv');                       is_diann_report(file)
+#' file <- download_data('dilution.report.tsv');                                      is_diann_report(file)
+#' @export
+is_diann_report <- function(x, .xname = get_name_in_parent(x)){
+    # File exists
+               if (is.null(x)                                  ){   return(false('%s is NULL',         .xname))
+        } else if (!is_a_string(x)                             ){   return(false('%s is not a string', .xname))
+        } else if (!is_existing_file(x)                        ){   return(false('%s does not exist',  .xname))
+        } else if (!tools::file_ext(x) %in% c('tsv', 'parquet')){   return(false('%s not tsv/parquet', .xname))
+        }
+    
+    # File is tsv
+    if (tools::file_ext(x) == 'tsv'){
+               if (col1(x) != 'File.Name'       ){   return(false('col1(%s) != "File.Name"',      .xname))
+        } else if (col2(x) != 'Run'             ){   return(false('col2(%s) != "Run"',            .xname))
+        } else if (col3(x) != 'Protein.Group'   ){   return(false('col3(%s) != "Protein.Group"',  .xname))
+        }
+        return(TRUE)
+    }
+    
+    # File is parquet
+        # File starts with PAR1
+        parquet_magic <- charToRaw("PAR1")
+        con_bin <- file(x, "rb")
+        on.exit(close(con_bin), add = TRUE)
+        header <- readBin(con_bin, what = "raw", n = 4)
+        if (!identical(header, parquet_magic))       return(false('%s does not start with PAR1 (a valid parquet file should)', .xname))
+        # File ends with PAR1
+        seek(con_bin, where = -4, origin = "end")
+        footer <- readBin(con_bin, what = "raw", n = 4)
+        if (!identical(footer, parquet_magic))       return(false('%s does not end with PAR1 (a valid parquet file should)', .xname))
+        # File starts with expected columns
+        x_data <- arrow::read_parquet(x)
+               if (names(x_data)[1] != 'Run.Index'){ return(false('col1(%s) != "Run.Index"', .xname))
+        } else if (names(x_data)[2] != 'Run'){       return(false('col2(%s) != "Run"',       .xname))
+        } else if (names(x_data)[3] != 'Channel'){   return(false('col3(%s) != "Channel"',   .xname))
+        }
+        return(TRUE)
+}
+
+
+
+
+#' Is fragpipe file?
 #' @param x      file
 #' @param .xname name of x
 #' @return NULL
 #' @examples
-#' file <- NULL
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#'
-#' file <- 3
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#'
-#' file <- 'blabla.tsv'
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#'
-#' file <- download_data('multiorganism.combined_protein.tsv')
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#'
-#' file <- download_data('dilution.report.tsv')
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#'
-#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics')
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#'
-#' file <- system.file('extdata/billing19.phosphosites.txt', package = 'autonomics')
-#' is_diann_report(file)
-#' is_fragpipe_tsv(file)
-#' is_maxquant_proteingroups(file)
-#' is_maxquant_phosphosites(file)
-#' @export
-is_diann_report <- function(x, .xname = get_name_in_parent(x)){
-    if (is.null(x)){                        false('%s is NULL',                  .xname)
-    } else if (!is_a_string(x)){            false('%s is not a string',          .xname)
-    } else if (!is_existing_file(x)){       false('%s does not exist',           .xname)
-    } else if (col1(x) != 'File.Name'){     false('col1(%s) != "File.Name"',     .xname)
-    } else if (col2(x) != 'Run'){           false('col2(%s) != "Run"',           .xname)
-    } else if (col3(x) != 'Protein.Group'){ false('col3(%s) != "Protein.Group"', .xname)
-    } else {                                TRUE
-    }
-}
-
-#' @rdname is_diann_report
-#' @export
-#' @importFrom arrow read_parquet
-is_diann_parquet_report <- function(x, .xname = get_name_in_parent(x)){
-  if (is.null(x)){                        false('%s is NULL',                  .xname)
-  } else if (!is_a_string(x)){            false('%s is not a string',          .xname)
-  } else if (!is_existing_file(x)){       false('%s does not exist',           .xname)
-  }
-  
-  x_data <- read_parquet(x)
-  if (names(x_data)[1] != 'Run.Index'){      false('col1(%s) != "Run.Index"', .xname)
-  } else if (names(x_data)[2] != 'Run'){     false('col2(%s) != "Run"',       .xname)
-  } else if (names(x_data)[3] != 'Channel'){ false('col3(%s) != "Channel"',   .xname)
-  } else {                                   TRUE
-  }
-}
-
-#' @rdname is_diann_report
+#' file <- NULL;                                                                      is_fragpipe_tsv(file)
+#' file <- 3;                                                                         is_fragpipe_tsv(file)
+#' file <- 'blabla.tsv';                                                              is_fragpipe_tsv(file)
+#' file <- download_data('dilution.report.tsv');                                      is_fragpipe_tsv(file)
+#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics'); is_fragpipe_tsv(file)
+#' file <- system.file('extdata/billing19.phosphosites.txt', package = 'autonomics'); is_fragpipe_tsv(file)
+#' file <- download_data('multiorganism.combined_protein.tsv');                       is_fragpipe_tsv(file)
 #' @export
 is_fragpipe_tsv <- function(x, .xname = get_name_in_parent(x)){
     if (is.null(x)){                      false('%s is NULL',                    .xname)
@@ -213,7 +203,19 @@ is_fragpipe_tsv <- function(x, .xname = get_name_in_parent(x)){
     }
 }
 
-#' @rdname is_diann_report
+
+#' Is maxquant proteingroups file?
+#' @param x      file
+#' @param .xname name of x
+#' @return NULL
+#' @examples
+#' file <- NULL;                                                                      is_maxquant_proteingroups(file)
+#' file <- 3;                                                                         is_maxquant_proteingroups(file)
+#' file <- 'blabla.tsv';                                                              is_maxquant_proteingroups(file)
+#' file <- download_data('dilution.report.tsv');                                      is_maxquant_proteingroups(file)
+#' file <- download_data('multiorganism.combined_protein.tsv');                       is_maxquant_proteingroups(file)
+#' file <- system.file('extdata/billing19.phosphosites.txt', package = 'autonomics'); is_maxquant_proteingroups(file)
+#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics'); is_maxquant_proteingroups(file)
 #' @export
 is_maxquant_proteingroups <- function(x, .xname = get_name_in_parent(x)){
     if (is.null(x)){                                false('%s is NULL',                         .xname)
@@ -226,7 +228,19 @@ is_maxquant_proteingroups <- function(x, .xname = get_name_in_parent(x)){
     }
 }
 
-#' @rdname is_diann_report
+
+#' Is maxquant phosphosites file?
+#' @param x      file
+#' @param .xname name of x
+#' @return NULL
+#' @examples
+#' file <- NULL;                                                                      is_maxquant_phosphosites(file)
+#' file <- 3;                                                                         is_maxquant_phosphosites(file)
+#' file <- 'blabla.tsv';                                                              is_maxquant_phosphosites(file)
+#' file <- download_data('dilution.report.tsv');                                      is_maxquant_phosphosites(file)
+#' file <- download_data('multiorganism.combined_protein.tsv');                       is_maxquant_phosphosites(file)
+#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics'); is_maxquant_phosphosites(file)
+#' file <- system.file('extdata/billing19.phosphosites.txt', package = 'autonomics'); is_maxquant_phosphosites(file)
 #' @export
 is_maxquant_phosphosites <- function(x, .xname = get_name_in_parent(x)){
     if (is.null(x))                               return(false('%s is NULL',                              .xname))
@@ -238,7 +252,19 @@ is_maxquant_phosphosites <- function(x, .xname = get_name_in_parent(x)){
     return(TRUE)
 }
 
-#' @rdname is_diann_report
+
+#' Is compounddiscoverer output?
+#' @param x      file
+#' @param .xname name of x
+#' @return NULL
+#' @examples
+#' file <- NULL;                                                                      is_compounddiscoverer_output(file)
+#' file <- 3;                                                                         is_compounddiscoverer_output(file)
+#' file <- 'blabla.tsv';                                                              is_compounddiscoverer_output(file)
+#' file <- download_data('dilution.report.tsv');                                      is_compounddiscoverer_output(file)
+#' file <- download_data('multiorganism.combined_protein.tsv');                       is_compounddiscoverer_output(file)
+#' file <- system.file('extdata/fukuda20.proteingroups.txt', package = 'autonomics'); is_compounddiscoverer_output(file)
+#' file <- system.file('extdata/billing19.phosphosites.txt', package = 'autonomics'); is_compounddiscoverer_output(file)
 #' @export
 is_compounddiscoverer_output <- function(x, .xname = get_name_in_parent(x)){
   if (is.null(x))                       { false('%s is NULL',         .xname)
@@ -249,18 +275,12 @@ is_compounddiscoverer_output <- function(x, .xname = get_name_in_parent(x)){
   }
 }
 
+
 #' @rdname is_diann_report
 #' @export
 assert_diann_report <- function(x, .xname = get_name_in_parent(x)){
     assert_engine(is_diann_report, x, .xname = .xname)
 }
-
-#' @rdname is_diann_report
-#' @export
-assert_diann_parquet_report <- function(x, .xname = get_name_in_parent(x)){
-  assert_engine(is_diann_parquet_report, x, .xname = .xname)
-}
-
 
 #' @rdname is_diann_report
 #' @export
