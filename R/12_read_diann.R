@@ -222,10 +222,10 @@ uniprot2isoforms <- function(x){
                             setnames(dt, 'PG.MaxLFQ',                  'maxlfq'              )
                             setnames(dt, 'Precursor.Quantity',         'preintensity'        )
 # Filter
-    if (format == 'parquet') dt %<>% .filter_dianne_proteingroups(Global.Q, Q, Global.PG.Q, PG.Q, 
-                                                                  Global.Peptidoform.Q, Peptidoform.Q, 
-                                                                  Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
-    dt %<>% .filter_dianne_proteingroups(Lib.PG.Q)
+    if (format == 'parquet') dt %<>% .filter_diann_proteingroups(Global.Q, Q, Global.PG.Q, PG.Q, 
+                                                                 Global.Peptidoform.Q, Peptidoform.Q, 
+                                                                 Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
+    dt %<>% .filter_diann_proteingroups(Lib.PG.Q)
 # Order precursors
     dt <- dt[, .SD[rev(order(preintensity))], by = c('uniprot', 'run')]
     dt[, iprecursor := seq_len(.N),                      by = c('uniprot', 'run')]
@@ -267,20 +267,17 @@ uniprot2isoforms <- function(x){
     dt[]
 }
 
-#' @importFrom rlang dots_list
-.filter_dianne_proteingroups <- function(dt, ..., verbose = TRUE)
-{
-  filters <- dots_list(...,  .named = TRUE)
-  assert_is_subset(c(names(filters), 'uniprot'), colnames(dt))
-  for (fl in names(filters))
-  {
-    n0 <- length(unique(dt$uniprot))
-    dt %<>% extract(dt[[fl]] < filters[[fl]])
-    n1 <- length(unique(dt$uniprot))
-    if (verbose)  message(
-      '\t\tRetain ', n1, '/', n0, ' proteingroups: ', fl, ' < ', filters[[fl]])
-  }
-  dt
+
+.filter_diann_proteingroups <- function(dt, ..., verbose = TRUE){
+    filters <- rlang::dots_list(...,  .named = TRUE)
+    assert_is_subset(c(names(filters), 'uniprot'), colnames(dt))
+    for (fl in names(filters)){
+        n0 <- length(unique(dt$uniprot))
+        dt %<>% extract(dt[[fl]] < filters[[fl]])
+        n1 <- length(unique(dt$uniprot))
+        if (verbose)  message('\t\tRetain ', n1, '/', n0, ' proteingroups: ', fl, ' < ', filters[[fl]])
+    }
+    dt
 }
 
 #' @rdname read_diann_proteingroups
