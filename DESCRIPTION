@@ -8,6 +8,9 @@ Authors@R: c(person('Aditya',   'Bhagwat',      email = 'aditya.bhagwat@uni-marb
              person('Witold',   'Szymanski',    email = 'witold.szymanski@uni-marburg.de',  role = c('ctb')),
              person('Shahina',  'Hayat',        email = 'shahina.hayat@hotmail.com',        role = c('ctb')),
              person('Laure',    'Cougnaud',     email = 'laure.cougnaud@openanalytics.eu',  role = c('ctb')), 
+             person('Hinrich',  'Goehlmann',    email = 'hinrich@goehlmann.info',           role = c('sad')),
+             person('Karsten',  'Suhre',        email = 'kas2049@qatar-med.cornell.edu',    role = c('sad')), 
+             person('Jonathan', 'Woodsmith',    email = 'laure.cougnaud@openanalytics.eu',  role = c('sad')),
              person('Johannes', 'Graumann',     email = 'johannes.graumann@uni-marburg.de', role = c('aut', 'sad'))
              )
 Description:
