@@ -151,6 +151,7 @@ uniprot2isoforms <- function(x){
     paste0(x, collapse = ',')
 }
 
+
 #' @rdname read_diann_proteingroups
 #' @importFrom arrow read_parquet
 #' @export
@@ -227,7 +228,7 @@ uniprot2isoforms <- function(x){
                                                                  Lib.Q, Lib.Peptidoform.Q, verbose = verbose)
     dt %<>% .filter_diann_proteingroups(Lib.PG.Q)
 # Order precursors
-    dt <- dt[, .SD[rev(order(preintensity))], by = c('uniprot', 'run')]
+    dt <- dt[, .SD[rev(order(preintensity))],            by = c('uniprot', 'run')]
     dt[, iprecursor := seq_len(.N),                      by = c('uniprot', 'run')]
     dt[, precounts  := length(unique(precursor)),        by = c('uniprot', 'run')]
     dt[, pepcounts  := length(unique(sequence)),         by = c('uniprot', 'run')]
@@ -239,12 +240,13 @@ uniprot2isoforms <- function(x){
                          log2maxlfq = log2(sum(maxlfq, na.rm = TRUE))), by = 'uniprot')
     pgdt %<>% extract(order(-pepcounts, -precounts, -log2maxlfq))
     dt[, uniprot := factor(uniprot, pgdt$uniprot)]
-    dt %<>% extract(order(uniprot, run, iprecursor))
-    dt[, uniprot := as.character(uniprot)]
-# Intuify protein
-    pgdt <- unique(dt[, .(uniprot, protein)])
-    pgdt[protein=='', protein := uniprot]
-    pgdt %<>% uncollapse(protein, sep = ';')                                     #     uncollapse
+    dt %<>% extract(order(uniprot, run, iprecursor))  # Sometimes non-standard fastahdrs are used
+    dt[, uniprot := as.character(uniprot)]            # Diann fails to extract the proteinname properly
+# Intuify protein                                     # And extracts only a non-unique part of it
+    pgdt <- unique(dt[, .(uniprot, protein)])         # In that case use uniprots
+    pgdt[protein=='', protein := uniprot];          proteinunique <- length(unique(pgdt$protein)) == nrow(pgdt)
+                                               if (!proteinunique)  pgdt[, protein := uniprot]
+    pgdt %<>% uncollapse(protein, sep = ';');  if (!proteinunique)  pgdt[, protein := paste0(uniprot, '_', 'ORGXX')]
     pgdt[, organism := split_extract_fixed(protein, '_', 2)]                     #     drop organism
     pgdt[, protein  := split_extract_fixed(protein, '_', 1)]                     # 
     pgdt[, protein := commonify_strings(protein), by = c('uniprot', 'organism')] #     commonify  (within proteingroup/organism)
