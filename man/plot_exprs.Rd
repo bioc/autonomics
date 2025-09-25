@@ -46,6 +46,7 @@ plot_exprs(
   xlab = x,
   ylab = "value",
   theme = ggplot2::theme(plot.title = element_text(hjust = 0.5)),
+  guides = NULL,
   verbose = TRUE
 )
 
@@ -136,6 +137,8 @@ plot_feature_boxplots(object, ...)
 \item{ylab}{string}
 
 \item{theme}{ggplot2::theme(...) or NULL}
+
+\item{guides}{NULL or c(fill = 'none', color = 'none')}
 
 \item{verbose}{TRUE or FALSE}
 
