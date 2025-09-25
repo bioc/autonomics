@@ -18,7 +18,8 @@ plot_exprs_per_coef(
   nrow = 1,
   ncol = NULL,
   theme = ggplot2::theme(legend.position = "bottom", legend.title = element_blank(),
-    plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+    plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5)),
+  ...
 )
 }
 \arguments{

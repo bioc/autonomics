@@ -1421,7 +1421,8 @@ plot_exprs_per_coef <- function(
        theme = ggplot2::theme( legend.position = 'bottom', 
                                   legend.title = element_blank(), 
                                     plot.title = element_text(hjust = 0.5), 
-                                 plot.subtitle = element_text(hjust = 0.5) )
+                                 plot.subtitle = element_text(hjust = 0.5) ), 
+            ...
 ){
     assert_is_valid_sumexp(object)
     if (orderbyp){
@@ -1438,7 +1439,7 @@ plot_exprs_per_coef <- function(
                             coefs = coefs, 
                             title = title,
                          subtitle = subtitle,
-                         MoreArgs = list(object = object, block = block, n = n, nrow = n, theme = theme), 
+                         MoreArgs = list(object = object, block = block, n = n, nrow = n, theme = theme, ...), 
                          SIMPLIFY = FALSE)
     gridExtra::grid.arrange(grobs = grobs, nrow = nrow)
 }
