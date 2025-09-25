@@ -295,18 +295,17 @@ uniprot2isoforms <- function(x){
     Lib.Peptidoform.Q    = 0.01,
     verbose              = TRUE
 ){
-    dt <- .read_diann_precursors(
-      file,
-      Global.Q             = Global.Q, 
-      Q                    = Q,
-      Global.PG.Q          = Global.PG.Q,
-      PG.Q                 = PG.Q,
-      Global.Peptidoform.Q = Global.Peptidoform.Q,
-      Peptidoform.Q        = Peptidoform.Q,
-      Lib.Q                = Lib.Q,
-      Lib.PG.Q             = Lib.PG.Q,
-      Lib.Peptidoform.Q    = Lib.Peptidoform.Q,
-      verbose              = verbose)
+    dt <- .read_diann_precursors( file,
+                              Global.Q = Global.Q, 
+                                     Q = Q,
+                           Global.PG.Q = Global.PG.Q,
+                                  PG.Q = PG.Q,
+                  Global.Peptidoform.Q = Global.Peptidoform.Q,
+                         Peptidoform.Q = Peptidoform.Q,
+                                 Lib.Q = Lib.Q,
+                              Lib.PG.Q = Lib.PG.Q,
+                     Lib.Peptidoform.Q = Lib.Peptidoform.Q,
+                               verbose = verbose )
     dt[, sequence := sequence[1], by = c('uniprot', 'run')]
     cols <- c('gene', 'feature_id', 'protein', 'organism', 'uniprot', 'run',
               'pepcounts', 'precounts', 'sequence',
