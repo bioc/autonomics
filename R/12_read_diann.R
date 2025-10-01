@@ -435,6 +435,10 @@ read_diann_proteingroups <- function(
     sdt(object)$sample_id  <- snames(object)
     fdt(object)$feature_id <- fnames(object)
     analysis(object)$nfeatures <- nrow(object)
+    if (all(is.na(assays(object)$log2intensity)))  assays(object)$log2intensity <- NULL
+        # In the newer diann parquet files `PG.TopN` is often zero everywhere
+        # This becomes NA after log2 transformation and renaming into `log2intensity`
+        # An all-NA assay is off course useless, so we drop it
 # fdt
     cols <- c('maxlfq', 'intensity', 'top1', 'top3', 'total', 'sequence', 'run', 'pepcounts', 'precounts')
     dt[, (cols) := NULL]
