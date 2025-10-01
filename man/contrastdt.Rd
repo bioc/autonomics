@@ -8,6 +8,7 @@ contrastdt(
   object,
   fitcoef,
   annocols = fvars(object) \%>\% extract(!stri_detect_fixed(., "~")),
+  assay = assayNames(object)[1],
   verbose = TRUE
 )
 }
@@ -28,6 +29,6 @@ Get contrastdt
 }
 \examples{
 object <- survobj()
-object \%<>\% linmod_limma(~sex + age)
-contrastdt(object, 'm-f~limma')
+object \%<>\% linmod_limma(~sex / age)
+contrastdt(object, fitcoef = 'm:senior-junior~limma')
 }
