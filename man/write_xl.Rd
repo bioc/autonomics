@@ -9,7 +9,7 @@ write_xl(
   object,
   file,
   fitcoefs = autonomics::fitcoefs(object),
-  assay = assayNames(object)[1],
+  assay = assayNames(object)[0],
   verbose = TRUE
 )
 
@@ -17,7 +17,7 @@ write_ods(
   object,
   file,
   fitcoefs = autonomics::fitcoefs(object),
-  assay = assayNames(object)[1],
+  assay = assayNames(object)[0],
   verbose = TRUE
 )
 }
@@ -47,7 +47,6 @@ write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods'))
 
 object <- read_metabolon(file)
 object \%<>\% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
-outfile <- file.path(tempdir(), 'linmod.atkin.metabolon.xlsx')
-write_xl( object, file.path(tempdir(), 'linmod.atkin.metabolon.xlsx'))
-write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods'))
+write_xl( object, file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx'))
+write_ods(object, file.path(tempdir(), 'awblinmod.atkin.metabolon.ods'))
 }

@@ -337,10 +337,11 @@ fitcoefs <- function(object){
 
 
 #' Get contrastdt
-#' @param object SummarizedExperiment
-#' @param fitcoef e.g. 't2-t1~limma'
+#' @param object   SummarizedExperiment
+#' @param fitcoef  e.g. 't2-t1~limma'
 #' @param annocols annotation fvars
-#' @param verbose TRUE or FALSE
+#' @param assay    scalar subset of assayNames(object)
+#' @param verbose  TRUE or FALSE
 #' @return data.table
 #' @examples
 #' object <- survobj()
@@ -351,7 +352,7 @@ contrastdt <- function(
     object, 
     fitcoef, 
     annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')), 
-       assay = assayNames(object)[1],
+       assay = assayNames(object)[0],
      verbose = TRUE
 ){ # fitcoef is needed because not all fit have same coefs
 # Order
@@ -367,9 +368,11 @@ contrastdt <- function(
     names(dt) %<>% stri_replace_first_fixed(paste0('~', coef, '~', fit), '')
     outdt %<>% cbind(dt)
 # Assay
-    dt <- assays(object)[[assay]]
-    dt %<>% data.table()
-    outdt %<>% cbind(dt)
+    if (length(assay) > 0){
+        dt <- assays(object)[[assay]]
+        dt %<>% data.table()
+        outdt %<>% cbind(dt)
+    }
     outdt
 }
 
@@ -386,16 +389,15 @@ contrastdt <- function(
 #' object <- read_metabolon(file)
 #' object %<>% linmod_limma(~Diabetes/Time)
 #' write_xl( object, file.path(tempdir(), 'linmod.atkin.metabolon.xlsx'))
-#' write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods'))
+#' write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods' ))
 #' 
 #' object <- read_metabolon(file)
 #' object %<>% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
-#' outfile <- file.path(tempdir(), 'linmod.atkin.metabolon.xlsx')
-#' write_xl( object, file.path(tempdir(), 'linmod.atkin.metabolon.xlsx'))
-#' write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods'))
+#' write_xl( object, file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx'))
+#' write_ods(object, file.path(tempdir(), 'awblinmod.atkin.metabolon.ods'))
 #' @export
 write_xl <- function(
-    object, file, fitcoefs = autonomics::fitcoefs(object), assay = assayNames(object)[1], verbose = TRUE
+    object, file, fitcoefs = autonomics::fitcoefs(object), assay = assayNames(object)[0], verbose = TRUE
 ){
 # Assert
     if (!installed('writexl'))  return(NULL)
@@ -422,7 +424,7 @@ write_xl <- function(
 #' @rdname write_xl
 #' @export
 write_ods <- function(
-    object, file, fitcoefs = autonomics::fitcoefs(object), assay = assayNames(object)[1], verbose = TRUE
+    object, file, fitcoefs = autonomics::fitcoefs(object), assay = assayNames(object)[0], verbose = TRUE
 ){
 # Assert
     if (!installed('readODS'))   return(NULL)

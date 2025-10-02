@@ -8,7 +8,7 @@ contrastdt(
   object,
   fitcoef,
   annocols = fvars(object) \%>\% extract(!stri_detect_fixed(., "~")),
-  assay = assayNames(object)[1],
+  assay = assayNames(object)[0],
   verbose = TRUE
 )
 }
@@ -18,6 +18,8 @@ contrastdt(
 \item{fitcoef}{e.g. 't2-t1~limma'}
 
 \item{annocols}{annotation fvars}
+
+\item{assay}{scalar subset of assayNames(object)}
 
 \item{verbose}{TRUE or FALSE}
 }
