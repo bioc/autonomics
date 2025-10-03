@@ -337,22 +337,24 @@ fitcoefs <- function(object){
 
 
 #' Get contrastdt
-#' @param object   SummarizedExperiment
-#' @param fitcoef  e.g. 't2-t1~limma'
-#' @param annocols annotation fvars
-#' @param assay    scalar subset of assayNames(object)
-#' @param verbose  TRUE or FALSE
+#' @param object    SummarizedExperiment
+#' @param fitcoef   e.g. 't2-t1~limma'
+#' @param annocols  annotation fvars
+#' @param assays    subset of assayNames(object)
+#' @param verbose   TRUE or FALSE
 #' @return data.table
 #' @examples
 #' object <- survobj()
-#' object %<>% linmod_limma(~sex / age)
-#' contrastdt(object, fitcoef = 'm:senior-junior~limma')
+#' object %<>% linmod_limma(~sex/age)
+#' contrastdt(object,        fitcoef = 'm:senior-junior~limma')
+#' contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = assayNames(object)[1])
+#' contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = assayNames(object)[1:2])
 #' @export
 contrastdt <- function(
     object, 
     fitcoef, 
-    annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')), 
-       assay = assayNames(object)[0],
+    annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')),
+      assays = assayNames(object)[0],
      verbose = TRUE
 ){ # fitcoef is needed because not all fit have same coefs
 # Order
@@ -368,9 +370,10 @@ contrastdt <- function(
     names(dt) %<>% stri_replace_first_fixed(paste0('~', coef, '~', fit), '')
     outdt %<>% cbind(dt)
 # Assay
-    if (length(assay) > 0){
-        dt <- assays(object)[[assay]]
+    for (ass in assays){
+        dt <- assays(object)[[ass]]
         dt %<>% data.table()
+        names(dt) %<>% paste0(ass, '.', .)
         outdt %<>% cbind(dt)
     }
     outdt
@@ -379,25 +382,39 @@ contrastdt <- function(
 
 #' Write xl
 #' @param object   SummarizedExperiment
-#' @param file   file
+#' @param file     file
 #' @param fitcoefs character vector
 #' @param assays   assayNames subset
 #' @param verbose  TRUE or FALSE
 #' @return filepath
 #' @examples 
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file)
-#' object %<>% linmod_limma(~Diabetes/Time)
-#' write_xl( object, file.path(tempdir(), 'linmod.atkin.metabolon.xlsx'))
-#' write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods' ))
+#' # linmod
+#'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#'     object <- read_metabolon(file)
+#'     object %<>% linmod_limma(~Diabetes/Time)
+#'     xlfile  <- file.path(tempdir(), 'linmod.atkin.metabolon.xlsx')
+#'     odsfile <- file.path(tempdir(), 'linmod.atkin.metabolon.ods' )
+#'     write_xl( object, xlfile)                                         # linmod xlsx: fdt + stats
+#'     write_xl( object, xlfile, assays = assayNames(object)[1]  )       #              fdt + stats + assay
+#'     write_xl( object, xlfile, assays = assayNames(object)[1:2])       #              fdt + stats + assays
+#'     write_ods(object, odsfile)                                        #        ods:  fdt + stats
+#'     write_ods(object, odsfile, assays = assayNames(object)[1]  )      #              fdt + stats + assay
+#'     write_ods(object, odsfile, assays = assayNames(object)[1:2])      #              fdt + stats + assays
 #' 
-#' object <- read_metabolon(file)
-#' object %<>% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
-#' write_xl( object, file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx'))
-#' write_ods(object, file.path(tempdir(), 'awblinmod.atkin.metabolon.ods'))
+#' # awblinmod
+#'     object <- read_metabolon(file)
+#'     object %<>% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
+#'     xlfile  <- file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx')
+#'     odsfile <- file.path(tempdir(), 'awblinmod.atkin.metabolon.ods')
+#'     write_xl( object, xlfile)                                         # awblinmod xlsx: fdt + stats
+#'     write_xl( object, xlfile, assay = assayNames(object)[1]  )        #                 fdt + stats + assay
+#'     write_xl( object, xlfile, assay = assayNames(object)[1:2])        #                 fdt + stats + assays
+#'     write_ods(object, odsfile)                                        #           ods:  fdt + stats
+#'     write_ods(object, odsfile, assay = assayNames(object)[1]  )       #                 fdt + stats + assay
+#'     write_ods(object, odsfile, assay = assayNames(object)[1:2])       #                 fdt + stats + assays
 #' @export
 write_xl <- function(
-    object, file, fitcoefs = autonomics::fitcoefs(object), assay = assayNames(object)[0], verbose = TRUE
+    object, file, fitcoefs = autonomics::fitcoefs(object), assays = assayNames(object)[0], verbose = TRUE
 ){
 # Assert
     if (!installed('writexl'))  return(NULL)
@@ -409,7 +426,7 @@ write_xl <- function(
         list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
     } else {
         fdt(object) %<>% add_adjusted_pvalues('fdr')
-        list0 <- mapply(contrastdt, fitcoef = fitcoefs, MoreArgs = list(object = object, assay = assay, verbose = FALSE), SIMPLIFY = FALSE)
+        list0 <- mapply(contrastdt, fitcoef = fitcoefs, MoreArgs = list(object = object, assays = assays, verbose = FALSE), SIMPLIFY = FALSE)
         list0 <- c(list(summary = summarize_fit(object)), list0)
     }
     names(list0) %<>% stri_replace_all_fixed('/', '\uff0f')   # Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
@@ -424,7 +441,7 @@ write_xl <- function(
 #' @rdname write_xl
 #' @export
 write_ods <- function(
-    object, file, fitcoefs = autonomics::fitcoefs(object), assay = assayNames(object)[0], verbose = TRUE
+    object, file, fitcoefs = autonomics::fitcoefs(object), assays = assayNames(object)[0], verbose = TRUE
 ){
 # Assert
     if (!installed('readODS'))   return(NULL)
@@ -437,7 +454,7 @@ write_ods <- function(
     } else {
       fdt(object) %<>% add_adjusted_pvalues('fdr')
       list0 <- mapply(contrastdt, fitcoef = fitcoefs,
-                                            MoreArgs = list(object = object, assay = assay, verbose = FALSE), 
+                                            MoreArgs = list(object = object, assays = assays, verbose = FALSE), 
                                             SIMPLIFY = FALSE)
       list0 <- c(list(summary = summarize_fit(object)), list0)
     }

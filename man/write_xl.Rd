@@ -9,7 +9,7 @@ write_xl(
   object,
   file,
   fitcoefs = autonomics::fitcoefs(object),
-  assay = assayNames(object)[0],
+  assays = assayNames(object)[0],
   verbose = TRUE
 )
 
@@ -17,7 +17,7 @@ write_ods(
   object,
   file,
   fitcoefs = autonomics::fitcoefs(object),
-  assay = assayNames(object)[0],
+  assays = assayNames(object)[0],
   verbose = TRUE
 )
 }
@@ -28,9 +28,9 @@ write_ods(
 
 \item{fitcoefs}{character vector}
 
-\item{verbose}{TRUE or FALSE}
-
 \item{assays}{assayNames subset}
+
+\item{verbose}{TRUE or FALSE}
 }
 \value{
 filepath
@@ -39,14 +39,28 @@ filepath
 Write xl
 }
 \examples{
-file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-object <- read_metabolon(file)
-object \%<>\% linmod_limma(~Diabetes/Time)
-write_xl( object, file.path(tempdir(), 'linmod.atkin.metabolon.xlsx'))
-write_ods(object, file.path(tempdir(), 'linmod.atkin.metabolon.ods'))
+# linmod
+    file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+    object <- read_metabolon(file)
+    object \%<>\% linmod_limma(~Diabetes/Time)
+    xlfile  <- file.path(tempdir(), 'linmod.atkin.metabolon.xlsx')
+    odsfile <- file.path(tempdir(), 'linmod.atkin.metabolon.ods' )
+    write_xl( object, xlfile)                                         # linmod xlsx: fdt + stats
+    write_xl( object, xlfile, assays = assayNames(object)[1]  )       #              fdt + stats + assay
+    write_xl( object, xlfile, assays = assayNames(object)[1:2])       #              fdt + stats + assays
+    write_ods(object, odsfile)                                        #        ods:  fdt + stats
+    write_ods(object, odsfile, assays = assayNames(object)[1]  )      #              fdt + stats + assay
+    write_ods(object, odsfile, assays = assayNames(object)[1:2])      #              fdt + stats + assays
 
-object <- read_metabolon(file)
-object \%<>\% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
-write_xl( object, file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx'))
-write_ods(object, file.path(tempdir(), 'awblinmod.atkin.metabolon.ods'))
+# awblinmod
+    object <- read_metabolon(file)
+    object \%<>\% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
+    xlfile  <- file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx')
+    odsfile <- file.path(tempdir(), 'awblinmod.atkin.metabolon.ods')
+    write_xl( object, xlfile)                                         # awblinmod xlsx: fdt + stats
+    write_xl( object, xlfile, assay = assayNames(object)[1]  )        #                 fdt + stats + assay
+    write_xl( object, xlfile, assay = assayNames(object)[1:2])        #                 fdt + stats + assays
+    write_ods(object, odsfile)                                        #           ods:  fdt + stats
+    write_ods(object, odsfile, assay = assayNames(object)[1]  )       #                 fdt + stats + assay
+    write_ods(object, odsfile, assay = assayNames(object)[1:2])       #                 fdt + stats + assays
 }

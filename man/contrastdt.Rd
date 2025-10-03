@@ -8,7 +8,7 @@ contrastdt(
   object,
   fitcoef,
   annocols = fvars(object) \%>\% extract(!stri_detect_fixed(., "~")),
-  assay = assayNames(object)[0],
+  assays = assayNames(object)[0],
   verbose = TRUE
 )
 }
@@ -19,7 +19,7 @@ contrastdt(
 
 \item{annocols}{annotation fvars}
 
-\item{assay}{scalar subset of assayNames(object)}
+\item{assays}{subset of assayNames(object)}
 
 \item{verbose}{TRUE or FALSE}
 }
@@ -31,6 +31,8 @@ Get contrastdt
 }
 \examples{
 object <- survobj()
-object \%<>\% linmod_limma(~sex / age)
-contrastdt(object, fitcoef = 'm:senior-junior~limma')
+object \%<>\% linmod_limma(~sex/age)
+contrastdt(object,        fitcoef = 'm:senior-junior~limma')
+contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = assayNames(object)[1])
+contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = assayNames(object)[1:2])
 }
