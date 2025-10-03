@@ -337,109 +337,141 @@ fitcoefs <- function(object){
 
 
 #' Get contrastdt
-#' @param object SummarizedExperiment
-#' @param fitcoef e.g. 't2-t1~limma'
-#' @param annocols annotation fvars
-#' @param verbose TRUE or FALSE
+#' @param object    SummarizedExperiment
+#' @param fitcoef   e.g. 't2-t1~limma'
+#' @param annocols  annotation fvars
+#' @param assays    subset of assayNames(object)
+#' @param verbose   TRUE or FALSE
 #' @return data.table
 #' @examples
 #' object <- survobj()
-#' object %<>% linmod_limma(~sex + age)
-#' contrastdt(object, 'm-f~limma')
+#' object %<>% linmod_limma(~sex/age)
+#' contrastdt(object,        fitcoef = 'm:senior-junior~limma')
+#' contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = SummarizedExperiment::assayNames(object)[1])
+#' contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = SummarizedExperiment::assayNames(object)[1:2])
 #' @export
 contrastdt <- function(
     object, 
     fitcoef, 
-    annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')), 
+    annocols = fvars(object) %>% extract(!stri_detect_fixed(.,'~')),
+      assays = assayNames(object)[0],
      verbose = TRUE
 ){ # fitcoef is needed because not all fit have same coefs
 # Order
-    sep <- guess_fitsep(fdt(object))
-    coef <- split_extract_fixed(fitcoef, sep, 1)
-    fit  <- split_extract_fixed(fitcoef, sep, 2)
+    coef <- split_extract_fixed(fitcoef, '~', 1)
+    fit  <- split_extract_fixed(fitcoef, '~', 2)
     object %<>% order_on_t(coefs = coef, fit = fit, verbose = verbose) # order_on_p
-# Extract
-    allfitcols <- fvars(object) %>% extract(stri_detect_fixed(., sep))
-    curfitcols <- allfitcols 
-    curfitcols %<>% extract(split_extract_fixed(., sep, 2:3) == fitcoef)
-    #annocols <- fvars(object) %>% setdiff('feature_id') %>% setdiff(allfitcols)
-    cols <- c(annocols, curfitcols)
-    fdt0 <- fdt(object)[, cols, with = FALSE]
-    names(fdt0) %<>% stri_replace_first_fixed(paste0(sep, coef, sep, fit), '')
-    fdt0
+# Annotations
+    outdt <- fdt(object)[ , annocols, with = FALSE ]
+# Contrast
+    cols <- fvars(object) %>% extract(stri_detect_fixed(., '~'))
+    cols %<>% extract(split_extract_fixed(., '~', 2:3) == fitcoef)
+    dt <- fdt(object)[, cols, with = FALSE]
+    names(dt) %<>% stri_replace_first_fixed(paste0('~', coef, '~', fit), '')
+    outdt %<>% cbind(dt)
+# Assay
+    for (ass in assays){
+        dt <- assays(object)[[ass]]
+        dt %<>% data.table()
+        names(dt) %<>% paste0(ass, '.', .)
+        outdt %<>% cbind(dt)
+    }
+    outdt
 }
 
 
-#' Write xl/ods
+#' Write xl
 #' @param object   SummarizedExperiment
-#' @param xlfile   file
-#' @param odsfile  file
+#' @param file     file
 #' @param fitcoefs character vector
+#' @param assays   assayNames subset
 #' @param verbose  TRUE or FALSE
 #' @return filepath
 #' @examples 
-#' file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
-#' object <- read_metabolon(file, fit = 'limma')
-#' xlfile  <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.xlsx')
-#' odsfile <- file.path(tempdir(), 'fukuda20.proteingroups.fdt.ods')
-#' # write_xl( object,  xlfile)
-#' # write_ods(object, odsfile)
+#' # linmod
+#'     file <- system.file('extdata/atkin.metabolon.xlsx', package = 'autonomics')
+#'     object <- read_metabolon(file)
+#'     object %<>% linmod_limma(~Diabetes/Time)
+#'     xlfile  <- file.path(tempdir(), 'linmod.atkin.metabolon.xlsx')
+#'     odsfile <- file.path(tempdir(), 'linmod.atkin.metabolon.ods' )
+#'     write_xl( object, xlfile)                                                               # linmod xlsx: fdt + stats
+#'     write_xl( object, xlfile,  assays = SummarizedExperiment::assayNames(object)[1]  )      #              fdt + stats + assay
+#'     write_xl( object, xlfile,  assays = SummarizedExperiment::assayNames(object)[1:2])      #              fdt + stats + assays
+#'     write_ods(object, odsfile)                                                              #        ods:  fdt + stats
+#'     write_ods(object, odsfile, assays = SummarizedExperiment::assayNames(object)[1]  )      #              fdt + stats + assay
+#'     write_ods(object, odsfile, assays = SummarizedExperiment::assayNames(object)[1:2])      #              fdt + stats + assays
+#' 
+#' # awblinmod
+#'     object <- read_metabolon(file)
+#'     object %<>% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
+#'     xlfile  <- file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx')
+#'     odsfile <- file.path(tempdir(), 'awblinmod.atkin.metabolon.ods')
+#'     write_xl( object, xlfile)                                                               # awblinmod xlsx: fdt + stats
+#'     write_xl( object, xlfile,  assay = SummarizedExperiment::assayNames(object)[1]  )       #                 fdt + stats + assay
+#'     write_xl( object, xlfile,  assay = SummarizedExperiment::assayNames(object)[1:2])       #                 fdt + stats + assays
+#'     write_ods(object, odsfile)                                                              #           ods:  fdt + stats
+#'     write_ods(object, odsfile, assay = SummarizedExperiment::assayNames(object)[1]  )       #                 fdt + stats + assay
+#'     write_ods(object, odsfile, assay = SummarizedExperiment::assayNames(object)[1:2])       #                 fdt + stats + assays
 #' @export
 write_xl <- function(
-    object, xlfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
+    object, file, fitcoefs = autonomics::fitcoefs(object), assays = assayNames(object)[0], verbose = TRUE
 ){
 # Assert
     if (!installed('writexl'))  return(NULL)
     assert_is_valid_sumexp(object)
-    assert_all_are_dirs(dirname(xlfile))
-# Write
-    if (verbose)  cmessage('%s%s', spaces(21), xlfile)
+    assert_all_are_dirs(dirname(file))
+# Prepare
+    if (verbose)  cmessage('%s%s', spaces(21), file)
     if (length(fitcoefs) == 0) {
-      list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
+        list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
     } else {
-      fdt(object) %<>% add_adjusted_pvalues('fdr')
-      list0 <- mapply(contrastdt, fitcoef = fitcoefs, MoreArgs = list(object = object, verbose = FALSE), SIMPLIFY = FALSE)
-      list0 <- c(list(summary = summarize_fit(object)), list0)
+        fdt(object) %<>% add_adjusted_pvalues('fdr')
+        list0 <- mapply(contrastdt, fitcoef = fitcoefs, MoreArgs = list(object = object, assays = assays, verbose = FALSE), SIMPLIFY = FALSE)
+        list0 <- c(list(summary = summarize_fit(object)), list0)
     }
-    names(list0) %<>% stri_replace_all_fixed(':', '.')   # error: Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
-    writexl::write_xlsx(list0, path = xlfile)
-# Return
-    invisible(xlfile)
+    names(list0) %<>% stri_replace_all_fixed('/', '\uff0f')   # Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
+    names(list0) %<>% stri_replace_all_fixed('*', '\u2731')
+    names(list0) %<>% stri_replace_all_fixed(':', '\ua789')   # \uff1a didnt work
+# Write
+    writexl::write_xlsx(list0, path = file)
+    invisible(file)
 }
 
 
 #' @rdname write_xl
 #' @export
 write_ods <- function(
-    object, odsfile, fitcoefs = autonomics::fitcoefs(object), verbose = TRUE
+    object, file, fitcoefs = autonomics::fitcoefs(object), assays = assayNames(object)[0], verbose = TRUE
 ){
 # Assert
     if (!installed('readODS'))   return(NULL)
     assert_is_valid_sumexp(object)
-    assert_all_are_dirs(dirname(odsfile))
+    assert_all_are_dirs(dirname(file))
 # Prepare    
-    if (verbose)  cmessage('%s%s', spaces(20), odsfile)
+    if (verbose)  cmessage('%s%s', spaces(20), file)
     if (length(fitcoefs) == 0) {
       list0 <- list(fdt(object)[, c('feature_id', fvars(object)), with = FALSE])
     } else {
-      fdt(object) %<>% add_adjusted_pvalues('fdr')                             # add fdr
-      list0 <- mapply(contrastdt, fitcoef = fitcoefs,                # extract contrastfdt
-                                            MoreArgs = list(object = object, verbose = FALSE), 
+      fdt(object) %<>% add_adjusted_pvalues('fdr')
+      list0 <- mapply(contrastdt, fitcoef = fitcoefs,
+                                            MoreArgs = list(object = object, assays = assays, verbose = FALSE), 
                                             SIMPLIFY = FALSE)
       list0 <- c(list(summary = summarize_fit(object)), list0)
     }
-    if (file.exists(odsfile))  unlink(odsfile)                               # rm old file
+    if (file.exists(file))  unlink(file)                      # rm old file
 # Write
-    names(list0) %<>% stri_replace_all_fixed(':', '.')   # error: Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
-    readODS::write_ods(list0[[1]], sheet = names(list0)[[1]],                # write first sheet (has to be done first)
-                                    path = odsfile)
-    if (length(list0)==1)  return(odsfile)
-    mapply(readODS::write_ods, x = list0[-1],                                # then append other sheets
+    names(list0) %<>% stri_replace_all_fixed('/', '\uff0f')   # Worksheet name cannot contain invalid characters: '[ ] : * ? / \'
+    names(list0) %<>% stri_replace_all_fixed('*', '\u2731')
+    names(list0) %<>% stri_replace_all_fixed(':', '\ua789')   # \uff1a didnt work
+    readODS::write_ods(list0[[1]], sheet = names(list0)[[1]], # write first sheet (has to be done first)
+                                    path = file)
+    if (length(list0)==1)  return(file)
+    mapply(readODS::write_ods, x = list0[-1],                 # then append other sheets
                            sheet = names(list0[-1]), 
-                        MoreArgs = list(path = odsfile, 
+                        MoreArgs = list(path = file, 
                                       append = TRUE), 
                         SIMPLIFY = FALSE)
-    invisible(odsfile)
+    invisible(file)
 }
 
 

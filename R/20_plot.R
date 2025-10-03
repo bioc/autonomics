@@ -1109,7 +1109,7 @@ add_facetvars <- function(
     object, assay, geom, x, fill, color, shape, size, alpha, block, linetype, 
     highlight, facet, scales, nrow, ncol, page, labeller, 
     pointsize, jitter, colorpalette, fillpalette, hlevels, 
-    title, subtitle, xlab, ylab, theme
+    title, subtitle, xlab, ylab, theme, guides
 ){
 # Initialize
     medianvalue <- value <- present <- NULL
@@ -1183,7 +1183,8 @@ add_facetvars <- function(
         if (length(breaks)>50)  breaks <- dt[, .SD[1], by = fill][[x]]
         p <- p + scale_x_discrete(breaks = breaks) + guides(alpha = 'none')
     }
-    if (!is.null(theme))  p <- p + theme
+    if (!is.null(theme ))  p <- p + theme
+    if (!is.null(guides))  p <- p + do.call(ggplot2::guides, as.list(guides))
     p
 }
 
@@ -1229,6 +1230,7 @@ add_facetvars <- function(
 #' @param file          NULL or filepath
 #' @param width         inches
 #' @param height        inches
+#' @param guides        NULL or c(fill = 'none', color = 'none')
 #' @param verbose       TRUE or FALSE
 #' @param ...           used to maintain depreceated functions
 #' @return ggplot object
@@ -1285,15 +1287,16 @@ plot_exprs <- function(
           scales = 'free_y',
         labeller = 'label_value',
        pointsize = if (is.null(block)) 0 else 0.5,
-          jitter = if (is.null(block)) 0.1 else 0,
-     fillpalette = make_var_palette(object, fill),
-    colorpalette = make_var_palette(object, color),
+          jitter = if (is.null(block)) 0.1 else 0,  #  explicit access to plotting args is required
+     fillpalette = make_var_palette(object, fill),  #  by e.g. plot_exprs_per_coef
+    colorpalette = make_var_palette(object, color), #  which calls this function
          hlevels = NULL,
            title = switch(dim, both = x, features = 'Feature Boxplots', samples  =  'Sample Boxplots'),
         subtitle = if (!is.null(fit)) coefs else '',
             xlab = x,  # NULL doesnt work for continuous variables
             ylab = 'value',
            theme = ggplot2::theme(plot.title = element_text(hjust = 0.5)),
+          guides = NULL,
          verbose = TRUE
 ){
 # Assert
@@ -1351,7 +1354,7 @@ plot_exprs <- function(
                           hlevels = hlevels,                 title = title,
                          subtitle = subtitle,
                              xlab = xlab,                     ylab = ylab,
-                            theme = theme
+                            theme = theme,                  guides = guides
         )
         if (!is.null(file))  print(p)
     }
@@ -1391,6 +1394,7 @@ plot_feature_boxplots <- function(object, ...){
 #' @param nrow          number of rows in faceted plot
 #' @param ncol          number of cols in faceted plot
 #' @param theme         ggplot2::theme(...) or NULL
+#' @param ...           passed to plot_exprs
 #' @return ggplot object
 #' @seealso \code{\link{plot_sample_densities}},
 #'          \code{\link{plot_sample_violins}}
@@ -1421,7 +1425,8 @@ plot_exprs_per_coef <- function(
        theme = ggplot2::theme( legend.position = 'bottom', 
                                   legend.title = element_blank(), 
                                     plot.title = element_text(hjust = 0.5), 
-                                 plot.subtitle = element_text(hjust = 0.5) )
+                                 plot.subtitle = element_text(hjust = 0.5) ), 
+            ...
 ){
     assert_is_valid_sumexp(object)
     if (orderbyp){
@@ -1438,7 +1443,7 @@ plot_exprs_per_coef <- function(
                             coefs = coefs, 
                             title = title,
                          subtitle = subtitle,
-                         MoreArgs = list(object = object, block = block, n = n, nrow = n, theme = theme), 
+                         MoreArgs = list(object = object, block = block, n = n, nrow = n, theme = theme, ...), 
                          SIMPLIFY = FALSE)
     gridExtra::grid.arrange(grobs = grobs, nrow = nrow)
 }
