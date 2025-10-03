@@ -45,22 +45,22 @@ Write xl
     object \%<>\% linmod_limma(~Diabetes/Time)
     xlfile  <- file.path(tempdir(), 'linmod.atkin.metabolon.xlsx')
     odsfile <- file.path(tempdir(), 'linmod.atkin.metabolon.ods' )
-    write_xl( object, xlfile)                                         # linmod xlsx: fdt + stats
-    write_xl( object, xlfile, assays = assayNames(object)[1]  )       #              fdt + stats + assay
-    write_xl( object, xlfile, assays = assayNames(object)[1:2])       #              fdt + stats + assays
-    write_ods(object, odsfile)                                        #        ods:  fdt + stats
-    write_ods(object, odsfile, assays = assayNames(object)[1]  )      #              fdt + stats + assay
-    write_ods(object, odsfile, assays = assayNames(object)[1:2])      #              fdt + stats + assays
+    write_xl( object, xlfile)                                                               # linmod xlsx: fdt + stats
+    write_xl( object, xlfile,  assays = SummarizedExperiment::assayNames(object)[1]  )      #              fdt + stats + assay
+    write_xl( object, xlfile,  assays = SummarizedExperiment::assayNames(object)[1:2])      #              fdt + stats + assays
+    write_ods(object, odsfile)                                                              #        ods:  fdt + stats
+    write_ods(object, odsfile, assays = SummarizedExperiment::assayNames(object)[1]  )      #              fdt + stats + assay
+    write_ods(object, odsfile, assays = SummarizedExperiment::assayNames(object)[1:2])      #              fdt + stats + assays
 
 # awblinmod
     object <- read_metabolon(file)
     object \%<>\% awblinmod_limma(c('Diabetes', 'Time'), block = 'Subject')
     xlfile  <- file.path(tempdir(), 'awblinmod.atkin.metabolon.xlsx')
     odsfile <- file.path(tempdir(), 'awblinmod.atkin.metabolon.ods')
-    write_xl( object, xlfile)                                         # awblinmod xlsx: fdt + stats
-    write_xl( object, xlfile, assay = assayNames(object)[1]  )        #                 fdt + stats + assay
-    write_xl( object, xlfile, assay = assayNames(object)[1:2])        #                 fdt + stats + assays
-    write_ods(object, odsfile)                                        #           ods:  fdt + stats
-    write_ods(object, odsfile, assay = assayNames(object)[1]  )       #                 fdt + stats + assay
-    write_ods(object, odsfile, assay = assayNames(object)[1:2])       #                 fdt + stats + assays
+    write_xl( object, xlfile)                                                               # awblinmod xlsx: fdt + stats
+    write_xl( object, xlfile,  assay = SummarizedExperiment::assayNames(object)[1]  )       #                 fdt + stats + assay
+    write_xl( object, xlfile,  assay = SummarizedExperiment::assayNames(object)[1:2])       #                 fdt + stats + assays
+    write_ods(object, odsfile)                                                              #           ods:  fdt + stats
+    write_ods(object, odsfile, assay = SummarizedExperiment::assayNames(object)[1]  )       #                 fdt + stats + assay
+    write_ods(object, odsfile, assay = SummarizedExperiment::assayNames(object)[1:2])       #                 fdt + stats + assays
 }

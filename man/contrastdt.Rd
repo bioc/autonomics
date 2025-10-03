@@ -33,6 +33,6 @@ Get contrastdt
 object <- survobj()
 object \%<>\% linmod_limma(~sex/age)
 contrastdt(object,        fitcoef = 'm:senior-junior~limma')
-contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = assayNames(object)[1])
-contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = assayNames(object)[1:2])
+contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = SummarizedExperiment::assayNames(object)[1])
+contrastdt(object[, 1:2], fitcoef = 'm:senior-junior~limma', assays = SummarizedExperiment::assayNames(object)[1:2])
 }

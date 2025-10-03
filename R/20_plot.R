@@ -1394,6 +1394,7 @@ plot_feature_boxplots <- function(object, ...){
 #' @param nrow          number of rows in faceted plot
 #' @param ncol          number of cols in faceted plot
 #' @param theme         ggplot2::theme(...) or NULL
+#' @param ...           passed to plot_exprs
 #' @return ggplot object
 #' @seealso \code{\link{plot_sample_densities}},
 #'          \code{\link{plot_sample_violins}}

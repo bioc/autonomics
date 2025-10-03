@@ -48,6 +48,8 @@ plot_exprs_per_coef(
 \item{ncol}{number of cols in faceted plot}
 
 \item{theme}{ggplot2::theme(...) or NULL}
+
+\item{...}{passed to plot_exprs}
 }
 \value{
 ggplot object
